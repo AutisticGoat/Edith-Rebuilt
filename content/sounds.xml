@@ -1,0 +1,39 @@
+<sounds root="sfx/">
+	<sound name="Edith Stomp">
+		<sample weight="1" path="edithstomp_1.wav" />
+		<sample weight="1" path="edithstomp_2.wav" />
+		<sample weight="1" path="edithstomp_3.wav" />
+	</sound>
+	<sound name="Edith Stomp Water">
+		<sample weight="1" path="edithstomp_water_1.wav" />
+		<sample weight="1" path="edithstomp_water_2.wav" />
+	</sound>
+	<sound name="Water Splash">
+		<sample weight="1" path="water_splash.wav" />
+	</sound>
+	
+	<sound name="deadseascrolls_pop">
+		<sample weight="1" path="deadseascrolls/pop.wav" />
+	</sound>
+	<sound name="deadseascrolls_whoosh">
+		<sample weight="1" path="deadseascrolls/whoosh.wav" />
+	</sound>
+	<sound name="Taunt">
+		<sample weight="1" path="taunt.wav" />
+	</sound>
+	<sound name="Vine Boom">
+		<sample weight="1" path="vine_boom.wav" />
+	</sound>
+	<sound name="Fart Reverb">
+		<sample weight="1" path="fart_reverb.wav" />
+	</sound>
+	<sound name="Salt Shaker">
+		<sample weight="1" path="SaltShaker.wav" />
+	</sound>
+	<sound name="Pepper Grinder">
+		<sample weight="1" path="PepperGrinder.wav" />
+	</sound>
+	<sound name="Yippee">
+		<sample weight="1" path="yippee-tbh.wav" />
+	</sound>
+</sounds>

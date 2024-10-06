@@ -1,0 +1,17 @@
+<ItemPools>
+	<Pool Name="treasure">
+		<Item Name="Salt Shaker" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+		<Item Name="Dry Eye" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+		<Item Name="Edith's Scarf" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+	</Pool>
+	
+	<Pool Name="devil">
+		<Item Name="Hellfire" Weight="1" DecreaseBy="1" RemoveOn="0.1"/>
+	</Pool>
+	
+	<Pool Name="secret">
+		<Item Name="Triple Moon" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+		<Item Name="</3" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+	</Pool>
+
+</ItemPools>

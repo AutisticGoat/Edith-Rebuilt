@@ -1,0 +1,47 @@
+<items gfxroot="gfx/items/" version="1">
+	<active
+		id="1" 
+		name="Salt Shaker" 
+		description="Stops the evil nearby" 
+		gfx="collectibles_SaltShaker.png"
+		quality="3" 
+		maxcharges="2"
+	/>
+	<active
+		id="2" 
+		name="Pepper Grinder" 
+		description="To spice up the danger" 
+		gfx="collectibles_PepperGrinder.png"
+		quality="3" 
+		maxcharges="1"
+	/>
+	<active
+		id="3" 
+		name="Sulfuric Fire" 
+		description="Sinful burns"
+		gfx="collectibles_SulfuricFire.png"
+		quality="3"
+		chargetype="timed"
+		maxcharges="360"
+	/>	
+	<passive
+		id="4" 
+		name="Edith's Hood" 
+		description="Vestige of disobedience" 
+		gfx="collectibles_EdithsHood.png"
+		quality="2"
+		cache="firedelay damage"
+	/>
+	
+	<trinket 
+		name="Geode"
+		description="Crack it open" 
+		gfx="Geode.png" 
+	/>
+	
+	<trinket 
+		name="Rumbling Pebble"
+		description="Rock scattering" 
+		gfx="RumblingPebble.png" 
+	/>
+</items>

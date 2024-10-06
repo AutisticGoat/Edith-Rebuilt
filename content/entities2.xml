@@ -1,0 +1,14 @@
+<entities anm2root="gfx/" version="5">
+	<entity anm2path="Edith Target.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="5" collisionRadius="10" friction="1" id="1000" name="Edith Target" numGridCollisionPoints="40" shadowSize="0" stageHP="0" variant="3456" >
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+    </entity>
+	<entity anm2path="Edith Grudge Target.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="5" collisionRadius="10" friction="1" id="1000" name="Edith Grudge Target" numGridCollisionPoints="40" shadowSize="0" stageHP="0" variant="3457" >
+		<gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+	</entity>
+	<entity anm2path="saltcreep.anm2" baseHP="0" boss="0" champion="0" collisionDamage="2" collisionMass="0" collisionRadius="1" friction="1" id="1000" name="Salt Creep" numGridCollisionPoints="0" shadowSize="0" stageHP="0" variant="46" subtype="40">
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+    </entity>
+	<entity anm2path="peppercreep.anm2" baseHP="0" boss="0" champion="0" collisionDamage="2" collisionMass="0" collisionRadius="1" friction="1" id="1000" name="Pepper Creep" numGridCollisionPoints="0" shadowSize="0" stageHP="0" variant="46" subtype="42">
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+    </entity>
+</entities>

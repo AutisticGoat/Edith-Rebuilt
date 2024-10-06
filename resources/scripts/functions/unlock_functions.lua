@@ -1,0 +1,216 @@
+local game = Game()
+local room = game:GetRoom()
+local sfx = SFXManager()
+local modrng = RNG()
+local json = require("json")
+
+edithMod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, function ()		
+	local achievements = edithMod.saveManager.GetPersistentSave()
+	edithMod.itempool = game:GetItemPool()
+end)
+
+edithMod:AddCallback(ModCallbacks.MC_POST_NPC_DEATH, function(_, e)
+	local achievementSize
+	if edithMod.saveManager.GetDeadSeaScrollsSave() then
+		achievementSize = edithMod.saveManager.GetDeadSeaScrollsSave().achievementsize
+	else
+		achievements = 1
+	end
+
+	for i, players in pairs(Isaac.FindByType(EntityType.ENTITY_PLAYER, 0, -1, false, false)) do; local player = players:ToPlayer();
+		if player:GetPlayerType() == PlayerType.PLAYER_EDITH then
+			if e.Type == EntityType.ENTITY_MOMS_HEART and e.Variant == 1 then
+			end
+			if e.Type == EntityType.ENTITY_ISAAC and e.Variant == 0 then -- Salt shaker unlock
+				if edithMod.saveManager.GetPersistentSave().SaltShakerUnlock ~= true then
+					edithMod.saveManager.GetPersistentSave().SaltShakerUnlock = true
+					if achievementSize == 1 then
+						GiantBookAPI.ShowAchievement("achivement_saltshaker.png")
+					else
+						miniAch.AddToQueue("gfx/ui/miniachievement/saltshaker.png")
+					end
+				end
+			end
+			if e.Type == EntityType.ENTITY_ISAAC and e.Variant == 1 then -- bb
+				if edithMod.saveManager.GetPersistentSave().PepperGrinderUnlock ~= true then
+					edithMod.saveManager.GetPersistentSave().PepperGrinderUnlock = true
+					if achievementSize == 1 then
+						GiantBookAPI.ShowAchievement("achivement_peppergrinder.png")
+					else
+						miniAch.AddToQueue("gfx/ui/miniachievement/peppergrinder.png")
+					end
+				end
+			end
+			if e.Type == EntityType.ENTITY_SATAN and e.Variant == 0 then
+				if edithMod.saveManager.GetPersistentSave().FalseIdolUnlock ~= true then
+					edithMod.saveManager.GetPersistentSave().FalseIdolUnlock = true
+					if achievementSize == 1 then
+						GiantBookAPI.ShowAchievement("achivement_falseidol.png")
+					else
+						miniAch.AddToQueue("gfx/ui/miniachievement/falseidol.png")
+					end
+				end
+			end
+			if e.Type == EntityType.ENTITY_THE_LAMB and e.Variant == 0 then
+				if edithMod.saveManager.GetPersistentSave().DryEyeUnlock ~= true then
+					edithMod.saveManager.GetPersistentSave().DryEyeUnlock = true
+					if achievementSize == 1 then
+						GiantBookAPI.ShowAchievement("achivement_dryeye.png")
+					else
+						miniAch.AddToQueue("gfx/ui/miniachievement/dry eye.png")
+					end
+				end
+			end
+			if e.Type == EntityType.ENTITY_MEGA_SATAN_2 and e.Variant == 0 then
+			end
+			if e.Type == EntityType.ENTITY_DELIRIUM and e.Variant == 0 then
+				if edithMod.saveManager.GetPersistentSave().TripleMoonUnlock ~= true then
+					edithMod.saveManager.GetPersistentSave().TripleMoonUnlock = true
+					if achievementSize == 1 then
+						GiantBookAPI.ShowAchievement("achivement_triplemoon.png")
+					else
+						miniAch.AddToQueue("gfx/ui/miniachievement/triplemoon.png")
+					end
+				end
+			end
+			if e.Type == EntityType.ENTITY_ULTRA_GREED then -- eye of Baal unlock
+				if e.Variant == 0 then
+					if edithMod.saveManager.GetPersistentSave().EyeOfBaalUnlock ~= true then
+						edithMod.saveManager.GetPersistentSave().EyeOfBaalUnlock = true
+						if achievementSize == 1 then
+							GiantBookAPI.ShowAchievement("achivement_eyeofbaal.png")
+						else
+							miniAch.AddToQueue("gfx/ui/miniachievement/eyeofbaal.png")
+						end
+					end
+				elseif e.Variant == 1 then -- Hellfire unlock
+					if edithMod.saveManager.GetPersistentSave().HellFireUnlock ~= true then
+						edithMod.saveManager.GetPersistentSave().HellFireUnlock = true
+						if achievementSize == 1 then
+						GiantBookAPI.ShowAchievement("achivement_hellfire.png")
+						else
+							miniAch.AddToQueue("gfx/ui/miniachievement/hellfire.png")
+						end
+					end
+				end
+			end
+			if e.Type == EntityType.ENTITY_HUSH and e.Variant == 0 then
+				if edithMod.saveManager.GetPersistentSave().FrogLegUnlock ~= true then
+					edithMod.saveManager.GetPersistentSave().FrogLegUnlock = true
+					if achievementSize == 1 then
+						GiantBookAPI.ShowAchievement("achivement_frogleg.png")
+					else
+						miniAch.AddToQueue("gfx/ui/miniachievement/frogleg")
+					end
+
+				end
+			end
+			if e.Type == EntityType.ENTITY_MOTHER and e.Variant == 10 then
+				if edithMod.saveManager.GetPersistentSave().BrokenHeartUnlock ~= true then
+					edithMod.saveManager.GetPersistentSave().BrokenHeartUnlock = true
+					if achievementSize == 1 then
+						GiantBookAPI.ShowAchievement("achivement_brokenheart.png")
+					else
+						miniAch.AddToQueue("gfx/ui/miniachievement/brokenheart.png")
+					end
+				end
+			end
+		elseif player:GetPlayerType() == PlayerType.PLAYER_EDITH_B then
+			-- Desbloqueos pendientes
+		end
+	end
+end)
+-- Sección para desbloquear objetos y demás cosas
+
+-- Sección para el desbloqueo y estado bloqueado de Tainted Edith
+function edithMod:EdithIsAboutToBeUnlocked()
+	local level = game:GetLevel()
+	local room = game:GetRoom()
+	local achievements = edithMod.saveManager.GetPersistentSave()
+	for i = 0, game:GetNumPlayers() - 1 do
+		local player = Isaac.GetPlayer(i)
+		if player:GetPlayerType() == PlayerType.PLAYER_EDITH and level:GetCurrentRoomIndex() == 94 and level:GetStage() == LevelStage.STAGE8 and edithMod.saveManager.GetPersistentSave().TaintedEdithUnlocked ~= true then
+			for _, entity in ipairs(Isaac.GetRoomEntities()) do
+				if (((entity.Type == EntityType.ENTITY_PICKUP and entity.Variant == PickupVariant.PICKUP_COLLECTIBLE)
+				or (entity.Type == EntityType.ENTITY_SHOPKEEPER))) then
+					entity:Remove()
+					TaintedEdithLockedEntity = Isaac.Spawn(EntityType.ENTITY_SLOT, 14, 0, entity.Position, Vector.Zero, nil)
+				end
+			end
+		end
+	end
+end
+edithMod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, edithMod.EdithIsAboutToBeUnlocked)
+
+function edithMod:UnlockTaintedEdith(player)
+	local achievementSize
+	if edithMod.saveManager.GetDeadSeaScrollsSave() then
+		achievementSize = edithMod.saveManager.GetDeadSeaScrollsSave().achievementsize
+	else
+		achievements = 1
+	end
+	
+	if player:GetPlayerType() ~= PlayerType.PLAYER_EDITH then return end
+
+	for _, entity in ipairs(Isaac.FindByType(EntityType.ENTITY_SLOT, 14)) do
+		local sprite = entity:GetSprite()
+		sprite:ReplaceSpritesheet(0, "gfx/characters/costumes/character_004xb_edith.png")
+		sprite:LoadGraphics()
+		
+		if sprite:IsFinished("PayPrize") then
+			edithMod.saveManager.GetPersistentSave().TaintedEdithUnlocked = true
+			if achievementSize == 1 then
+				GiantBookAPI.ShowAchievement("achievement_taintededith.png")
+			else	
+				miniAch.AddToQueue("gfx/ui/miniachievement/taintededith.png")
+			end	
+			entity:Remove()
+		end
+	end
+end
+edithMod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, edithMod.UnlockTaintedEdith)
+
+function edithMod:PreUnlockTaintedEdith()
+	local achievements = edithMod.saveManager.GetPersistentSave()
+
+	local player = Isaac.GetPlayer()
+	local edithB = false
+	local players = edithMod:GetPlayers()
+	for _,v in ipairs(players) do
+		if player:GetPlayerType() == PlayerType.PLAYER_EDITH_B then
+			edithB = true
+		end
+		if edithB and edithMod.saveManager.GetPersistentSave().TaintedEdithUnlocked ~= true then
+			v.Visible = false
+			v.ControlsEnabled = false
+			local controllerid = v.ControllerIndex
+			if Input.IsActionTriggered(ButtonAction.ACTION_MENUBACK, controllerid) then
+				game:Fadeout(1.0/0.0,1)
+			end
+		end
+	end
+end
+edithMod:AddCallback(ModCallbacks.MC_POST_RENDER, edithMod.PreUnlockTaintedEdith)
+
+function edithMod:IsTaintedEdithLocked()
+	for p = 0, game:GetNumPlayers() - 1 do
+		local player = Isaac.GetPlayer(p)
+		local room = game:GetRoom()
+		local level = game:GetLevel()
+		if player:GetPlayerType() == PlayerType.PLAYER_EDITH_B and edithMod.saveManager.GetPersistentSave().TaintedEdithUnlocked ~= true then
+			Isaac.ExecuteCommand("stage 13")
+			level:MakeRedRoomDoor(95, DoorSlot.LEFT0)
+			level:ChangeRoom(94)
+			room:RemoveDoor(DoorSlot.RIGHT0)
+			for _, entity in ipairs(Isaac.GetRoomEntities()) do
+				if ((entity.Type == EntityType.ENTITY_PICKUP and entity.Variant == PickupVariant.PICKUP_COLLECTIBLE)
+				or (entity.Type == EntityType.ENTITY_SHOPKEEPER)) then
+					Isaac.Spawn(EntityType.ENTITY_SLOT, 14, 0, entity.Position, Vector.Zero, nil)
+					entity:Remove()
+				end
+			end
+			game:GetHUD():SetVisible(false)
+		end
+	end
+end
+edithMod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, edithMod.IsTaintedEdithLocked)

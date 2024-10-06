@@ -1,0 +1,32 @@
+<players root="gfx/characters/costumes/" 
+         portraitroot="gfx/ui/stage/" 
+         nameimageroot="gfx/ui/boss/">
+		 
+	<player 
+		name="Edith" 
+		skin="character_004xa_edith.png" 
+		armor="6"
+		nameimage="PlayerName_04xa_Edith.png" 
+		portrait="PlayerPortraitBig_04xa_Edith.png" 
+		skinColor="0" 
+		costumeSuffix="editha"
+		healthtype="1"
+		birthright="Super Stomps"
+		pocketActive="Salt Shaker"
+		noshake="true"
+	/>
+	<player 
+		bSkinParent="Edith" 
+		name="Edith" 
+		skin="character_004xa_edith.png" 
+		black="6"
+		nameimage="PlayerName_04xa_Edith.png" 
+		portrait="PlayerPortraitBig_04xa_Edith.png" 
+		skinColor="1" 
+		costumeSuffix="edithb"
+		birthright="Stone Breaker" 
+		healthtype="1"
+		birthright="Scorching leaps"
+		noshake="true"
+	/>
+</players>
