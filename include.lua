@@ -10,6 +10,7 @@ local includeFiles = {
 	"resources/scripts/collectibles/items/PepperGrinder",
 	"resources/scripts/collectibles/items/EdithsHood",
 	"resources/scripts/collectibles/items/SulfuricFire",
+	"resources/scripts/collectibles/items/Sal",
 	-- Items fin
 	
 	-- Trinkets
@@ -21,6 +22,7 @@ local includeFiles = {
 	"resources/scripts/entities/Effects/SaltCreep",
 	"resources/scripts/entities/Effects/PepperCreep",
 	"resources/scripts/entities/Effects/Edith_Target",
+	"resources/scripts/entities/Effects/Edith_Target_B",
 	-- Entidades fin
 	
 	-- Personajes

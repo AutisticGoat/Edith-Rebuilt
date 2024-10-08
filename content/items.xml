@@ -4,8 +4,9 @@
 		name="Salt Shaker" 
 		description="Stops the evil nearby" 
 		gfx="collectibles_SaltShaker.png"
-		quality="3" 
-		maxcharges="2"
+		quality="2" 
+		chargetype="timed"
+		maxcharges="420"
 	/>
 	<active
 		id="2" 
@@ -31,6 +32,14 @@
 		gfx="collectibles_EdithsHood.png"
 		quality="2"
 		cache="firedelay damage"
+	/>
+	
+	<passive
+		id="4" 
+		name="Sal" 
+		description="salt shedding" 
+		gfx="collectibles_Sal.png"
+		quality="2"
 	/>
 	
 	<trinket 

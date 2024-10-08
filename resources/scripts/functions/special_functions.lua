@@ -138,8 +138,6 @@ function edithMod.RenderAreaOfEffect(entity, AreaSize, AreaColor) -- Took from M
     end
 end
 
-
-
 function edithMod:GetRandomRune(rng)
 	local runes = {
 		Card.RUNE_HAGALAZ,
@@ -162,9 +160,9 @@ end
 local function doEdithTear(tear, IsBlood, isTainted)
 	local player = tear.Parent:ToPlayer()
 	
-	-- local tearSizeMult = player:HasCollectible(CollectibleType.COLLECTIBLE_SOY_MILK) and 1 or 0.85
+	local tearSizeMult = player:HasCollectible(CollectibleType.COLLECTIBLE_SOY_MILK) and 1 or 0.85
 	
-	-- tear.Scale = tear.Scale * tearSizeMult
+	tear.Scale = tear.Scale * tearSizeMult
 	tear:ChangeVariant(TearVariant.ROCK)
 	
 	if not player then return end
@@ -178,16 +176,20 @@ local function doEdithTear(tear, IsBlood, isTainted)
 		B = 1,
 	}
 	
+	local bloodDif = 1
+	
 	if IsBlood then
-		colorDif.R = 1
-		colorDif.G = 0.5
-		colorDif.B = 0.5
+		colorDif.R = colorDif.R + 1
+		colorDif.G = colorDif.G - bloodDif
+		colorDif.B = colorDif.B - bloodDif
 	end
 	
+	local taintedDif = 0.8
+	
 	if isTainted then
-		colorDif.R = 0.3
-		colorDif.G = 0.3
-		colorDif.B = 0.3
+		colorDif.R = colorDif.R - taintedDif
+		colorDif.G = colorDif.G - taintedDif
+		colorDif.B = colorDif.B - taintedDif
 	end
 	
 	-- local colorize = playerColor:GetColorize()
@@ -195,30 +197,24 @@ local function doEdithTear(tear, IsBlood, isTainted)
 	tearColor.R = tearColor.R + colorDif.R + (playerColor.R - 1)
 	tearColor.G = tearColor.G + colorDif.G + (playerColor.G - 1)
 	tearColor.B = tearColor.B + colorDif.B + (playerColor.B - 1)
+
+	-- local tearColorize = tearColor:GetColorize()
+	-- local playColorize = playerColor:GetColorize()
 	
-	tearColor:SetOffset(
-		tearColor.RO + playerColor.RO,  
-		tearColor.GO + playerColor.GO, 
-		tearColor.BO + playerColor.BO
-	)
+	-- tearColor:SetOffset(
+		-- tearColor.RO + playerColor.RO,  
+		-- tearColor.GO + playerColor.GO, 
+		-- tearColor.BO + playerColor.BO
+	-- )
 	
-	local tearColorize = tearColor:GetColorize()
-	local playColorize = playerColor:GetColorize()
+	-- local diff = 0.8
 	
-	tearColor:SetOffset(
-		tearColor.RO + playerColor.RO,  
-		tearColor.GO + playerColor.GO, 
-		tearColor.BO + playerColor.BO
-	)
-	
-	local diff = 0.8
-	
-	tearColor:SetColorize(
-		tearColorize.R + playColorize.R, 
-		tearColorize.G + playColorize.G, 
-		tearColorize.B + playColorize.B, 
-		1
-	)
+	-- tearColor:SetColorize(
+		-- tearColorize.R + playColorize.R, 
+		-- tearColorize.G + playColorize.G, 
+		-- tearColorize.B + playColorize.B, 
+		-- 1
+	-- )
 	
 	-- tearColor:SetOffset(
 		-- tearColor.RO + playerColor.RO,  

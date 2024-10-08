@@ -153,10 +153,14 @@ mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, edithMod.WeaponManager)
 function mod:EdithSaltTears(tear)
 	local player = edithMod:GetPlayerFromTear(tear)
 	
+	-- print(tear.Height)
+	
     if player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH then return end
     
 	edithMod.ForceSaltTear(tear)
-		
+	
+	
+	
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED) then return end
 	
 	local playerData = edithMod:GetData(player)
@@ -245,6 +249,9 @@ function mod:EdithJumpHandler(player)
 			local movementVector = Vector(0, 0)
 			local CharSpeed = player.MoveSpeed + 2
 
+			local targetSprite = target:GetSprite()
+
+
 			movementVector.X = (
 				(input.left and -1 * MovementForce.left) or 
 				(input.right and 1 * MovementForce.right) or 
@@ -264,10 +271,12 @@ function mod:EdithJumpHandler(player)
 			local resizer = math.max(CharSpeed, 1)
 			local NormalMovement = movementVector:Normalized()
 
-			local targetVel = playerData.EdithTarget.Velocity
+			local targetVel = target.Velocity
 
-			playerData.EdithTarget.Velocity = (targetVel + (NormalMovement * resizer))
-			playerData.EdithTarget:MultiplyFriction(0.9)
+			target.Velocity = (targetVel + (NormalMovement * resizer))
+			target:MultiplyFriction(0.9)
+			
+			-- if targetSprite:GetAnimation() == "Blin"
 		end
 	end
 	
@@ -284,11 +293,11 @@ function mod:EdithJumpHandler(player)
 			
 				local multTears = multiShot:GetNumTears()
 				setEdithJumps(player, multTears)
-				-- if playerData.ExtraJumps then
-					-- playerData.ExtraJumps = multiShot:GetNumTears()
-
-				-- end
 			end
+		end
+		
+		if edithMod:IsKeyStompPressed(player) then
+			target.Velocity = target.Velocity * 0.6
 		end
 		
 		if playerData.EdithJumpTimer == 0 and playerData.ExtraJumps > 0 then

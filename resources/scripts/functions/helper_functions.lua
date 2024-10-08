@@ -30,7 +30,6 @@ function edithMod:GetPlayers(functionCheck, ...)
 end
 
 function edithMod:GetPlayerFromTear(entity)
-	-- function OmoriMod.GetPlayerFromAttack(entity)
 	for i=1, 3 do
 		local check = nil
 		if i == 1 then

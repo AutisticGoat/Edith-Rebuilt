@@ -229,6 +229,16 @@ function edithMod:CheckImGuiIntegrity()
 	end
 end
 
+function edithMod:CheckMenuDataIntegrity()
+	local SaveManager = edithMod.saveManager
+	local menuData = SaveManager.GetDeadSeaScrollsSave()
+	
+	
+	for k, v in pairs(menuData) do
+		print(k, v)
+	end
+end
+
 function edithMod:CallbackRemoveTest()
 	if not ImGui.ElementExists("EdithTargetColot") then return end
 
@@ -268,6 +278,21 @@ function edithMod:ResetImGui()
 			ImGui.RemoveElement(element)
 		end
 	end
+end
+
+function edithMod:InitSaveData()
+	local SaveManager = edithMod.saveManager
+	local menuData = SaveManager.GetDeadSeaScrollsSave()
+	
+	menuData.stompsound = menuData.stompsound or 1
+	menuData.stompVolume = menuData.stompVolume or 100
+	menuData.targetdesign = menuData.targetdesign or 1
+	menuData.RGBMode = menuData.RGBMode or false
+	menuData.RGBSpeed = menuData.RGBSpeed or 16
+	menuData.targetline = menuData.targetline or false
+	menuData.linespace = menuData.linespace or 16
+	
+	menuData.taintedStompVolume = menuData.taintedStompVolume or 100
 end
 
 local function FalseSafeResetImGui(_, player)

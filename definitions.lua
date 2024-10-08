@@ -20,6 +20,7 @@ edithMod.Enums = {
 	edithMod.Enums.CollectibleType.COLLECTIBLE_PEPPERGRINDER = Isaac.GetItemIdByName("Pepper Grinder")
 	edithMod.Enums.CollectibleType.COLLECTIBLE_EDITHS_HOOD = Isaac.GetItemIdByName("Edith's Hood")
 	edithMod.Enums.CollectibleType.COLLECTIBLE_SULFURIC_FIRE = Isaac.GetItemIdByName("Sulfuric Fire")
+	edithMod.Enums.CollectibleType.COLLECTIBLE_SAL = Isaac.GetItemIdByName("Sal")
 
 -- trinkettypes 
 	edithMod.Enums.TrinketType.TRINKET_GEODE = Isaac.GetTrinketIdByName("Geode")
@@ -33,7 +34,7 @@ edithMod.Enums = {
 
 -- effect variants --
 	edithMod.Enums.EffectVariant.EFFECT_EDITH_TARGET = Isaac.GetEntityVariantByName("Edith Target")
-	edithMod.Enums.EffectVariant.EFFECT_EDITH_B_TARGET = Isaac.GetEntityVariantByName("Edith Grudge Target")
+	edithMod.Enums.EffectVariant.EFFECT_EDITH_B_TARGET = Isaac.GetEntityVariantByName("Edith Tainted Arrow")
 
 
 	edithMod.Enums.SubTypes.SALT_CREEP = Isaac.GetEntitySubTypeByName("Salt Creep")
