@@ -1,1 +1,2 @@
-im gonna change this later but i think every repo needs a readme.md so yeah 
+Required:
+- REPENTOGON (1.0.13 or greater)
