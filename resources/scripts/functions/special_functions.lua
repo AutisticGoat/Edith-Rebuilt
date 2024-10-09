@@ -171,7 +171,7 @@ local function doEdithTear(tear, IsBlood, isTainted)
 	local playerColor = player.Color
 	
 	local colorDif = {
-		R = 0.8,
+		R = 1,
 		G = 1,
 		B = 1,
 	}
@@ -184,7 +184,7 @@ local function doEdithTear(tear, IsBlood, isTainted)
 		colorDif.B = colorDif.B - bloodDif
 	end
 	
-	local taintedDif = 0.8
+	local taintedDif = 1.4
 	
 	if isTainted then
 		colorDif.R = colorDif.R - taintedDif
@@ -192,36 +192,43 @@ local function doEdithTear(tear, IsBlood, isTainted)
 		colorDif.B = colorDif.B - taintedDif
 	end
 	
-	-- local colorize = playerColor:GetColorize()
+	local colorize = playerColor:GetColorize()
 	
 	tearColor.R = tearColor.R + colorDif.R + (playerColor.R - 1)
 	tearColor.G = tearColor.G + colorDif.G + (playerColor.G - 1)
 	tearColor.B = tearColor.B + colorDif.B + (playerColor.B - 1)
 
-	-- local tearColorize = tearColor:GetColorize()
-	-- local playColorize = playerColor:GetColorize()
+	local isPlayerColorized = (
+		colorize.R +
+		colorize.G + 
+		colorize.B 
+	) ~= 0
+
+	print(isPlayerColorized)
 	
-	-- tearColor:SetOffset(
-		-- tearColor.RO + playerColor.RO,  
-		-- tearColor.GO + playerColor.GO, 
-		-- tearColor.BO + playerColor.BO
-	-- )
 	
-	-- local diff = 0.8
 	
-	-- tearColor:SetColorize(
-		-- tearColorize.R + playColorize.R, 
-		-- tearColorize.G + playColorize.G, 
-		-- tearColorize.B + playColorize.B, 
-		-- 1
-	-- )
+	if isPlayerColorized then
+		local ColAdd = 0.7
+		
+		local bloodAdd = IsBlood and 2 or 0
+		local bloodRem = IsBlood and 3 or 0
+		
+		tearColor.R = tearColor.R + (colorize.R - ColAdd) + bloodAdd
+		tearColor.G = tearColor.G + (colorize.G - ColAdd) - bloodRem
+		tearColor.B = tearColor.B + (colorize.B - ColAdd) - bloodRem
 	
-	-- tearColor:SetOffset(
-		-- tearColor.RO + playerColor.RO,  
-		-- tearColor.GO + playerColor.GO, 
-		-- tearColor.BO + playerColor.BO
-	-- )
+	end
 	
+	-- print(table.unpack(colorize))
+
+	for k, v in pairs(colorize) do
+		-- print(k, v)
+	end
+
+	-- local playerCol = player:GetColorize()
+	
+
 	
 	
 	tear.Color = tearColor 
@@ -238,7 +245,7 @@ function edithMod.ForceSaltTear(tear, tainted)
 
 	local IsBloodTear = tearVariants[tear.Variant] or false
 	
-	doEdithTear(tear, IsBloodTear, isTainted)
+	doEdithTear(tear, IsBloodTear, tainted)
 end
 
 function edithMod:SecondsToFrames(seconds)

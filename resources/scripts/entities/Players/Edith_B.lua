@@ -14,12 +14,12 @@ function mod:EdithInit(player)
 
 	local playerSprite = player:GetSprite()
 
-	if playerSprite:GetFilename() ~= "gfx/001.000.editha_player.anm2" and not player:IsCoopGhost() then
-		playerSprite:Load("gfx/001.000.editha_player.anm2", true)
+	if playerSprite:GetFilename() ~= "gfx/001.000.edithabplayer.anm2" and not player:IsCoopGhost() then
+		playerSprite:Load("gfx/001.000.edithb_player.anm2", true)
 		playerSprite:Update()
 	end
 
-	edithMod.ForceCharacterCostume(player, edithMod.Enums.PlayerType.PLAYER_EDITH_B, edithMod.Enums.NullItemID.ID_EDITH_SCARF)
+	edithMod.ForceCharacterCostume(player, edithMod.Enums.PlayerType.PLAYER_EDITH_B, edithMod.Enums.NullItemID.ID_EDITH_B_SCARF)
 	
 	
 end
@@ -52,9 +52,13 @@ function edithMod:SetTaintedEdithStats(player, cacheFlag)
 	edithMod.SwitchCase(cacheFlag, cacheActions)
 	local color = player.Color
 	
-	color:SetColorize(0.2, 0.2, 0.2, 1)
+	-- color.R = 0.3
+	-- color.G = 0.3
+	-- color.B = 0.3
 	
-	player.Color = color
+	-- color:SetColorize(0.2, 0.2, 0.2, 1)
+	
+	-- player.Color = color
 end
 edithMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, edithMod.SetTaintedEdithStats)
 

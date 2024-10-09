@@ -1,5 +1,5 @@
 <AnimatedActor>
-	<Info CreatedBy="robot" CreatedOn="11/17/2021 6:53:09 AM" Version="272" Fps="30"/>
+	<Info CreatedBy="robot" CreatedOn="08/10/2024 12:24:02 p. m." Version="273" Fps="30"/>
 	<Content>
 		<Spritesheets>
 			<Spritesheet Path="characters\costumes\character_004xb_edith.png" Id="0"/>
