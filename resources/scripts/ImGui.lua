@@ -191,9 +191,34 @@ local function OptionsUpdate()
 		-- Edith configs end
 		
 		-- Tainted Edith Configs
+			agregarColorinput("taintededithWindow", "TaintedEdithArrowColor", "Arror Color", 
+			function(r, g, b)
+				saveData.ArrowColor = {
+					Red = r,
+					Green = g,
+					Blue = b,
+				}
+			end,
+			1, 1, 1)
+			
+			
+			local arrowcolor = saveData.ArrowColor
+			ImGui.UpdateData("TaintedEdithArrowColor", ImGuiData.ColorValues, 
+			{
+				arrowcolor.Red,
+				arrowcolor.Green,
+				arrowcolor.Blue,
+			})
+			
+			
 			agregarSlider("taintededithWindow", "StompTaintedVolume", "Set stomp volume", function(index, val)
 				saveData.taintedStompVolume = index
 			end, 100, 25, 100, "%d%")
+			
+			
+			
+			
+			
 			actualizarCampo("StompTaintedVolume", "taintedStompVolume", 100, "Slider")
 		
 		-- Tainted Edith Configs end
@@ -220,6 +245,7 @@ function edithMod:CheckImGuiIntegrity()
 		"TargetLine",
 		"TargetLineSpace",
 		"ScreenShake",	
+
 		
 		"StompTaintedVolume",
 	}
@@ -239,30 +265,10 @@ function edithMod:CheckMenuDataIntegrity()
 	end
 end
 
-function edithMod:CallbackRemoveTest()
-	if not ImGui.ElementExists("EdithTargetColot") then return end
-
-	for i = 0, 10 do
-		ImGui.RemoveCallback("EdithTargetColot", i)
-	end
-	
-	ImGui.AddCallback("EdithTargetColot", ImGuiCallback.Active, function(r, g, b, a)
-		local SaveManager = edithMod.saveManager
-	
-		if not SaveManager then return end
-		local saveData = SaveManager.GetDeadSeaScrollsSave()
-		
-		saveData.TargetColor = {
-			Red = r,
-			Green = g,
-			Blue = b,
-		}
-	end)
-end
-
 function edithMod:ResetImGui()
 	local elements = {
 		-- Edith
+		"EdithTargetColot",
 		"StompSound",
 		"StompVolume",
 		"TargetDesign", 
@@ -271,7 +277,12 @@ function edithMod:ResetImGui()
 		"TargetLine",
 		"TargetLineSpace",
 		"ScreenShake",
+		
+		
+		"TaintedEdithArrowColor",
 		"StompTaintedVolume",
+		
+		
 	}
 	for _, element in ipairs(elements) do
 		if ImGui.ElementExists(element) then
@@ -284,6 +295,8 @@ function edithMod:InitSaveData()
 	local SaveManager = edithMod.saveManager
 	local menuData = SaveManager.GetDeadSeaScrollsSave()
 	
+	
+	menuData.TargetColor = menuData.TargetColor or {Red = 1, Green = 1, Blue = 1}
 	menuData.stompsound = menuData.stompsound or 1
 	menuData.stompVolume = menuData.stompVolume or 100
 	menuData.targetdesign = menuData.targetdesign or 1
@@ -292,6 +305,7 @@ function edithMod:InitSaveData()
 	menuData.targetline = menuData.targetline or false
 	menuData.linespace = menuData.linespace or 16
 	
+	menuData.ArrowColor = menuData.ArrowColor or {Red = 1, Green = 1, Blue = 1}
 	menuData.taintedStompVolume = menuData.taintedStompVolume or 100
 end
 
@@ -299,13 +313,13 @@ local function FalseSafeResetImGui(_, player)
 	if player.FrameCount ~= 1 then return end
 	-- print("Shit setted idk")
 	
-	edithMod:CallbackRemoveTest()
+	-- edithMod:CallbackRemoveTest()
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, FalseSafeResetImGui)
 
 local function SetImGuiReset()
 	edithMod:ResetImGui()
-	edithMod:CallbackRemoveTest()
+	-- edithMod:CallbackRemoveTest()
 end
 mod:AddCallback(ModCallbacks.MC_PRE_MOD_UNLOAD, SetImGuiReset)
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, SetImGuiReset)

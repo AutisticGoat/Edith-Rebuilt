@@ -210,6 +210,10 @@ function mod:EdithJumpHandler(player)
 		right = Input.GetActionValue(ButtonAction.ACTION_RIGHT, player.ControllerIndex),
 	}
 
+	-- for k, v in pairs(MovementForce) do
+		-- print(k, v)
+	-- end
+
 	if not playerData.ExtraJumps then
 		playerData.ExtraJumps = 0
 	end
@@ -275,8 +279,6 @@ function mod:EdithJumpHandler(player)
 
 			target.Velocity = (targetVel + (NormalMovement * resizer))
 			target:MultiplyFriction(0.9)
-			
-			-- if targetSprite:GetAnimation() == "Blin"
 		end
 	end
 	
@@ -564,16 +566,11 @@ function mod:EdithLanding(player, data, pitfall)
 	else
 	
 	local hasEpicFetus = player:HasCollectible(CollectibleType.COLLECTIBLE_EPIC_FETUS) 
-	
-	local baseofensiveTimer = 30
-	local baseDeffensiveTimer = 20
-	-- local cooldown = 20
-	
+		
 	if playerData.ExtraJumps > 0 then
 		if player:HasCollectible(CollectibleType.COLLECTIBLE_EPIC_FETUS) then
 				playerData.EdithJumpTimer = 30
 			else
-				-- cooldown = 1
 				playerData.EdithJumpTimer = 10
 			end
 		else
@@ -594,6 +591,29 @@ function mod:EdithLanding(player, data, pitfall)
 	
 	playerData.IsFalling = false
 -------- Other stuff end ---------	
+
+-------- Bomb Stomp --------
+	if playerData.BombStomp == true then
+		if player:GetNumBombs() > 0 and not player:HasGoldenBomb() then
+			player:AddBombs(-1)
+		end
+		
+		
+		
+		game:BombExplosionEffects(
+			player.Position, 
+			10, 
+			0, 
+			Color.Default, 
+			player, 
+			1, 
+			false, 
+			false, 
+			0
+		)
+		playerData.BombStomp = false
+	end
+-------- Bomb Stomp  end --------
 end
 mod:AddCallback(JumpLib.Callbacks.PLAYER_LAND, mod.EdithLanding, {
     tag = "edithMod_EdithJump",
@@ -635,21 +655,34 @@ function mod:EdithJumpLibStuff(player, data)
 			end
 		end
 	end
+
 	player.Velocity = player.Velocity + direction * distance / div
 end
 mod:AddCallback(JumpLib.Callbacks.PLAYER_UPDATE_30, mod.EdithJumpLibStuff, {tag = "edithMod_EdithJump"})
 
+function mod:EdithBomb(player, data)
+	local playerData = edithMod:GetData(player)
+	if player:GetNumBombs() <= 0 and not player:HasGoldenBomb() then return end
+	if Input.IsActionTriggered(ButtonAction.ACTION_BOMB, player.ControllerIndex) then
+		JumpLib:SetSpeed(player, 10 + (data.Height / 10))
+		
+		playerData.BombStomp = true
+	end
+end
+mod:AddCallback(JumpLib.Callbacks.PLAYER_UPDATE_60, mod.EdithBomb, {tag = "edithMod_EdithJump"})
+
 function mod:EdithOnNewRoom()	
-	for i, entity in pairs(Isaac.FindByType(EntityType.ENTITY_PLAYER, 0, -1, false, false)) do
-		local player = entity:ToPlayer()
+	local players = PlayerManager.GetPlayers()
+
+	for _, player in pairs(players) do
 		if player:GetPlayerType() == edithMod.Enums.PlayerType.PLAYER_EDITH then
+			local newColor = player.Color
 			edithMod:RemoveEdithTarget(player)
 			setEdithJumps(player, 0)	
-			local newColor = player.Color
-			if newColor.A == 0 then
-				newColor.A = 1
-				player.Color = newColor
-			end
+			
+			newColor.A = 1
+			player.Color = newColor
+			-- end
 		end
 	end
 end
@@ -660,9 +693,11 @@ function edithMod:OverrideInputs(entity, input, action)
 	
 	local player = entity:ToPlayer()
 	
+	if not player then return end
+	
 	if player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH then return end
 	
-	if input == 2 then
+	if input == InputHook.GET_ACTION_VALUE then
 		local actions = {
 			[ButtonAction.ACTION_LEFT] = 0,
 			[ButtonAction.ACTION_RIGHT] = 0,
@@ -670,6 +705,15 @@ function edithMod:OverrideInputs(entity, input, action)
 			[ButtonAction.ACTION_DOWN] = 0,
 		}
 		return actions[action]
+	end
+	if input == InputHook.IS_ACTION_TRIGGERED then
+		if action == ButtonAction.ACTION_BOMB then
+			local isJumping = JumpLib:GetData(player).Jumping
+			
+			if isJumping then
+				return false
+			end
+		end
 	end
 end
 edithMod:AddCallback(ModCallbacks.MC_INPUT_ACTION, edithMod.OverrideInputs)
@@ -777,15 +821,15 @@ function edithMod:OnEsauJrUse(Id, RNG, player, flags, slot, data)
 end
 edithMod:AddCallback(ModCallbacks.MC_PRE_USE_ITEM, edithMod.OnEsauJrUse, CollectibleType.COLLECTIBLE_ESAU_JR)
 
-function mod:SetMaxConsumables(player, tags, value)
-	if tags == "maxcoins" then
-		return 9999
-	elseif tags == "maxbombs" then
-		return 10
-	elseif tags == "maxkeys" then
-		return 100
-	end
-end
+-- function mod:SetMaxConsumables(player, tags, value)
+	-- if tags == "maxcoins" then
+		-- return 9999
+	-- elseif tags == "maxbombs" then
+		-- return 10
+	-- elseif tags == "maxkeys" then
+		-- return 100
+	-- end
+-- end
 -- mod:AddCallback(ModCallbacks.MC_EVALUATE_CUSTOM_CACHE, mod.SetMaxConsumables)
 
 function mod:Mierda(player)

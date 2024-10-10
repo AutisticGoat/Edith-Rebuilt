@@ -69,11 +69,6 @@ local teleportPoints = {
 
 function mod:EdithTargetLogic(effect)	
 	local room = game:GetRoom()
-	-- if not room then
-		-- room = game:GetRoom()
-	-- end
-	
-	-- print(room)
 
 	local player = effect.SpawnerEntity:ToPlayer()
 	if player.ControlsEnabled == false then return end

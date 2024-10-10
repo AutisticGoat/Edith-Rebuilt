@@ -45,7 +45,7 @@ function edithMod:IsKeyStompPressed(player)
         Input.IsButtonPressed(Keyboard.KEY_LEFT_SHIFT, player.ControllerIndex) or
         Input.IsButtonPressed(Keyboard.KEY_RIGHT_SHIFT, player.ControllerIndex) or
 		Input.IsButtonPressed(Keyboard.KEY_RIGHT_CONTROL, player.ControllerIndex) or
-        Input.IsActionTriggered(ButtonAction.ACTION_DROP, player.ControllerIndex)
+        Input.IsActionPressed(ButtonAction.ACTION_DROP, player.ControllerIndex)
 		
 	return k_stomp
 end

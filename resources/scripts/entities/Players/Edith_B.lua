@@ -461,6 +461,8 @@ function edithMod:OverrideTaintedInputs(entity, input, action)
 	
 	local player = entity:ToPlayer()
 	
+	if not player then return end
+	
 	if player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH_B then return end
 	
 	if input == 2 then

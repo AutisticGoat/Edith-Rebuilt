@@ -14,8 +14,6 @@ function edithMod:BrimStomp(player)
 			local brimData = edithMod:GetData(laser)
 			
 			brimData.StompBrimstone = true
-			
-			-- laser:SetTimeout(9) 
 		end
 	end
 end
