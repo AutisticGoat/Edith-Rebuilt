@@ -22,14 +22,11 @@ function edithMod:IsEdithTargetMoving(player)
     return (k_down or k_right or k_left or k_up) or false
 end
 
-
-
 function edithMod:GetAceleration(entity)
 	local normalizedVelocity = entity.Velocity:Normalized()
-	local VelX = math.abs(entity.Velocity.X * normalizedVelocity.X)
-	local VelY = math.abs(entity.Velocity.Y * normalizedVelocity.Y)
+	local NewVelValue = entity.Velocity * normalizedVelocity
 	
-	local acel = VelX + VelY
+	local acel = NewVelValue.X + NewVelValue.Y
 	
 	return TSIL.Utils.Math.Round(acel, 2)
 end
@@ -51,7 +48,6 @@ function edithMod:IsKeyStompPressed(player)
 end
 
 function edithMod:IsKeyStompTriggered(player)
-	
 	local k_stomp =
 		Input.IsButtonTriggered(Keyboard.KEY_Z, player.ControllerIndex) or
         Input.IsButtonTriggered(Keyboard.KEY_LEFT_SHIFT, player.ControllerIndex) or
@@ -184,8 +180,7 @@ local function doEdithTear(tear, IsBlood, isTainted)
 		colorDif.B = colorDif.B - bloodDif
 	end
 	
-	local taintedDif = 1.4
-	
+	local taintedDif = 1.6	
 	if isTainted then
 		colorDif.R = colorDif.R - taintedDif
 		colorDif.G = colorDif.G - taintedDif
@@ -203,10 +198,6 @@ local function doEdithTear(tear, IsBlood, isTainted)
 		colorize.G + 
 		colorize.B 
 	) ~= 0
-
-	print(isPlayerColorized)
-	
-	
 	
 	if isPlayerColorized then
 		local ColAdd = 0.7
@@ -219,17 +210,6 @@ local function doEdithTear(tear, IsBlood, isTainted)
 		tearColor.B = tearColor.B + (colorize.B - ColAdd) - bloodRem
 	
 	end
-	
-	-- print(table.unpack(colorize))
-
-	for k, v in pairs(colorize) do
-		-- print(k, v)
-	end
-
-	-- local playerCol = player:GetColorize()
-	
-
-	
 	
 	tear.Color = tearColor 
 end
@@ -285,7 +265,6 @@ function edithMod:SpawnBlackPowder(parent, quantity, position, distance)
 	local radius = (entityPosition - centerPosition):Length()
 
 	Pentagram.Scale = distance + distance / 2	
-	print(Pentagram.CollisionDamage)
 end
 
 function edithMod:exponentialFunction(number, coeffcient, power)
@@ -348,26 +327,18 @@ function edithMod:contarCifras(n)
 	return str:gsub("%+", "."):gsub("%.", ""):len()
 end
 
--- local rng = 
-
 function edithMod:RandomNumber(rng, num1, num2)
-    -- Configuración del RNG por defecto
     rng = rng or edithMod.Enums.Utils.RNG
 
-    -- Determinar si se trata de números flotantes
     local isFloat = (num2 and math.type(num1 + num2) == "float") or math.type(num1) == "float"
 
-    -- Calcular la cantidad de cifras significativas en cada número
     local cifrasNum1 = edithMod:contarCifras(num1)
     local cifrasNum2 = num2 and edithMod:contarCifras(num2) or 0
 
-    -- Determinar el número con más cifras significativas
     local longerNumber = math.max(cifrasNum1, cifrasNum2)
 
-    -- Calcular la potencia para normalizar los números
     local power = isFloat and (num2 and 10 ^ (longerNumber - 1) or 10 ^ (cifrasNum1 - 1)) or 1
 
-    -- Normalizar los números
 	if num1 then
 		num1 = math.ceil(num1 * power)
 	end
@@ -375,7 +346,6 @@ function edithMod:RandomNumber(rng, num1, num2)
         num2 = math.ceil(num2 * power)
     end
 
-    -- Generar el número aleatorio
     local result
 	if num1 then
 		if num2 then
@@ -391,7 +361,6 @@ function edithMod:RandomNumber(rng, num1, num2)
 		result = math.tointeger(result)
 	end
 	
-    -- Devolver el resultado
     return result
 end
 
@@ -433,13 +402,12 @@ function edithMod:IsPlayerShooting(player)
 	return (shoot.l or shoot.r or shoot.u or shoot.d)
 end
 
+local targetSprite = Sprite()
+targetSprite:Load("gfx/edith target.anm2", true)
 function edithMod:drawLine(from, to, color, linespace)
 
 	linespace = linespace or 16
-
-	local targetSprite = Sprite()
-	targetSprite:Load("gfx/edith line.anm2", true)
-						
+	
 	local diffVector = (to - from)
 	local angle = diffVector:GetAngleDegrees()
 	local sectionCount = math.floor(diffVector:Length() / linespace)
@@ -448,23 +416,18 @@ function edithMod:drawLine(from, to, color, linespace)
 	targetSprite.Rotation = angle
 	targetSprite:SetFrame("Line", 0)
 	targetSprite:Update()
-	
-	-- print(sectionCount)
-	
+		
 	for i = 1, sectionCount do
 		targetSprite:Render(Isaac.WorldToScreen(from))
 		from = from + Vector.One * linespace * Vector.FromAngle(angle) 
 	end
 
 	targetSprite.Rotation = 0
-	targetSprite:SetFrame("Idle", 0)
-	targetSprite:Render(to)
 end
 
 function edithMod:SpawnSaltGib(parent, Number, color, timeout,spawnType)
 	for i = 1, Number do
 		local rng = edithMod.Enums.Utils.RNG
-	
 	
 		local VelX = edithMod:RandomNumber(rng, -100, 100) / 100
 		local VelY = edithMod:RandomNumber(rng, -100, 100) / 100

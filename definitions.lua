@@ -28,7 +28,6 @@ edithMod.Enums = {
 
 -- null items --
 	edithMod.Enums.NullItemID.ID_EDITH_SCARF = Isaac.GetCostumeIdByPath("gfx/characters/character_004xa_edith_scarf.anm2")
-	edithMod.Enums.NullItemID.ID_EDITH_CLOAK = Isaac.GetCostumeIdByPath("gfx/characters/character_004xa_edith_cloak.anm2")
 	edithMod.Enums.NullItemID.ID_EDITH_B_SCARF = Isaac.GetCostumeIdByPath("gfx/characters/character_004xb_edith_scarf.anm2")
 	
 

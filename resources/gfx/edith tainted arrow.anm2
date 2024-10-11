@@ -1,8 +1,8 @@
 <AnimatedActor>
-	<Info CreatedBy="robot" CreatedOn="07/10/2024 01:33:43 p. m." Version="118" Fps="30"/>
+	<Info CreatedBy="robot" CreatedOn="10/10/2024 09:43:53 a. m." Version="119" Fps="30"/>
 	<Content>
 		<Spritesheets>
-			<Spritesheet Path="effects\effect_000_tainted_edith_arrow.png" Id="0"/>
+			<Spritesheet Path="effects\TaintedEdithArrow\effect_000_tainted_edith_arrow.png" Id="0"/>
 			<Spritesheet Path="effects\effect_000_edith_target_line.png" Id="1"/>
 		</Spritesheets>
 		<Layers>

@@ -195,6 +195,8 @@ function mod:EdithJumpHandler(player)
 
 	local multiShot = player:GetMultiShotParams(WeaponType.WEAPON_TEARS)
 
+	-- print(edithMod:GetAceleration(player))
+
 	local isMoving = edithMod:IsEdithTargetMoving(player)
 	local isKeyStompPressed = edithMod:IsKeyStompPressed(player)
 	local hasMarked = player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED)

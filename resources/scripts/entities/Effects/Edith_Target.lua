@@ -7,10 +7,9 @@ local green = 0
 local blue = 0
 local state = 1
 
-
 local RGBCyclingColor = Color(1, 1, 1, 1)
 function edithMod:RGBCycle(step)
-    step = step or 1 -- valor predeterminado si no se proporciona step
+    step = step or 1 
 	
     if state == 1 then
         green = math.min(255, green + step)
@@ -47,8 +46,6 @@ function edithMod:RGBCycle(step)
 	RGBCyclingColor.R = red / 255
 	RGBCyclingColor.G = green / 255
 	RGBCyclingColor.B = blue / 255
-
-    -- return Color(red/255, green/255, blue/255, 1)
 end
 
 local function interpolateVector2D(vectorA, vectorB, t)
@@ -161,7 +158,7 @@ end
 edithMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, mod.EdithTargetLogic, edithMod.Enums.EffectVariant.EFFECT_EDITH_TARGET)
 
 local ObscureDiv = 155/255
-local targetPath = "gfx/effects/effect_000_edith_target"
+local targetPath = "gfx/effects/EdithTarget/effect_000_edith_target"
 local targetSuffix = {
 	[1] = "",
 	[2] = "_trans",
