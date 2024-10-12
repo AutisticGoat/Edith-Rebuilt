@@ -122,26 +122,24 @@ function mod:EdithInit(player)
 end
 edithMod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, edithMod.EdithInit)
 
+local OverridableWeapons = {
+	[WeaponType.WEAPON_BRIMSTONE] = true,
+	[WeaponType.WEAPON_KNIFE] = true,
+	[WeaponType.WEAPON_LASER] = true,
+	[WeaponType.WEAPON_BOMBS] = true,
+	[WeaponType.WEAPON_ROCKETS] = true,
+	[WeaponType.WEAPON_TECH_X] = true,
+	[WeaponType.WEAPON_SPIRIT_SWORD] = true
+}
+
 function edithMod:WeaponManager(player)			
 	if player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH then return end
 	
 	local weapon = player:GetWeapon(1)
 	if weapon then
-		local OverridableWeapons = {
-			[WeaponType.WEAPON_BRIMSTONE] = true,
-			[WeaponType.WEAPON_KNIFE] = true,
-			[WeaponType.WEAPON_LASER] = true,
-			[WeaponType.WEAPON_BOMBS] = true,
-			[WeaponType.WEAPON_ROCKETS] = true,
-			[WeaponType.WEAPON_TECH_X] = true,
-			[WeaponType.WEAPON_SPIRIT_SWORD] = true
-		}
-	
 		local override = OverridableWeapons[weapon:GetWeaponType()] or false
-	
 		if override == true then
 			local newWeapon = Isaac.CreateWeapon(WeaponType.WEAPON_TEARS, player)
-		
 			Isaac.DestroyWeapon(weapon)
 			player:EnableWeaponType(WeaponType.WEAPON_TEARS, true)
 			player:SetWeapon(newWeapon, 1)
