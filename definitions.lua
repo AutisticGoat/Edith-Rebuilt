@@ -51,6 +51,7 @@ edithMod.Enums = {
 	edithMod.Enums.SoundEffect.SOUND_SALT_SHAKER = Isaac.GetSoundIdByName("Salt Shaker")
 	edithMod.Enums.SoundEffect.SOUND_PEPPER_GRINDER = Isaac.GetSoundIdByName("Pepper Grinder")
 	edithMod.Enums.SoundEffect.SOUND_YIPPEE = Isaac.GetSoundIdByName("Yippee")
+	edithMod.Enums.SoundEffect.SOUND_SPRING = Isaac.GetSoundIdByName("Spring")
 	
 -- Utils -- 
 

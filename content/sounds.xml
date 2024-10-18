@@ -11,13 +11,6 @@
 	<sound name="Water Splash">
 		<sample weight="1" path="water_splash.wav" />
 	</sound>
-	
-	<sound name="deadseascrolls_pop">
-		<sample weight="1" path="deadseascrolls/pop.wav" />
-	</sound>
-	<sound name="deadseascrolls_whoosh">
-		<sample weight="1" path="deadseascrolls/whoosh.wav" />
-	</sound>
 	<sound name="Taunt">
 		<sample weight="1" path="taunt.wav" />
 	</sound>
@@ -35,5 +28,8 @@
 	</sound>
 	<sound name="Yippee">
 		<sample weight="1" path="yippee-tbh.wav" />
+	</sound>
+	<sound name="Spring">
+		<sample weight="1" path="Spring.wav" />
 	</sound>
 </sounds>

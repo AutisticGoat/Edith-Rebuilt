@@ -85,9 +85,7 @@ local function stopTEdithHops(player, cooldown, useQuitJump)
 	if useQuitJump then
 		JumpLib:QuitJump(player)
 	end
-	
-	-- print(JumpLib.Data)
-	
+		
 	player:SetMinDamageCooldown(cooldown)
 	
 	resetCharges(player)
@@ -95,8 +93,9 @@ end
 
 
 function edithMod:InitTaintedEdithJump(player)
+	local playerData = edithMod:GetData(player)
 	local jumpHeight = 6.5
-	local jumpSpeed = 2.8
+	local jumpSpeed = 2.8 * edithMod:Log(playerData.ImpulseCharge, 100)
 			
 	local jumpFlags = (
 		JumpLib.Flags.COLLISION_GRID
@@ -229,11 +228,6 @@ function edithMod:TaintedEdithUpdate(player)
 				):ToEffect()
 				
 				playerData.TaintedEdithTarget.DepthOffset = -100
-				
-				
-				local sprite = playerData.TaintedEdithTarget:GetSprite()
-				
-				sprite = -180
 			end
 		else
 			local target = playerData.TaintedEdithTarget
@@ -261,18 +255,7 @@ function edithMod:TaintedEdithUpdate(player)
 			local baseTearsStat = 2.73
 			local tearMult = edithMod:GetTPS(player) / baseTearsStat
 						
-			-- print(tearMult)
 			local chargeAdd = 5 * edithMod:exponentialFunction(tearMult, 1, 1.5)
-
-			
-			
-			-- print(chargeAdd)
-			
-			-- local MaxCharge = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and 200 or 100
-		
-			-- print(MaxCharge)
-			
-			-- print(faceDirection)
 			if playerData.IsHoping == false and target ~= nil then
 				playerData.ImpulseCharge = math.min(playerData.ImpulseCharge + chargeAdd, 100)
 				
@@ -296,8 +279,6 @@ function edithMod:TaintedEdithUpdate(player)
 				player.Velocity = ((HopVec) * (6 + (player.MoveSpeed - 1)) * playerData.ImpulseCharge / 100) 
 			end
 			
-			-- 
-			
 			if not (HopVec.X == 0 and HopVec.Y == 0) then
 				if not isJumping then
 					edithMod:InitTaintedEdithJump(player)
@@ -308,8 +289,8 @@ function edithMod:TaintedEdithUpdate(player)
 		
 		if edithMod:IsKeyStompTriggered(player) then
 			if playerData.ParryCounter == 0 and isTaintedEdithParry(player) == false then
+				stopTEdithHops(player, 0, true)
 				edithMod:InitTaintedEdithParry(player)
-				stopTEdithHops(player)
 			end
 		end
 	
@@ -343,6 +324,10 @@ function edithMod:RenderTaintedEdith(player)
 			player:SetHeadDirection(faceDirection, 2, true)
 		end
 	end	
+	
+	local room = game:GetRoom()
+	
+	-- print(room:GetAliveEnemiesCount())
 end
 edithMod:AddCallback(ModCallbacks.MC_POST_PLAYER_RENDER, edithMod.RenderTaintedEdith)
 
@@ -374,19 +359,23 @@ function edithMod:OnNewRoom()
 end
 edithMod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, edithMod.OnNewRoom)
 
-function mod:EdithLanding(player, data, pitfall)
-	-- sfx:Play(SoundEffect.SOUND_STONE_IMPACT)
-	
+function mod:EdithLanding(player, data, pitfall)	
 	local playerData = edithMod:GetData(player)
 	
 	local saveData = edithMod.saveManager.GetDeadSeaScrollsSave()
 	
+	local stompSounds = {
+		[1] = SoundEffect.SOUND_STONE_IMPACT,
+		[2] = edithMod.Enums.SoundEffect.SOUND_YIPPEE,
+		[3] = edithMod.Enums.SoundEffect.SOUND_SPRING,
+	}
+		
 	local stompVolume = saveData.taintedStompVolume	
 	
 	local volume = 1
 	local volumeAdjust = (stompVolume / 100) ^ 2
 	
-	sfx:Play(SoundEffect.SOUND_STONE_IMPACT, volumeAdjust, 0, false, 1, 0)
+	sfx:Play(stompSounds[saveData.TaintedHopSound], volumeAdjust, 0, false, 1, 0)
 	
 	local tearRange = player.TearRange / 40
 	local radius = math.min((30 + (tearRange - 8) * 1.5), 50) -- Hop radius 
@@ -394,14 +383,12 @@ function mod:EdithLanding(player, data, pitfall)
 		
 	local tearsMult = edithMod:GetTPS(player) / 2.73
 
-	local damageBase = 10 + (3.5)
+	local damageBase = 13.5
 	local DamageStat = player.Damage + ((player.Damage / 5.25) - 1)
 
 	local rawFormula = ((damageBase + DamageStat) / 2.5) * (playerData.ImpulseCharge + playerData.BirthrightCharge) / 100
 	
 	edithMod:TaintedEdithStomp(player, radius, rawFormula, knockbackFormula, false)	
-	
-	
 	
 	local FireDamage = (player.Damage / 2) + 10
 	spawnFireJet(player, radius, FireDamage)
@@ -548,6 +535,8 @@ edithMod:AddCallback(ModCallbacks.MC_POST_RENDER, edithMod.RenderChargeBar)
 function edithMod:RenderBirthrightChargeBar(player)
     local data = edithMod:GetData(player)
     local room = game:GetRoom()
+
+	if not player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) then return end
 
     if room:GetRenderMode() == RenderMode.RENDER_WATER_REFLECT then
         return

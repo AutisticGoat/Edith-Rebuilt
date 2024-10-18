@@ -271,6 +271,18 @@ function edithMod:exponentialFunction(number, coeffcient, power)
     return number ~= 0 and coeffcient * number ^ (power - 1) or 0
 end
 
+function edithMod:Log(x, base)
+    if x <= 0 or base <= 1 then
+        return nil
+    end
+
+    local logNatural = math.log(x)
+    local logBase = math.log(base)
+    
+    return logNatural / logBase
+end
+
+
 function edithMod:SpawnSaltCreep(parent, position, damage, timeout, gibAmount, spawnType)
 	local salt = Isaac.Spawn(
 		EntityType.ENTITY_EFFECT, 

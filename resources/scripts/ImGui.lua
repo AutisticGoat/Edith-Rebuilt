@@ -277,6 +277,17 @@ local function OptionsUpdate()
 			
 		agregarElemento("TaintedEdithSetting", "taintedSoundSeparator", ImGuiElement.SeparatorText, "Sound")
 			
+		agregarCombobox("TaintedEdithSetting", "hopSound", "Set hopSound", 		
+		{
+			"Stone", 
+			"Yippee", 
+			"Spring",
+		}, 
+			
+		function(index, val)
+			saveData.TaintedHopSound = index + 1
+		end, 0)
+			
 		agregarSlider("TaintedEdithSetting", "StompTaintedVolume", "Set stomp volume", function(index, val)
 			saveData.taintedStompVolume = index
 		end, 100, 25, 100, "%d%")
@@ -356,7 +367,6 @@ end
 
 function edithMod:ResetImGui()
 	local elements = {
-		-- Edith
 		"Settings",
 		"EdithSetting",
 		
@@ -387,7 +397,6 @@ function edithMod:InitSaveData()
 	local SaveManager = edithMod.saveManager
 	local menuData = SaveManager.GetDeadSeaScrollsSave()
 	
-	
 	menuData.TargetColor = menuData.TargetColor or {Red = 1, Green = 1, Blue = 1}
 	menuData.stompsound = menuData.stompsound or 1
 	menuData.stompVolume = menuData.stompVolume or 100
@@ -397,14 +406,22 @@ function edithMod:InitSaveData()
 	menuData.targetline = menuData.targetline or false
 	menuData.linespace = menuData.linespace or 16
 	
-	menuData.ArrowColor = menuData.ArrowColor or {Red = 1, Green = 1, Blue = 1}
+	menuData.ArrowColor = menuData.ArrowColor or {Red = 1, Green = 0, Blue = 0}
 	menuData.ArrowDesign = menuData.ArrowDesign or 1
+	menuData.TaintedHopSound = menuData.TaintedHopSound or 1
 	menuData.taintedStompVolume = menuData.taintedStompVolume or 100
 end
 
 local function SetImGuiReset()
 	edithMod:ResetImGui()
 end
+
+local function initSaveData()
+	edithMod:InitSaveData()
+end
+mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, initSaveData)
+mod:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT, initSaveData)
+
 mod:AddCallback(ModCallbacks.MC_PRE_MOD_UNLOAD, SetImGuiReset)
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, SetImGuiReset)
 mod:AddCallback(ModCallbacks.MC_POST_RENDER, OptionsUpdate)
