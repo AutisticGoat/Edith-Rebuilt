@@ -277,7 +277,7 @@ local function OptionsUpdate()
 			
 		agregarElemento("TaintedEdithSetting", "taintedSoundSeparator", ImGuiElement.SeparatorText, "Sound")
 			
-		agregarCombobox("TaintedEdithSetting", "hopSound", "Set hopSound", 		
+		agregarCombobox("TaintedEdithSetting", "hopSound", "Set Hop Sound", 		
 		{
 			"Stone", 
 			"Yippee", 
@@ -287,9 +287,24 @@ local function OptionsUpdate()
 		function(index, val)
 			saveData.TaintedHopSound = index + 1
 		end, 0)
+		actualizarCampo("hopSound", "TaintedHopSound", 1, "ComboBox")
+		
+		agregarCombobox("TaintedEdithSetting", "parrySound", "Set Parry Sound", 		
+		{
+			"Stone", 
+			"Taunt", 
+			"Vine Boom",
+			"Fart Reverb",
+		}, 
+			
+		function(index, val)
+			saveData.TaintedParrySound = index + 1
+		end, 0)
+			
+		actualizarCampo("parrySound", "TaintedParrySound", 1, "ComboBox")
 			
 		agregarSlider("TaintedEdithSetting", "StompTaintedVolume", "Set stomp volume", function(index, val)
-			saveData.taintedStompVolume = index
+			saveData.taintedStompVolume = index 
 		end, 100, 25, 100, "%d%")
 			
 		actualizarCampo("StompTaintedVolume", "taintedStompVolume", 100, "Slider")
@@ -315,7 +330,14 @@ function edithMod:ResetSaveData(isTainted)
 	local SaveManager = edithMod.saveManager
 	local menuData = SaveManager.GetDeadSeaScrollsSave()
 	
-	if not isTainted then
+	if isTainted then
+		menuData.ArrowColor = {Red = 1, Green = 0, Blue = 0}
+		menuData.ArrowDesign = 1
+		menuData.taintedStompVolume = 100
+		menuData.TaintedHopSound = 1
+		menuData.TaintedParrySound = 1
+		
+	else
 		menuData.TargetColor = {Red = 1, Green = 1, Blue = 1}
 		menuData.stompsound = 1
 		menuData.stompVolume = 100
@@ -324,32 +346,42 @@ function edithMod:ResetSaveData(isTainted)
 		menuData.RGBSpeed = 16
 		menuData.targetline = false
 		menuData.linespace = 16
-	else
-		menuData.ArrowColor = {Red = 1, Green = 0, Blue = 0}
-		menuData.ArrowDesign = 1
-		menuData.taintedStompVolume = 100
 	end
 end
 
-function edithMod:CheckImGuiIntegrity()
-	local elements = {
-		"edithWindow",
-		"StompSound",
-		"StompVolume",
-		"edithSettings",
-		"TargetDesign", 
-		"SetRGB", 
-		"SetRGBSpeed",
-		"TargetLine",
-		"TargetLineSpace",
-		"ScreenShake",	
+local elements = {
+	"Settings",
+	"EdithSetting",
+	
+	"EdithTargetColot",
+	"StompSound",
+	"StompVolume",
+	"TargetDesign", 
+	"SetRGB", 
+	"SetRGBSpeed",
+	"TargetLine",
+	"TargetLineSpace",
+	"ScreenShake",
+	"resetButton",
 		
 		
-		"TaintedEdithArrowColor",
-		"arrowDesign",
-		"StompTaintedVolume",
-	}
+	"TaintedEdithArrowColor",
+	"arrowDesign",
+	"StompTaintedVolume",
+	"hopSound",
+	"parrySound",
+}
+	
+function edithMod:ResetImGui()
+	for _, element in ipairs(elements) do
+		if ImGui.ElementExists(element) then
+			ImGui.RemoveElement(element)
+		end
+	end
+end
 
+
+function edithMod:CheckImGuiIntegrity()
 	for i, element in pairs(elements) do
 		print(elements[i],ImGui.ElementExists(element))
 	end
@@ -362,34 +394,6 @@ function edithMod:CheckMenuDataIntegrity()
 	
 	for k, v in pairs(menuData) do
 		print(k, v)
-	end
-end
-
-function edithMod:ResetImGui()
-	local elements = {
-		"Settings",
-		"EdithSetting",
-		
-		"EdithTargetColot",
-		"StompSound",
-		"StompVolume",
-		"TargetDesign", 
-		"SetRGB", 
-		"SetRGBSpeed",
-		"TargetLine",
-		"TargetLineSpace",
-		"ScreenShake",
-		"resetButton",
-		
-		
-		"TaintedEdithArrowColor",
-		"arrowDesign",
-		"StompTaintedVolume",
-	}
-	for _, element in ipairs(elements) do
-		if ImGui.ElementExists(element) then
-			ImGui.RemoveElement(element)
-		end
 	end
 end
 
@@ -410,10 +414,12 @@ function edithMod:InitSaveData()
 	menuData.ArrowDesign = menuData.ArrowDesign or 1
 	menuData.TaintedHopSound = menuData.TaintedHopSound or 1
 	menuData.taintedStompVolume = menuData.taintedStompVolume or 100
+	menuData.TaintedParrySound = menuData.TaintedParrySound or 1
 end
 
 local function SetImGuiReset()
 	edithMod:ResetImGui()
+	edithMod:InitSaveData()
 end
 
 local function initSaveData()

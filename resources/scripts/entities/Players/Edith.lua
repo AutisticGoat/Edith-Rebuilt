@@ -45,7 +45,6 @@ function mod:InitEdithJump(player)
 	local jumpHeight = (10 + (distance / 40) / div) * epicFetusMult
 			
 			
-	-- EffectVariant.POOF01
 	local variant = 99
 			
 	local DustCloud = Isaac.Spawn(
@@ -55,9 +54,7 @@ function mod:InitEdithJump(player)
 		player.Position, 
 		Vector.Zero, 
 		player
-	)
-	-- DustCloud.Color = Color(1, 0, 0, 1)
-	
+	)	
 	DustCloud.DepthOffset = -100
 		
 	local config = {
@@ -67,9 +64,9 @@ function mod:InitEdithJump(player)
 		Flags = jumpFlags
 	}
 				
-	for _, entity in ipairs(Isaac.FindByType(EntityType.ENTITY_EFFECT, EffectVariant.TARGET)) do
-		entity:Remove()
-	end
+	-- for _, entity in ipairs(Isaac.FindByType(EntityType.ENTITY_EFFECT, EffectVariant.TARGET)) do
+		-- entity:Remove()
+	-- end
 		
 	JumpLib:Jump(player, config)
 end
@@ -309,7 +306,7 @@ function mod:EdithJumpHandler(player)
 		end
 				
 		local direction = (targetPos - playerPos):Normalized()
-		local angle = edithMod:vectorToAngle(direction.X, direction.Y)
+		local angle = edithMod:vectorToAngle(direction)
 		local faceDirection = DegreesToDirection[angle]
 				
 		local isClose = distance <= 5

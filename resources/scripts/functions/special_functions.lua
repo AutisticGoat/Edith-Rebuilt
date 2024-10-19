@@ -13,6 +13,17 @@ function edithMod:RemoveEdithTarget(player)
 	playerData.EdithTarget = nil
 end
 
+function edithMod:RemoveTaintedEdithTargetArrow(player)
+	playerData = edithMod:GetData(player)
+	
+	if player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH_B then return end
+	
+	if not playerData.TaintedEdithTarget then return end
+	
+	playerData.TaintedEdithTarget:Remove()
+	playerData.TaintedEdithTarget = nil
+end
+
 function edithMod:IsEdithTargetMoving(player)
 	local k_up = Input.IsActionPressed(ButtonAction.ACTION_UP, player.ControllerIndex)
     local k_down = Input.IsActionPressed(ButtonAction.ACTION_DOWN, player.ControllerIndex)
@@ -79,7 +90,10 @@ function edithMod:GetPlayerRange(player)
 	return player.TearRange / 40
 end
 
-function edithMod:vectorToAngle(x, y)
+function edithMod:vectorToAngle(vector)
+	local x = vector.X
+	local y = vector.Y
+
     if x == 0 then
         return y > 0 and 90 or y < 0 and 270 or 0
     end
