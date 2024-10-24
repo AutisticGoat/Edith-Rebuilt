@@ -1,6 +1,5 @@
 local game = edithMod.Enums.Utils.Game
 local mod = edithMod
-local level = game:GetLevel()
 
 local red = 255
 local green = 0
@@ -10,6 +9,8 @@ local state = 1
 local RGBCyclingColor = Color(1, 1, 1, 1)
 function edithMod:RGBCycle(step)
     step = step or 1 
+	
+	-- if game:IsPaused() then return end
 	
     if state == 1 then
         green = math.min(255, green + step)
@@ -118,42 +119,8 @@ function mod:EdithTargetLogic(effect)
 			end
 		end
 	end
-
-	local roomName = level:GetCurrentRoomDesc().Data.Name
-	local isMirrorWorld = room:IsMirrorWorld()
-
-	local roomSize = room:GetGridSize()
-
-	for i = 0, roomSize do
-		local grid = room:GetGridEntity(i)
-		
-		if grid then
-			local door = grid:ToDoor()
-			
-			if door then
-				local doorPos = door.Position
-				local distance = effectPos:Distance(doorPos)
-								
-				if distance <= 25 then
-					if door:IsOpen() then
-						local newColor = player.Color
-						newColor.A = 0
-						player.Color = newColor
-						player.Position = door.Position
-					else
-						local dimension = room:IsMirrorWorld() and 0 or 1			
-						local playerEffetts = player:GetEffects()
-						
-						if roomName == "Mirror Room" and playerEffetts:HasNullEffect(NullItemID.ID_LOST_CURSE) then
-							player.Position = doorPos
-						else
-							door:TryUnlock(player)
-						end
-					end
-				end
-			end
-		end
-	end
+	
+	edithMod:TargetDoorManager(effect, player)
 end 
 edithMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, mod.EdithTargetLogic, edithMod.Enums.EffectVariant.EFFECT_EDITH_TARGET)
 

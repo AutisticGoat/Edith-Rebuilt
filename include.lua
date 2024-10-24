@@ -1,50 +1,50 @@
+local scriptsPath = "resources/scripts"
+
 local includeFiles = {
 	-- Cosas necesarias
-	"definitions",
-	"resources/scripts/functions/helper_functions",
-	"resources/scripts/functions/special_functions",
-	"resources/scripts/ImGui",
+	"/definitions",
+	"/functions/helper_functions",
+	"/functions/special_functions",
+	"/ImGui",
 	
 	-- Items
-	"resources/scripts/collectibles/items/SaltShaker",
-	"resources/scripts/collectibles/items/PepperGrinder",
-	"resources/scripts/collectibles/items/EdithsHood",
-	"resources/scripts/collectibles/items/SulfuricFire",
-	"resources/scripts/collectibles/items/Sal",
+	"/collectibles/items/SaltShaker",
+	"/collectibles/items/PepperGrinder",
+	"/collectibles/items/EdithsHood",
+	"/collectibles/items/SulfuricFire",
+	"/collectibles/items/Sal",
 	-- Items fin
 	
 	-- Trinkets
-	"resources/scripts/collectibles/trinkets/geode",
-	"resources/scripts/collectibles/trinkets/rumblingpebble",
+	"/collectibles/trinkets/geode",
+	"/collectibles/trinkets/rumblingpebble",
 	-- Trinkets fin
 	
 	-- Entidades
-	"resources/scripts/entities/Effects/SaltCreep",
-	"resources/scripts/entities/Effects/PepperCreep",
-	"resources/scripts/entities/Effects/Edith_Target",
-	"resources/scripts/entities/Effects/Edith_Target_B",
+	"/entities/Effects/SaltCreep",
+	"/entities/Effects/PepperCreep",
+	"/entities/Effects/Edith_Target",
+	"/entities/Effects/Edith_Target_B",
 	-- Entidades fin
 	
 	-- Personajes
-	"resources/scripts/entities/Players/Edith",
-	"resources/scripts/entities/Players/Edith_B",
+	"/entities/Players/Edith",
+	"/entities/Players/Edith_B",
 	-- Personajes fin
 	
-	-- Desafios	-- Desafios fin
 
 	-- sinergias pisotones
-	"resources/scripts/stompSynergies/blackPowder",
-	"resources/scripts/stompSynergies/brimstone",
-	"resources/scripts/stompSynergies/techX",
-	"resources/scripts/stompSynergies/MomsKnife",
-	"resources/scripts/stompSynergies/Rockwaves",
-	"resources/scripts/stompSynergies/SpiritSword",
-	"resources/scripts/stompSynergies/EpicFetus",
+	"/stompSynergies/blackPowder",
+	"/stompSynergies/brimstone",
+	"/stompSynergies/techX",
+	"/stompSynergies/MomsKnife",
+	"/stompSynergies/Rockwaves",
+	"/stompSynergies/SpiritSword",
+	"/stompSynergies/EpicFetus",
 	
-	
-	"resources/scripts/RNG",
+	"/RNG",
 }
 
 for _, v in ipairs(includeFiles) do
-	include(v)
+	include(scriptsPath .. v)
 end

@@ -1,7 +1,8 @@
 local game = edithMod.Enums.Utils.Game
-local room = game:GetRoom()
+local room = edithMod.Enums.Utils.Room
 local mod = edithMod
 local sfx = edithMod.Enums.Utils.SFX
+local rng = edithMod.Enums.Utils.RNG
 
 local Tags = {
 	TEdithJump = "edithMod_TaintedEdithJump",
@@ -59,9 +60,9 @@ local function resetCharges(player)
 	end
 end
 
-local function stopTEdithHops(player, cooldown, useQuitJump)
+local function stopTEdithHops(player, cooldown, useQuitJump, resetChrg)
 	local playerData = edithMod:GetData(player)
-	playerData.IsHoping = false
+		playerData.IsHoping = false
 	player:MultiplyFriction(0.5)
 	playerData.HopVector = Vector(0, 0)
 	
@@ -71,10 +72,12 @@ local function stopTEdithHops(player, cooldown, useQuitJump)
 	if useQuitJump then
 		JumpLib:QuitJump(player)
 	end
-		
+			
 	player:SetMinDamageCooldown(cooldown)
 	
-	resetCharges(player)
+	if resetChrg == true then
+		resetCharges(player)
+	end
 end
 
 local jumpFlags = (
@@ -106,11 +109,11 @@ function edithMod:InitTaintedEdithParry(player)
 	local jumpSpeed = 2.5
 	
 	local isChap4 = edithMod:isChap4()
+	local BackDrop = room:GetBackdropType()
+	local variant = room:HasWater() and EffectVariant.BIG_SPLASH or (isChap4 and EffectVariant.POOF02 or EffectVariant.POOF01)
+	local subType = room:HasWater() and 1 or (isChap4 and 66 or 1)
 	
-	local variant = isChap4 and EffectVariant.POOF02 or EffectVariant.POOF01
-	local subType = isChap4 and 66 or 1
-			-- , 
-			-- CloudSubType,
+	sfx:Play(SoundEffect.SOUND_SHELLGAME)
 	
 	local DustCloud = Isaac.Spawn(
 		EntityType.ENTITY_EFFECT, 
@@ -120,16 +123,38 @@ function edithMod:InitTaintedEdithParry(player)
 		Vector.Zero, 
 		player
 	)	
+		
+	if room:HasWater() then
+		local customColor = {
+			[BackdropType.CORPSE3] = {0.75, 0.2, 0.2},
+			[BackdropType.DROSS] = {92/255, 81/255, 71/255},
+		}		
+			
+		local color = customColor[BackDrop] or {0.7, 0.75, 1}
+		
+		for k, v in pairs(color) do print(v) end
+		edithMod:ChangeColor(DustCloud, table.unpack(color))
+	end
 	
 	if isChap4 then
+		if not room:HasWater() then
 		DustCloud.SpriteScale = DustCloud.SpriteScale * 1.5
-		DustCloud.Color = Color(0.6, 0, 0, 1)
+		local redChange = 0.6
+		
+		local colorMap = {
+			[BackdropType.BLUE_WOMB] = {0, 0, 0, 0.3, 0.4, 0.6},
+			[BackdropType.CORPSE] = {0, 0, 0, 0.62, 0.65, 0.62},
+			[BackdropType.CORPSE2] = {0, 0, 0, 0.55, 0.57, 0.55},
+		}
+		
+		local color = colorMap[BackDrop] or {redChange, 0, 0, 0, 0, 0}
+		edithMod:ChangeColor(DustCloud, table.unpack(color))
+		end
 	end
 	
 	local dustSprite = DustCloud:GetSprite()
 	
-	dustSprite.PlaybackSpeed = 2
-	
+	dustSprite.PlaybackSpeed = room:HasWater() and 1.3 or 2	
 	DustCloud.DepthOffset = -100
 	
 	local config = {
@@ -148,18 +173,6 @@ local function isTaintedEdithParry(player)
 	return tags["edithMod_TaintedEdithParry"] or false
 end
 
-local function ChangeColor(entity, red, green, blue, redOff, greenOff, blueOff)
-	local color = entity.Color
-	color.R = red or 1
-	color.G = green or 1
-	color.B = blue or 1
-	color.RO = redOff or 0
-	color.GO = greenOff or 0
-	color.BO = blueOff or 0
-	
-	entity.Color = color
-end
-
 local hopSounds = {
 	[1] = SoundEffect.SOUND_STONE_IMPACT,
 	[2] = edithMod.Enums.SoundEffect.SOUND_YIPPEE,
@@ -173,21 +186,30 @@ local parryJumpSounds = {
 	[4] = edithMod.Enums.SoundEffect.SOUND_FART_REVERB,
 }
 
+local burtSaltColor = Color(0.3, 0.3, 0.3, 1)
 local function TaintedEdithFeedBackManager(player, room, isParryJump)
+	local rng = edithMod.Enums.Utils.RNG	
 	local BackDrop = room:GetBackdropType()
 
 	isParryJump = isParryJump or false
-
+	
 	local saveData = edithMod.saveManager.GetDeadSeaScrollsSave()
 	
+	local pitch = rng:RandomInt(90, 110) * 0.01
+
 	local stompVolume = saveData.taintedStompVolume	
-	local volume = 1
+	local volume = isParryJump and 2 or 1
 	local volumeAdjust = (stompVolume / 100) ^ 2
 	
-	local chosenSound = isParryJump and parryJumpSounds[saveData.TaintedParrySound] or hopSounds[saveData.TaintedHopSound]
+	local realVolume = volumeAdjust * volume
+		
+	local chosenSound = edithMod:isChap4() and SoundEffect.SOUND_MEATY_DEATHS or (isParryJump and parryJumpSounds[saveData.TaintedParrySound] or hopSounds[saveData.TaintedHopSound]) 
 	
-	sfx:Play(chosenSound, volumeAdjust, 0, false, 1, 0)
+	sfx:Play(chosenSound, realVolume, 0, false, pitch, 0)
 
+	if room:HasWater() then
+		sfx:Play(edithMod.Enums.SoundEffect.SOUND_WATERSPLASH, (volume - 0.5) * volumeAdjust, 0, false, 1.5 + (rng:RandomFloat()), 0)
+	end
 
 	if room:HasWater() then
 		local WaterSplash = Isaac.Spawn(
@@ -208,7 +230,7 @@ local function TaintedEdithFeedBackManager(player, room, isParryJump)
 			[BackdropType.DROSS] = {92/255, 81/255, 71/255},
 		}		
 		local color = customColor[BackDrop] or {0.7, 0.75, 1}
-		ChangeColor(WaterSplash, table.unpack(color))
+		edithMod:ChangeColor(WaterSplash, table.unpack(color))
 	else
 		local CloudSubType = edithMod:isChap4() and 3 or 1
 		local DustCloud = Isaac.Spawn(
@@ -234,16 +256,16 @@ local function TaintedEdithFeedBackManager(player, room, isParryJump)
 			[BackdropType.CORPSE2] = {0, 0, 0, 0.55, 0.57, 0.55},
 		}
 		local color = colorMap[BackDrop] or {1, 1, 1}
-		ChangeColor(DustCloud, table.unpack(color))
+		edithMod:ChangeColor(DustCloud, table.unpack(color))
 	end
-	edithMod:SpawnSaltGib(player, 1, _, 5, "StompGib")
+	edithMod:SpawnSaltGib(player, 1, burtSaltColor, 5, "StompGib")
 end
 
 function edithMod:TaintedEdithUpdate(player)
 	local playerData = edithMod:GetData(player)
 	local jumpData = JumpLib:GetData(player)
 	local isJumping = jumpData.Jumping
-	
+		
 	playerData.movementVector = playerData.movementVector or Vector.Zero
 	
 	if player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH_B then return end
@@ -283,7 +305,7 @@ function edithMod:TaintedEdithUpdate(player)
 	playerData.ImpulseCharge = playerData.ImpulseCharge or 0
 	playerData.BirthrightCharge = playerData.BirthrightCharge or 0
 	
-	playerData.ParryCounter = playerData.ParryCounter or 60
+	playerData.ParryCounter = playerData.ParryCounter or 30
 	
 	if playerData.ParryCounter > 0 then
 		if isTaintedEdithParry(player) ~= true then
@@ -296,8 +318,10 @@ function edithMod:TaintedEdithUpdate(player)
 	if edithMod:IsEdithTargetMoving(player) then
 		if not playerData.TaintedEdithTarget then
 			if playerData.IsHoping then
-				playerData.IsHoping = false
-				stopTEdithHops(player, 0, true)
+				if isJumping then
+				stopTEdithHops(player, 0, true, true)
+				TaintedEdithFeedBackManager(player, room)
+				end
 			end
 				
 			player:MultiplyFriction(0.8)
@@ -372,19 +396,23 @@ function edithMod:TaintedEdithUpdate(player)
 		
 		if edithMod:IsKeyStompTriggered(player) then
 			if playerData.ParryCounter == 0 and isTaintedEdithParry(player) == false then
-				stopTEdithHops(player, 0, true)
+				stopTEdithHops(player, 0, true, true)
 				edithMod:InitTaintedEdithParry(player)
 			end
 		end
-	
 		edithMod:RemoveTaintedEdithTargetArrow(player)
 	end	
 		
 	if player:CollidesWithGrid() then
-		stopTEdithHops(player, 20, true)
+		if not isJumping then
+			stopTEdithHops(player, 20, true, playerData.TaintedEdithTarget == nil)
+		end
 	end
+	
+	-- print(playerData.TaintedEdithTarget)
 end
 edithMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, edithMod.TaintedEdithUpdate)
+
 
 function edithMod:RenderTaintedEdith(player)
 	if player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH_B then return end
@@ -421,9 +449,7 @@ local function spawnFireJet(player, radius, damage)
 
 	for _, enemy in ipairs(Isaac.FindInRadius(player.Position, radius, EntityPartition.ENEMY)) do
 		local BirthrightFire = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.FIRE_JET, 0, enemy.Position, Vector.Zero, player):ToEffect()
-		
 		local mult = (playerData.BirthrightCharge / 100) or 1
-		
 		local baseDamage = damage 
 		
 		BirthrightFire.CollisionDamage = baseDamage * mult
@@ -436,7 +462,8 @@ function edithMod:OnNewRoom()
 	for _, player in ipairs(players) do
 		if player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH_B then return end
 		
-		stopTEdithHops(player, 0, true)
+		stopTEdithHops(player, 0, true, true)
+		edithMod:RemoveTaintedEdithTargetArrow(player)
 	end
 end
 edithMod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, edithMod.OnNewRoom)
@@ -445,15 +472,8 @@ function mod:EdithLanding(player, data, pitfall)
 	local playerData = edithMod:GetData(player)
 	local room = game:GetRoom()
 	
-	
-	
-	
-	
 	TaintedEdithFeedBackManager(player, room)
-	
-	
-	
-	
+		
 	local tearRange = player.TearRange / 40
 	local radius = math.min((30 + (tearRange - 8) * 1.5), 50) -- Hop radius 
 	local knockbackFormula = math.min(50, (7.7 + player.Damage ^ 1.2)) * player.ShotSpeed
@@ -492,7 +512,7 @@ function mod:EdithParry(player, data)
 	
 	local birthrightMult = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and 1.5 or 1
 	
-	local damageBase = 10 + (3.5)
+	local damageBase = 13.5
 	local DamageStat = player.Damage + ((player.Damage / 5.25) - 1)
 
 	local rawFormula = ((damageBase + DamageStat) / 1.8) * birthrightMult
@@ -544,6 +564,7 @@ function edithMod:TaintedEdithDamageManager(player, damage, flags, source, coold
 end
 edithMod:AddCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG, edithMod.TaintedEdithDamageManager)
 
+local offsetTargetVector = Vector(0, 10)
 function edithMod:RenderChargeBar(player)
 	if room:GetRenderMode() == RenderMode.RENDER_WATER_REFLECT then return end
 
@@ -576,7 +597,7 @@ function edithMod:RenderChargeBar(player)
 				end
 			else
 				if chargeBar:IsFinished("Disappear") then
-					chargeBar = nil
+					-- chargeBar = nil
 				else	
 					if not data.IsHoping and data.ImpulseCharge > 0 then
 						chargeBar:SetFrame("Charging", math.ceil(data.ImpulseCharge))
@@ -588,10 +609,11 @@ function edithMod:RenderChargeBar(player)
 		if chargeBar then
 			if (chargeBar:GetAnimation() ~= "Disappear") and data.IsHoping == true or data.ImpulseCharge == 0 then
 				chargeBar:Play("Disappear", false)
+				chargeBar.PlaybackSpeed = 1
 			end
 		end
 			
-		data.TaintedEdithChargebar.Offset = Vector(0, 10)
+		data.TaintedEdithChargebar.Offset = offsetTargetVector
 		data.TaintedEdithChargebar:Render(room:WorldToScreenPosition(player.Position), Vector.Zero, Vector.Zero)
 			
 		if update then

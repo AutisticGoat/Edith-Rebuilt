@@ -1,8 +1,9 @@
 local mod = edithMod
 local game = edithMod.Enums.Utils.Game
-local room = game:GetRoom()
+local room = edithMod.Enums.Utils.Room
 local sfx = edithMod.Enums.Utils.SFX
-local level = game:GetLevel()
+local level = edithMod.Enums.Utils.Level
+local rng = edithMod.Enums.Utils.RNG
 
 local DegreesToDirection = {
 	[0] = Direction.RIGHT,
@@ -12,6 +13,11 @@ local DegreesToDirection = {
 	[360] = Direction.RIGHT,
 }
 
+local jumpFlags = (  
+	JumpLib.Flags.DISABLE_SHOOTING_INPUT |
+	JumpLib.Flags.DISABLE_LASER_FOLLOW |
+	JumpLib.Flags.DISABLE_BOMB_INPUT
+)
 function mod:InitEdithJump(player)
 	local playerData = edithMod:GetData(player)
 	
@@ -22,20 +28,13 @@ function mod:InitEdithJump(player)
 	local distance = playerPos:Distance(targetPos)
 	
 	local jumpSpeed = 1.5
-	
-	
-	local jumpFlags = (  
-		JumpLib.Flags.DISABLE_SHOOTING_INPUT |
-		JumpLib.Flags.DISABLE_LASER_FOLLOW 
-		
-	)
 		
 	local soundeffect = SoundEffect.SOUND_SHELLGAME
 	local div = 25
 		
 	if player.CanFly then
 		jumpSpeed = 1
-		div = 18
+		div = 15
 		soundeffect = SoundEffect.SOUND_ANGEL_WING
 	end
 		
@@ -63,11 +62,7 @@ function mod:InitEdithJump(player)
 		Tags = "edithMod_EdithJump",
 		Flags = jumpFlags
 	}
-				
-	-- for _, entity in ipairs(Isaac.FindByType(EntityType.ENTITY_EFFECT, EffectVariant.TARGET)) do
-		-- entity:Remove()
-	-- end
-		
+
 	JumpLib:Jump(player, config)
 end
 
@@ -129,10 +124,10 @@ local OverridableWeapons = {
 	[WeaponType.WEAPON_SPIRIT_SWORD] = true
 }
 
-function edithMod:WeaponManager(player)			
+function edithMod:WeaponManager(player)		
 	if player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH then return end
-	
 	local weapon = player:GetWeapon(1)
+		
 	if weapon then
 		local override = OverridableWeapons[weapon:GetWeaponType()] or false
 		if override == true then
@@ -148,13 +143,9 @@ mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, edithMod.WeaponManager)
 function mod:EdithSaltTears(tear)
 	local player = edithMod:GetPlayerFromTear(tear)
 	
-	-- print(tear.Height)
-	
-    if player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH then return end
+	if player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH then return end
     
 	edithMod.ForceSaltTear(tear)
-	
-	
 	
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED) then return end
 	
@@ -542,8 +533,6 @@ function mod:EdithLanding(player, data, pitfall)
 		
 	local RawFormula = ((((damageBase + (DamageStat * tearsMult)) * multishotMult) * birthrightMult) * bloodClotMult) * flightMult.Damage
 	
-	
-	
 	local damageFormula = TSIL.Utils.Math.Round(RawFormula, 2)
 
 	local stompDamage = edithMod:IsKeyStompPressed(player) and 0 or math.max(damageFormula, 1)
@@ -630,30 +619,28 @@ function mod:EdithJumpLibStuff(player, data)
 	local distance = (posDif):Length()
 
 	local div = 50
-	local aceleration = edithMod:GetAceleration(player)
-	
 	local isMovingTarget = edithMod:IsEdithTargetMoving(player)
 	
 	if iskeystomp and player.CanFly then
 		div = 70
 	end
-	
-	local jumpData = JumpLib:GetData(player)
-	
+		
 	local aceleration = edithMod:GetAceleration(player)
-	
+		
 	if not playerData.IsFalling or playerData.IsFalling == false then
-		if player.CanFly then
-			if IsFalling(player) then
-				playerData.IsFalling = true
-				sfx:Play(SoundEffect.SOUND_SHELLGAME)
-				player:MultiplyFriction(0.05)
-				JumpLib:SetSpeed(player, 10 + (data.Height / 10))
+		if player.CanFly and ((isMovingTarget and distance <= 50) or distance <= 5) then
+			if not iskeystomp then
+				if IsFalling(player) then
+					playerData.IsFalling = true
+					sfx:Play(SoundEffect.SOUND_SHELLGAME)
+					player:MultiplyFriction(0.05)
+					JumpLib:SetSpeed(player, 10 + (data.Height / 10))
+				end
 			end
 		end
 	end
 
-	player.Velocity = player.Velocity + direction * distance / div
+	player.Velocity = player.Velocity + (direction * distance) / div
 end
 mod:AddCallback(JumpLib.Callbacks.PLAYER_UPDATE_30, mod.EdithJumpLibStuff, {tag = "edithMod_EdithJump"})
 
@@ -679,7 +666,6 @@ function mod:EdithOnNewRoom()
 			
 			newColor.A = 1
 			player.Color = newColor
-			-- end
 		end
 	end
 end
@@ -703,15 +689,15 @@ function edithMod:OverrideInputs(entity, input, action)
 		}
 		return actions[action]
 	end
-	if input == InputHook.IS_ACTION_TRIGGERED then
-		if action == ButtonAction.ACTION_BOMB then
-			local isJumping = JumpLib:GetData(player).Jumping
+	-- if input == InputHook.IS_ACTION_TRIGGERED then
+		-- if action == ButtonAction.ACTION_BOMB then
+			-- local isJumping = JumpLib:GetData(player).Jumping
 			
-			if isJumping then
-				return false
-			end
-		end
-	end
+			-- if isJumping then
+				-- return false
+			-- end
+		-- end
+	-- end
 end
 edithMod:AddCallback(ModCallbacks.MC_INPUT_ACTION, edithMod.OverrideInputs)
 
@@ -814,23 +800,5 @@ function edithMod:OnEsauJrUse(Id, RNG, player, flags, slot, data)
 	if edithTarget and edithTarget:Exists() then
 		edithMod:RemoveEdithTarget(player)
 	end
-
 end
 edithMod:AddCallback(ModCallbacks.MC_PRE_USE_ITEM, edithMod.OnEsauJrUse, CollectibleType.COLLECTIBLE_ESAU_JR)
-
--- function mod:SetMaxConsumables(player, tags, value)
-	-- if tags == "maxcoins" then
-		-- return 9999
-	-- elseif tags == "maxbombs" then
-		-- return 10
-	-- elseif tags == "maxkeys" then
-		-- return 100
-	-- end
--- end
--- mod:AddCallback(ModCallbacks.MC_EVALUATE_CUSTOM_CACHE, mod.SetMaxConsumables)
-
-function mod:Mierda(player)
-	-- player:AddCustomCacheTag("maxcoins", true)
-	-- print(player:GetCustomCacheValue("maxcoins"))
-end
-edithMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, edithMod.Mierda)

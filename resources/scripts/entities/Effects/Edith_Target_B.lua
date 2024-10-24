@@ -1,4 +1,5 @@
 local game = edithMod.Enums.Utils.Game
+local room = edithMod.Enums.Utils.Room
 
 local arrowPath = "gfx/effects/TaintedEdithArrow/effect_000_tainted_edith"
 
@@ -15,7 +16,6 @@ local arrowSuffix = {
 function edithMod:RenderTaintedEdithArrow(effect)
 	local player = effect.SpawnerEntity:ToPlayer()
 	local effectSprite = effect:GetSprite()
-	
 	
 	effect.Visible = effect.FrameCount > 1
 	
@@ -39,20 +39,21 @@ function edithMod:RenderTaintedEdithArrow(effect)
 	
 		sprite.Rotation = rotation
 	end
-	
-	
 
-	local newEffecColor = effect.Color
+	-- local newEffecColor = effect.Color
 	
-	newEffecColor.R = arrowColor.Red
-	newEffecColor.G = arrowColor.Green
-	newEffecColor.B = arrowColor.Blue
-
-	effect.Color = newEffecColor
+	edithMod:ChangeColor(effect, arrowColor.Red, arrowColor.Green, arrowColor.Blue)
 	
 	effectSprite:ReplaceSpritesheet(0, arrowPath .. arrowSuffix[arrowDesign] .. ".png", true)
-	
-	-- local SelectedArrowDesign = arrowSuffix[]
 end
 edithMod:AddCallback(ModCallbacks.MC_PRE_EFFECT_RENDER, edithMod.RenderTaintedEdithArrow, edithMod.Enums.EffectVariant.EFFECT_EDITH_B_TARGET)
 
+function edithMod:taintedArrowUpdate(effect)
+	local roomSize = room:GetGridSize()
+	local player = effect.SpawnerEntity:ToPlayer()
+
+	if not player then return end
+
+	edithMod:TargetDoorManager(effect, player)
+end
+edithMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, edithMod.taintedArrowUpdate, edithMod.Enums.EffectVariant.EFFECT_EDITH_B_TARGET)

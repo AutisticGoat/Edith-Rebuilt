@@ -1,6 +1,7 @@
 local game = edithMod.Enums.Utils.Game
 local modrng = edithMod.Enums.Utils.RNG
-local room = game:GetRoom()
+local room = edithMod.Enums.Utils.Room
+local level = edithMod.Enums.Utils.Level
 
 function edithMod:RemoveEdithTarget(player)
 	playerData = edithMod:GetData(player)
@@ -107,6 +108,18 @@ function edithMod:vectorToAngle(vector)
     return atan
 end
 
+function edithMod:ChangeColor(entity, red, green, blue, redOff, greenOff, blueOff)
+	local color = entity.Color
+	color.R = red or 1
+	color.G = green or 1
+	color.B = blue or 1
+	color.RO = redOff or 0
+	color.GO = greenOff or 0
+	color.BO = blueOff or 0
+	
+	entity.Color = color
+end
+
 function edithMod:DestroyGrid(entity, radius)
 	radius = radius or 10
 
@@ -165,6 +178,42 @@ function edithMod:GetRandomRune(rng)
 	local runeRandomSelect = edithMod:RandomNumber(rng, 1, #runes)
 	
 	return runes[runeRandomSelect]
+end
+
+function edithMod:TargetDoorManager(effect, player)
+	local roomSize = room:GetGridSize()
+	local playerPos = player.position
+	local effectPos = effect.Position
+	
+	local roomName = level:GetCurrentRoomDesc().Data.Name
+	local isMirrorWorld = room:IsMirrorWorld()
+		
+	for i = 0, roomSize do
+		local grid = room:GetGridEntity(i)
+		if grid then
+			if grid:ToDoor() then
+			local door = grid:ToDoor()
+				local doorPos = door.Position
+				local distance = effectPos:Distance(doorPos)	
+				if distance <= 20 then
+					if door:IsOpen() then
+						local newColor = effect.Color
+						newColor.A = 1
+						effect.Color = newColor
+						player.Position = doorPos
+					else
+						local dimension = room:IsMirrorWorld() and 0 or 1			
+						local playerEffects = player:GetEffects()
+						if roomName == "Mirror Room" and playerEffects:HasNullEffect(NullItemID.ID_LOST_CURSE) then
+							player.Position = doorPos
+						else
+							door:TryUnlock(player)
+						end
+					end
+				end
+			end
+		end
+	end
 end
 
 local function doEdithTear(tear, IsBlood, isTainted)
@@ -296,7 +345,6 @@ function edithMod:Log(x, base)
     return logNatural / logBase
 end
 
-
 function edithMod:SpawnSaltCreep(parent, position, damage, timeout, gibAmount, spawnType)
 	local salt = Isaac.Spawn(
 		EntityType.ENTITY_EFFECT, 
@@ -415,7 +463,7 @@ function edithMod.ForceCharacterCostume(player, playertype, costumePath)
 end
 
 function edithMod:IsBetweenNumber(num, lower, upper)
-  return (lower <= num and num <= upper) or (lower >= num and num >= upper)
+	return (lower <= num and num <= upper) or (lower >= num and num >= upper)
 end
 
 function edithMod:IsPlayerShooting(player)
@@ -468,13 +516,13 @@ function edithMod:SpawnSaltGib(parent, Number, color, timeout,spawnType)
 		):ToEffect()
 		if color then 
 			saltGib.Color = Color(
-				(color.R + p.Color.R - 1), 
-				(color.G + p.Color.G - 1), 
-				(color.B + p.Color.B - 1), 
-				(color.A + p.Color.A - 1),
-				(color.RO + p.Color.RO),
-				(color.GO + p.Color.GO),
-				(color.BO + p.Color.BO)
+				(color.R + parent.Color.R - 1), 
+				(color.G + parent.Color.G - 1), 
+				(color.B + parent.Color.B - 1), 
+				(color.A + parent.Color.A - 1),
+				(color.RO + parent.Color.RO),
+				(color.GO + parent.Color.GO),
+				(color.BO + parent.Color.BO)
 			)
 		else
 			saltGib.Color = parent.Color
@@ -488,7 +536,6 @@ function edithMod:SpawnSaltGib(parent, Number, color, timeout,spawnType)
 		saltGibData.SpawnType = spawnType
 	end
 end
-
 
 function edithMod:ShockwaveSprite()
     local bdType = room:GetBackdropType()
