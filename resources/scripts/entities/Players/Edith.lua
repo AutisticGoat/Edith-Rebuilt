@@ -4,20 +4,14 @@ local room = edithMod.Enums.Utils.Room
 local sfx = edithMod.Enums.Utils.SFX
 local level = edithMod.Enums.Utils.Level
 local rng = edithMod.Enums.Utils.RNG
-
-local DegreesToDirection = {
-	[0] = Direction.RIGHT,
-	[90] = Direction.DOWN,
-	[180] = Direction.LEFT,
-	[270] = Direction.UP,
-	[360] = Direction.RIGHT,
-}
+local tables = edithMod.Enums.Tables
 
 local jumpFlags = (  
 	JumpLib.Flags.DISABLE_SHOOTING_INPUT |
 	JumpLib.Flags.DISABLE_LASER_FOLLOW |
 	JumpLib.Flags.DISABLE_BOMB_INPUT
 )
+
 function mod:InitEdithJump(player)
 	local playerData = edithMod:GetData(player)
 	
@@ -42,10 +36,7 @@ function mod:InitEdithJump(player)
 		
 	local epicFetusMult = player:HasCollectible(CollectibleType.COLLECTIBLE_EPIC_FETUS) and 3 or 1
 	local jumpHeight = (10 + (distance / 40) / div) * epicFetusMult
-			
-			
-	local variant = 99
-			
+				
 	local DustCloud = Isaac.Spawn(
 		EntityType.ENTITY_EFFECT, 
 		EffectVariant.POOF01, 
@@ -92,21 +83,13 @@ function mod:SetEdithStats(player, cacheFlag)
 end
 mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, mod.SetEdithStats)
 
-local function IsFalling(entity)
-    local data = JumpLib.Internal:GetData(entity)
-    if (data.Fallspeed or 0) > (data.StaticHeightIncrease or 1) then
-        return true
-    end
-    return false
-end
-
 function mod:EdithInit(player)
 	if player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH then return end
 
 	local playerSprite = player:GetSprite()
 
-	if playerSprite:GetFilename() ~= "gfx/001.000.editha_player.anm2" and not player:IsCoopGhost() then
-		playerSprite:Load("gfx/001.000.editha_player.anm2", true)
+	if playerSprite:GetFilename() ~= "gfx/EdithAnim.anm2" and not player:IsCoopGhost() then
+		playerSprite:Load("gfx/EdithAnim.anm2", true)
 		playerSprite:Update()
 	end
 
@@ -114,22 +97,12 @@ function mod:EdithInit(player)
 end
 edithMod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, edithMod.EdithInit)
 
-local OverridableWeapons = {
-	[WeaponType.WEAPON_BRIMSTONE] = true,
-	[WeaponType.WEAPON_KNIFE] = true,
-	[WeaponType.WEAPON_LASER] = true,
-	[WeaponType.WEAPON_BOMBS] = true,
-	[WeaponType.WEAPON_ROCKETS] = true,
-	[WeaponType.WEAPON_TECH_X] = true,
-	[WeaponType.WEAPON_SPIRIT_SWORD] = true
-}
-
 function edithMod:WeaponManager(player)		
 	if player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH then return end
 	local weapon = player:GetWeapon(1)
 		
-	if weapon then
-		local override = OverridableWeapons[weapon:GetWeaponType()] or false
+	if weapon then	
+		local override = tables.OverrideWeapons[weapon:GetWeaponType()] or false
 		if override == true then
 			local newWeapon = Isaac.CreateWeapon(WeaponType.WEAPON_TEARS, player)
 			Isaac.DestroyWeapon(weapon)
@@ -142,6 +115,7 @@ mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, edithMod.WeaponManager)
 
 function mod:EdithSaltTears(tear)
 	local player = edithMod:GetPlayerFromTear(tear)
+	-- print(parent)
 	
 	if player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH then return end
     
@@ -174,14 +148,14 @@ function mod:EdithKnockbackTears(tear)
 end
 mod:AddCallback(ModCallbacks.MC_POST_TEAR_UPDATE, mod.EdithKnockbackTears)
 
+local playerSprite 
+
 function mod:EdithJumpHandler(player)
-	local playerSprite = player:GetSprite()
 	local playerData = edithMod:GetData(player)
 	local room = game:GetRoom()
-
+	if not playerSprite then playerSprite = player:GetSprite() end
+	
 	local multiShot = player:GetMultiShotParams(WeaponType.WEAPON_TEARS)
-
-	-- print(edithMod:GetAceleration(player))
 
 	local isMoving = edithMod:IsEdithTargetMoving(player)
 	local isKeyStompPressed = edithMod:IsKeyStompPressed(player)
@@ -198,27 +172,25 @@ function mod:EdithJumpHandler(player)
 		right = Input.GetActionValue(ButtonAction.ACTION_RIGHT, player.ControllerIndex),
 	}
 
-	-- for k, v in pairs(MovementForce) do
-		-- print(k, v)
-	-- end
-
-	if not playerData.ExtraJumps then
-		playerData.ExtraJumps = 0
-	end
+	playerData.ExtraJumps = playerData.ExtraJumps or 0
 
 	if player:IsDead() == true then
 		edithMod:RemoveEdithTarget(player)
 	end
 	
 	playerData.EdithTarget = playerData.EdithTarget or nil
-
-	local input = {
-		up = Input.IsActionPressed(ButtonAction.ACTION_UP, player.ControllerIndex),
-		down = Input.IsActionPressed(ButtonAction.ACTION_DOWN, player.ControllerIndex),
-		left = Input.IsActionPressed(ButtonAction.ACTION_LEFT, player.ControllerIndex),
-		right = Input.IsActionPressed(ButtonAction.ACTION_RIGHT, player.ControllerIndex)
-	}
-
+	
+	local input
+	
+	if not input then
+		input = {
+			up = Input.IsActionPressed(ButtonAction.ACTION_UP, player.ControllerIndex),
+			down = Input.IsActionPressed(ButtonAction.ACTION_DOWN, player.ControllerIndex),
+			left = Input.IsActionPressed(ButtonAction.ACTION_LEFT, player.ControllerIndex),
+			right = Input.IsActionPressed(ButtonAction.ACTION_RIGHT, player.ControllerIndex)
+		}
+	end	
+	
 	playerData.EdithJumpTimer = playerData.EdithJumpTimer or 20
 
 	if playerData.EdithJumpTimer > 0 then
@@ -298,7 +270,10 @@ function mod:EdithJumpHandler(player)
 				
 		local direction = (targetPos - playerPos):Normalized()
 		local angle = edithMod:vectorToAngle(direction)
-		local faceDirection = DegreesToDirection[angle]
+		
+		-- print(angle)
+		
+		local faceDirection = tables.DegreesToDirection[angle]
 				
 		local isClose = distance <= 5
 		local isShooting = edithMod:IsPlayerShooting(player)
@@ -314,6 +289,18 @@ function mod:EdithJumpHandler(player)
 				player:SetHeadDirection(isClose and Direction.DOWN or faceDirection, 1, true)
 			end
 		end
+	end
+	
+	-- if player:GetEntityFlags() ~= 0 then
+		-- if player:GetEntityFlags() & EntityFlag.FLAG_SLIPPERY_PHYSICS == EntityFlag.FLAG_SLIPPERY_PHYSICS then
+			player:ClearEntityFlags(EntityFlag.FLAG_SLIPPERY_PHYSICS)
+		-- end
+		
+		-- print(player:GetEntityFlags(), player:GetEntityFlags() & EntityFlag.FLAG_SLIPPERY_PHYSICS == EntityFlag.FLAG_SLIPPERY_PHYSICS)
+	-- end
+	
+	if not isJumping then
+		-- player:MultiplyFriction(0.5)
 	end
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, mod.EdithJumpHandler)
@@ -492,7 +479,6 @@ function mod:EdithLanding(player, data, pitfall)
 		return
 	end
 	
-	-- print(player:CollidesWi`qthGrid())
 -------- Stomp Sound Manager --------
 	
 -------- Stomp Sound Manager end --------
@@ -583,9 +569,7 @@ function mod:EdithLanding(player, data, pitfall)
 		if player:GetNumBombs() > 0 and not player:HasGoldenBomb() then
 			player:AddBombs(-1)
 		end
-		
-		
-		
+
 		game:BombExplosionEffects(
 			player.Position, 
 			10, 
@@ -630,7 +614,7 @@ function mod:EdithJumpLibStuff(player, data)
 	if not playerData.IsFalling or playerData.IsFalling == false then
 		if player.CanFly and ((isMovingTarget and distance <= 50) or distance <= 5) then
 			if not iskeystomp then
-				if IsFalling(player) then
+				if JumpLib:IsFalling(player) then
 					playerData.IsFalling = true
 					sfx:Play(SoundEffect.SOUND_SHELLGAME)
 					player:MultiplyFriction(0.05)
@@ -639,10 +623,16 @@ function mod:EdithJumpLibStuff(player, data)
 			end
 		end
 	end
+	
+	player:ClearEntityFlags(EntityFlag.FLAG_SLIPPERY_PHYSICS)
+	
+	-- player:MultiplyFriction(5)
 
 	player.Velocity = player.Velocity + (direction * distance) / div
 end
 mod:AddCallback(JumpLib.Callbacks.PLAYER_UPDATE_30, mod.EdithJumpLibStuff, {tag = "edithMod_EdithJump"})
+
+Isaac.GetItemConfig():GetCollectible(4).Name = "Cricket's Collar"
 
 function mod:EdithBomb(player, data)
 	local playerData = edithMod:GetData(player)
@@ -671,6 +661,8 @@ function mod:EdithOnNewRoom()
 end
 mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, mod.EdithOnNewRoom)
 
+local overrideActions = edithMod.Enums.Tables.OverrideActions
+
 function edithMod:OverrideInputs(entity, input, action)
 	if not entity then return end
 	
@@ -681,23 +673,8 @@ function edithMod:OverrideInputs(entity, input, action)
 	if player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH then return end
 	
 	if input == InputHook.GET_ACTION_VALUE then
-		local actions = {
-			[ButtonAction.ACTION_LEFT] = 0,
-			[ButtonAction.ACTION_RIGHT] = 0,
-			[ButtonAction.ACTION_UP] = 0,
-			[ButtonAction.ACTION_DOWN] = 0,
-		}
-		return actions[action]
+		return overrideActions[action]
 	end
-	-- if input == InputHook.IS_ACTION_TRIGGERED then
-		-- if action == ButtonAction.ACTION_BOMB then
-			-- local isJumping = JumpLib:GetData(player).Jumping
-			
-			-- if isJumping then
-				-- return false
-			-- end
-		-- end
-	-- end
 end
 edithMod:AddCallback(ModCallbacks.MC_INPUT_ACTION, edithMod.OverrideInputs)
 

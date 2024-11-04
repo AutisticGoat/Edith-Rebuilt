@@ -1,24 +1,17 @@
 local game = edithMod.Enums.Utils.Game
 local room = edithMod.Enums.Utils.Room
+local tables = edithMod.Enums.Tables
 
 local arrowPath = "gfx/effects/TaintedEdithArrow/effect_000_tainted_edith"
-
-local arrowSuffix = {
-	[1] = "_arrow",
-	[2] = "_arrow_pointy",
-	[3] = "_triangle_line",
-	[4] = "_triangle_full",
-	[5] = "_chevron_line",
-	[6] = "_chevron_full",
-	[7] = "_grudge",
-}		
 
 function edithMod:RenderTaintedEdithArrow(effect)
 	local player = effect.SpawnerEntity:ToPlayer()
 	local effectSprite = effect:GetSprite()
 	
-	effect.Visible = effect.FrameCount > 1
+	local rendermode = room:GetRenderMode()
 	
+	if rendermode == 5 then return false end
+		
 	local sprite = effect:GetSprite()
 	
 	if not player then return end
@@ -36,15 +29,11 @@ function edithMod:RenderTaintedEdithArrow(effect)
 	
 	if arrowDesign ~= 7 then
 		local rotation = HopVec:GetAngleDegrees()
-	
 		sprite.Rotation = rotation
 	end
-
-	-- local newEffecColor = effect.Color
-	
+		
 	edithMod:ChangeColor(effect, arrowColor.Red, arrowColor.Green, arrowColor.Blue)
-	
-	effectSprite:ReplaceSpritesheet(0, arrowPath .. arrowSuffix[arrowDesign] .. ".png", true)
+	effectSprite:ReplaceSpritesheet(0, arrowPath .. tables.ArrowSuffix[arrowDesign] .. ".png", true)
 end
 edithMod:AddCallback(ModCallbacks.MC_PRE_EFFECT_RENDER, edithMod.RenderTaintedEdithArrow, edithMod.Enums.EffectVariant.EFFECT_EDITH_B_TARGET)
 
@@ -54,6 +43,6 @@ function edithMod:taintedArrowUpdate(effect)
 
 	if not player then return end
 
-	edithMod:TargetDoorManager(effect, player)
+	edithMod:TargetDoorManager(effect, player, 20)
 end
 edithMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, edithMod.taintedArrowUpdate, edithMod.Enums.EffectVariant.EFFECT_EDITH_B_TARGET)

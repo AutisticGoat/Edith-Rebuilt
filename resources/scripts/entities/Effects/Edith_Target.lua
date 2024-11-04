@@ -1,4 +1,8 @@
 local game = edithMod.Enums.Utils.Game
+local room = edithMod.Enums.Utils.Room
+local tables = edithMod.Enums.Tables
+local misc = edithMod.Enums.Misc
+
 local mod = edithMod
 
 local red = 255
@@ -9,9 +13,7 @@ local state = 1
 local RGBCyclingColor = Color(1, 1, 1, 1)
 function edithMod:RGBCycle(step)
     step = step or 1 
-	
-	-- if game:IsPaused() then return end
-	
+		
     if state == 1 then
         green = math.min(255, green + step)
         if green == 255 then
@@ -66,8 +68,6 @@ local teleportPoints = {
 }
 
 function mod:EdithTargetLogic(effect)	
-	local room = game:GetRoom()
-
 	local player = effect.SpawnerEntity:ToPlayer()
 	if player.ControlsEnabled == false then return end
 		
@@ -81,7 +81,7 @@ function mod:EdithTargetLogic(effect)
 	local playerData = edithMod:GetData(player)
 	
 	local targetSprite = effect:GetSprite()
-	
+		
 	if edithMod:IsKeyStompPressed(player) or playerData.ExtraJumps > 0 and playerData.EdithJumpTimer == 0 then
 		targetSprite:Play("Blink")
 	end
@@ -94,20 +94,14 @@ function mod:EdithTargetLogic(effect)
 	local Camera = room:GetCamera()
 	Camera:SetFocusPosition(cameraPos)
 	
-	for _, entity in pairs(Isaac.FindByType(EntityType.ENTITY_EFFECT, EffectVariant.TARGET)) do
-		local target = entity:ToEffect()
-		local player = effect.SpawnerEntity:ToPlayer()
-		
-		target.Position = effectPos
-		
-		target:MultiplyFriction(0)
-		target.Velocity = Vector.Zero
-		
-		local newColor = target.Color
-		newColor.A = 0
-		target.Color = newColor
+	local markedTarget = player:GetMarkedTarget()
+	-- local 
+	if markedTarget then
+		markedTarget.Position = effect.Position
+		markedTarget.Velocity = Vector.Zero
+		markedTarget.Visible = false
 	end
-		
+	
 	if room:GetType() == RoomType.ROOM_DUNGEON then
 		for k, v in pairs(teleportPoints) do
 			DungeonVector.X = v.X
@@ -120,45 +114,17 @@ function mod:EdithTargetLogic(effect)
 		end
 	end
 	
-	edithMod:TargetDoorManager(effect, player)
+	edithMod:TargetDoorManager(effect, player, 25)
 end 
 edithMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, mod.EdithTargetLogic, edithMod.Enums.EffectVariant.EFFECT_EDITH_TARGET)
 
-local ObscureDiv = 155/255
 local targetPath = "gfx/effects/EdithTarget/effect_000_edith_target"
-local targetSuffix = {
-	[1] = "",
-	[2] = "_trans",
-	[3] = "_rainbow",
-	[4] = "_lesbian",
-	[5] = "_bisexual",
-	[6] = "_gay",
-	[7] = "_ace",
-	[8] = "_enby",
-	[9] = "_Venezuela",
-}		
-
-local frameLimits = {
-	["Idle"] = 12,
-	["Blink"] = 2
-}
 
 local targetlineColor = Color(1, 1, 1, 1)
 
-local colorValues = {
-	[2] = {R = 245/255, G = 169/255, B = 184/255},
-	[3] = {R = 1, G = 0, B = 1},
-	[4] = {R = 1, G = 154/255, B = 86/255},
-	[5] = {R = 155/255, G = 79/255, B = 150/255},
-	[6] = {R = 123/255, G = 173/255, B = 226/255},
-	[7] = {R = 128/255, G = 0, B = 128/255},
-	[8] = {R = 154/255, G = 89/255, B = 207/255},
-	[9] = {R = 0, G = 36/255, B = 125/255},
-}
-
 function mod:EdithTargetSprite(effect)
-	local room = game:GetRoom()
-	if room:GetRenderMode() == RenderMode.RENDER_WATER_REFLECT then return end
+	local room = game:GetRoom()	
+	if room:GetRenderMode() == RenderMode.RENDER_WATER_REFLECT then return false end
 	
     local player = effect.SpawnerEntity:ToPlayer()
     if not player then return end
@@ -183,41 +149,35 @@ function mod:EdithTargetSprite(effect)
 			if RGBmode then
 				edithMod:RGBCycle(RGBspeed)
 				effect.Color = RGBCyclingColor
-			else
-				local NewTargetColor = effect.Color
-		
-				NewTargetColor.R = targetColor.Red
-				NewTargetColor.G = targetColor.Green
-				NewTargetColor.B = targetColor.Blue
-				
-				effect.Color = NewTargetColor
+			else		
+				edithMod:ChangeColor(effect, targetColor.Red, targetColor.Green, targetColor.Blue)
 			end
 		else
 			effect.Color = Color.Default
 		end
 		
-		effectSprite:ReplaceSpritesheet(0, targetPath .. targetSuffix[targetDesign] .. ".png", true)
+		effectSprite:ReplaceSpritesheet(0, targetPath .. tables.TargetSuffix[targetDesign] .. ".png", true)
 		
 		local targetLine = saveData.targetline
 		if targetLine ~= true then return end
-				
+								
 		if targetDesign == 1 then
 			targetlineColor = effectColor
 		else
-			targetlineColor.R = colorValues[targetDesign].R
-			targetlineColor.G = colorValues[targetDesign].G
-			targetlineColor.B = colorValues[targetDesign].B
+			targetlineColor.R = tables.ColorValues[targetDesign].R
+			targetlineColor.G = tables.ColorValues[targetDesign].G
+			targetlineColor.B = tables.ColorValues[targetDesign].B
 		end
 
 		local animation = effectSprite:GetAnimation()
 		local frame = effectSprite:GetFrame()
-		local isObscure = frame >= (frameLimits[animation] or 0)
+		local isObscure = frame >= (tables.FrameLimits[animation] or 0)
 
 		if isObscure then
 			local newObcureColor = targetlineColor
-			newObcureColor.R = newObcureColor.R * ObscureDiv
-			newObcureColor.G = newObcureColor.G * ObscureDiv
-			newObcureColor.B = newObcureColor.B * ObscureDiv
+			newObcureColor.R = newObcureColor.R * misc.ObscureDiv
+			newObcureColor.G = newObcureColor.G * misc.ObscureDiv
+			newObcureColor.B = newObcureColor.B * misc.ObscureDiv
 		
 			targetlineColor = newObcureColor
 		end

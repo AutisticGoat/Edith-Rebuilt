@@ -4,7 +4,7 @@
 		 
 	<player 
 		name="Edith" 
-		skin="character_004xa_edith.png" 
+		skin="characterEdith.png" 
 		armor="6"
 		nameimage="PlayerName_04xa_Edith.png" 
 		portrait="PlayerPortraitBig_04xa_Edith.png" 
@@ -18,7 +18,7 @@
 	<player 
 		bSkinParent="Edith" 
 		name="Edith" 
-		skin="character_004xb_edith.png" 
+		skin="characterTaintedEdith.png" 
 		black="6"
 		nameimage="PlayerName_04xa_Edith.png" 
 		portrait="PlayerPortraitBig_04xa_Edith.png" 

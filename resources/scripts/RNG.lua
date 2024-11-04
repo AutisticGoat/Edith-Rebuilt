@@ -1,6 +1,5 @@
 local game = edithMod.Enums.Utils.Game
 
-
 local function setRNG()
 	local rng = edithMod.Enums.Utils.RNG
 	local RECOMMENDED_SHIFT_IDX = 35
@@ -9,8 +8,6 @@ local function setRNG()
 	local startSeed = seeds:GetStartSeed()
 	
 	rng:SetSeed(startSeed, RECOMMENDED_SHIFT_IDX)	
-
-	print(rng, rng:GetSeed(), startSeed)
 end
 
 function edithMod:GameStartedFunction()

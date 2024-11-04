@@ -22,11 +22,13 @@ function mod:TaintedEdithInit(player)
 
 	local playerSprite = player:GetSprite()
 
-	if playerSprite:GetFilename() ~= "gfx/001.000.edithabplayer.anm2" and not player:IsCoopGhost() then
-		playerSprite:Load("gfx/001.000.edithb_player.anm2", true)
+	if playerSprite:GetFilename() ~= "gfx/EdithTaintedAnim.anm2" and not player:IsCoopGhost() then
+		playerSprite:Load("gfx/EdithTaintedAnim.anm2", true)
 		playerSprite:Update()
 	end
-
+	
+	-- player:AddNullCostume(edithMod.Enums.NullItemID.ID_EDITH_B_SCARF)
+	
 	edithMod.ForceCharacterCostume(player, edithMod.Enums.PlayerType.PLAYER_EDITH_B, edithMod.Enums.NullItemID.ID_EDITH_B_SCARF)
 end
 edithMod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, edithMod.TaintedEdithInit)
@@ -123,7 +125,7 @@ function edithMod:InitTaintedEdithParry(player)
 		Vector.Zero, 
 		player
 	)	
-		
+
 	if room:HasWater() then
 		local customColor = {
 			[BackdropType.CORPSE3] = {0.75, 0.2, 0.2},
@@ -132,7 +134,7 @@ function edithMod:InitTaintedEdithParry(player)
 			
 		local color = customColor[BackDrop] or {0.7, 0.75, 1}
 		
-		for k, v in pairs(color) do print(v) end
+		-- for k, v in pairs(color) do print(v) end
 		edithMod:ChangeColor(DustCloud, table.unpack(color))
 	end
 	
@@ -258,7 +260,7 @@ local function TaintedEdithFeedBackManager(player, room, isParryJump)
 		local color = colorMap[BackDrop] or {1, 1, 1}
 		edithMod:ChangeColor(DustCloud, table.unpack(color))
 	end
-	edithMod:SpawnSaltGib(player, 1, burtSaltColor, 5, "StompGib")
+	edithMod:SpawnSaltGib(player, isParryJump and 6 or 1 , burtSaltColor, 5, "StompGib")
 end
 
 function edithMod:TaintedEdithUpdate(player)
@@ -461,7 +463,7 @@ function edithMod:OnNewRoom()
 	
 	for _, player in ipairs(players) do
 		if player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH_B then return end
-		
+		edithMod:ChangeColor(player, _, _, _, 1)
 		stopTEdithHops(player, 0, true, true)
 		edithMod:RemoveTaintedEdithTargetArrow(player)
 	end
@@ -470,20 +472,36 @@ edithMod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, edithMod.OnNewRoom)
 
 function mod:EdithLanding(player, data, pitfall)	
 	local playerData = edithMod:GetData(player)
-	local room = game:GetRoom()
+	local tearRange = player.TearRange / 40
+	local damageBase = 13.5
+	local DamageStat = player.Damage + ((player.Damage / 5.25) - 1)
+	local rawFormula = ((damageBase + DamageStat) / 2.5) * (playerData.ImpulseCharge + playerData.BirthrightCharge) / 100
+	
+	playerData.HopParams = {
+		hopRadius = math.min((30 + (tearRange - 8) * 1.5), 50),
+		knockbackFormula = math.min(50, (7.7 + player.Damage ^ 1.2)) * player.ShotSpeed,
+		Damage = ((damageBase + DamageStat) / 2.5) * (playerData.ImpulseCharge + playerData.BirthrightCharge) / 100,
+	}
+	
+	local HopParams = playerData.HopParams
+	
+	-- for k, v in pairs(HopParams) do
+		-- print(k, v)
+	-- end
+		
+	-- local room = game:GetRoom()
+	
+	player:SpawnWaterImpactEffects(player.Position, Vector(1, 1), 1)
+	
+	-- player:SpawnWaterImpactEffects(Vector(300, 200), Vector.Zero, 100)
 	
 	TaintedEdithFeedBackManager(player, room)
 		
-	local tearRange = player.TearRange / 40
+	
 	local radius = math.min((30 + (tearRange - 8) * 1.5), 50) -- Hop radius 
 	local knockbackFormula = math.min(50, (7.7 + player.Damage ^ 1.2)) * player.ShotSpeed
 		
 	local tearsMult = edithMod:GetTPS(player) / 2.73
-
-	local damageBase = 13.5
-	local DamageStat = player.Damage + ((player.Damage / 5.25) - 1)
-
-	local rawFormula = ((damageBase + DamageStat) / 2.5) * (playerData.ImpulseCharge + playerData.BirthrightCharge) / 100
 	
 	edithMod:TaintedEdithStomp(player, radius, rawFormula, knockbackFormula, false)	
 end
@@ -556,96 +574,40 @@ edithMod:AddCallback(ModCallbacks.MC_INPUT_ACTION, edithMod.OverrideTaintedInput
 function edithMod:TaintedEdithDamageManager(player, damage, flags, source, cooldown)
 	local playerData = edithMod:GetData(player)
 	
-	if player:GetPlayerType() == edithMod.Enums.PlayerType.PLAYER_EDITH_B then
-		if playerData.IsHoping == true then
-			return false
-		end
-	end
+	-- if player:GetPlayerType() == edithMod.Enums.PlayerType.PLAYER_EDITH_B then
+		-- if playerData.IsHoping == true then
+			-- return false
+		-- end
+	-- end
 end
 edithMod:AddCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG, edithMod.TaintedEdithDamageManager)
+
+local redArea = Color(1, 0, 0, 1)
+local blueArea = Color(0, 0.2, 1, 1)
 
 local offsetTargetVector = Vector(0, 10)
 function edithMod:RenderChargeBar(player)
 	if room:GetRenderMode() == RenderMode.RENDER_WATER_REFLECT then return end
-
-	local players = PlayerManager.GetPlayers()
-
-	for _, player in ipairs(players) do
-		local data = edithMod:GetData(player)
-		local room = game:GetRoom()
-
-		local update = true
-
-		local chargeBar = data.TaintedEdithChargebar
-
-		if not chargeBar then
-			data.TaintedEdithChargebar = Sprite()
-			data.TaintedEdithChargebar:Load("gfx/chargebar.anm2", true)
-		else
-			if not data.ImpulseCharge then return end
-				chargeBar.PlaybackSpeed = 0.5
-			if not chargeBar:IsPlaying("Disappear") and (not data.IsHoping == true) and data.ImpulseCharge ~= 0 then
-				if data.ImpulseCharge < 100 and not (chargeBar:GetAnimation() == "Charged") then
-					chargeBar:SetFrame("Charging", math.ceil(data.ImpulseCharge))
-					update = false
-				else
-					if chargeBar:GetAnimation() == "Charging" then
-						chargeBar:Play("StartCharged", true)
-					elseif chargeBar:IsFinished("StartCharged") and not (chargeBar:GetAnimation() == "Charged") then
-						chargeBar:Play("Charged", true)
-					end
-				end
-			else
-				if chargeBar:IsFinished("Disappear") then
-					-- chargeBar = nil
-				else	
-					if not data.IsHoping and data.ImpulseCharge > 0 then
-						chargeBar:SetFrame("Charging", math.ceil(data.ImpulseCharge))
-					end
-				end
-			end
-		end
-				
-		if chargeBar then
-			if (chargeBar:GetAnimation() ~= "Disappear") and data.IsHoping == true or data.ImpulseCharge == 0 then
-				chargeBar:Play("Disappear", false)
-				chargeBar.PlaybackSpeed = 1
-			end
-		end
-			
-		data.TaintedEdithChargebar.Offset = offsetTargetVector
-		data.TaintedEdithChargebar:Render(room:WorldToScreenPosition(player.Position), Vector.Zero, Vector.Zero)
-			
-		if update then
-		   data.TaintedEdithChargebar:Update()
-		end
-	end
-end
-edithMod:AddCallback(ModCallbacks.MC_POST_RENDER, edithMod.RenderChargeBar)
-
-function edithMod:RenderBirthrightChargeBar(player)
-    local data = edithMod:GetData(player)
-    local room = game:GetRoom()
-
-	if not player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) then return end
-
-    if room:GetRenderMode() == RenderMode.RENDER_WATER_REFLECT then
-        return
-    end
-
+	
+	-- local HopParams = playerData.HopParams
+	
+		-- edithMod.RenderAreaOfEffect(player, HopParams.hopRadius, redArea)
+		-- edithMod.RenderAreaOfEffect(player, 120, blueArea)
+	
+	local data = edithMod:GetData(player)
 	local update = true
 
-	local chargeBar = data.TaintedEdithBirthrightChargebar
+	local chargeBar = data.TaintedEdithChargebar
 
 	if not chargeBar then
-		data.TaintedEdithBirthrightChargebar = Sprite()
-		data.TaintedEdithBirthrightChargebar:Load("gfx/chargebar.anm2", true)
+		data.TaintedEdithChargebar = Sprite()
+		data.TaintedEdithChargebar:Load("gfx/chargebar.anm2", true)
 	else
-		if not data.BirthrightCharge then return end
+		if not data.ImpulseCharge then return end
 			chargeBar.PlaybackSpeed = 0.5
-		if not chargeBar:IsPlaying("Disappear") and (not data.IsHoping == true) and data.BirthrightCharge ~= 0 then
-			if data.BirthrightCharge < 100 and not (chargeBar:GetAnimation() == "Charged") then
-				chargeBar:SetFrame("Charging", math.ceil(data.BirthrightCharge))
+		if not chargeBar:IsPlaying("Disappear") and (not data.IsHoping == true) and data.ImpulseCharge ~= 0 then
+			if data.ImpulseCharge < 100 and not (chargeBar:GetAnimation() == "Charged") then
+				chargeBar:SetFrame("Charging", math.ceil(data.ImpulseCharge))
 				update = false
 			else
 				if chargeBar:GetAnimation() == "Charging" then
@@ -656,22 +618,84 @@ function edithMod:RenderBirthrightChargeBar(player)
 			end
 		else
 			if chargeBar:IsFinished("Disappear") then
-				chargeBar = nil
+				-- chargeBar = nil
+			else	
+				if not data.IsHoping and data.ImpulseCharge > 0 then
+					chargeBar:SetFrame("Charging", math.ceil(data.ImpulseCharge))
+				end
 			end
 		end
 	end
-			
+				
 	if chargeBar then
-		if (chargeBar:GetAnimation() ~= "Disappear") and data.IsHoping == true then
+		if (chargeBar:GetAnimation() ~= "Disappear") and data.IsHoping == true or data.ImpulseCharge == 0 then
 			chargeBar:Play("Disappear", false)
+			chargeBar.PlaybackSpeed = 1
 		end
 	end
-		
-	data.TaintedEdithBirthrightChargebar.Offset = Vector(0, 25)
-    data.TaintedEdithBirthrightChargebar:Render(room:WorldToScreenPosition(player.Position), Vector.Zero, Vector.Zero)
+				
+	data.TaintedEdithChargebar.Offset = offsetTargetVector
+	data.TaintedEdithChargebar:Render(room:WorldToScreenPosition(player.Position), Vector.Zero, Vector.Zero)
 		
 	if update then
-       data.TaintedEdithBirthrightChargebar:Update()
-    end
+	   data.TaintedEdithChargebar:Update()
+	end
 end
-edithMod:AddCallback(ModCallbacks.MC_POST_PLAYER_RENDER, edithMod.RenderBirthrightChargeBar)
+edithMod:AddCallback(ModCallbacks.MC_PRE_PLAYER_RENDER, edithMod.RenderChargeBar)
+
+-- function edithMod:RenderBirthrightChargeBar(player)
+    -- local data = edithMod:GetData(player)
+    -- local room = game:GetRoom()
+
+	-- if not player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) then return end
+
+    -- if room:GetRenderMode() == RenderMode.RENDER_WATER_REFLECT then
+        -- return
+    -- end
+
+	-- local update = true
+
+	-- local chargeBar = data.TaintedEdithBirthrightChargebar
+
+	-- if not chargeBar then
+		-- data.TaintedEdithBirthrightChargebar = Sprite()
+		-- data.TaintedEdithBirthrightChargebar:Load("gfx/chargebar.anm2", true)
+	-- else
+		-- if not data.BirthrightCharge then return end
+			-- chargeBar.PlaybackSpeed = 0.5
+		-- if not chargeBar:IsPlaying("Disappear") and (not data.IsHoping == true) and data.BirthrightCharge ~= 0 then
+			-- if data.BirthrightCharge < 100 and not (chargeBar:GetAnimation() == "Charged") then
+				-- chargeBar:SetFrame("Charging", math.ceil(data.BirthrightCharge))
+				-- update = false
+			-- else
+				-- if chargeBar:GetAnimation() == "Charging" then
+					-- chargeBar:Play("StartCharged", true)
+				-- elseif chargeBar:IsFinished("StartCharged") and not (chargeBar:GetAnimation() == "Charged") then
+					-- chargeBar:Play("Charged", true)
+				-- end
+			-- end
+		-- else
+			-- if chargeBar:IsFinished("Disappear") then
+				-- chargeBar = nil
+			-- end
+		-- end
+	-- end
+			
+	-- if chargeBar then
+		-- if (chargeBar:GetAnimation() ~= "Disappear") and data.IsHoping == true then
+			-- chargeBar:Play("Disappear", false)
+		-- end
+	-- end
+		
+	-- data.TaintedEdithBirthrightChargebar.Offset = Vector(0, 25)
+    -- data.TaintedEdithBirthrightChargebar:Render(room:WorldToScreenPosition(player.Position), Vector.Zero, Vector.Zero)
+		
+	-- if update then
+       -- data.TaintedEdithBirthrightChargebar:Update()
+    -- end
+-- end
+-- edithMod:AddCallback(ModCallbacks.MC_POST_PLAYER_RENDER, edithMod.RenderBirthrightChargeBar)
+
+
+-- Isaac.GetItemConfig():GetCollectible(CollectibleType.COLLECTIBLE_FLIP).MaxCharges = 4
+

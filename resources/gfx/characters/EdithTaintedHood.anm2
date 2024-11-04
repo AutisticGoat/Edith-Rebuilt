@@ -1,8 +1,8 @@
 <AnimatedActor>
-	<Info CreatedBy="robot" CreatedOn="08/10/2024 12:09:34 p. m." Version="118" Fps="30"/>
+	<Info CreatedBy="robot" CreatedOn="28/10/2024 03:47:36 p. m." Version="119" Fps="30"/>
 	<Content>
 		<Spritesheets>
-			<Spritesheet Path="costumes\character_004xb_edith_scarf.png" Id="0"/>
+			<Spritesheet Path="costumes\characterTaintedEdithHood.png" Id="0"/>
 		</Spritesheets>
 		<Layers>
 			<Layer Name="head0" Id="0" SpritesheetId="0"/>

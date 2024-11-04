@@ -2,6 +2,8 @@ local game = edithMod.Enums.Utils.Game
 local modrng = edithMod.Enums.Utils.RNG
 local room = edithMod.Enums.Utils.Room
 local level = edithMod.Enums.Utils.Level
+local tables = edithMod.Enums.Tables
+local misc = edithMod.Enums.Misc
 
 function edithMod:RemoveEdithTarget(player)
 	playerData = edithMod:GetData(player)
@@ -71,7 +73,7 @@ function edithMod:IsKeyStompTriggered(player)
 end
 
 function edithMod.tearsUp(firedelay, val, mult)
-	local mult = mult or false
+	mult = mult or false
     local currentTears = 30 / (firedelay + 1)
     local newTears = currentTears + val
 	
@@ -108,14 +110,15 @@ function edithMod:vectorToAngle(vector)
     return atan
 end
 
-function edithMod:ChangeColor(entity, red, green, blue, redOff, greenOff, blueOff)
+function edithMod:ChangeColor(entity, red, green, blue, alpha, redOff, greenOff, blueOff)
 	local color = entity.Color
-	color.R = red or 1
-	color.G = green or 1
-	color.B = blue or 1
-	color.RO = redOff or 0
-	color.GO = greenOff or 0
-	color.BO = blueOff or 0
+	color.R = red or entity.Color.R
+	color.G = green or entity.Color.G
+	color.B = blue or entity.Color.B
+	color.A = alpha or entity.Color.A
+	color.RO = redOff or entity.Color.RO
+	color.GO = greenOff or entity.Color.GO
+	color.BO = blueOff or entity.Color.BO
 	
 	entity.Color = color
 end
@@ -123,8 +126,9 @@ end
 function edithMod:DestroyGrid(entity, radius)
 	radius = radius or 10
 
-	local room = game:GetRoom()
-	for i = 0, (room:GetGridSize()) do
+	local roomSize = room:GetGridSize()
+
+	for i = 0, roomSize do
 		local grid = room:GetGridEntity(i)
 		if grid then
 			local distance = (entity.Position - grid.Position):Length()
@@ -138,20 +142,20 @@ function edithMod:DestroyGrid(entity, radius)
 end
 
 local LINE_SPRITE = Sprite()
-LINE_SPRITE:Load("gfx/1000.021_tiny bug.anm2", true)
+LINE_SPRITE:Load("gfx/TinyBug.anm2", true)
 LINE_SPRITE:SetFrame("Dead", 0)
 
-local MAX_POINTS = 32
+local MAX_POINTS = 360
 local ANGLE_SEPARATION = 360 / MAX_POINTS
 
-function edithMod.RenderAreaOfEffect(entity, AreaSize, AreaColor) -- Took from Melee lib and tweaked a little bit
+function edithMod.RenderAreaOfEffect(entity, AreaSize, AreaColor) -- Took from Melee lib, tweaked a little bit
     local hitboxPosition = entity.Position
-    local renderPosition = Isaac.WorldToScreen(hitboxPosition) - Game().ScreenShakeOffset
+    local renderPosition = Isaac.WorldToScreen(hitboxPosition) - game.ScreenShakeOffset
     local hitboxSize = AreaSize
     local offset = Isaac.WorldToScreen(hitboxPosition + Vector(0, hitboxSize)) - renderPosition + Vector(0, 1)
     local offset2 = offset:Rotated(ANGLE_SEPARATION)
     local segmentSize = offset:Distance(offset2)
-    LINE_SPRITE.Scale = Vector(segmentSize * 2 / 3, 0.5)
+    LINE_SPRITE.Scale = Vector(segmentSize * (2 / 3), 0.5)
     for i = 1, MAX_POINTS do
         local angle = ANGLE_SEPARATION * i
         LINE_SPRITE.Rotation = angle
@@ -162,53 +166,33 @@ function edithMod.RenderAreaOfEffect(entity, AreaSize, AreaColor) -- Took from M
 end
 
 function edithMod:GetRandomRune(rng)
-	local runes = {
-		Card.RUNE_HAGALAZ,
-		Card.RUNE_JERA,
-		Card.RUNE_EHWAZ,
-		Card.RUNE_DAGAZ,
-		Card.RUNE_ANSUZ,
-		Card.RUNE_PERTHRO,
-		Card.RUNE_BERKANO,
-		Card.RUNE_ALGIZ,
-		Card.RUNE_BLANK,
-		Card.RUNE_BLACK,
-	}
-
-	local runeRandomSelect = edithMod:RandomNumber(rng, 1, #runes)
-	
-	return runes[runeRandomSelect]
+	local runeRandomSelect = edithMod:RandomNumber(rng, 1, #tables.Runes)
+	return tables.Runes[runeRandomSelect]
 end
 
-function edithMod:TargetDoorManager(effect, player)
-	local roomSize = room:GetGridSize()
-	local playerPos = player.position
+function edithMod:TargetDoorManager(effect, player, triggerDistance)
 	local effectPos = effect.Position
-	
 	local roomName = level:GetCurrentRoomDesc().Data.Name
 	local isMirrorWorld = room:IsMirrorWorld()
-		
-	for i = 0, roomSize do
-		local grid = room:GetGridEntity(i)
-		if grid then
-			if grid:ToDoor() then
-			local door = grid:ToDoor()
-				local doorPos = door.Position
-				local distance = effectPos:Distance(doorPos)	
-				if distance <= 20 then
-					if door:IsOpen() then
-						local newColor = effect.Color
-						newColor.A = 1
-						effect.Color = newColor
+	
+	for i = 0, 7 do
+		local door = room:GetDoor(i)
+		if door ~= nil then
+			local doorPos = room:GetDoorSlotPosition(i)
+			local distance = effectPos:Distance(doorPos)	
+			if not doorPos then return end
+			if distance <= triggerDistance then
+				if door:IsOpen() then 
+					player.Position = doorPos
+					edithMod:ChangeColor(player, _, _, _, 0)
+					edithMod:RemoveEdithTarget(player)
+					edithMod:RemoveTaintedEdithTargetArrow(player)
+				else
+					local playerEffects = player:GetEffects()
+					if roomName == "Mirror Room" and playerEffects:HasNullEffect(NullItemID.ID_LOST_CURSE) then
 						player.Position = doorPos
 					else
-						local dimension = room:IsMirrorWorld() and 0 or 1			
-						local playerEffects = player:GetEffects()
-						if roomName == "Mirror Room" and playerEffects:HasNullEffect(NullItemID.ID_LOST_CURSE) then
-							player.Position = doorPos
-						else
-							door:TryUnlock(player)
-						end
+						door:TryUnlock(player)
 					end
 				end
 			end
@@ -216,77 +200,61 @@ function edithMod:TargetDoorManager(effect, player)
 	end
 end
 
-local function doEdithTear(tear, IsBlood, isTainted)
+-- local tearPath = 
+
+local function tearCol(_, tear)
 	local player = tear.Parent:ToPlayer()
-	
-	local tearSizeMult = player:HasCollectible(CollectibleType.COLLECTIBLE_SOY_MILK) and 1 or 0.85
-	
-	tear.Scale = tear.Scale * tearSizeMult
-	tear:ChangeVariant(TearVariant.ROCK)
 	
 	if not player then return end
 	
-	local tearColor = tear.Color
-	local playerColor = player.Color
+	if player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH and player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH_B then return end	
+		
+	local tearData = edithMod:GetData(tear)
 	
-	local colorDif = {
-		R = 1,
-		G = 1,
-		B = 1,
-	}
+	local isBloody = string.find(tearData.ShatterSprite, "blood") ~= nil
+	local isBurnt = string.find(tearData.ShatterSprite, "burnt") ~= nil
 	
-	local bloodDif = 1
-	
-	if IsBlood then
-		colorDif.R = colorDif.R + 1
-		colorDif.G = colorDif.G - bloodDif
-		colorDif.B = colorDif.B - bloodDif
+	local tableColor = tables.TearShatterColor
+	local shatterColor = tableColor[isBurnt][isBloody]
+		
+	for _, ent in ipairs(Isaac.GetRoomEntities()) do
+		if ent.Type == 1000 and (ent.Variant == 145 or ent.Variant == 35) then
+			local dist = tear.Position:Distance(ent.Position)
+			if dist <= 10 then
+				if ent.Variant == 35 then		
+					edithMod:ChangeColor(ent, shatterColor[1], shatterColor[2], shatterColor[3])
+				end
+				if ent.Variant == 145 then
+					local sprite = ent:GetSprite()
+					sprite:ReplaceSpritesheet(0, misc.TearPath .. tearData.ShatterSprite .. ".png", true)
+				end
+			end
+		end
 	end
-	
-	local taintedDif = 1.6	
-	if isTainted then
-		colorDif.R = colorDif.R - taintedDif
-		colorDif.G = colorDif.G - taintedDif
-		colorDif.B = colorDif.B - taintedDif
-	end
-	
-	local colorize = playerColor:GetColorize()
-	
-	tearColor.R = tearColor.R + colorDif.R + (playerColor.R - 1)
-	tearColor.G = tearColor.G + colorDif.G + (playerColor.G - 1)
-	tearColor.B = tearColor.B + colorDif.B + (playerColor.B - 1)
+end
+edithMod:AddCallback(ModCallbacks.MC_POST_TEAR_DEATH, tearCol)
 
-	local isPlayerColorized = (
-		colorize.R +
-		colorize.G + 
-		colorize.B 
-	) ~= 0
-	
-	if isPlayerColorized then
-		local ColAdd = 0.7
+local function doEdithTear(tear, IsBlood, isTainted)
+	local player = tear.Parent:ToPlayer()	
+	local tearSizeMult = player:HasCollectible(CollectibleType.COLLECTIBLE_SOY_MILK) and 1 or 0.85
+	tearData = edithMod:GetData(tear)
+	tear.Scale = tear.Scale * tearSizeMult
+	tear:ChangeVariant(TearVariant.ROCK)
+	local tearSprite = tear:GetSprite()
 		
-		local bloodAdd = IsBlood and 2 or 0
-		local bloodRem = IsBlood and 3 or 0
-		
-		tearColor.R = tearColor.R + (colorize.R - ColAdd) + bloodAdd
-		tearColor.G = tearColor.G + (colorize.G - ColAdd) - bloodRem
-		tearColor.B = tearColor.B + (colorize.B - ColAdd) - bloodRem
+	local path = (isTainted and (IsBlood and "burnt_blood_salt_tears" or "burnt_salt_tears") or (IsBlood and "blood_salt_tears" or "salt_tears"))
 	
-	end
+	tearData.ShatterSprite = (isTainted and (IsBlood and "burnt_blood_salt_shatter" or "burnt_salt_shatter") or (IsBlood and "blood_salt_shatter" or "salt_shatter"))
+				
+	local newSprite = misc.TearPath .. path .. ".png"
 	
-	tear.Color = tearColor 
+	tearSprite:ReplaceSpritesheet(0, newSprite, true)
+	
+	tear.Color = player.Color
 end
 
 function edithMod.ForceSaltTear(tear, tainted)
-    local tearVariants = {
-        [TearVariant.BLOOD] = true,
-        [TearVariant.GLAUCOMA_BLOOD] = true,
-        [TearVariant.CUPID_BLOOD] = true,
-        [TearVariant.PUPULA_BLOOD] = true,
-        [TearVariant.GODS_FLESH_BLOOD] = true,
-	}
-
-	local IsBloodTear = tearVariants[tear.Variant] or false
+	local IsBloodTear = tables.BloodytearVariants[tear.Variant] or false
 	
 	doEdithTear(tear, IsBloodTear, tainted)
 end
@@ -441,21 +409,18 @@ end
 function edithMod.ForceCharacterCostume(player, playertype, costumePath)
 	local playerData = edithMod:GetData(player)
 
-	playerData.HasCostume = {}
+	playerData.HasCostume = playerData.HasCostume or {}
 
-	if playerData.HasCostume[playertype] then
-		playerData.HasCostume[playertype] = nil
-	end
+	local hasCostume = playerData.HasCostume[playertype] or false
+	local isCurrentPlayerType = (player:GetPlayerType() == playertype)
 
-	if player:GetPlayerType() == playertype then
-		if not playerData.HasCostume[playertype] then
+	if isCurrentPlayerType then
+		if not hasCostume then
 			player:AddNullCostume(costumePath)
 			playerData.HasCostume[playertype] = true
-		end	
-	end
-
-	if player:GetPlayerType() ~= playertype then
-		if playerData.HasCostume[playertype] then
+		end
+	else
+		if hasCostume then
 			player:TryRemoveNullCostume(costumePath)
 			playerData.HasCostume[playertype] = false
 		end
@@ -478,6 +443,7 @@ end
 
 local targetSprite = Sprite()
 targetSprite:Load("gfx/edith target.anm2", true)
+
 function edithMod:drawLine(from, to, color, linespace)
 
 	linespace = linespace or 16

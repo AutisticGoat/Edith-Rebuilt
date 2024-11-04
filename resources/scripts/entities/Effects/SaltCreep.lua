@@ -17,23 +17,12 @@ function edithMod:AddSaltEffects(effect)
 	end
 	
 	local effectData = edithMod:GetData(effect)
-	-- local player = effect.SpawnetEntity:ToPlayer()
-	
-	-- print()
-	
-	-- for k, v in pairs(effectData) do
-		-- print(k, v)
-	-- end
-	
 	for i, entity in pairs(Isaac.GetRoomEntities()) do
 		if entity:IsVulnerableEnemy() and entity:IsActiveEnemy() then
 			if entity.Position:Distance(effect.Position) <= 20 then
 				entity:AddFreeze(EntityRef(effect), 90)
-				
-				-- print(effectData.SpawnType == "Sal" )
 				if effectData.SpawnType == "Sal" then
 					local enemyData = edithMod:GetData(entity)
-					
 					enemyData.SalFreeze = true
 				end
 			end

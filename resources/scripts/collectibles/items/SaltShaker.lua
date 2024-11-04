@@ -13,7 +13,7 @@ function edithMod:UseSaltShaker(Id, RNG, player, flags, slot, data)
 	end
 
 	sfx:Play(edithMod.Enums.SoundEffect.SOUND_SALT_SHAKER, 2, 0, false, SoundPitch, 0)
-	local SaltQuantity = 17
+	local SaltQuantity = 24
 	local ndegree = 360/SaltQuantity
 	for i = 1, SaltQuantity do	
 		edithMod:SpawnSaltCreep(player, player.Position + Vector(0, 60):Rotated(ndegree*i), 0, 7, 1, "SaltShakerSpawn")
