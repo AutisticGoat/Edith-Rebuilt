@@ -1,13 +1,15 @@
-Kotry: Project leader
+JJ: Main inspiration
+Kotry: Project leader, coder
 
 Skulldier: Sal initial concept
 
 Kerkel: Jump Library
 
-Mateo Parra Correa: Tainted Edith Birthright idea
+Marcy Parra Correa: Tainted Edith Birthright idea
 
 Sr Kalaka: Edith Sprite
 Yuls: Tainted Edith sprite base
+gigamouse: finished Tainted Edith sprite 
 
 Patricio <3: Testing, First Tainted Edith sprite
 

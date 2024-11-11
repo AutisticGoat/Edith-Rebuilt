@@ -33,12 +33,27 @@
 		quality="2"
 		cache="firedelay damage"
 	/>
-	
 	<passive
-		id="4" 
+		id="5" 
 		name="Sal" 
-		description="salt shedding" 
+		description="Salt shedding" 
 		gfx="collectibles_Sal.png"
+		quality="2"
+	/>
+	<passive
+		id="6" 
+		name="Gilded Stone" 
+		description="placeholder" 
+		gfx="collectibles_Gilded_Stone.png"
+		cache="damage speed"
+		quality="2"
+	/>
+	<passive
+		id="7" 
+		name="Molten Core" 
+		description="placeholder" 
+		cache="damage"
+		gfx="collectibles_Molten_Core.png"
 		quality="2"
 	/>
 	

@@ -1,16 +1,12 @@
 local mod = edithMod
-local game = edithMod.Enums.Utils.Game
-local room = edithMod.Enums.Utils.Room
-local sfx = edithMod.Enums.Utils.SFX
-local level = edithMod.Enums.Utils.Level
-local rng = edithMod.Enums.Utils.RNG
+local utils = edithMod.Enums.Utils
 local tables = edithMod.Enums.Tables
 
-local jumpFlags = (  
-	JumpLib.Flags.DISABLE_SHOOTING_INPUT |
-	JumpLib.Flags.DISABLE_LASER_FOLLOW |
-	JumpLib.Flags.DISABLE_BOMB_INPUT
-)
+local game, room, sfx, level, rng = utils.Game, utils.Room, utils.SFX, utils.Level, utils.RNG
+
+local jumpFlags = tables.JumpFlags
+local jumpTags = tables.JumpTags
+local overrideActions = tables.OverrideActions
 
 function mod:InitEdithJump(player)
 	local playerData = edithMod:GetData(player)
@@ -50,8 +46,8 @@ function mod:InitEdithJump(player)
 	local config = {
 		Height = jumpHeight,
 		Speed = jumpSpeed,
-		Tags = "edithMod_EdithJump",
-		Flags = jumpFlags
+		Tags = jumpTags.EdithJump,
+		Flags = jumpFlags.EdithJump,
 	}
 
 	JumpLib:Jump(player, config)
@@ -65,26 +61,8 @@ function setEdithJumps(player, jumps)
 	end
 end
 
-function mod:SetEdithStats(player, cacheFlag)
-	if player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH then return end
-
-	local cacheActions = {
-		[CacheFlag.CACHE_DAMAGE] = function()
-			player.Damage = player.Damage * 1.5
-		end,
-		[CacheFlag.CACHE_RANGE] = function()
-			player.TearRange = edithMod.rangeUp(player.TearRange, 2.5)
-		end,
-		[CacheFlag.CACHE_TEARFLAG] = function()
-			player.TearFlags = player.TearFlags | TearFlags.TEAR_TURN_HORIZONTAL
-		end,
-	}
-	edithMod.SwitchCase(cacheFlag, cacheActions)
-end
-mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, mod.SetEdithStats)
-
 function mod:EdithInit(player)
-	if player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH then return end
+	if not edithMod:IsEdith(player, false) then return end
 
 	local playerSprite = player:GetSprite()
 
@@ -97,8 +75,8 @@ function mod:EdithInit(player)
 end
 edithMod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, edithMod.EdithInit)
 
-function edithMod:WeaponManager(player)		
-	if player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH then return end
+function edithMod:WeaponManager(player)	
+	if not edithMod:IsEdith(player, false) then return end
 	local weapon = player:GetWeapon(1)
 		
 	if weapon then	
@@ -117,7 +95,7 @@ function mod:EdithSaltTears(tear)
 	local player = edithMod:GetPlayerFromTear(tear)
 	-- print(parent)
 	
-	if player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH then return end
+	if not edithMod:IsEdith(player, false) then return end
     
 	edithMod.ForceSaltTear(tear)
 	
@@ -140,7 +118,7 @@ function mod:EdithKnockbackTears(tear)
 
 	if not player then return end
 
-	if player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH then return end
+	if not edithMod:IsEdith(player, false) then return end
 
 	if tear.FrameCount ~= 1 then return end
 
@@ -148,12 +126,15 @@ function mod:EdithKnockbackTears(tear)
 end
 mod:AddCallback(ModCallbacks.MC_POST_TEAR_UPDATE, mod.EdithKnockbackTears)
 
-local playerSprite 
-
 function mod:EdithJumpHandler(player)
+	local room = edithMod.Enums.Utils.Room
+	if not edithMod:IsEdith(player, false) then return end
+
 	local playerData = edithMod:GetData(player)
-	local room = game:GetRoom()
-	if not playerSprite then playerSprite = player:GetSprite() end
+	
+	local playerSprite = player:GetSprite()
+	
+	-- print(playerSprite, playerData)
 	
 	local multiShot = player:GetMultiShotParams(WeaponType.WEAPON_TEARS)
 
@@ -162,8 +143,6 @@ function mod:EdithJumpHandler(player)
 	local hasMarked = player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED)
 	local isShooting = edithMod:IsPlayerShooting(player)
 	local isJumping = JumpLib:GetData(player).Jumping
-
-	if player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH then return end
 		
 	local MovementForce = {
 		up = Input.GetActionValue(ButtonAction.ACTION_UP, player.ControllerIndex),
@@ -456,7 +435,10 @@ local function isNearTrapdoor(player, room)
 end
 
 function mod:EdithLanding(player, data, pitfall)
-	local room = game:GetRoom()
+	local room = edithMod.Enums.Utils.Room
+	print(room)
+	
+	
 	local playerData = edithMod:GetData(player)
 	local edithTarget = playerData.EdithTarget
 	local playerSprite = player:GetSprite()
@@ -586,7 +568,7 @@ function mod:EdithLanding(player, data, pitfall)
 -------- Bomb Stomp  end --------
 end
 mod:AddCallback(JumpLib.Callbacks.PLAYER_LAND, mod.EdithLanding, {
-    tag = "edithMod_EdithJump",
+    tag = jumpTags.EdithJump,
 })
 
 function mod:EdithJumpLibStuff(player, data)
@@ -630,9 +612,7 @@ function mod:EdithJumpLibStuff(player, data)
 
 	player.Velocity = player.Velocity + (direction * distance) / div
 end
-mod:AddCallback(JumpLib.Callbacks.PLAYER_UPDATE_30, mod.EdithJumpLibStuff, {tag = "edithMod_EdithJump"})
-
-Isaac.GetItemConfig():GetCollectible(4).Name = "Cricket's Collar"
+mod:AddCallback(JumpLib.Callbacks.PLAYER_UPDATE_30, mod.EdithJumpLibStuff, {tag = jumpTags.EdithJump})
 
 function mod:EdithBomb(player, data)
 	local playerData = edithMod:GetData(player)
@@ -643,13 +623,13 @@ function mod:EdithBomb(player, data)
 		playerData.BombStomp = true
 	end
 end
-mod:AddCallback(JumpLib.Callbacks.PLAYER_UPDATE_60, mod.EdithBomb, {tag = "edithMod_EdithJump"})
+mod:AddCallback(JumpLib.Callbacks.PLAYER_UPDATE_60, mod.EdithBomb, {tag = jumpTags.EdithJump})
 
 function mod:EdithOnNewRoom()	
 	local players = PlayerManager.GetPlayers()
 
 	for _, player in pairs(players) do
-		if player:GetPlayerType() == edithMod.Enums.PlayerType.PLAYER_EDITH then
+		if edithMod:IsEdith(player, false) then
 			local newColor = player.Color
 			edithMod:RemoveEdithTarget(player)
 			setEdithJumps(player, 0)	
@@ -660,32 +640,6 @@ function mod:EdithOnNewRoom()
 	end
 end
 mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, mod.EdithOnNewRoom)
-
-local overrideActions = edithMod.Enums.Tables.OverrideActions
-
-function edithMod:OverrideInputs(entity, input, action)
-	if not entity then return end
-	
-	local player = entity:ToPlayer()
-	
-	if not player then return end
-	
-	if player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH then return end
-	
-	if input == InputHook.GET_ACTION_VALUE then
-		return overrideActions[action]
-	end
-end
-edithMod:AddCallback(ModCallbacks.MC_INPUT_ACTION, edithMod.OverrideInputs)
-
-function edithMod:PlayerDamageManager(player, damage, flags, source, countdown)
-	if player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH then return end
-	
-	if flags == DamageFlag.DAMAGE_SPIKES or flags == DamageFlag.DAMAGE_ACID then
-		return false
-	end
-end
-edithMod:AddCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG, edithMod.PlayerDamageManager)
 
 function edithMod:DamageStuff(entity, damage, flags, source, countdown)	
 	if source.Type == 0 then return end

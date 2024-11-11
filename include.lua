@@ -16,6 +16,8 @@ local includeFiles = {
 	col .. "items/EdithsHood",
 	col .. "items/SulfuricFire",
 	col .. "items/Sal",
+	col .. "items/MoltenCore",
+	col .. "items/GildedStone",
 	-- Items fin
 	
 	-- Trinkets

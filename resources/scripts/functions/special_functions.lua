@@ -1,10 +1,10 @@
 local game = edithMod.Enums.Utils.Game
 local modrng = edithMod.Enums.Utils.RNG
-local room = edithMod.Enums.Utils.Room
-local level = edithMod.Enums.Utils.Level
 local tables = edithMod.Enums.Tables
 local misc = edithMod.Enums.Misc
 
+local level
+local room
 function edithMod:RemoveEdithTarget(player)
 	playerData = edithMod:GetData(player)
 	
@@ -16,6 +16,27 @@ function edithMod:RemoveEdithTarget(player)
 	playerData.EdithTarget = nil
 end
 
+function edithMod:IsEdith(player, tainted)
+	return player:GetPlayerType() == (tainted and edithMod.Enums.PlayerType.PLAYER_EDITH_B or edithMod.Enums.PlayerType.PLAYER_EDITH)
+end
+
+function edithMod:SetLevelRoom(Level, Room)
+	Level = edithMod.Enums.Utils.Level
+	Room = edithMod.Enums.Utils.Room
+end
+
+edithMod:AddCallback(ModCallbacks.MC_POST_UPDATE, function()
+	if game:GetFrameCount() > 5 then return end
+	
+	-- edithMod:SetLevelRoom(level, room)
+	
+	-- print(level, room)
+end)
+
+function edithMod:IsAnyEdith(player)
+	return edithMod:IsEdith(player, true) or edithMod:IsEdith(player, false)
+end
+	
 function edithMod:RemoveTaintedEdithTargetArrow(player)
 	playerData = edithMod:GetData(player)
 	
@@ -125,16 +146,16 @@ end
 
 function edithMod:DestroyGrid(entity, radius)
 	radius = radius or 10
-
+	local room = edithMod.Enums.Utils.Room
 	local roomSize = room:GetGridSize()
 
 	for i = 0, roomSize do
 		local grid = room:GetGridEntity(i)
 		if grid then
 			local distance = (entity.Position - grid.Position):Length()
-			if distance <= radius + 20 then
-				local door = grid:ToDoor()
-				if door then return end
+			if distance <= radius then
+				-- local door = grid:ToDoor()
+				-- if door then return end
 				grid:Destroy()
 			end
 		end
@@ -171,6 +192,9 @@ function edithMod:GetRandomRune(rng)
 end
 
 function edithMod:TargetDoorManager(effect, player, triggerDistance)
+	local room = edithMod.Enums.Utils.Room
+	local level = edithMod.Enums.Utils.Level
+
 	local effectPos = effect.Position
 	local roomName = level:GetCurrentRoomDesc().Data.Name
 	local isMirrorWorld = room:IsMirrorWorld()
@@ -533,6 +557,7 @@ end
 
 
 function edithMod:isChap4()
+	local room = edithMod.Enums.Utils.Room
 	local bdType = room:GetBackdropType()
 
 	local chap4bdType = {}

@@ -1,13 +1,12 @@
-local game = edithMod.Enums.Utils.Game
-local room = edithMod.Enums.Utils.Room
 local mod = edithMod
-local sfx = edithMod.Enums.Utils.SFX
-local rng = edithMod.Enums.Utils.RNG
+local utils = edithMod.Enums.Utils
+local tables = edithMod.Enums.Tables
 
-local Tags = {
-	TEdithJump = "edithMod_TaintedEdithJump",
-	TEdithParry = "edithMod_TaintedEdithParry"
-}
+local game, room, sfx, level, rng = utils.Game, utils.Room, utils.SFX, utils.Level, utils.RNG
+
+local jumpFlags = tables.JumpFlags
+local jumpTags = tables.JumpTags
+local overrideActions = tables.OverrideActions
 
 local DegreesToDirection = {
 	[0] = Direction.RIGHT,
@@ -18,7 +17,7 @@ local DegreesToDirection = {
 }
 
 function mod:TaintedEdithInit(player)
-	if player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH_B then return end
+	if not edithMod:IsEdith(player, true) then return end
 
 	local playerSprite = player:GetSprite()
 
@@ -32,24 +31,6 @@ function mod:TaintedEdithInit(player)
 	edithMod.ForceCharacterCostume(player, edithMod.Enums.PlayerType.PLAYER_EDITH_B, edithMod.Enums.NullItemID.ID_EDITH_B_SCARF)
 end
 edithMod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, edithMod.TaintedEdithInit)
-
-function edithMod:SetTaintedEdithStats(player, cacheFlag)
-	if player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH_B then return end
-
-	local cacheActions = {
-		[CacheFlag.CACHE_DAMAGE] = function()
-			player.Damage = player.Damage * 1.5
-		end,
-		[CacheFlag.CACHE_RANGE] = function()
-			player.TearRange = edithMod.rangeUp(player.TearRange, 2.5)
-		end,
-		[CacheFlag.CACHE_TEARFLAG] = function()
-			player.TearFlags = player.TearFlags | TearFlags.TEAR_TURN_HORIZONTAL
-		end,
-	}
-	edithMod.SwitchCase(cacheFlag, cacheActions)
-end
-edithMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, edithMod.SetTaintedEdithStats)
 
 local function resetCharges(player)
 	local playerData = edithMod:GetData(player)
@@ -82,15 +63,6 @@ local function stopTEdithHops(player, cooldown, useQuitJump, resetChrg)
 	end
 end
 
-local jumpFlags = (
-	JumpLib.Flags.COLLISION_GRID
-	| JumpLib.Flags.COLLISION_ENTITY
-	| JumpLib.Flags.OVERWRITABLE
-	| JumpLib.Flags.DISABLE_COOL_BOMBS
-	| JumpLib.Flags.IGNORE_CONFIG_OVERRIDE
-	| JumpLib.Flags.FAMILIAR_FOLLOW_ORBITALS
-)
-
 function edithMod:InitTaintedEdithJump(player)
 	local playerData = edithMod:GetData(player)
 	local jumpHeight = 6.5
@@ -99,15 +71,15 @@ function edithMod:InitTaintedEdithJump(player)
 	local config = {
 		Height = jumpHeight,
 		Speed = jumpSpeed,
-		Tags = Tags.TEdithJump,
-		Flags = jumpFlags
+		Tags = jumpTags.TEdithJump,
+		Flags = jumpFlags.TEdithJump
 	}
 	JumpLib:Jump(player, config)
 end
 
 function edithMod:InitTaintedEdithParry(player)
 	local playerData = edithMod:GetData(player)
-	local jumpHeight = 10
+	local jumpHeight = 10.5
 	local jumpSpeed = 2.5
 	
 	local isChap4 = edithMod:isChap4()
@@ -162,8 +134,8 @@ function edithMod:InitTaintedEdithParry(player)
 	local config = {
 		Height = jumpHeight,
 		Speed = jumpSpeed,
-		Tags = Tags.TEdithParry,
-		Flags = jumpFlags
+		Tags = jumpTags.TEdithParry,
+		Flags = jumpFlags.TEdithParry
 	}
 	JumpLib:Jump(player, config)
 end
@@ -270,7 +242,7 @@ function edithMod:TaintedEdithUpdate(player)
 		
 	playerData.movementVector = playerData.movementVector or Vector.Zero
 	
-	if player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH_B then return end
+	if not edithMod:IsEdith(player, true) then return end
 	
 	local aceleration = edithMod:GetAceleration(player)
 	local playerData = edithMod:GetData(player)
@@ -417,7 +389,7 @@ edithMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, edithMod.TaintedEdithUp
 
 
 function edithMod:RenderTaintedEdith(player)
-	if player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH_B then return end
+	if not edithMod:IsEdith(player, true) then return end
 
 	local playerData = edithMod:GetData(player)
 	local HopVec = playerData.HopVector
@@ -462,7 +434,7 @@ function edithMod:OnNewRoom()
 	local players = PlayerManager.GetPlayers()
 	
 	for _, player in ipairs(players) do
-		if player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH_B then return end
+		if not edithMod:IsEdith(player, true) then return end
 		edithMod:ChangeColor(player, _, _, _, 1)
 		stopTEdithHops(player, 0, true, true)
 		edithMod:RemoveTaintedEdithTargetArrow(player)
@@ -478,8 +450,8 @@ function mod:EdithLanding(player, data, pitfall)
 	local rawFormula = ((damageBase + DamageStat) / 2.5) * (playerData.ImpulseCharge + playerData.BirthrightCharge) / 100
 	
 	playerData.HopParams = {
-		hopRadius = math.min((30 + (tearRange - 8) * 1.5), 50),
-		knockbackFormula = math.min(50, (7.7 + player.Damage ^ 1.2)) * player.ShotSpeed,
+		Radius = math.min((30 + (tearRange - 8) * 1.5), 50),
+		Knockback = math.min(50, (7.7 + player.Damage ^ 1.2)) * player.ShotSpeed,
 		Damage = ((damageBase + DamageStat) / 2.5) * (playerData.ImpulseCharge + playerData.BirthrightCharge) / 100,
 	}
 	
@@ -503,15 +475,15 @@ function mod:EdithLanding(player, data, pitfall)
 		
 	local tearsMult = edithMod:GetTPS(player) / 2.73
 	
-	edithMod:TaintedEdithStomp(player, radius, rawFormula, knockbackFormula, false)	
+	edithMod:TaintedEdithStomp(player, HopParams.Radius, HopParams.Damage, HopParams.Knockback, false)	
 end
 mod:AddCallback(JumpLib.Callbacks.PLAYER_LAND, mod.EdithLanding, {
-    tag = Tags.TEdithJump,
+    tag = jumpTags.TEdithJump,
 })
 
 function edithMod:OnTaintedShootTears(tear)
 	local player = edithMod:GetPlayerFromTear(tear)
-	if player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH_B then return end
+	if not edithMod:IsEdith(player, true) then return end
 
 	edithMod.ForceSaltTear(tear, true)
 end
@@ -521,8 +493,6 @@ function mod:EdithParry(player, data)
 	local playerData = edithMod:GetData(player)
 	playerData.ParryCounter = 30
 	
-	local room = game:GetRoom()
-			
 	local tearRange = player.TearRange / 40
 	
 	local knockbackFormula = math.min(50, (8 + player.Damage ^ 1.5)) * player.ShotSpeed
@@ -535,9 +505,23 @@ function mod:EdithParry(player, data)
 
 	local rawFormula = ((damageBase + DamageStat) / 1.8) * birthrightMult
 		
-	edithMod:TaintedEdithStomp(player, ParryRadius, rawFormula, knockbackFormula, false)
+	
 	
 	local FireDamage = player.Damage / 2 + rawFormula
+	
+	playerData.ParryParams = {
+		Knockback = knockbackFormula,
+		Radius = ParryRadius,
+		Damage = rawFormula,
+	}
+	
+	local ParryParams = playerData.ParryParams
+	
+	
+	
+	local room = game:GetRoom()
+			
+	edithMod:TaintedEdithStomp(player, ParryParams.Radius, ParryParams.Damage, ParryParams.Knockback, false)
 	
 	spawnFireJet(player, ParryRadius, FireDamage)
 	
@@ -547,29 +531,29 @@ function mod:EdithParry(player, data)
 	TaintedEdithFeedBackManager(player, room, true)
 end
 mod:AddCallback(JumpLib.Callbacks.PLAYER_LAND, mod.EdithParry, {
-    tag = Tags.TEdithParry,
+    tag = jumpTags.TEdithParry,
 })
 
-function edithMod:OverrideTaintedInputs(entity, input, action)
-	if not entity then return end
+-- function edithMod:OverrideTaintedInputs(entity, input, action)
+	-- if not entity then return end
 	
-	local player = entity:ToPlayer()
+	-- local player = entity:ToPlayer()
 	
-	if not player then return end
+	-- if not player then return end
 	
-	if player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH_B then return end
+	-- if not edithMod:IsEdith(player, true) then return end
 	
-	if input == 2 then
-		local actions = {
-			[ButtonAction.ACTION_LEFT] = 0,
-			[ButtonAction.ACTION_RIGHT] = 0,
-			[ButtonAction.ACTION_UP] = 0,
-			[ButtonAction.ACTION_DOWN] = 0,
-		}
-		return actions[action]
-	end
-end
-edithMod:AddCallback(ModCallbacks.MC_INPUT_ACTION, edithMod.OverrideTaintedInputs)
+	-- if input == 2 then
+		-- local actions = {
+			-- [ButtonAction.ACTION_LEFT] = 0,
+			-- [ButtonAction.ACTION_RIGHT] = 0,
+			-- [ButtonAction.ACTION_UP] = 0,
+			-- [ButtonAction.ACTION_DOWN] = 0,
+		-- }
+		-- return actions[action]
+	-- end
+-- end
+-- edithMod:AddCallback(ModCallbacks.MC_INPUT_ACTION, edithMod.OverrideTaintedInputs)
 
 function edithMod:TaintedEdithDamageManager(player, damage, flags, source, cooldown)
 	local playerData = edithMod:GetData(player)
@@ -589,10 +573,13 @@ local offsetTargetVector = Vector(0, 10)
 function edithMod:RenderChargeBar(player)
 	if room:GetRenderMode() == RenderMode.RENDER_WATER_REFLECT then return end
 	
-	-- local HopParams = playerData.HopParams
+	playerData = edithMod:GetData(player)
 	
-		-- edithMod.RenderAreaOfEffect(player, HopParams.hopRadius, redArea)
-		-- edithMod.RenderAreaOfEffect(player, 120, blueArea)
+	local HopParams = playerData.HopParams
+	local ParryParams = playerData.ParryParams 
+	
+		-- edithMod.RenderAreaOfEffect(player, HopParams.Radius, redArea)
+		-- edithMod.RenderAreaOfEffect(player, ParryParams.Radius, blueArea)
 	
 	local data = edithMod:GetData(player)
 	local update = true
@@ -641,7 +628,7 @@ function edithMod:RenderChargeBar(player)
 	   data.TaintedEdithChargebar:Update()
 	end
 end
-edithMod:AddCallback(ModCallbacks.MC_PRE_PLAYER_RENDER, edithMod.RenderChargeBar)
+-- edithMod:AddCallback(ModCallbacks.MC_PRE_PLAYER_RENDER, edithMod.RenderChargeBar)
 
 -- function edithMod:RenderBirthrightChargeBar(player)
     -- local data = edithMod:GetData(player)

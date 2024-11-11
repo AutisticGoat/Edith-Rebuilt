@@ -9,6 +9,8 @@ edithMod.Enums = {
 		COLLECTIBLE_EDITHS_HOOD = Isaac.GetItemIdByName("Edith's Hood"),
 		COLLECTIBLE_SULFURIC_FIRE = Isaac.GetItemIdByName("Sulfuric Fire"),
 		COLLECTIBLE_SAL = Isaac.GetItemIdByName("Sal"),
+		COLLECTIBLE_MOLTEN_CORE = Isaac.GetItemIdByName("Molten Core"),
+		COLLECTIBLE_GILDED_STONE = Isaac.GetItemIdByName("Gilded Stone"),
 	},
 	TrinketType = {
 		TRINKET_GEODE = Isaac.GetTrinketIdByName("Geode"),
@@ -42,6 +44,8 @@ edithMod.Enums = {
 		Game = Game(),
 		SFX = SFXManager(),
 		RNG = RNG(),
+		Room = nil,
+		Level = nil,
 	},
 	Tables = {
 		OverrideActions = {
@@ -109,12 +113,12 @@ edithMod.Enums = {
 		},
 		TearShatterColor = {
 			[true] = {
-				[true] = {0.4, 0.125, 0.125},  -- isBurnt y isBloody
-				[false] = {0.4, 0.4, 0.4}      -- isBurnt y no isBloody
+				[true] = {0.4, 0.125, 0.125},
+				[false] = {0.4, 0.4, 0.4}
 			},
 			[false] = {
-				[true] = {0.65, 0.1, 0.1},     -- no isBurnt y isBloody
-				[false] = {1, 1, 1}            -- no isBurnt y no isBloody
+				[true] = {0.65, 0.1, 0.1},
+				[false] = {1, 1, 1}
 			}
 		},
 		Runes = {
@@ -128,12 +132,81 @@ edithMod.Enums = {
 			Card.RUNE_ALGIZ,
 			Card.RUNE_BLANK,
 			Card.RUNE_BLACK,
-		}
+		},
+		JumpTags = {
+			EdithJump = "edithMod_EdithJump",
+			TEdithJump = "edithMod_TaintedEdithJump",
+			TEdithParry = "edithMod_TaintedEdithParry",
+		},
+		JumpFlags = {
+			EdithJump = (JumpLib.Flags.DISABLE_SHOOTING_INPUT | JumpLib.Flags.DISABLE_LASER_FOLLOW | JumpLib.Flags.DISABLE_BOMB_INPUT),
+			TEdithJump = (JumpLib.Flags.COLLISION_GRID | JumpLib.Flags.COLLISION_ENTITY | JumpLib.Flags.OVERWRITABLE | JumpLib.Flags.DISABLE_COOL_BOMBS | JumpLib.Flags.IGNORE_CONFIG_OVERRIDE | JumpLib.Flags.FAMILIAR_FOLLOW_ORBITALS),
+			TEdithParry = (JumpLib.Flags.COLLISION_GRID | JumpLib.Flags.OVERWRITABLE | JumpLib.Flags.DISABLE_COOL_BOMBS | JumpLib.Flags.IGNORE_CONFIG_OVERRIDE | JumpLib.Flags.FAMILIAR_FOLLOW_ORBITALS),
+		},
 	},
 	Misc = {
 		TearPath = "gfx/tears/",
 		ObscureDiv = 155/255,
 	},
 }
-edithMod.Enums.Utils.Room = edithMod.Enums.Utils.Game:GetRoom()
-edithMod.Enums.Utils.Level = edithMod.Enums.Utils.Game:GetLevel()
+
+local game = edithMod.Enums.Utils.Game
+
+edithMod.Enums.Utils.Room = game:GetRoom()
+edithMod.Enums.Utils.Level = game:GetLevel()
+
+
+function edithMod:SetObjects()
+	
+
+	-- print(game)
+	-- print(game:GetRoom())
+	-- print(game:GetLevel())
+	
+	
+	
+	-- print(edithMod.Enums)
+	-- print(edithMod.Enums.Utils.Room)
+	-- print(edithMod.Enums.Utils.Level)
+	
+	edithMod.Enums.Utils.Room = game:GetRoom()
+	edithMod.Enums.Utils.Level = game:GetLevel()
+end
+edithMod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, edithMod.SetObjects)
+
+-- print()
+-- local game = edithMod.Enums.Utils.Game
+
+	-- edithMod.Enums.Utils.Room = game:GetRoom()
+	-- edithMod.Enums.Utils.Level = game:GetLevel()
+
+-- local function setRNG()
+	
+
+	-- local rng = edithMod.Enums.Utils.RNG
+	-- local RECOMMENDED_SHIFT_IDX = 35
+	
+	-- local seeds = game:GetSeeds()
+	-- local startSeed = seeds:GetStartSeed()
+	
+	-- rng:SetSeed(startSeed, RECOMMENDED_SHIFT_IDX)	
+-- end
+
+function edithMod:GameStartedFunction()
+	-- print(edithMod.Enums.Utils.Room)
+	
+end
+edithMod:AddCallback(ModCallbacks.MC_POST_UPDATE, edithMod.GameStartedFunction)
+
+
+-- edithMod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, function(self)
+	-- local game = edithMod.Enums.Utils.Game
+
+	-- edithMod.Enums.Utils.Room = game:GetRoom()
+	-- edithMod.Enums.Utils.Level = game:GetLevel()
+	
+	-- setRNG()
+	
+	-- print(edithMod.Enums.Utils.Level, edithMod.Enums.Utils.Room)
+-- end)
+
