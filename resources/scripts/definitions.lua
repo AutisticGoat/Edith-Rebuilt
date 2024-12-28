@@ -39,6 +39,7 @@ edithMod.Enums = {
 		SOUND_PEPPER_GRINDER = Isaac.GetSoundIdByName("Pepper Grinder"),
 		SOUND_YIPPEE = Isaac.GetSoundIdByName("Yippee"),
 		SOUND_SPRING = Isaac.GetSoundIdByName("Spring"),
+		SOUND_SOLARIAN = Isaac.GetSoundIdByName("Solarian"),
 	},
 	Utils = {
 		Game = Game(),

@@ -4,7 +4,7 @@ function edithMod:OnSpawningSalt(effect)
 	end
 	
 	local rng = edithMod.Enums.Utils.RNG
-	local saltFrame = tostring(edithMod:RandomNumber(rng, 1, 6))
+	local saltFrame = tostring(edithMod:RandomNumber(1, 6))
 		
 	local saltSprite = effect:GetSprite()
 	saltSprite:Play("SmallBlood0" .. saltFrame, true)	

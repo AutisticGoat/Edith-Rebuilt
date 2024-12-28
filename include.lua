@@ -8,6 +8,7 @@ local includeFiles = {
 	"definitions",
 	"functions/helper_functions",
 	"functions/special_functions",
+	"functions/EdithClasses",
 	"ImGui",
 	
 	-- Items

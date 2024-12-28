@@ -289,12 +289,13 @@ local function OptionsUpdate()
 		end, 0)
 		actualizarCampo("hopSound", "TaintedHopSound", 1, "ComboBox")
 		
-		agregarCombobox("TaintedEdithSetting", "parrySound", "Set Parry Sound", 		
+		agregarCombobox("TaintedEdithSetting", "parrySound", "Set Jump Sound", 		
 		{
 			"Stone", 
 			"Taunt", 
 			"Vine Boom",
 			"Fart Reverb",
+			"Solarian",
 		}, 
 			
 		function(index, val)

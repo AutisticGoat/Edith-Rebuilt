@@ -49,15 +49,10 @@ function edithMod:GetPlayerFromTear(entity)
 end
 -- end
 
-function edithMod:GetSpawner(entity)
-	if entity and entity.GetData then
-		local spawnData = edithMod:GetSpawnData(entity)
-		if spawnData and spawnData.SpawnerEntity then
-			local spawner = edithMod:GetPtrHashEntity(spawnData.SpawnerEntity)
-			return spawner
-		end
-	end
-	return nil
+function edithMod:GetData(entity)
+	local data = entity:GetData()
+	data.edithMod = data.edithMod or {}
+	return data.edithMod
 end
 
 function edithMod:GetSpawnData(entity)
@@ -78,17 +73,6 @@ function edithMod:GetPtrHashEntity(entity)
 				return matchEntity
 			end
 		end
-	end
-	return nil
-end
-
-function edithMod:GetData(entity)
-	if entity and entity.GetData then
-		local data = entity:GetData()
-		if not data.edithMod then
-			data.edithMod = {}
-		end
-		return data.edithMod
 	end
 	return nil
 end

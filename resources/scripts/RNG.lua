@@ -14,12 +14,3 @@ function edithMod:GameStartedFunction()
 	setRNG()
 end
 edithMod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, edithMod.GameStartedFunction)
-edithMod:AddCallback(ModCallbacks.MC_PRE_MOD_UNLOAD, edithMod.GameStartedFunction)
-
-function edithMod:SetObjects()
-	edithMod.Enums.Utils.Room = game:GetRoom()
-	edithMod.Enums.Utils.Level = game:GetLevel()
-	
-	-- print(edithMod.Enums.Utils.Room, edithMod.Enums.Utils.Level)
-end
-edithMod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, edithMod.SetObjects)

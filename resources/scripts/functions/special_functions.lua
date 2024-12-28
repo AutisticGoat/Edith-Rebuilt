@@ -1,12 +1,13 @@
-local game = edithMod.Enums.Utils.Game
-local modrng = edithMod.Enums.Utils.RNG
-local tables = edithMod.Enums.Tables
-local misc = edithMod.Enums.Misc
+local mod = edithMod
+local enums = mod.Enums
+local utils = enums.Utils
+local game = utils.Game
+local tables = enums.Tables
+local misc = enums.Misc
 
-local level
-local room
+---@param player EntityPlayer
 function edithMod:RemoveEdithTarget(player)
-	playerData = edithMod:GetData(player)
+	local playerData = edithMod:GetData(player)
 	
 	if player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH then return end
 	
@@ -16,31 +17,26 @@ function edithMod:RemoveEdithTarget(player)
 	playerData.EdithTarget = nil
 end
 
+---comment
+---@param player EntityPlayer
+---@param tainted boolean
+---@return boolean
 function edithMod:IsEdith(player, tainted)
 	return player:GetPlayerType() == (tainted and edithMod.Enums.PlayerType.PLAYER_EDITH_B or edithMod.Enums.PlayerType.PLAYER_EDITH)
 end
 
-function edithMod:SetLevelRoom(Level, Room)
-	Level = edithMod.Enums.Utils.Level
-	Room = edithMod.Enums.Utils.Room
-end
-
-edithMod:AddCallback(ModCallbacks.MC_POST_UPDATE, function()
-	if game:GetFrameCount() > 5 then return end
-	
-	-- edithMod:SetLevelRoom(level, room)
-	
-	-- print(level, room)
-end)
-
+---comment
+---@param player EntityPlayer
+---@return boolean
 function edithMod:IsAnyEdith(player)
 	return edithMod:IsEdith(player, true) or edithMod:IsEdith(player, false)
 end
 	
+---@param player EntityPlayer
 function edithMod:RemoveTaintedEdithTargetArrow(player)
-	playerData = edithMod:GetData(player)
+	local playerData = edithMod:GetData(player)
 	
-	if player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH_B then return end
+	if not edithMod:IsEdith(player, true) then return end
 	
 	if not playerData.TaintedEdithTarget then return end
 	
@@ -48,6 +44,9 @@ function edithMod:RemoveTaintedEdithTargetArrow(player)
 	playerData.TaintedEdithTarget = nil
 end
 
+---comment
+---@param player EntityPlayer
+---@return boolean
 function edithMod:IsEdithTargetMoving(player)
 	local k_up = Input.IsActionPressed(ButtonAction.ACTION_UP, player.ControllerIndex)
     local k_down = Input.IsActionPressed(ButtonAction.ACTION_DOWN, player.ControllerIndex)
@@ -57,13 +56,11 @@ function edithMod:IsEdithTargetMoving(player)
     return (k_down or k_right or k_left or k_up) or false
 end
 
+---comment
+---@param entity Entity
+---@return number
 function edithMod:GetAceleration(entity)
-	local normalizedVelocity = entity.Velocity:Normalized()
-	local NewVelValue = entity.Velocity * normalizedVelocity
-	
-	local acel = NewVelValue.X + NewVelValue.Y
-	
-	return TSIL.Utils.Math.Round(acel, 2)
+	return entity.Velocity:Length()
 end
 
 function edithMod.SwitchCase(value, tables)
@@ -71,6 +68,9 @@ function edithMod.SwitchCase(value, tables)
     return type(value) == "function" and value() or value
 end
 
+---comment
+---@param player EntityPlayer
+---@return boolean
 function edithMod:IsKeyStompPressed(player)
 	local k_stomp =
 		Input.IsButtonPressed(Keyboard.KEY_Z, player.ControllerIndex) or
@@ -82,6 +82,9 @@ function edithMod:IsKeyStompPressed(player)
 	return k_stomp
 end
 
+---comment
+---@param player EntityPlayer
+---@return boolean
 function edithMod:IsKeyStompTriggered(player)
 	local k_stomp =
 		Input.IsButtonTriggered(Keyboard.KEY_Z, player.ControllerIndex) or
@@ -93,6 +96,11 @@ function edithMod:IsKeyStompTriggered(player)
 	return k_stomp
 end
 
+---comment
+---@param firedelay number
+---@param val number
+---@param mult number
+---@return number
 function edithMod.tearsUp(firedelay, val, mult)
 	mult = mult or false
     local currentTears = 30 / (firedelay + 1)
@@ -104,16 +112,26 @@ function edithMod.tearsUp(firedelay, val, mult)
     return math.max((30 / newTears) - 1, -0.75)
 end
 
+---comment
+---@param range number
+---@param val number
+---@return number
 function edithMod.rangeUp(range, val)
     local currentRange = range / 40.0
     local newRange = currentRange + val
     return math.max(1.0,newRange) * 40.0
 end
 
+---comment
+---@param player EntityPlayer
+---@return number
 function edithMod:GetPlayerRange(player)
 	return player.TearRange / 40
 end
 
+---comment
+---@param vector Vector
+---@return integer
 function edithMod:vectorToAngle(vector)
 	local x = vector.X
 	local y = vector.Y
@@ -131,6 +149,15 @@ function edithMod:vectorToAngle(vector)
     return atan
 end
 
+---comment
+---@param entity Entity
+---@param red number
+---@param green number
+---@param blue number
+---@param alpha number?
+---@param redOff number?
+---@param greenOff number?
+---@param blueOff number?
 function edithMod:ChangeColor(entity, red, green, blue, alpha, redOff, greenOff, blueOff)
 	local color = entity.Color
 	color.R = red or entity.Color.R
@@ -144,9 +171,12 @@ function edithMod:ChangeColor(entity, red, green, blue, alpha, redOff, greenOff,
 	entity.Color = color
 end
 
+---comment
+---@param entity Entity
+---@param radius number
 function edithMod:DestroyGrid(entity, radius)
 	radius = radius or 10
-	local room = edithMod.Enums.Utils.Room
+	local room = game:GetRoom()
 	local roomSize = room:GetGridSize()
 
 	for i = 0, roomSize do
@@ -154,8 +184,6 @@ function edithMod:DestroyGrid(entity, radius)
 		if grid then
 			local distance = (entity.Position - grid.Position):Length()
 			if distance <= radius then
-				-- local door = grid:ToDoor()
-				-- if door then return end
 				grid:Destroy()
 			end
 		end
@@ -169,6 +197,10 @@ LINE_SPRITE:SetFrame("Dead", 0)
 local MAX_POINTS = 360
 local ANGLE_SEPARATION = 360 / MAX_POINTS
 
+---comment
+---@param entity Entity
+---@param AreaSize number
+---@param AreaColor Color
 function edithMod.RenderAreaOfEffect(entity, AreaSize, AreaColor) -- Took from Melee lib, tweaked a little bit
     local hitboxPosition = entity.Position
     local renderPosition = Isaac.WorldToScreen(hitboxPosition) - game.ScreenShakeOffset
@@ -186,18 +218,27 @@ function edithMod.RenderAreaOfEffect(entity, AreaSize, AreaColor) -- Took from M
     end
 end
 
+---comment
+---@param rng RNG
+---@return integer
 function edithMod:GetRandomRune(rng)
-	local runeRandomSelect = edithMod:RandomNumber(rng, 1, #tables.Runes)
+	local runes = #tables.Runes
+	
+	local runeRandomSelect = edithMod:RandomNumber(1, runes)
 	return tables.Runes[runeRandomSelect]
 end
 
+---comment
+---@param effect EntityEffect
+---@param player EntityPlayer
+---@param triggerDistance number
 function edithMod:TargetDoorManager(effect, player, triggerDistance)
-	local room = edithMod.Enums.Utils.Room
-	local level = edithMod.Enums.Utils.Level
+	local room = game:GetRoom()
+	local level = game:GetLevel()
 
 	local effectPos = effect.Position
 	local roomName = level:GetCurrentRoomDesc().Data.Name
-	local isMirrorWorld = room:IsMirrorWorld()
+	-- local isMirrorWorld = room:IsMirrorWorld()
 	
 	for i = 0, 7 do
 		local door = room:GetDoor(i)
@@ -208,7 +249,7 @@ function edithMod:TargetDoorManager(effect, player, triggerDistance)
 			if distance <= triggerDistance then
 				if door:IsOpen() then 
 					player.Position = doorPos
-					edithMod:ChangeColor(player, _, _, _, 0)
+					edithMod:ChangeColor(player, 1, 1, 1, 0)
 					edithMod:RemoveEdithTarget(player)
 					edithMod:RemoveTaintedEdithTargetArrow(player)
 				else
@@ -226,6 +267,8 @@ end
 
 -- local tearPath = 
 
+---comment
+---@param tear EntityTear
 local function tearCol(_, tear)
 	local player = tear.Parent:ToPlayer()
 	
@@ -258,10 +301,18 @@ local function tearCol(_, tear)
 end
 edithMod:AddCallback(ModCallbacks.MC_POST_TEAR_DEATH, tearCol)
 
+---comment
+---@param tear EntityTear
+---@param IsBlood boolean
+---@param isTainted boolean
 local function doEdithTear(tear, IsBlood, isTainted)
 	local player = tear.Parent:ToPlayer()	
+
+	if not player then return end
+
 	local tearSizeMult = player:HasCollectible(CollectibleType.COLLECTIBLE_SOY_MILK) and 1 or 0.85
-	tearData = edithMod:GetData(tear)
+	local tearData = edithMod:GetData(tear)
+
 	tear.Scale = tear.Scale * tearSizeMult
 	tear:ChangeVariant(TearVariant.ROCK)
 	local tearSprite = tear:GetSprite()
@@ -271,29 +322,38 @@ local function doEdithTear(tear, IsBlood, isTainted)
 	tearData.ShatterSprite = (isTainted and (IsBlood and "burnt_blood_salt_shatter" or "burnt_salt_shatter") or (IsBlood and "blood_salt_shatter" or "salt_shatter"))
 				
 	local newSprite = misc.TearPath .. path .. ".png"
-	
 	tearSprite:ReplaceSpritesheet(0, newSprite, true)
-	
 	tear.Color = player.Color
 end
 
+---comment
+---@param tear EntityTear
+---@param tainted boolean
 function edithMod.ForceSaltTear(tear, tainted)
 	local IsBloodTear = tables.BloodytearVariants[tear.Variant] or false
 	
 	doEdithTear(tear, IsBloodTear, tainted)
 end
 
+---comment
+---@param seconds number
+---@return integer
 function edithMod:SecondsToFrames(seconds)
 	return math.ceil(seconds * 30)
 end
 
+---comment
+---@param parent Entity
+---@param quantity number
+---@param position Vector
+---@param distance number
 function edithMod:SpawnBlackPowder(parent, quantity, position, distance)
 	quantity = quantity or 20
 	distance = distance or 60
 		
 	local degrees = 360 / quantity
 	for i = 1, quantity do
-		blackPowder = Isaac.Spawn(
+		local blackPowder = Isaac.Spawn(
 			EntityType.ENTITY_EFFECT,
 			EffectVariant.PLAYER_CREEP_BLACKPOWDER, 
 			0, 
@@ -312,20 +372,25 @@ function edithMod:SpawnBlackPowder(parent, quantity, position, distance)
 		0, 
 		position, 
 		Vector.Zero, 
-		blackPowder
+		nil
 	):ToEffect()
-	
-	local entityPosition = blackPowder.Position
-	local centerPosition = position
-	local radius = (entityPosition - centerPosition):Length()
 
 	Pentagram.Scale = distance + distance / 2	
 end
 
+---comment
+---@param number number
+---@param coeffcient number
+---@param power number
+---@return integer
 function edithMod:exponentialFunction(number, coeffcient, power)
     return number ~= 0 and coeffcient * number ^ (power - 1) or 0
 end
 
+---comment
+---@param x number
+---@param base number
+---@return number?
 function edithMod:Log(x, base)
     if x <= 0 or base <= 1 then
         return nil
@@ -337,6 +402,13 @@ function edithMod:Log(x, base)
     return logNatural / logBase
 end
 
+---comment
+---@param parent Entity
+---@param position Vector
+---@param damage number
+---@param timeout number
+---@param gibAmount integer
+---@param spawnType string
 function edithMod:SpawnSaltCreep(parent, position, damage, timeout, gibAmount, spawnType)
 	local salt = Isaac.Spawn(
 		EntityType.ENTITY_EFFECT, 
@@ -347,19 +419,26 @@ function edithMod:SpawnSaltCreep(parent, position, damage, timeout, gibAmount, s
 		parent
 	):ToEffect()
 	
+	if not salt then return end
+
 	salt.CollisionDamage = damage or 0
 	
 	local timeOutSeconds = edithMod:SecondsToFrames(timeout) or 30
 	salt:SetTimeout(timeOutSeconds)
 	
 	if gibAmount and gibAmount > 0 then
-		edithMod:SpawnSaltGib(parent, gibAmount, _, 15, spawnType)
+		edithMod:SpawnSaltGib(parent, gibAmount, Color.Default, 15, spawnType)
 	end
 	local saltData = edithMod:GetData(salt)
 	
 	saltData.SpawnType = spawnType
 end
 
+---comment
+---@param parent Entity
+---@param position Vector
+---@param damage number
+---@param timeout number
 function edithMod:SpawnPepperCreep(parent, position, damage, timeout)
 	local pepper = Isaac.Spawn(
 		EntityType.ENTITY_EFFECT, 
@@ -370,30 +449,26 @@ function edithMod:SpawnPepperCreep(parent, position, damage, timeout)
 		parent
 	):ToEffect()
 	
+	if not pepper then return end
 	pepper.CollisionDamage = damage or 0
-	
 	local timeOutSeconds = edithMod:SecondsToFrames(timeout) or 30
 	pepper:SetTimeout(timeOutSeconds)
 end
 
-function edithMod:hasTrailingZeros(n)
-  local str = string.format("%.10f", n)  -- precisión de 10 dígitos decimales
-  local lastNonZeroIndex = str:find("%d[^0]+$")
-  if lastNonZeroIndex then
-    local trailingZeros = str:sub(lastNonZeroIndex + 1)
-    return #trailingZeros
-  else
-    return false
-  end
-
-end
-
+---comment
+---@param n number
+---@return integer
 function edithMod:contarCifras(n)
     local str = tostring(n)
 	return str:gsub("%+", "."):gsub("%.", ""):len()
 end
 
-function edithMod:RandomNumber(rng, num1, num2)
+---comment
+---@param num1 number
+---@param num2 number
+---@param rng RNG?
+---@return (integer|number)
+function edithMod:RandomNumber(num1, num2, rng)
     rng = rng or edithMod.Enums.Utils.RNG
 
     local isFloat = (num2 and math.type(num1 + num2) == "float") or math.type(num1) == "float"
@@ -427,9 +502,14 @@ function edithMod:RandomNumber(rng, num1, num2)
 		result = math.tointeger(result)
 	end
 	
+---@diagnostic disable-next-line: return-type-mismatch
     return result
 end
 
+---comment
+---@param player EntityPlayer
+---@param playertype integer
+---@param costumePath integer
 function edithMod.ForceCharacterCostume(player, playertype, costumePath)
 	local playerData = edithMod:GetData(player)
 
@@ -451,10 +531,18 @@ function edithMod.ForceCharacterCostume(player, playertype, costumePath)
 	end
 end
 
+---comment
+---@param num number
+---@param lower number
+---@param upper number
+---@return boolean
 function edithMod:IsBetweenNumber(num, lower, upper)
 	return (lower <= num and num <= upper) or (lower >= num and num >= upper)
 end
 
+---comment
+---@param player EntityPlayer
+---@return boolean
 function edithMod:IsPlayerShooting(player)
 	local shoot = {
         l = Input.IsActionPressed(ButtonAction.ACTION_SHOOTLEFT, player.ControllerIndex),
@@ -468,6 +556,11 @@ end
 local targetSprite = Sprite()
 targetSprite:Load("gfx/edith target.anm2", true)
 
+---comment
+---@param from Vector
+---@param to Vector
+---@param color Color
+---@param linespace integer
 function edithMod:drawLine(from, to, color, linespace)
 
 	linespace = linespace or 16
@@ -489,12 +582,18 @@ function edithMod:drawLine(from, to, color, linespace)
 	targetSprite.Rotation = 0
 end
 
-function edithMod:SpawnSaltGib(parent, Number, color, timeout,spawnType)
-	for i = 1, Number do
+---comment
+---@param parent Entity
+---@param Number integer
+---@param color Color
+---@param timeout number
+---@param spawnType Entity
+function edithMod:SpawnSaltGib(parent, Number, color, timeout, spawnType)
+	for _ = 1, Number do
 		local rng = edithMod.Enums.Utils.RNG
 	
-		local VelX = edithMod:RandomNumber(rng, -100, 100) / 100
-		local VelY = edithMod:RandomNumber(rng, -100, 100) / 100
+		local VelX = edithMod:RandomNumber(-100, 100) / 100
+		local VelY = edithMod:RandomNumber(-100, 100) / 100
 		
 		local saltGib = Isaac.Spawn(
 			EntityType.ENTITY_EFFECT,
@@ -503,7 +602,10 @@ function edithMod:SpawnSaltGib(parent, Number, color, timeout,spawnType)
 			parent.Position,
 			Vector(VelX, VelY):Normalized():Resized(3),
 			parent
-		):ToEffect()
+		):ToEffect() 
+
+		if not saltGib then return end
+
 		if color then 
 			saltGib.Color = Color(
 				(color.R + parent.Color.R - 1), 
@@ -517,17 +619,18 @@ function edithMod:SpawnSaltGib(parent, Number, color, timeout,spawnType)
 		else
 			saltGib.Color = parent.Color
 		end
-		
+
 		local timeOutSeconds = edithMod:SecondsToFrames(timeout) or 30
-		saltGib:SetTimeout(timeOutSeconds)
-		
 		local saltGibData = edithMod:GetData(saltGib)
-		
+		saltGib:SetTimeout(timeOutSeconds)
 		saltGibData.SpawnType = spawnType
 	end
 end
 
+---comment
+---@return string
 function edithMod:ShockwaveSprite()
+	local room = game:GetRoom()
     local bdType = room:GetBackdropType()
     local effectPath = "resources/gfx/effects/effect_062_"
 
@@ -555,9 +658,10 @@ function edithMod:ShockwaveSprite()
     return effectPath .. (shockwaveSprites[bdType] or "groundbreak.png")
 end
 
-
+---comment
+---@return boolean
 function edithMod:isChap4()
-	local room = edithMod.Enums.Utils.Room
+	local room = game:GetRoom()
 	local bdType = room:GetBackdropType()
 
 	local chap4bdType = {}
@@ -577,12 +681,21 @@ local function MakeVector(x)
 	return Vector(math.cos(math.rad(x)),math.sin(math.rad(x)))
 end
 
+---comment
+---@param p EntityPlayer
+---@return number
 function edithMod:GetTPS(p)
     return TSIL.Utils.Math.Round(30 / (p.MaxFireDelay + 1), 2)
 end
 
 -- function 
 
+---comment
+---@param parent EntityPlayer
+---@param radius number
+---@param damage number
+---@param knockback number
+---@param breakGrid true
 function edithMod:EdithStomp(parent, radius, damage, knockback, breakGrid)
 	for i, entity in pairs(Isaac.FindInRadius(parent.Position, radius, 0xFFFFFFFF)) do
 		local stompBehavior = {
@@ -600,6 +713,7 @@ function edithMod:EdithStomp(parent, radius, damage, knockback, breakGrid)
 			end,
 			[EntityType.ENTITY_TEAR] = function()
 				local tear = entity:ToTear()
+				if not tear then return end
 				tear:AddTearFlags(TearFlags.TEAR_QUADSPLIT)
 				tear.CollisionDamage = tear.CollisionDamage * 2
 				entity.Velocity = (entity.Position - parent.Position):Resized(knockback) * 1.5
@@ -607,12 +721,6 @@ function edithMod:EdithStomp(parent, radius, damage, knockback, breakGrid)
 			[EntityType.ENTITY_FIREPLACE] = function()
 				if entity.Variant ~= 4 then
 					entity:Die()
-				end
-			end,
-			[EntityType.ENTITY_SLOT] = function() 
-				if breakslots then
-					entity:TakeDamage(damage, DamageFlag.DAMAGE_EXPLOSION | DamageFlag.DAMAGE_CRUSH, EntityRef(parent), 0)
-					entity.Velocity = (entity.Position - parent.Position):Resized(knockback)
 				end
 			end,
 			[EntityType.ENTITY_FAMILIAR] = function()
@@ -635,6 +743,8 @@ function edithMod:EdithStomp(parent, radius, damage, knockback, breakGrid)
 			[EntityType.ENTITY_PICKUP] = function()
 				local pickup = entity:ToPickup()
 				
+				if not pickup then return end
+
 				local FlavorTextPikcupVariants = {
 					[PickupVariant.PICKUP_PILL] = true,
 					[PickupVariant.PICKUP_TAROTCARD] = true,
@@ -651,7 +761,7 @@ function edithMod:EdithStomp(parent, radius, damage, knockback, breakGrid)
 				local isFlavorTextPickup = edithMod.SwitchCase(pickup.Variant, FlavorTextPikcupVariants) or isCoinPenny
 				
 				if not isFlavorTextPickup then
-					parent:ForceCollide(pickup)
+					parent:ForceCollide(pickup, true)
 				end
 				
 				if entity.Variant == PickupVariant.PICKUP_BOMBCHEST then
@@ -659,10 +769,10 @@ function edithMod:EdithStomp(parent, radius, damage, knockback, breakGrid)
 				end
 			end,
 			[EntityType.ENTITY_SLOT] = function()	
-				local slot = entity:ToSlot()
+				-- local slot = entity:ToSlot()
 								
-				slot:SetState(2)
-				parent:TakeDamage(1, 0, EntityRef(slot), 0)
+				-- slot:SetState(2)
+				-- parent:TakeDamage(1, 0, EntityRef(slot), 0)
 			end,
 			[EntityType.ENTITY_SHOPKEEPER] = function()
 				entity:Kill()
@@ -678,7 +788,7 @@ function edithMod:EdithStomp(parent, radius, damage, knockback, breakGrid)
 		
 			local damageMultiplier = entity:HasEntityFlags(EntityFlag.FLAG_FREEZE) and 1.3 or 1 
 			
-			local terraMultiplier = parent:HasCollectible(CollectibleType.COLLECTIBLE_TERRA) and edithMod:RandomNumber(_, 500, 1500) / 1000 or 1								
+			local terraMultiplier = parent:HasCollectible(CollectibleType.COLLECTIBLE_TERRA) and edithMod:RandomNumber(500, 1500) / 1000 or 1								
 			damage = (damage * damageMultiplier) * terraMultiplier
 		
 			entity:TakeDamage(damage, DamageFlag.DAMAGE_CRUSH | DamageFlag.DAMAGE_IGNORE_ARMOR, EntityRef(parent), 0)
@@ -688,13 +798,18 @@ function edithMod:EdithStomp(parent, radius, damage, knockback, breakGrid)
 			edithMod.SwitchCase(entity.Type, stompBehavior)
 		end
 		if breakGrid then
-			edithMod:DestroyGrid(entity, radius, false)
+			edithMod:DestroyGrid(entity, radius)
 		end
 	end
 end
 
+---@param parent EntityPlayer
+---@param radius number
+---@param damage number
+---@param knockback number
+---@param breakGrid true
 function edithMod:TaintedEdithStomp(parent, radius, damage, knockback, breakGrid)
-	for i, entity in pairs(Isaac.FindInRadius(parent.Position, radius, 0xFFFFFFFF)) do
+	for _, entity in ipairs(Isaac.FindInRadius(parent.Position, radius, 0xFFFFFFFF)) do
 		local stompBehavior = {
 			[EntityType.ENTITY_FIREPLACE] = function()
 				if entity.Variant ~= 4 then
@@ -704,6 +819,8 @@ function edithMod:TaintedEdithStomp(parent, radius, damage, knockback, breakGrid
 			[EntityType.ENTITY_PICKUP] = function()
 				local pickup = entity:ToPickup()
 				
+				if not pickup then return end
+
 				local FlavorTextPikcupVariants = {
 					[PickupVariant.PICKUP_PILL] = true,
 					[PickupVariant.PICKUP_TAROTCARD] = true,
@@ -720,7 +837,7 @@ function edithMod:TaintedEdithStomp(parent, radius, damage, knockback, breakGrid
 				local isFlavorTextPickup = edithMod.SwitchCase(pickup.Variant, FlavorTextPikcupVariants) or isCoinPenny
 				
 				if not isFlavorTextPickup then
-					parent:ForceCollide(pickup)
+					parent:ForceCollide(pickup, true)
 				end
 				
 				if entity.Variant == PickupVariant.PICKUP_BOMBCHEST then
@@ -741,7 +858,7 @@ function edithMod:TaintedEdithStomp(parent, radius, damage, knockback, breakGrid
 			edithMod.SwitchCase(entity.Type, stompBehavior)
 		end
 		if breakGrid then
-			edithMod:DestroyGrid(entity, radius, false)
+			edithMod:DestroyGrid(entity, radius)
 		end
 	end
 end

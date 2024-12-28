@@ -158,6 +158,7 @@ local parryJumpSounds = {
 	[2] = edithMod.Enums.SoundEffect.SOUND_PIZZA_TAUNT,
 	[3] = edithMod.Enums.SoundEffect.SOUND_VINE_BOOM,
 	[4] = edithMod.Enums.SoundEffect.SOUND_FART_REVERB,
+	[5] = edithMod.Enums.SoundEffect.SOUND_SOLARIAN,
 }
 
 local burtSaltColor = Color(0.3, 0.3, 0.3, 1)
@@ -686,3 +687,4 @@ end
 
 -- Isaac.GetItemConfig():GetCollectible(CollectibleType.COLLECTIBLE_FLIP).MaxCharges = 4
 
+--

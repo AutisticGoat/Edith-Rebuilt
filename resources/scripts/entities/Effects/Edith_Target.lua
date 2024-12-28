@@ -1,9 +1,9 @@
-local game = edithMod.Enums.Utils.Game
-local room = edithMod.Enums.Utils.Room
-local tables = edithMod.Enums.Tables
-local misc = edithMod.Enums.Misc
-
 local mod = edithMod
+local enums = mod.Enums
+local utils = enums.Utils
+local tables = enums.Tables
+local game = utils.Game
+local misc = enums.Misc
 
 local red = 255
 local green = 0
@@ -77,11 +77,10 @@ function mod:EdithTargetLogic(effect)
 	
 	local playerPos = player.Position
 	local effectPos = effect.Position
-	
 	local playerData = edithMod:GetData(player)
-	
 	local targetSprite = effect:GetSprite()
-		
+	local room = game:GetRoom()
+
 	if edithMod:IsKeyStompPressed(player) or playerData.ExtraJumps > 0 and playerData.EdithJumpTimer == 0 then
 		targetSprite:Play("Blink")
 	end
@@ -149,6 +148,7 @@ function mod:EdithTargetSprite(effect)
 			if RGBmode then
 				edithMod:RGBCycle(RGBspeed)
 				effect.Color = RGBCyclingColor
+				-- player.Color = effect.Color
 			else		
 				edithMod:ChangeColor(effect, targetColor.Red, targetColor.Green, targetColor.Blue)
 			end
