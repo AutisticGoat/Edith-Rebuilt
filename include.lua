@@ -10,6 +10,7 @@ local includeFiles = {
 	"functions/special_functions",
 	"functions/EdithClasses",
 	"ImGui",
+	"EdithKotryHudHelper",
 	
 	-- Items
 	col .. "items/SaltShaker",

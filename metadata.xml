@@ -1,18 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <metadata>
-    <name>Edith: Kotry's Build</name>
+    <name>Edith: Rebuild</name>
     <directory>Edith (kotrybuild)</directory>
     <id>0</id>
-    <description>UNFINISHED! BE WARNED
-- unfinished unlocks.
-
-hi
-
-im releasing the repentance version of edith publicly, because i know it will just never surface if i dont rip the bandaid off. its a brave new world for this character, so everything is subject to change.
-- Lambchop
-
-Hi, i'm Kotry, and i'm trying to fix and complete Lamb's Edith despite her pettitions to don't do that lol, i'm bored and just wanted to do this
-</description>
+    <description>
+        pending description
+    </description>
     <version>1.0</version>
     <visibility>Public</visibility>
     <tag id="Lua"/>

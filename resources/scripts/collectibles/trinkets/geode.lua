@@ -24,7 +24,7 @@ function edithMod:SpawnOnKill(entity, damage, flag, source, cooldown)
 	
 	local trinketMult = player:GetTrinketMultiplier(edithMod.Enums.TrinketType.TRINKET_GEODE)
 	local rng = player:GetTrinketRNG(edithMod.Enums.TrinketType.TRINKET_GEODE)
-	local spawnRuneRoll = edithMod:RandomNumber(rng)
+	local spawnRuneRoll = edithMod:RandomNumber()
 		
 	if entity:IsActiveEnemy() and entity:IsVulnerableEnemy() and spawnedRune == false then
 		print(entity:IsDead())

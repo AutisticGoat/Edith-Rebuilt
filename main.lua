@@ -1,6 +1,9 @@
 edithMod = RegisterMod("Edith Kotry Build", 1)
 local mod = edithMod
 
+edithMod.saveManager = include("resources.scripts.save_manager")
+edithMod.saveManager.Init(mod)
+
 local myFolder = "resources.scripts.EdithKotryLibraryOfIsaac"
 local LOCAL_TSIL = require(myFolder .. ".TSIL")
 LOCAL_TSIL.Init(myFolder)
@@ -9,19 +12,15 @@ edithMod.JumpLib = include("resources/scripts/EdithKotryJumpLib")
 edithMod.JumpLib.Init(mod)
 
 include("include")
-edithMod.saveManager = include("resources.scripts.save_manager")
-edithMod.saveManager.Init(mod)
 
 local tables = edithMod.Enums.Tables
 
 -- some shared functions between edith and tainted Edith, the behave almost the same 
 function edithMod:OverrideTaintedInputs(entity, input, action)
 	if not entity then return end
-	
 	local player = entity:ToPlayer()
 	
 	if not player then return end
-	
 	if not edithMod:IsAnyEdith(player) then return end
 	
 	if input == 2 then
@@ -30,6 +29,9 @@ function edithMod:OverrideTaintedInputs(entity, input, action)
 end
 edithMod:AddCallback(ModCallbacks.MC_INPUT_ACTION, edithMod.OverrideTaintedInputs)
 
+---comment
+---@param player EntityPlayer
+---@param cacheFlag CacheFlag
 function edithMod:SetEdithStats(player, cacheFlag)
 	if not edithMod:IsAnyEdith(player) then return end
 
@@ -39,9 +41,6 @@ function edithMod:SetEdithStats(player, cacheFlag)
 		end,
 		[CacheFlag.CACHE_RANGE] = function()
 			player.TearRange = edithMod.rangeUp(player.TearRange, 2.5)
-		end,
-		[CacheFlag.CACHE_TEARFLAG] = function()
-			player.TearFlags = player.TearFlags | TearFlags.TEAR_TURN_HORIZONTAL
 		end,
 	}
 	edithMod.SwitchCase(cacheFlag, cacheActions)

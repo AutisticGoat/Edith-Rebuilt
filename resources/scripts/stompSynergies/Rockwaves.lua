@@ -1,4 +1,4 @@
-function edithMod:BrimStomp(player)
+function edithMod:RockStomp(player)
 	if edithMod:IsKeyStompPressed(player) then return end
 
 	if player:HasCollectible(CollectibleType.COLLECTIBLE_TERRA) then
@@ -37,7 +37,7 @@ function edithMod:BrimStomp(player)
 		) -- Cuánto dura cada anillo
 	end
 end
-edithMod:AddCallback(JumpLib.Callbacks.PLAYER_LAND, edithMod.BrimStomp, {
+edithMod:AddCallback(JumpLib.Callbacks.PLAYER_LAND, edithMod.RockStomp, {
     tag = "edithMod_EdithJump",
 })
 

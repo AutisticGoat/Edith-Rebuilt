@@ -40,15 +40,29 @@ ImGui.LinkWindowToElement("settingswindow", "edithSettings")
 ImGui.LinkWindowToElement("progressWindow", "progressElement")
 ImGui.LinkWindowToElement("creditsWindow", "CreditsElement")
 
-local function actualizarCampo(nombre, campo, valorPorDefecto, Tipo)
+---comment
+---@param nombre string
+---@param subtabla string
+---@param campo string
+---@param valorPorDefecto any
+---@param Tipo string
+local function actualizarCampo(nombre, subtabla, campo, valorPorDefecto, Tipo)
     local SaveManager = edithMod.saveManager
     if not SaveManager then return end
     local saveData = SaveManager.GetDeadSeaScrollsSave()
 
+	local subtablas = {
+		["EDITHDATA"] = saveData.EdithData,
+		["TEDITHDATA"] = saveData.TEdithData,
+		["MISCDATA"] = saveData.miscData,
+	}
+
+	local targetTable = subtablas[string.upper(subtabla)]
+
     local updateFunctions = {
-		["ComboBox"] = function() return (saveData[campo] - 1) or valorPorDefecto end,
-        ["Slider"] = function() return saveData[campo] or valorPorDefecto end,
-        ["Checkbox"] = function() return saveData[campo] or valorPorDefecto end,
+		["ComboBox"] = function() return (targetTable[campo] - 1) or valorPorDefecto end,
+        ["Slider"] = function() return targetTable[campo] or valorPorDefecto end,
+        ["Checkbox"] = function() return targetTable[campo] or valorPorDefecto end,
     }
 
     local updateValue = updateFunctions[Tipo]()
@@ -141,20 +155,22 @@ local function OptionsUpdate()
 	if not SaveManager then return end
 	local saveData = SaveManager.GetDeadSeaScrollsSave()
 
+	local EdithData = saveData.EdithData
+	local TEdithData = saveData.TEdithData
+	local miscData = saveData.miscData
+
     if SaveManager.IsLoaded() then
-		
 		agregarTabBar("settingswindow", "Settings")
 		agregarTab("Settings", "EdithSetting", "Edith")
 		agregarTab("Settings", "TaintedEdithSetting", "Tainted Edith")
 		agregarTab("Settings", "MiscSetting", "Misc")
 	-- Edith configs
-		
 		-- Visuals 
 		agregarElemento("EdithSetting", "VisualSeparator", ImGuiElement.SeparatorText, "Visuals")
 			
 		agregarColorinput("EdithSetting", "EdithTargetColot", "Target Color", 
 			function(r, g, b)
-				saveData.TargetColor = {
+				EdithData.TargetColor = {
 					Red = r,
 					Green = g,
 					Blue = b,
@@ -175,19 +191,19 @@ local function OptionsUpdate()
 			"Venezuela",
 		}, 
 		function(index, val)
-			saveData.targetdesign = index + 1
+			EdithData.targetdesign = index + 1
 		end, 0)
 		agregarCheckbox("EdithSetting", "SetRGB", "Set RGB Mode", function(check)
-			saveData.RGBMode = check
+			EdithData.RGBMode = check
 		end, false)
 		agregarSlider("EdithSetting", "SetRGBSpeed", "Set RGB Speed", function(index, val)
-			saveData.RGBSpeed = index
+			EdithData.RGBSpeed = index
 		end, 1, 1, 255, "%d%")
 		agregarCheckbox("EdithSetting", "TargetLine", "Enable Target line", function(check)
-				saveData.targetline = check
+			EdithData.targetline = check
 			end, false)
 		agregarSlider("EdithSetting", "TargetLineSpace", "Set Line Space", function(index, val)
-				saveData.linespace = index
+			EdithData.linespace = index
 			end, 16, 1, 50, "%d%")
 		-- Visuals end
 		
@@ -195,7 +211,7 @@ local function OptionsUpdate()
 		agregarElemento("EdithSetting", "SoundSeparator", ImGuiElement.SeparatorText, "Sound")
 
 		agregarSlider("EdithSetting", "StompVolume", "Set stomp volume", function(index, val)
-			saveData.stompVolume = index
+			EdithData.stompVolume = index
 		end, 100, 25, 100, "%d%")
 		agregarCombobox("EdithSetting", "StompSound", "Set Stomp Sound", 
 		{
@@ -205,7 +221,7 @@ local function OptionsUpdate()
 			"Vine Boom"
 		}, 
 		function(index, val)
-			saveData.stompsound = index + 1
+			EdithData.stompsound = index + 1
 		end, 0)
 		-- sounds end
 		
@@ -217,16 +233,15 @@ local function OptionsUpdate()
 		end, false)
 		-- 
 		
+		actualizarCampo("StompSound", "EdithData", "stompsound", 0, "ComboBox")
+		actualizarCampo("StompVolume", "EdithData", "stompVolume", 100, "Slider")
+		actualizarCampo("TargetDesign", "EdithData", "targetdesign", 0, "ComboBox")
+		actualizarCampo("SetRGB", "EdithData", "RGBMode", false, "Checkbox")
+		actualizarCampo("SetRGBSpeed", "EdithData", "RGBSpeed", 16,"Slider")	
+		actualizarCampo("TargetLine", "EdithData", "targetline", false, "Checkbox")
+		actualizarCampo("TargetLineSpace", "EdithData", "linespace", 16, "Slider")
 			
-		actualizarCampo("StompSound", "stompsound", 0, "ComboBox")
-		actualizarCampo("StompVolume", "stompVolume", 100, "Slider")
-		actualizarCampo("TargetDesign", "targetdesign", 0, "ComboBox")
-		actualizarCampo("SetRGB", "RGBMode", false, "Checkbox")
-		actualizarCampo("SetRGBSpeed", "RGBSpeed", 16,"Slider")	
-		actualizarCampo("TargetLine", "targetline", false, "Checkbox")
-		actualizarCampo("TargetLineSpace", "linespace", 16, "Slider")
-			
-		local color = saveData.TargetColor
+		local color = EdithData.TargetColor
 			
 		ImGui.UpdateData("EdithTargetColot", ImGuiData.ColorValues, 
 			{
@@ -242,7 +257,7 @@ local function OptionsUpdate()
 	
 		agregarColorinput("TaintedEdithSetting", "TaintedEdithArrowColor", "Arror Color", 
 		function(r, g, b)
-			saveData.ArrowColor = {
+			TEdithData.ArrowColor = {
 				Red = r,
 				Green = g,
 				Blue = b,
@@ -262,18 +277,27 @@ local function OptionsUpdate()
 		}, 
 			
 		function(index, val)
-			saveData.ArrowDesign = index + 1
+			TEdithData.ArrowDesign = index + 1
 		end, 0)
 			
-		actualizarCampo("arrowDesign", "ArrowDesign", 1, "ComboBox")
+		actualizarCampo("arrowDesign", "TEdithData", "ArrowDesign", 1, "ComboBox")
 			
-		local arrowcolor = saveData.ArrowColor
+		local arrowcolor = TEdithData.ArrowColor
 		ImGui.UpdateData("TaintedEdithArrowColor", ImGuiData.ColorValues, 
 		{
 			arrowcolor.Red,
 			arrowcolor.Green,
 			arrowcolor.Blue,
 		})
+		agregarCheckbox("TaintedEdithSetting", "TaintedSetRGB", "Set RGB Mode", function(check)
+			TEdithData.RGBMode = check
+		end, false)
+		actualizarCampo("TaintedSetRGB", "TEdithData", "RGBMode", false, "Checkbox")
+		
+		agregarSlider("TaintedEdithSetting", "TaintedSetRGBSpeed", "Set RGB Speed", function(index, val)
+			TEdithData.RGBSpeed = index
+		end, 1, 1, 255, "%d%")
+		actualizarCampo("TaintedSetRGBSpeed", "TEdithData", "RGBSpeed", 16,"Slider")	
 			
 		agregarElemento("TaintedEdithSetting", "taintedSoundSeparator", ImGuiElement.SeparatorText, "Sound")
 			
@@ -285,9 +309,9 @@ local function OptionsUpdate()
 		}, 
 			
 		function(index, val)
-			saveData.TaintedHopSound = index + 1
+			TEdithData.TaintedHopSound = index + 1
 		end, 0)
-		actualizarCampo("hopSound", "TaintedHopSound", 1, "ComboBox")
+		actualizarCampo("hopSound", "TEdithData", "TaintedHopSound", 1, "ComboBox")
 		
 		agregarCombobox("TaintedEdithSetting", "parrySound", "Set Jump Sound", 		
 		{
@@ -299,17 +323,16 @@ local function OptionsUpdate()
 		}, 
 			
 		function(index, val)
-			saveData.TaintedParrySound = index + 1
+			TEdithData.TaintedParrySound = index + 1
 		end, 0)
 			
-		actualizarCampo("parrySound", "TaintedParrySound", 1, "ComboBox")
+		actualizarCampo("parrySound", "TEdithData", "TaintedParrySound", 1, "ComboBox")
 			
 		agregarSlider("TaintedEdithSetting", "StompTaintedVolume", "Set stomp volume", function(index, val)
-			saveData.taintedStompVolume = index 
+			TEdithData.taintedStompVolume = index 
 		end, 100, 25, 100, "%d%")
 			
-		actualizarCampo("StompTaintedVolume", "taintedStompVolume", 100, "Slider")
-		
+		actualizarCampo("StompTaintedVolume", "TEdithData", "taintedStompVolume", 100, "Slider")
 		agregarElemento("TaintedEdithSetting", "taintedresetSeparator", ImGuiElement.SeparatorText, "Reset")
 		agregarBoton("TaintedEdithSetting", "taintedresetButton", "Reset settings", function()
 			edithMod:ResetSaveData(true)
@@ -319,10 +342,10 @@ local function OptionsUpdate()
 		
 	-- Misc Configs
 		agregarCheckbox("MiscSetting", "ScreenShake", "Enable Stomp screen shake", function(check)
-			saveData.shakescreen = check
+			miscData.shakescreen = check
 		end, false)
 			
-		actualizarCampo("ScreenShake", "shakescreen", false, "Checkbox")
+		actualizarCampo("ScreenShake", "MiscData", "shakescreen", false, "Checkbox")
 	-- Misc Configs end
     end
 end
@@ -330,23 +353,26 @@ end
 function edithMod:ResetSaveData(isTainted)
 	local SaveManager = edithMod.saveManager
 	local menuData = SaveManager.GetDeadSeaScrollsSave()
-	
+	local EdithData = menuData.EdithData
+	local TEdithData = menuData.TEdithData
+
 	if isTainted then
-		menuData.ArrowColor = {Red = 1, Green = 0, Blue = 0}
-		menuData.ArrowDesign = 1
-		menuData.taintedStompVolume = 100
-		menuData.TaintedHopSound = 1
-		menuData.TaintedParrySound = 1
-		
+		TEdithData.ArrowColor = {Red = 1, Green = 0, Blue = 0}
+		TEdithData.ArrowDesign = 1
+		TEdithData.TaintedHopSound = 1
+		TEdithData.taintedStompVolume = 100
+		TEdithData.TaintedParrySound = 1
+		TEdithData.RGBMode = false
+		TEdithData.RGBSpeed = 16
 	else
-		menuData.TargetColor = {Red = 1, Green = 1, Blue = 1}
-		menuData.stompsound = 1
-		menuData.stompVolume = 100
-		menuData.targetdesign = 1
-		menuData.RGBMode = false
-		menuData.RGBSpeed = 16
-		menuData.targetline = false
-		menuData.linespace = 16
+		EdithData.TargetColor = {Red = 1, Green = 1, Blue = 1}
+		EdithData.stompsound = 1
+		EdithData.stompVolume = 100
+		EdithData.targetdesign = 1
+		EdithData.RGBMode = false
+		EdithData.RGBSpeed = 16
+		EdithData.targetline = false
+		EdithData.linespace = 16
 	end
 end
 
@@ -369,6 +395,8 @@ local elements = {
 	"TaintedEdithArrowColor",
 	"arrowDesign",
 	"StompTaintedVolume",
+	"TaintedSetRGB", 
+	"TaintedSetRGBSpeed",
 	"hopSound",
 	"parrySound",
 }
@@ -381,7 +409,6 @@ function edithMod:ResetImGui()
 	end
 end
 
-
 function edithMod:CheckImGuiIntegrity()
 	for i, element in pairs(elements) do
 		print(elements[i],ImGui.ElementExists(element))
@@ -392,7 +419,6 @@ function edithMod:CheckMenuDataIntegrity()
 	local SaveManager = edithMod.saveManager
 	local menuData = SaveManager.GetDeadSeaScrollsSave()
 	
-	
 	for k, v in pairs(menuData) do
 		print(k, v)
 	end
@@ -402,20 +428,33 @@ function edithMod:InitSaveData()
 	local SaveManager = edithMod.saveManager
 	local menuData = SaveManager.GetDeadSeaScrollsSave()
 	
-	menuData.TargetColor = menuData.TargetColor or {Red = 1, Green = 1, Blue = 1}
-	menuData.stompsound = menuData.stompsound or 1
-	menuData.stompVolume = menuData.stompVolume or 100
-	menuData.targetdesign = menuData.targetdesign or 1
-	menuData.RGBMode = menuData.RGBMode or false
-	menuData.RGBSpeed = menuData.RGBSpeed or 16
-	menuData.targetline = menuData.targetline or false
-	menuData.linespace = menuData.linespace or 16
+	menuData.EdithData = menuData.EdithData or {}
+	menuData.TEdithData = menuData.TEdithData or {}
+	menuData.miscData = menuData.miscData or {}
+
+	local EdithData = menuData.EdithData
+	local TEdithData = menuData.TEdithData
+	local miscData = menuData.miscData
+
+
+	EdithData.TargetColor = EdithData.TargetColor or {Red = 1, Green = 1, Blue = 1}
+	EdithData.stompsound = EdithData.stompsound or 1
+	EdithData.stompVolume = EdithData.stompVolume or 100
+	EdithData.targetdesign = EdithData.targetdesign or 1
+	EdithData.RGBMode = EdithData.RGBMode or false
+	EdithData.RGBSpeed = EdithData.RGBSpeed or 16
+	EdithData.targetline = EdithData.targetline or false
+	EdithData.linespace = EdithData.linespace or 16
 	
-	menuData.ArrowColor = menuData.ArrowColor or {Red = 1, Green = 0, Blue = 0}
-	menuData.ArrowDesign = menuData.ArrowDesign or 1
-	menuData.TaintedHopSound = menuData.TaintedHopSound or 1
-	menuData.taintedStompVolume = menuData.taintedStompVolume or 100
-	menuData.TaintedParrySound = menuData.TaintedParrySound or 1
+	TEdithData.ArrowColor = TEdithData.ArrowColor or {Red = 1, Green = 0, Blue = 0}
+	TEdithData.ArrowDesign = TEdithData.ArrowDesign or 1
+	TEdithData.TaintedHopSound = TEdithData.TaintedHopSound or 1
+	TEdithData.taintedStompVolume = TEdithData.taintedStompVolume or 100
+	TEdithData.TaintedParrySound = TEdithData.TaintedParrySound or 1
+	TEdithData.RGBMode = TEdithData.RGBMode or false
+	TEdithData.RGBSpeed = TEdithData.RGBSpeed or 16
+
+	miscData.shakescreen = miscData.shakescreen or true
 end
 
 local function SetImGuiReset()

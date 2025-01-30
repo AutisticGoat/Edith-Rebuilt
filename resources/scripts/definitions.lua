@@ -45,8 +45,6 @@ edithMod.Enums = {
 		Game = Game(),
 		SFX = SFXManager(),
 		RNG = RNG(),
-		Room = nil,
-		Level = nil,
 	},
 	Tables = {
 		OverrideActions = {
@@ -70,6 +68,13 @@ edithMod.Enums = {
 			[180] = Direction.LEFT,
 			[270] = Direction.UP,
 			[360] = Direction.RIGHT,
+		},
+		DirectionToVector = {
+			[Direction.NO_DIRECTION] = Vector.Zero,
+			[Direction.RIGHT] = Vector(1, 0),
+			[Direction.DOWN] = Vector(0, 1),
+			[Direction.LEFT] = Vector(-1, 0),
+			[Direction.UP] = Vector(0, -1)
 		},
 		ArrowSuffix = {
 			[1] = "_arrow",
@@ -122,6 +127,13 @@ edithMod.Enums = {
 				[false] = {1, 1, 1}
 			}
 		},
+		BackdropColors = {
+			[BackdropType.CORPSE3] = Color(0.75, 0.2, 0.2),
+			[BackdropType.DROSS] = Color(92/255, 81/255, 71/255),
+			[BackdropType.BLUE_WOMB] = Color(0, 0, 0, 1, 0.3, 0.4, 0.6),
+			[BackdropType.CORPSE] = Color(0, 0, 0, 1, 0.62, 0.65, 0.62),
+			[BackdropType.CORPSE2] = Color(0, 0, 0, 1, 0.55, 0.57, 0.55),
+		},
 		Runes = {
 			Card.RUNE_HAGALAZ,
 			Card.RUNE_JERA,
@@ -136,78 +148,22 @@ edithMod.Enums = {
 		},
 		JumpTags = {
 			EdithJump = "edithMod_EdithJump",
+			TEdithHop = "edithMod_TaintedEdithHop",
 			TEdithJump = "edithMod_TaintedEdithJump",
-			TEdithParry = "edithMod_TaintedEdithParry",
 		},
 		JumpFlags = {
 			EdithJump = (JumpLib.Flags.DISABLE_SHOOTING_INPUT | JumpLib.Flags.DISABLE_LASER_FOLLOW | JumpLib.Flags.DISABLE_BOMB_INPUT),
-			TEdithJump = (JumpLib.Flags.COLLISION_GRID | JumpLib.Flags.COLLISION_ENTITY | JumpLib.Flags.OVERWRITABLE | JumpLib.Flags.DISABLE_COOL_BOMBS | JumpLib.Flags.IGNORE_CONFIG_OVERRIDE | JumpLib.Flags.FAMILIAR_FOLLOW_ORBITALS),
-			TEdithParry = (JumpLib.Flags.COLLISION_GRID | JumpLib.Flags.OVERWRITABLE | JumpLib.Flags.DISABLE_COOL_BOMBS | JumpLib.Flags.IGNORE_CONFIG_OVERRIDE | JumpLib.Flags.FAMILIAR_FOLLOW_ORBITALS),
+			TEdithHop = (JumpLib.Flags.COLLISION_GRID | JumpLib.Flags.COLLISION_ENTITY | JumpLib.Flags.OVERWRITABLE | JumpLib.Flags.DISABLE_COOL_BOMBS | JumpLib.Flags.IGNORE_CONFIG_OVERRIDE | JumpLib.Flags.FAMILIAR_FOLLOW_ORBITALS),
+			TEdithJump = (JumpLib.Flags.COLLISION_GRID | JumpLib.Flags.OVERWRITABLE | JumpLib.Flags.DISABLE_COOL_BOMBS | JumpLib.Flags.IGNORE_CONFIG_OVERRIDE | JumpLib.Flags.FAMILIAR_FOLLOW_ORBITALS),
 		},
+		MovementBasedActives = {
+			[CollectibleType.COLLECTIBLE_SUPLEX] = true,
+			[CollectibleType.COLLECTIBLE_PONY] = true,
+			[CollectibleType.COLLECTIBLE_WHITE_PONY] = true,
+		}
 	},
 	Misc = {
 		TearPath = "gfx/tears/",
 		ObscureDiv = 155/255,
 	},
 }
-
-local game = edithMod.Enums.Utils.Game
-
-edithMod.Enums.Utils.Room = game:GetRoom()
-edithMod.Enums.Utils.Level = game:GetLevel()
-
-
-function edithMod:SetObjects()
-	
-
-	-- print(game)
-	-- print(game:GetRoom())
-	-- print(game:GetLevel())
-	
-	
-	
-	-- print(edithMod.Enums)
-	-- print(edithMod.Enums.Utils.Room)
-	-- print(edithMod.Enums.Utils.Level)
-	
-	edithMod.Enums.Utils.Room = game:GetRoom()
-	edithMod.Enums.Utils.Level = game:GetLevel()
-end
-edithMod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, edithMod.SetObjects)
-
--- print()
--- local game = edithMod.Enums.Utils.Game
-
-	-- edithMod.Enums.Utils.Room = game:GetRoom()
-	-- edithMod.Enums.Utils.Level = game:GetLevel()
-
--- local function setRNG()
-	
-
-	-- local rng = edithMod.Enums.Utils.RNG
-	-- local RECOMMENDED_SHIFT_IDX = 35
-	
-	-- local seeds = game:GetSeeds()
-	-- local startSeed = seeds:GetStartSeed()
-	
-	-- rng:SetSeed(startSeed, RECOMMENDED_SHIFT_IDX)	
--- end
-
-function edithMod:GameStartedFunction()
-	-- print(edithMod.Enums.Utils.Room)
-	
-end
-edithMod:AddCallback(ModCallbacks.MC_POST_UPDATE, edithMod.GameStartedFunction)
-
-
--- edithMod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, function(self)
-	-- local game = edithMod.Enums.Utils.Game
-
-	-- edithMod.Enums.Utils.Room = game:GetRoom()
-	-- edithMod.Enums.Utils.Level = game:GetLevel()
-	
-	-- setRNG()
-	
-	-- print(edithMod.Enums.Utils.Level, edithMod.Enums.Utils.Room)
--- end)
-

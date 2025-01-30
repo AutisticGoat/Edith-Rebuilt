@@ -1,3 +1,4 @@
+---@diagnostic disable: undefined-global
 local META, META0
 
 local function EditClass(T, newProperty)
@@ -51,9 +52,7 @@ end
 ---@return boolean
 function META:IsEdith(tainted)
 	local player = self
-	
-	return tainted == true and player:GetPlayerType() == edithMod.Enums.PlayerType.PLAYER_EDITH_B or player:GetPlayerType() == edithMod.Enums.PlayerType.PLAYER_EDITH
 
-	
+	return tainted == true and player:GetPlayerType() == edithMod.Enums.PlayerType.PLAYER_EDITH_B or player:GetPlayerType() == edithMod.Enums.PlayerType.PLAYER_EDITH	
 end
 EndClass()

@@ -6,7 +6,7 @@ function edithMod:ShootSaltTears(tear)
 	
 	if not player:HasCollectible(edithMod.Enums.CollectibleType.COLLECTIBLE_EDITHS_HOOD) then return end
 	
-	edithMod.ForceSaltTear(tear)
+	edithMod:ForceSaltTear(tear)
 	
 	local rng = player:GetCollectibleRNG(edithMod.Enums.CollectibleType.COLLECTIBLE_EDITHS_HOOD)
 	local randomSpawnChance = edithMod:RandomNumber(rng, 6)
@@ -35,7 +35,7 @@ function edithMod:onKillWithTear(tear, collider)
 	
 	if collider.HitPoints <= tear.CollisionDamage then
 		local rng = player:GetCollectibleRNG(edithMod.Enums.CollectibleType.COLLECTIBLE_EDITHS_HOOD)	
-		local randomSpawnChance = edithMod:RandomNumber(rng, 5)
+		local randomSpawnChance = edithMod:RandomNumber(5, _, rng)
 		
 		if randomSpawnChance ~= 1 then return end
 		

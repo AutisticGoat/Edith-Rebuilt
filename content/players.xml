@@ -19,7 +19,7 @@
 		bSkinParent="Edith" 
 		name="Edith" 
 		skin="characterTaintedEdith.png" 
-		black="6"
+		armor="6"
 		nameimage="PlayerName_04xa_Edith.png" 
 		portrait="PlayerPortraitBig_04xa_Edith.png" 
 		skinColor="1" 

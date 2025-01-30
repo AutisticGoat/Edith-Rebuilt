@@ -9,7 +9,7 @@ local misc = enums.Misc
 function edithMod:RemoveEdithTarget(player)
 	local playerData = edithMod:GetData(player)
 	
-	if player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH then return end
+	if not edithMod:IsEdith(player, false) then return end
 	
 	if not playerData.EdithTarget then return end
 	
@@ -270,17 +270,18 @@ end
 ---comment
 ---@param tear EntityTear
 local function tearCol(_, tear)
+	if not tear.Parent then return end
+
 	local player = tear.Parent:ToPlayer()
 	
 	if not player then return end
-	
-	if player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH and player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH_B then return end	
-		
+	if not edithMod:IsAnyEdith(player) then return end	
 	local tearData = edithMod:GetData(tear)
 	
+	if not tearData.ShatterSprite then return end
+
 	local isBloody = string.find(tearData.ShatterSprite, "blood") ~= nil
 	local isBurnt = string.find(tearData.ShatterSprite, "burnt") ~= nil
-	
 	local tableColor = tables.TearShatterColor
 	local shatterColor = tableColor[isBurnt][isBloody]
 		
@@ -328,8 +329,9 @@ end
 
 ---comment
 ---@param tear EntityTear
----@param tainted boolean
+---@param tainted boolean?
 function edithMod.ForceSaltTear(tear, tainted)
+	tainted = tainted or false
 	local IsBloodTear = tables.BloodytearVariants[tear.Variant] or false
 	
 	doEdithTear(tear, IsBloodTear, tainted)
@@ -455,6 +457,54 @@ function edithMod:SpawnPepperCreep(parent, position, damage, timeout)
 	pepper:SetTimeout(timeOutSeconds)
 end
 
+local red = 255
+local green = 0
+local blue = 0
+local state = 1
+
+local RGBCyclingColor = Color(1, 1, 1, 1)
+function edithMod:RGBCycle(step)
+    step = step or 1 
+		
+    if state == 1 then
+        green = math.min(255, green + step)
+        if green == 255 then
+            state = 2
+        end
+    elseif state == 2 then
+        red = math.max(0, red - step)
+        if red == 0 then
+            state = 3
+        end
+    elseif state == 3 then
+        blue = math.min(255, blue + step)
+        if blue == 255 then
+            state = 4
+        end
+    elseif state == 4 then
+        green = math.max(0, green - step)
+        if green == 0 then
+            state = 5
+        end
+    elseif state == 5 then
+        red = math.min(255, red + step)
+        if red == 255 then
+            state = 6
+        end
+    elseif state == 6 then
+        blue = math.max(0, blue - step)
+        if blue == 0 then
+            state = 1
+        end
+    end
+
+	RGBCyclingColor.R = red / 255
+	RGBCyclingColor.G = green / 255
+	RGBCyclingColor.B = blue / 255
+
+	return RGBCyclingColor
+end
+
 ---comment
 ---@param n number
 ---@return integer
@@ -465,8 +515,8 @@ end
 
 ---comment
 ---@param num1 number
----@param num2 number
----@param rng RNG?
+---@param num2? number
+---@param rng? RNG
 ---@return (integer|number)
 function edithMod:RandomNumber(num1, num2, rng)
     rng = rng or edithMod.Enums.Utils.RNG
@@ -508,7 +558,7 @@ end
 
 ---comment
 ---@param player EntityPlayer
----@param playertype integer
+---@param playertype PlayerType
 ---@param costumePath integer
 function edithMod.ForceCharacterCostume(player, playertype, costumePath)
 	local playerData = edithMod:GetData(player)
@@ -574,7 +624,7 @@ function edithMod:drawLine(from, to, color, linespace)
 	targetSprite:SetFrame("Line", 0)
 	targetSprite:Update()
 		
-	for i = 1, sectionCount do
+	for _ = 1, sectionCount do
 		targetSprite:Render(Isaac.WorldToScreen(from))
 		from = from + Vector.One * linespace * Vector.FromAngle(angle) 
 	end
@@ -585,22 +635,17 @@ end
 ---comment
 ---@param parent Entity
 ---@param Number integer
----@param color Color
----@param timeout number
----@param spawnType Entity
+---@param color Color?
+---@param timeout number?
+---@param spawnType string?
 function edithMod:SpawnSaltGib(parent, Number, color, timeout, spawnType)
-	for _ = 1, Number do
-		local rng = edithMod.Enums.Utils.RNG
-	
-		local VelX = edithMod:RandomNumber(-100, 100) / 100
-		local VelY = edithMod:RandomNumber(-100, 100) / 100
-		
+	for _ = 1, Number do	
 		local saltGib = Isaac.Spawn(
 			EntityType.ENTITY_EFFECT,
 			EffectVariant.TOOTH_PARTICLE,
 			0,
 			parent.Position,
-			Vector(VelX, VelY):Normalized():Resized(3),
+			RandomVector():Resized(3),
 			parent
 		):ToEffect() 
 
@@ -620,11 +665,75 @@ function edithMod:SpawnSaltGib(parent, Number, color, timeout, spawnType)
 			saltGib.Color = parent.Color
 		end
 
+---@diagnostic disable-next-line: param-type-mismatch
 		local timeOutSeconds = edithMod:SecondsToFrames(timeout) or 30
 		local saltGibData = edithMod:GetData(saltGib)
 		saltGib:SetTimeout(timeOutSeconds)
 		saltGibData.SpawnType = spawnType
 	end
+end
+
+---comment
+---@param player EntityPlayer
+---@return EntityEffect
+function edithMod:SpawnEdithTarget(player)
+	local playerData = edithMod:GetData(player)
+
+	if not playerData.EdithTarget then 
+		local target = Isaac.Spawn(	
+			EntityType.ENTITY_EFFECT,
+			edithMod.Enums.EffectVariant.EFFECT_EDITH_TARGET,
+			0,
+			player.Position,
+			Vector.Zero,
+			player
+		):ToEffect()
+		playerData.EdithTarget = target
+
+		target.DepthOffset = -100
+	end
+
+	return playerData.EdithTarget
+end
+
+---comment
+---@param player EntityPlayer
+---@return EntityNPC|nil
+function edithMod:GetClosestEnemy(player)
+	local closestDistance, closestEnemy
+    for _, enemy in ipairs(Isaac.GetRoomEntities()) do
+        if enemy:IsActiveEnemy() and enemy:IsVulnerableEnemy() then
+            local distanceToPlayer = enemy.Position:Distance(player.Position)
+            if not closestDistance or closestDistance > distanceToPlayer then
+                closestEnemy = enemy:ToNPC()
+                closestDistance = distanceToPlayer
+            end
+        end
+    end
+	return closestEnemy
+end
+
+---comment
+---@param player EntityPlayer
+---@return EntityEffect
+function edithMod:SpawnTaintedArrow(player)
+	local playerData = edithMod:GetData(player)
+
+	if not playerData.TaintedEdithTarget then 
+		local arrow = Isaac.Spawn(	
+			EntityType.ENTITY_EFFECT,
+			edithMod.Enums.EffectVariant.EFFECT_EDITH_B_TARGET,
+			0,
+			player.Position,
+			Vector.Zero,
+			player
+		):ToEffect()
+		playerData.TaintedEdithTarget = arrow
+
+		arrow.DepthOffset = -100
+	end
+
+	return playerData.TaintedEdithTarget
 end
 
 ---comment
@@ -688,29 +797,15 @@ function edithMod:GetTPS(p)
     return TSIL.Utils.Math.Round(30 / (p.MaxFireDelay + 1), 2)
 end
 
--- function 
-
 ---comment
 ---@param parent EntityPlayer
 ---@param radius number
 ---@param damage number
 ---@param knockback number
----@param breakGrid true
+---@param breakGrid boolean
 function edithMod:EdithStomp(parent, radius, damage, knockback, breakGrid)
 	for i, entity in pairs(Isaac.FindInRadius(parent.Position, radius, 0xFFFFFFFF)) do
 		local stompBehavior = {
-			[EntityType.ENTITY_PLAYER] = function() 
-				-- local player = entity:ToPlayer()
-				-- local d = player:GetData()
-				-- if player:GetPlayerType() == PlayerType.PLAYER_EDITH then
-					-- entity.Velocity = (entity.Position - parent.Position):Resized(knockback) / 4.5
-				-- else
-					-- entity.Velocity = (entity.Position - parent.Position):Resized(knockback) / 3
-				-- end
-				-- if d.WasTaintedEdithPush == nil then
-					-- d.WasTaintedEdithPush = true
-				-- end
-			end,
 			[EntityType.ENTITY_TEAR] = function()
 				local tear = entity:ToTear()
 				if not tear then return end
@@ -769,10 +864,6 @@ function edithMod:EdithStomp(parent, radius, damage, knockback, breakGrid)
 				end
 			end,
 			[EntityType.ENTITY_SLOT] = function()	
-				-- local slot = entity:ToSlot()
-								
-				-- slot:SetState(2)
-				-- parent:TakeDamage(1, 0, EntityRef(slot), 0)
 			end,
 			[EntityType.ENTITY_SHOPKEEPER] = function()
 				entity:Kill()
@@ -807,8 +898,8 @@ end
 ---@param radius number
 ---@param damage number
 ---@param knockback number
----@param breakGrid true
-function edithMod:TaintedEdithStomp(parent, radius, damage, knockback, breakGrid)
+---@param isParry boolean
+function edithMod:TaintedEdithStomp(parent, radius, damage, knockback, isParry)
 	for _, entity in ipairs(Isaac.FindInRadius(parent.Position, radius, 0xFFFFFFFF)) do
 		local stompBehavior = {
 			[EntityType.ENTITY_FIREPLACE] = function()
@@ -854,11 +945,12 @@ function edithMod:TaintedEdithStomp(parent, radius, damage, knockback, breakGrid
 			entity:TakeDamage(damage, DamageFlag.DAMAGE_CRUSH | DamageFlag.DAMAGE_IGNORE_ARMOR, EntityRef(parent), 0)
 			
 			entity.Velocity = (entity.Position - parent.Position):Resized(knockback)
+
+			if isParry then
+				parent:SetMinDamageCooldown(30)
+			end
 		else
 			edithMod.SwitchCase(entity.Type, stompBehavior)
-		end
-		if breakGrid then
-			edithMod:DestroyGrid(entity, radius)
 		end
 	end
 end

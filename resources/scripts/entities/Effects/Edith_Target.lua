@@ -5,52 +5,6 @@ local tables = enums.Tables
 local game = utils.Game
 local misc = enums.Misc
 
-local red = 255
-local green = 0
-local blue = 0
-local state = 1
-
-local RGBCyclingColor = Color(1, 1, 1, 1)
-function edithMod:RGBCycle(step)
-    step = step or 1 
-		
-    if state == 1 then
-        green = math.min(255, green + step)
-        if green == 255 then
-            state = 2
-        end
-    elseif state == 2 then
-        red = math.max(0, red - step)
-        if red == 0 then
-            state = 3
-        end
-    elseif state == 3 then
-        blue = math.min(255, blue + step)
-        if blue == 255 then
-            state = 4
-        end
-    elseif state == 4 then
-        green = math.max(0, green - step)
-        if green == 0 then
-            state = 5
-        end
-    elseif state == 5 then
-        red = math.min(255, red + step)
-        if red == 255 then
-            state = 6
-        end
-    elseif state == 6 then
-        blue = math.max(0, blue - step)
-        if blue == 0 then
-            state = 1
-        end
-    end
-
-	RGBCyclingColor.R = red / 255
-	RGBCyclingColor.G = green / 255
-	RGBCyclingColor.B = blue / 255
-end
-
 local function interpolateVector2D(vectorA, vectorB, t)
     local Interpolated = {
         X = (1 - t) * vectorA.X + t * vectorB.X,
@@ -94,7 +48,6 @@ function mod:EdithTargetLogic(effect)
 	Camera:SetFocusPosition(cameraPos)
 	
 	local markedTarget = player:GetMarkedTarget()
-	-- local 
 	if markedTarget then
 		markedTarget.Position = effect.Position
 		markedTarget.Velocity = Vector.Zero
@@ -102,7 +55,7 @@ function mod:EdithTargetLogic(effect)
 	end
 	
 	if room:GetType() == RoomType.ROOM_DUNGEON then
-		for k, v in pairs(teleportPoints) do
+		for _, v in ipairs(teleportPoints) do
 			DungeonVector.X = v.X
 			DungeonVector.Y = v.Y
 			
@@ -134,31 +87,28 @@ function mod:EdithTargetSprite(effect)
 		local saveData = edithMod.saveManager.GetDeadSeaScrollsSave()
 		if not saveData then return end
 		
-		local targetColor = saveData.TargetColor
+		local edithData = saveData.EdithData
 
-		local RGBmode = saveData.RGBMode
-		local RGBspeed = saveData.RGBSpeed
-		local targetSpace = saveData.linespace
-		local targetDesign = saveData.targetdesign
+		local targetColor = edithData.TargetColor
+
+		local RGBmode = edithData.RGBMode
+		local RGBspeed = edithData.RGBSpeed
+		local targetSpace = edithData.linespace
+		local targetDesign = edithData.targetdesign
 
 		local effectColor = effect.Color
 		local effectSprite = effect:GetSprite()
 		
-		if saveData.targetdesign == 1 then
-			if RGBmode then
-				edithMod:RGBCycle(RGBspeed)
-				effect.Color = RGBCyclingColor
-				-- player.Color = effect.Color
-			else		
-				edithMod:ChangeColor(effect, targetColor.Red, targetColor.Green, targetColor.Blue)
-			end
-		else
-			effect.Color = Color.Default
-		end
+		local color = (targetDesign == 1 and 
+			(RGBmode and edithMod:RGBCycle(RGBspeed) or Color(targetColor.Red, targetColor.Green, targetColor.Blue)) 
+		) or Color.Default
+
+		effect:SetColor(color, -1, 100, false, false)
 		
 		effectSprite:ReplaceSpritesheet(0, targetPath .. tables.TargetSuffix[targetDesign] .. ".png", true)
 		
-		local targetLine = saveData.targetline
+		local targetLine = edithData.targetline
+
 		if targetLine ~= true then return end
 								
 		if targetDesign == 1 then

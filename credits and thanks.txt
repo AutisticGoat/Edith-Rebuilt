@@ -1,17 +1,21 @@
-JJ: Main inspiration
-Kotry: Project leader, coder
+Used resources and utilities:
+- Library of Isaac (ThiccoCatto): https://github.com/Team-Compliance/libraryofisaac
+- JumpLib (Kerkel): https://github.com/drpandacat/JumpLib
+- Isaac Save Manager (Catinsurance, Benny): https://github.com/catinsurance/IsaacSaveManager
+- HudHelper (Benny, CatWizard): https://github.com/BenevolusGoat/hud-helper
+- Joshua Hadley: Salt Shaker Sound Effect (https://freesound.org/people/JoshuaHadley/sounds/708587/)
+- ArtNinja: Edith water stomp sound effect (https://freesound.org/people/Artninja/sounds/745017/)
+- Red Candle Games: Perfect Parry sound from Nine sols
+- Tour De Pizza: Pizza Tower taunt sound
 
-Skulldier: Sal initial concept
+Credits:
+- JJ: Main inspiration
+- D!Edith team: Inspiration to resume this project
+- Skulldier: Sal initial concept
+- Marcy Parra Correa: Tainted Edith Birthright idea
+- Sr Kalaka: Edith Sprite
+- Yuls: Tainted Edith sprite base
+- gigamouse: finished Tainted Edith sprite 
+- Patricio: Testing, First Tainted Edith sprite
+- Kotry: Project leader, code leader 
 
-Kerkel: Jump Library
-
-Marcy Parra Correa: Tainted Edith Birthright idea
-
-Sr Kalaka: Edith Sprite
-Yuls: Tainted Edith sprite base
-gigamouse: finished Tainted Edith sprite 
-
-Patricio <3: Testing, First Tainted Edith sprite
-
-Joshua Hadley: Salt Shaker Sound Effect (https://freesound.org/people/JoshuaHadley/sounds/708587/)
-ArtNinja: Edith water stomp sound effect (https://freesound.org/people/Artninja/sounds/745017/)

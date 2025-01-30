@@ -29,6 +29,9 @@ function edithMod:GetPlayers(functionCheck, ...)
 	return players
 end
 
+---comment
+---@param entity Entity
+---@return EntityPlayer?
 function edithMod:GetPlayerFromTear(entity)
 	for i=1, 3 do
 		local check = nil
@@ -47,20 +50,11 @@ function edithMod:GetPlayerFromTear(entity)
 	end
 	return nil
 end
--- end
 
 function edithMod:GetData(entity)
 	local data = entity:GetData()
 	data.edithMod = data.edithMod or {}
 	return data.edithMod
-end
-
-function edithMod:GetSpawnData(entity)
-	if entity and entity.GetData then
-		local data = edithMod:GetData(entity)
-		return data.SpawnData
-	end
-	return nil
 end
 
 function edithMod:GetPtrHashEntity(entity)
@@ -76,28 +70,3 @@ function edithMod:GetPtrHashEntity(entity)
 	end
 	return nil
 end
-
-local entitySpawnData = {}
-edithMod:AddCallback(ModCallbacks.MC_PRE_ENTITY_SPAWN, function(_, type, variant, subType, position, velocity, spawner, seed)
-	entitySpawnData[seed] = {
-		Type = type,
-		Variant = variant,
-		SubType = subType,
-		Position = position,
-		Velocity = velocity,
-		SpawnerEntity = spawner,
-		InitSeed = seed
-	}
-end)
-edithMod:AddCallback(ModCallbacks.MC_POST_TEAR_INIT, function(_, entity)
-	local seed = entity.InitSeed
-	local data = edithMod:GetData(entity)
-	data.SpawnData = entitySpawnData[seed]
-end)
-edithMod:AddCallback(ModCallbacks.MC_POST_ENTITY_REMOVE, function(_, entity)
-	local data = edithMod:GetData(entity)
-	data.SpawnData = nil
-end)
-edithMod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function()
-	entitySpawnData = {}
-end)
