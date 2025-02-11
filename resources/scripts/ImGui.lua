@@ -47,9 +47,12 @@ ImGui.LinkWindowToElement("creditsWindow", "CreditsElement")
 ---@param valorPorDefecto any
 ---@param Tipo string
 local function actualizarCampo(nombre, subtabla, campo, valorPorDefecto, Tipo)
-    local SaveManager = edithMod.saveManager
+    local SaveManager = edithMod.SaveManager
     if not SaveManager then return end
+
     local saveData = SaveManager.GetDeadSeaScrollsSave()
+
+	if not saveData then return end
 
 	local subtablas = {
 		["EDITHDATA"] = saveData.EdithData,
@@ -150,10 +153,12 @@ local function agregarTab(padre, nombre, etiqueta)
 end
 
 local function OptionsUpdate()
-	local SaveManager = edithMod.saveManager
+	local SaveManager = edithMod.SaveManager
 	
 	if not SaveManager then return end
 	local saveData = SaveManager.GetDeadSeaScrollsSave()
+
+	if not saveData then return end
 
 	local EdithData = saveData.EdithData
 	local TEdithData = saveData.TEdithData
@@ -351,8 +356,11 @@ local function OptionsUpdate()
 end
 
 function edithMod:ResetSaveData(isTainted)
-	local SaveManager = edithMod.saveManager
+	local SaveManager = edithMod.SaveManager
+	if not SaveManager then return end
 	local menuData = SaveManager.GetDeadSeaScrollsSave()
+	if not menuData then return end
+
 	local EdithData = menuData.EdithData
 	local TEdithData = menuData.TEdithData
 
@@ -416,8 +424,10 @@ function edithMod:CheckImGuiIntegrity()
 end
 
 function edithMod:CheckMenuDataIntegrity()
-	local SaveManager = edithMod.saveManager
+	local SaveManager = edithMod.SaveManager
+	if not SaveManager then return end
 	local menuData = SaveManager.GetDeadSeaScrollsSave()
+	if not menuData then return end
 	
 	for k, v in pairs(menuData) do
 		print(k, v)
@@ -425,8 +435,10 @@ function edithMod:CheckMenuDataIntegrity()
 end
 
 function edithMod:InitSaveData()
-	local SaveManager = edithMod.saveManager
+	local SaveManager = edithMod.SaveManager
+	if not SaveManager then return end
 	local menuData = SaveManager.GetDeadSeaScrollsSave()
+	if not menuData then return end
 	
 	menuData.EdithData = menuData.EdithData or {}
 	menuData.TEdithData = menuData.TEdithData or {}

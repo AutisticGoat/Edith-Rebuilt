@@ -36,17 +36,17 @@ local includeFiles = {
 	
 	-- Personajes
 	ent .. "Players/Edith",
-	ent .. "Players/Edith_B",
+	-- ent .. "Players/Edith_B",
 	-- Personajes fin
 	
 	-- sinergias pisotones
-	stmpSyn .. "blackPowder",
-	stmpSyn .. "brimstone",
-	stmpSyn .. "techX",
-	stmpSyn .. "MomsKnife",
-	stmpSyn .. "Rockwaves",
-	stmpSyn .. "SpiritSword",
-	stmpSyn .. "EpicFetus",
+	-- stmpSyn .. "blackPowder",
+	-- stmpSyn .. "brimstone",
+	-- stmpSyn .. "techX",
+	-- stmpSyn .. "MomsKnife",
+	-- stmpSyn .. "Rockwaves",
+	-- stmpSyn .. "SpiritSword",
+	-- stmpSyn .. "EpicFetus",
 		
 	"RNG",
 }

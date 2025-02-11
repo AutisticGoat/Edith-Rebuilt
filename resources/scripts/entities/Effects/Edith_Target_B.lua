@@ -22,7 +22,7 @@ function edithMod:RenderTaintedEdithArrow(effect)
 	local arrowColor = tEdithdata.ArrowColor
 	local arrowDesign = tEdithdata.ArrowDesign
 	
-	local playerData = edithMod:GetData(player)
+	local playerData = edithMod.GetData(player)
 	local HopVec = playerData.HopVector
 	
 	effectSprite.Rotation = arrowDesign ~= 7 and HopVec:GetAngleDegrees() or 0 

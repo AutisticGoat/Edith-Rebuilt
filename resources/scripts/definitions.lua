@@ -1,3 +1,7 @@
+local edithJumpTag = "edithMod_EdithJump"
+local tedithJumpTag = "edithMod_TaintedEdithJump"
+local tedithHopTag = "edithMod_TaintedEdithHop"
+
 edithMod.Enums = {
 	PlayerType = {
 		PLAYER_EDITH = Isaac.GetPlayerTypeByName("Edith", false),
@@ -147,9 +151,9 @@ edithMod.Enums = {
 			Card.RUNE_BLACK,
 		},
 		JumpTags = {
-			EdithJump = "edithMod_EdithJump",
-			TEdithHop = "edithMod_TaintedEdithHop",
-			TEdithJump = "edithMod_TaintedEdithJump",
+			EdithJump = edithJumpTag,
+			TEdithHop = tedithHopTag,
+			TEdithJump = tedithJumpTag,
 		},
 		JumpFlags = {
 			EdithJump = (JumpLib.Flags.DISABLE_SHOOTING_INPUT | JumpLib.Flags.DISABLE_LASER_FOLLOW | JumpLib.Flags.DISABLE_BOMB_INPUT),
@@ -160,10 +164,34 @@ edithMod.Enums = {
 			[CollectibleType.COLLECTIBLE_SUPLEX] = true,
 			[CollectibleType.COLLECTIBLE_PONY] = true,
 			[CollectibleType.COLLECTIBLE_WHITE_PONY] = true,
+		},
+		HeadAxis = {
+			[Direction.LEFT] = "Hor",
+			[Direction.RIGHT] = "Hor",
+			[Direction.UP] = "Ver",
+			[Direction.DOWN] = "Ver",
+		},
+		JumpParams = {
+			EdithJump = {
+				tag = edithJumpTag,
+				type = EntityType.ENTITY_PLAYER,
+				player = Isaac.GetPlayerTypeByName("Edith", false),
+			},
+			TEdithJump = {
+				tag = tedithJumpTag,
+				type = EntityType.ENTITY_PLAYER,
+				player = Isaac.GetPlayerTypeByName("Edith", true),
+			},
+			TEdithHop = {
+				tag = tedithHopTag,
+				type = EntityType.ENTITY_PLAYER,
+				player = Isaac.GetPlayerTypeByName("Edith", true),
+			}
 		}
 	},
 	Misc = {
 		TearPath = "gfx/tears/",
 		ObscureDiv = 155/255,
+		HeadAdjustVec = Vector.Zero,
 	},
 }

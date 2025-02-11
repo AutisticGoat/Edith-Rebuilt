@@ -3,7 +3,6 @@ function edithMod:OnSpawningPepper(effect)
 		return 
 	end
 	
-	local rng = edithMod.Enums.Utils.RNG
 	local saltFrame = tostring(edithMod:RandomNumber(1, 6))
 		
 	local saltSprite = effect:GetSprite()

@@ -1,6 +1,6 @@
 local mod = edithMod
 local utils = edithMod.Enums.Utils
-local room = utils.Room
+-- local room = utils.Room
 
 function mod:GildedStoneStats(player, flags)
 	local MoltenCoreCount = player:GetCollectibleNum(edithMod.Enums.CollectibleType.COLLECTIBLE_GILDED_STONE)

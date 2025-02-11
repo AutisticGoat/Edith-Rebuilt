@@ -1,8 +1,7 @@
 edithMod = RegisterMod("Edith Kotry Build", 1)
 local mod = edithMod
 
-edithMod.saveManager = include("resources.scripts.save_manager")
-edithMod.saveManager.Init(mod)
+include("resources/scripts/save_manager").Init(mod)
 
 local myFolder = "resources.scripts.EdithKotryLibraryOfIsaac"
 local LOCAL_TSIL = require(myFolder .. ".TSIL")
@@ -29,7 +28,6 @@ function edithMod:OverrideTaintedInputs(entity, input, action)
 end
 edithMod:AddCallback(ModCallbacks.MC_INPUT_ACTION, edithMod.OverrideTaintedInputs)
 
----comment
 ---@param player EntityPlayer
 ---@param cacheFlag CacheFlag
 function edithMod:SetEdithStats(player, cacheFlag)
@@ -43,7 +41,8 @@ function edithMod:SetEdithStats(player, cacheFlag)
 			player.TearRange = edithMod.rangeUp(player.TearRange, 2.5)
 		end,
 	}
-	edithMod.SwitchCase(cacheFlag, cacheActions)
+		
+	edithMod.WhenEval(cacheFlag, cacheActions)
 end
 edithMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, edithMod.SetEdithStats)
 

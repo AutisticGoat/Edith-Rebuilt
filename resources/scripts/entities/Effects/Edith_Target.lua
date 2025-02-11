@@ -31,11 +31,11 @@ function mod:EdithTargetLogic(effect)
 	
 	local playerPos = player.Position
 	local effectPos = effect.Position
-	local playerData = edithMod:GetData(player)
+	local playerData = edithMod.GetData(player)
 	local targetSprite = effect:GetSprite()
 	local room = game:GetRoom()
 
-	if edithMod:IsKeyStompPressed(player) or playerData.ExtraJumps > 0 and playerData.EdithJumpTimer == 0 then
+	if edithMod.IsKeyStompPressed(player) or playerData.ExtraJumps > 0 and playerData.EdithJumpTimer == 0 then
 		targetSprite:Play("Blink")
 	end
 	
@@ -83,8 +83,8 @@ function mod:EdithTargetSprite(effect)
 
 	if player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH then return end
 
-	if edithMod.saveManager:IsLoaded() then
-		local saveData = edithMod.saveManager.GetDeadSeaScrollsSave()
+	if edithMod.SaveManager:IsLoaded() then
+		local saveData = edithMod.SaveManager.GetDeadSeaScrollsSave()
 		if not saveData then return end
 		
 		local edithData = saveData.EdithData

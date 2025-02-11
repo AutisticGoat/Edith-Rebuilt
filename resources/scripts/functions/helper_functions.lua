@@ -51,7 +51,7 @@ function edithMod:GetPlayerFromTear(entity)
 	return nil
 end
 
-function edithMod:GetData(entity)
+function edithMod.GetData(entity)
 	local data = entity:GetData()
 	data.edithMod = data.edithMod or {}
 	return data.edithMod

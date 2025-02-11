@@ -1,7 +1,8 @@
-local game = edithMod.Enums.Utils.Game
+local utils = edithMod.Enums.Utils
+local game = utils.Game
 
 local function setRNG()
-	local rng = edithMod.Enums.Utils.RNG
+	local rng = utils.RNG
 	local RECOMMENDED_SHIFT_IDX = 35
 	
 	local seeds = game:GetSeeds()
