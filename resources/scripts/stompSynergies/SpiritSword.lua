@@ -1,11 +1,11 @@
-function edithMod:BrimStomp(player)
+---@param player EntityPlayer
+function edithMod:SwordStomp(player)
     if player:HasCollectible(CollectibleType.COLLECTIBLE_SPIRIT_SWORD) then
         -- Obtener datos del jugador y la espada
         local playerData = JumpLib:GetData(player)
-        local isJumping = playerData.Jumping
 
         -- Verificar si se ha presionado la tecla de salto
-        if edithMod:IsKeyStompPressed(player) then return end
+        if edithMod.IsKeyStompPressed(player) then return end
 
         -- Crear un nuevo cuchillo (espada espiritual)
         local knife = player:FireKnife(
@@ -17,7 +17,7 @@ function edithMod:BrimStomp(player)
         )
 
         -- Obtener datos del cuchillo
-        local knifeData = edithMod:GetData(knife)
+        local knifeData = edithMod.GetData(knife)
         local knifeSprite = knife:GetSprite()
 
         -- Configurar el cuchillo
@@ -49,13 +49,13 @@ function edithMod:BrimStomp(player)
         knife.CollisionDamage = formula
     end
 end
-edithMod:AddCallback(JumpLib.Callbacks.PLAYER_LAND, edithMod.BrimStomp, {
+edithMod:AddCallback(JumpLib.Callbacks.PLAYER_LAND, edithMod.SwordStomp, {
     tag = "edithMod_EdithJump",
 })
 
 function edithMod:RemoveStompKnife(knife)
     local knifeSprite = knife:GetSprite()
-    local knifeData = edithMod:GetData(knife)
+    local knifeData = edithMod.GetData(knife)
 	
     if knife.Variant ~= KnifeVariant.SPIRIT_SWORD or not knifeData.StompSword then
         return

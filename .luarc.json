@@ -240,9 +240,5 @@
 		"CustomGameOver",
 		"Encyclopedia",
 		"DetailedRespawn",
-		"MinimapAPI",
-        "tableMerge"
-	],
-    "diagnostics.disable": [
-        "missing-return-value"
-    ]}
+		"MinimapAPI"
+	]}

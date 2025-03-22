@@ -5,7 +5,6 @@ local effectVar = enums.EffectVariant
 local tables = enums.Tables
 
 local arrowPath = "gfx/effects/TaintedEdithArrow/effect_000_tainted_edith"
-local saveMan = edithMod.saveManager
 
 function edithMod:RenderTaintedEdithArrow(effect)
 	local room = game:GetRoom()
@@ -15,7 +14,7 @@ function edithMod:RenderTaintedEdithArrow(effect)
 	local rendermode = room:GetRenderMode()
 	
 	if rendermode == RenderMode.RENDER_WATER_REFLECT then return false end
-	local saveData = saveMan.GetDeadSeaScrollsSave()
+	local saveData = edithMod.SaveManager.GetDeadSeaScrollsSave()
 	local tEdithdata = saveData.TEdithData
 	
 	if not player then return end
@@ -27,7 +26,7 @@ function edithMod:RenderTaintedEdithArrow(effect)
 	
 	effectSprite.Rotation = arrowDesign ~= 7 and HopVec:GetAngleDegrees() or 0 
 
-	local color = tEdithdata.RGBMode and edithMod:RGBCycle(tEdithdata.RGBSpeed) or Color(arrowColor.Red, arrowColor.Green, arrowColor.Blue)
+	local color = tEdithdata.RGBMode and edithMod.RGBCycle(tEdithdata.RGBSpeed) or Color(arrowColor.Red, arrowColor.Green, arrowColor.Blue)
 
 	effect:SetColor(color, -1, 100, false, false)
 	effectSprite:ReplaceSpritesheet(0, arrowPath .. tables.ArrowSuffix[arrowDesign] .. ".png", true)

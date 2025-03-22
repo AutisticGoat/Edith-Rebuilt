@@ -47,12 +47,22 @@ function META:GetDickSize()
     return player.TearRange / 40
 end
 
----comment
+---Returns true if player is Edith.
+---`boolean` checks for Tainted Edith
 ---@param tainted boolean?
 ---@return boolean
 function META:IsEdith(tainted)
-	local player = self
+	local player = self ---@type EntityPlayer
 
 	return tainted == true and player:GetPlayerType() == edithMod.Enums.PlayerType.PLAYER_EDITH_B or player:GetPlayerType() == edithMod.Enums.PlayerType.PLAYER_EDITH	
+end
+
+---Kills player when they has brimstone
+function META:FuckingKillPlayerIfHasBrimstone()
+	local player = self ---@type EntityPlayer
+
+	if player:HasCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE) then
+		player:Die()
+	end
 end
 EndClass()

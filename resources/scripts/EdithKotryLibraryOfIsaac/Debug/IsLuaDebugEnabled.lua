@@ -1,3 +1,4 @@
+---@diagnostic disable: duplicate-set-field, undefined-global
 ---Players can boot the game with an launch option called "--luadebug", which will enable additional
 ---functionality that is considered to be unsafe. For more information about this flag, see the
 ---wiki: https://bindingofisaacrebirth.fandom.com/wiki/Launch_Options

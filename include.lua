@@ -7,19 +7,20 @@ local includeFiles = {
 	-- Cosas necesarias
 	"definitions",
 	"functions/helper_functions",
-	"functions/special_functions",
+	"functions/functions",
 	"functions/EdithClasses",
 	"ImGui",
 	"EdithKotryHudHelper",
+	"lhsx",
 	
 	-- Items
 	col .. "items/SaltShaker",
-	col .. "items/PepperGrinder",
-	col .. "items/EdithsHood",
-	col .. "items/SulfuricFire",
-	col .. "items/Sal",
-	col .. "items/MoltenCore",
-	col .. "items/GildedStone",
+	-- col .. "items/PepperGrinder",
+	-- col .. "items/EdithsHood",
+	-- col .. "items/SulfuricFire",
+	-- col .. "items/Sal",
+	-- col .. "items/MoltenCore",
+	-- col .. "items/GildedStone",
 	-- Items fin
 	
 	-- Trinkets
@@ -36,7 +37,7 @@ local includeFiles = {
 	
 	-- Personajes
 	ent .. "Players/Edith",
-	-- ent .. "Players/Edith_B",
+	ent .. "Players/Edith_B",
 	-- Personajes fin
 	
 	-- sinergias pisotones

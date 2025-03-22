@@ -91,15 +91,15 @@ end
 mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, mod.RandomRockTear)
 
 function edithMod:ShootTear(tear, index, grid)
-	local tearData = edithMod:GetData(tear)
-	local player = edithMod:GetPlayerFromTear(tear)
+	-- local tearData = edithMod:GetData(tear)
+	-- local player = edithMod:GetPlayerFromTear(tear)
 
-	local rock = grid:ToRock()	
-	if not rock then return end
-	if not tearData.IsPebbleTear then return end
+	-- local rock = grid:ToRock()	
+	-- if not rock then return end
+	-- if not tearData.IsPebbleTear then return end
 	
-	print("Es lágrima del guijarro ese")
+	-- print("Es lágrima del guijarro ese")
 	
-	grid:Destroy()
+	-- grid:Destroy()
 end
 edithMod:AddCallback(ModCallbacks.MC_PRE_TEAR_GRID_COLLISION, edithMod.ShootTear)

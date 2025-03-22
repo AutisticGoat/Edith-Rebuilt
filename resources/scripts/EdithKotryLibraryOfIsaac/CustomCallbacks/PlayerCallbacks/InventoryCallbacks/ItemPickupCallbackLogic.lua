@@ -1,3 +1,4 @@
+---@diagnostic disable: duplicate-doc-field
 ---@class PickingUpItem
 ---@field ID CollectibleType | TrinketType
 ---@field Type ItemType

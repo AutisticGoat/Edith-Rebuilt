@@ -20,7 +20,7 @@ mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, mod.SalSpawnSaltCreep)
 ---@param amount number
 ---@param source EntityRef
 function mod:KillingSalEnemy(entity, amount, _, source)
-	local entityData = edithMod:GetData(entity)
+	local entityData = edithMod.GetData(entity)
 	if entityData.SalFreeze ~= true then return end
 	if entity.HitPoints >= amount then return end
 
@@ -29,7 +29,7 @@ function mod:KillingSalEnemy(entity, amount, _, source)
 	local tear = Ent:ToTear()
 
 	if tear then
-		local entTearData = edithMod:GetData(tear)
+		local entTearData = edithMod.GetData(tear)
 		if entTearData.IsSalTear == true then return end
 	end
 
@@ -40,7 +40,7 @@ function mod:KillingSalEnemy(entity, amount, _, source)
 	
 	for _ = 1, randomTears do
 		local tears = player:FireTear(entity.Position, RandomVector() * (player.ShotSpeed * 10), false, false, false, player, 1)
-		local tearData = edithMod:GetData(tears)
+		local tearData = edithMod.GetData(tears)
 		
 		tears:AddTearFlags(TearFlags.TEAR_PIERCING)
 		tearData.IsSalTear = true

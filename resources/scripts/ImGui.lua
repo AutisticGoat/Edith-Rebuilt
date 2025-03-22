@@ -102,6 +102,21 @@ local function agregarSlider(padre, nombre, titulo, callback, default, minimo, m
     end
 end
 
+local function agregarSliderDecimal(padre, nombre, titulo, callback, default, minimo, maximo, formato)
+	if not ImGui.ElementExists(nombre) then
+		ImGui.AddSliderFloat(
+			padre, 
+			nombre, 
+			titulo, 
+			callback, 
+			default, 
+			minimo, 
+			maximo, 
+			formato
+		)
+	end
+end
+
 local function agregarCheckbox(padre, nombre, titulo, callback, activo)
     if not ImGui.ElementExists(nombre) then
         ImGui.AddCheckbox(
@@ -201,9 +216,9 @@ local function OptionsUpdate()
 		agregarCheckbox("EdithSetting", "SetRGB", "Set RGB Mode", function(check)
 			EdithData.RGBMode = check
 		end, false)
-		agregarSlider("EdithSetting", "SetRGBSpeed", "Set RGB Speed", function(index, val)
+		agregarSliderDecimal("EdithSetting", "SetRGBSpeed", "Set RGB Speed", function(index, val)
 			EdithData.RGBSpeed = index
-		end, 1, 1, 255, "%d%")
+		end, 1, 0.001, 0.03, "%.5f")
 		agregarCheckbox("EdithSetting", "TargetLine", "Enable Target line", function(check)
 			EdithData.targetline = check
 			end, false)
@@ -447,7 +462,6 @@ function edithMod:InitSaveData()
 	local EdithData = menuData.EdithData
 	local TEdithData = menuData.TEdithData
 	local miscData = menuData.miscData
-
 
 	EdithData.TargetColor = EdithData.TargetColor or {Red = 1, Green = 1, Blue = 1}
 	EdithData.stompsound = EdithData.stompsound or 1

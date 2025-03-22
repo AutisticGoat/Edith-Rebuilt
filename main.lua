@@ -10,6 +10,8 @@ LOCAL_TSIL.Init(myFolder)
 edithMod.JumpLib = include("resources/scripts/EdithKotryJumpLib")
 edithMod.JumpLib.Init(mod)
 
+include("resources/scripts/incubus_at_home")
+
 include("include")
 
 local tables = edithMod.Enums.Tables

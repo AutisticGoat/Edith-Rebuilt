@@ -19,7 +19,7 @@ edithMod:AddCallback(JumpLib.Callbacks.PLAYER_LAND, edithMod.BrimStomp, {
 })
 
 function edithMod:Stuff(effect)
-	local effectData = edithMod:GetData(effect)
+	local effectData = edithMod.GetData(effect)
 
 	local Vec1 = Vector(236.606, 224.768)
 	local Vec2 = Vector(236.606, 364.768)

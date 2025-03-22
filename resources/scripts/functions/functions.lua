@@ -178,7 +178,7 @@ end
 ---Returns player's range stat as portrayed in Game's stat HUD
 ---@param player EntityPlayer
 ---@return number
-function edithMod:GetPlayerRange(player)
+function edithMod.GetPlayerRange(player)
 	return player.TearRange / 40
 end
 
@@ -316,31 +316,24 @@ local function tearCol(_, tear)
 	if not tear.Parent then return end
 
 	local player = tear.Parent:ToPlayer()
-	
-	if not player then return end
-	if not edithMod:IsAnyEdith(player) then return end	
+	if not player or not edithMod:IsAnyEdith(player) then return end
+
 	local tearData = edithMod.GetData(tear)
-	
 	if not tearData.ShatterSprite then return end
 
 	local isBloody = string.find(tearData.ShatterSprite, "blood") ~= nil
 	local isBurnt = string.find(tearData.ShatterSprite, "burnt") ~= nil
-	local tableColor = tables.TearShatterColor
-	local shatterColor = tableColor[isBurnt][isBloody]
-		
+	local shatterColor = tables.TearShatterColor[isBurnt][isBloody]
+
 	for _, ent in ipairs(Isaac.GetRoomEntities()) do
 		if ent.Type == 1000 and (ent.Variant == 145 or ent.Variant == 35) then
-			local dist = tear.Position:Distance(ent.Position)
-			if dist <= 10 then
-				if ent.Variant == 35 then		
+			if tear.Position:Distance(ent.Position) <= 10 then
+				if ent.Variant == 35 then
 					ent.Color = tear.Color
-					edithMod:ChangeColor(ent, shatterColor[1], shatterColor[2], shatterColor[3])
+				elseif ent.Variant == 145 then
+					ent:GetSprite():ReplaceSpritesheet(0, misc.TearPath .. tearData.ShatterSprite .. ".png", true)
 				end
-				if ent.Variant == 145 then
-					local sprite = ent:GetSprite()
-					sprite:ReplaceSpritesheet(0, misc.TearPath .. tearData.ShatterSprite .. ".png", true)
-					edithMod:ChangeColor(ent, shatterColor[1], shatterColor[2], shatterColor[3])
-				end
+				edithMod:ChangeColor(ent, shatterColor[1], shatterColor[2], shatterColor[3])
 			end
 		end
 	end
@@ -371,7 +364,7 @@ local function doEdithTear(tear, IsBlood, isTainted)
 	tear.Color = player.Color
 end
 
----Forces tears to look like salt tears. Boolean argument sets tears for Tainted Edith
+---Forces tears to look like salt tears. `tainted` argument sets tears for Tainted Edith
 ---@param tear EntityTear
 ---@param tainted? boolean
 function edithMod.ForceSaltTear(tear, tainted)
@@ -383,7 +376,7 @@ end
 
 ---Converts seconds to game update frames
 ---@param seconds number
----@return integer
+---@return number
 function edithMod:SecondsToFrames(seconds)
 	return math.ceil(seconds * 30)
 end
@@ -407,7 +400,7 @@ function edithMod:SpawnBlackPowder(parent, quantity, position, distance)
 			Vector.Zero, 
 			parent
 		):ToEffect()
-		
+		if not blackPowder then return end
 		local powderData = edithMod.GetData(blackPowder)
 		powderData.CustomSpawn = true
 	end
@@ -484,6 +477,7 @@ end
 ---@param player EntityPlayer
 ---@return number
 function edithMod.GetEdithTargetDistance(player)
+---@diagnostic disable-next-line: missing-return-value
 	if not edithMod.IsEdith(player, false) then return end
 	local playerData = edithMod.GetData(player)
 	local target = playerData.EdithTarget ---@type EntityEffect
@@ -495,6 +489,7 @@ end
 ---@param player EntityPlayer
 ---@return Vector
 function edithMod.GetEdithTargetDirection(player)
+---@diagnostic disable-next-line: missing-return-value
 	if not edithMod.IsEdith(player, false) then return end
 	local playerData = edithMod.GetData(player)
 	local target = playerData.EdithTarget ---@type EntityEffect
@@ -522,54 +517,6 @@ function edithMod:SpawnPepperCreep(parent, position, damage, timeout)
 	pepper.CollisionDamage = damage or 0
 	local timeOutSeconds = edithMod:SecondsToFrames(timeout) or 30
 	pepper:SetTimeout(timeOutSeconds)
-end
-
-local red = 255
-local green = 0
-local blue = 0
-local state = 1
-
-local RGBCyclingColor = Color(1, 1, 1, 1)
-function edithMod:RGBCycle(step)
-    step = step or 1 
-		
-    if state == 1 then
-        green = math.min(255, green + step)
-        if green == 255 then
-            state = 2
-        end
-    elseif state == 2 then
-        red = math.max(0, red - step)
-        if red == 0 then
-            state = 3
-        end
-    elseif state == 3 then
-        blue = math.min(255, blue + step)
-        if blue == 255 then
-            state = 4
-        end
-    elseif state == 4 then
-        green = math.max(0, green - step)
-        if green == 0 then
-            state = 5
-        end
-    elseif state == 5 then
-        red = math.min(255, red + step)
-        if red == 255 then
-            state = 6
-        end
-    elseif state == 6 then
-        blue = math.max(0, blue - step)
-        if blue == 0 then
-            state = 1
-        end
-    end
-
-	RGBCyclingColor.R = red / 255
-	RGBCyclingColor.G = green / 255
-	RGBCyclingColor.B = blue / 255
-
-	return RGBCyclingColor
 end
 
 ---comment
@@ -648,7 +595,7 @@ function edithMod.ForceCharacterCostume(player, playertype, costumePath)
 	end
 end
 
----comment Checks if a number is between other two numbers
+---Checks if a number is between other two numbers
 ---@param num number
 ---@param lower number
 ---@param upper number
@@ -670,19 +617,16 @@ function edithMod:IsPlayerShooting(player)
 	return (shoot.l or shoot.r or shoot.u or shoot.d)
 end
 
-local targetSprite = Sprite()
-targetSprite:Load("gfx/edith target.anm2", true)
+local targetSprite = Sprite("gfx/edith target.anm2", true)
 
 ---Draws a line between From position to To position
 ---@param from Vector
 ---@param to Vector
 ---@param color Color
 ---@param linespace integer
-function edithMod:drawLine(from, to, color, linespace)
-
+function edithMod.drawLine(from, to, color, linespace)
 	linespace = linespace or 16
-	
-	local diffVector = (to - from)
+	local diffVector = to - from
 	local angle = diffVector:GetAngleDegrees()
 	local sectionCount = math.floor(diffVector:Length() / linespace)
 
@@ -693,7 +637,7 @@ function edithMod:drawLine(from, to, color, linespace)
 		
 	for _ = 1, sectionCount do
 		targetSprite:Render(Isaac.WorldToScreen(from))
-		from = from + Vector.One * linespace * Vector.FromAngle(angle) 
+		from = from + Vector.One * linespace * Vector.FromAngle(angle)
 	end
 
 	targetSprite.Rotation = 0
@@ -740,10 +684,8 @@ function edithMod:SpawnSaltGib(parent, Number, color, timeout, spawnType)
 	end
 end
 
----Spawns Edith Target and returns it
 ---@param player EntityPlayer
----@return EntityEffect
-function edithMod:SpawnEdithTarget(player)
+function edithMod.SpawnEdithTarget(player)
 	local playerData = edithMod.GetData(player)
 
 	if not playerData.EdithTarget then 
@@ -759,8 +701,6 @@ function edithMod:SpawnEdithTarget(player)
 
 		target.DepthOffset = -100
 	end
-
-	return playerData.EdithTarget
 end
 
 ---Returns the closest enemy to player
@@ -768,7 +708,6 @@ end
 ---@return EntityNPC|nil
 function edithMod.GetClosestEnemy(player)
 	local closestDistance, closestEnemy
-	local room = game:GetRoom()
     for _, enemy in ipairs(Isaac.GetRoomEntities()) do
         if enemy:IsActiveEnemy() and enemy:IsVulnerableEnemy() then
             local distanceToPlayer = enemy.Position:Distance(player.Position)
@@ -779,10 +718,6 @@ function edithMod.GetClosestEnemy(player)
         end
     end
 
-	if closestEnemy then
-		local checkline = room:CheckLine(player.Position, closestEnemy.Position, 0, 1000)
-		if checkline == false then return nil end
-	end
 	return closestEnemy
 end
 
@@ -953,7 +888,7 @@ function edithMod:EdithStomp(parent, radius, damage, knockback, breakGrid)
 		
 			entity:TakeDamage(damage, DamageFlag.DAMAGE_CRUSH | DamageFlag.DAMAGE_IGNORE_ARMOR, EntityRef(parent), 0)
 			
-			entity.Velocity = (entity.Position - parent.Position):Resized(knockback)
+			edithMod.TriggerPush(entity, parent, knockback, 5, false)
 		else
 			edithMod.When(entity.Type, stompBehavior)
 		end
@@ -972,6 +907,16 @@ function edithMod.GetEdithTarget(player)
 	return edithTarget
 end
 
+---Triggers a push to `pushed` from `pusher`
+---@param pushed Entity
+---@param pusher Entity
+---@param strength number
+---@param duration integer
+---@param impactDamage boolean
+function edithMod.TriggerPush(pushed, pusher, strength, duration, impactDamage)
+	local dir = ((pusher.Position - pushed.Position) * -1):Resized(strength)
+	pushed:AddKnockback(EntityRef(pusher), dir, duration, impactDamage)
+end
 
 ---Method used for Edith's dash behavior (Like A Pony/White Pony or Mars usage)
 ---@param player EntityPlayer
@@ -1030,16 +975,16 @@ function edithMod:TaintedEdithStomp(parent, radius, damage, knockback, isParry)
 		}
 	
 		if entity:IsActiveEnemy() and entity:IsVulnerableEnemy() then
-		
 			entity:TakeDamage(damage, DamageFlag.DAMAGE_CRUSH | DamageFlag.DAMAGE_IGNORE_ARMOR, EntityRef(parent), 0)
 			
-			entity.Velocity = (entity.Position - parent.Position):Resized(knockback)
+			edithMod.TriggerPush(entity, parent, knockback, 5, false)
+			-- entity.Velocity = (entity.Position - parent.Position):Resized(knockback)
 
 			if isParry then
 				parent:SetMinDamageCooldown(30)
 			end
 		else
-			edithMod.SwitchCase(entity.Type, stompBehavior)
+			edithMod.When(entity.Type, stompBehavior, function() end)
 		end
 	end
 end
@@ -1082,19 +1027,17 @@ function edithMod.LandFeedbackManager(player, soundTable, GibColor, IsParryLand)
 
 		soundPick = EdithData.stompsound ---@type number
 		volume = (isStomping and 1.5 or 2) * ((EdithData.stompVolume / 100) ^ 2) ---@type number
-
 		SizeX = isStomping and 0.6 or 0.7 * player.SpriteScale.X
 		SizeY = isStomping and 0.6 or 0.8 * player.SpriteScale.X
-
 		ScreenShakeIntensity = isStomping and 6 or 10
-
 		gibAmount = isStomping and 6 or 10
 	elseif edithMod.IsEdith(player, true) then
 		local TEdithData = menuData.TEdithData
-
-		soundPick = TEdithData.TaintedHopSound ---@type number
+		SizeX = IsParryLand and 0.8 or 0.5
+		SizeY = IsParryLand and 0.7 or 0.5
+		soundPick = IsParryLand and TEdithData.TaintedParrySound or TEdithData.TaintedHopSound ---@type number
 		volume = (IsParryLand and 1.5 or 1) * ((TEdithData.taintedStompVolume / 100) ^ 2) ---@type number
-		ScreenShakeIntensity = 6
+		ScreenShakeIntensity = IsParryLand and 6 or 3
 		gibAmount = IsParryLand and 6 or 1
 	end
 
@@ -1132,4 +1075,49 @@ function edithMod.LandFeedbackManager(player, soundTable, GibColor, IsParryLand)
 	stompGFX.Color = color
 	GibColor = GibColor or Color.Default
 	edithMod:SpawnSaltGib(player, gibAmount, GibColor, 5, "StompGib")
+end
+
+---comment
+---@param entity Entity
+---@return EntityPlayer?
+function edithMod:GetPlayerFromTear(entity)
+	for i=1, 3 do
+		local check = nil
+		if i == 1 then
+			check = entity.Parent
+		elseif i == 2 then
+			check = entity.SpawnerEntity
+		end
+		if check then
+			if check.Type == EntityType.ENTITY_PLAYER then
+				return edithMod:GetPtrHashEntity(check):ToPlayer()
+			elseif check.Type == EntityType.ENTITY_FAMILIAR then
+				return check:ToFamiliar().Player:ToPlayer()
+			end
+		end
+	end
+	return nil
+end
+
+---comment
+---@param entity Entity
+---@return table
+function edithMod.GetData(entity)
+	local data = entity:GetData()
+	data.edithMod = data.edithMod or {}
+	return data.edithMod
+end
+
+function edithMod:GetPtrHashEntity(entity)
+	if entity then
+		if entity.Entity then
+			entity = entity.Entity
+		end
+		for _, matchEntity in pairs(Isaac.FindByType(entity.Type, entity.Variant, entity.SubType, false, false)) do
+			if GetPtrHash(entity) == GetPtrHash(matchEntity) then
+				return matchEntity
+			end
+		end
+	end
+	return nil
 end

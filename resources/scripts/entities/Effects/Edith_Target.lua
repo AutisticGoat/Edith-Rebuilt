@@ -4,6 +4,20 @@ local utils = enums.Utils
 local tables = enums.Tables
 local game = utils.Game
 local misc = enums.Misc
+local saveManager = mod.SaveManager
+local Hsx = edithMod.Hsx
+
+local funcs = {
+	IsEdith = mod.IsEdith,
+	SetVector = mod.SetVector,
+	GetData = mod.GetData,
+	DrawLine = mod.drawLine,
+	MenuData = saveManager.GetDeadSeaScrollsSave,
+	RGBCycle = mod.RGBCycle,
+	Switch = mod.When,
+	HSVToRGB = Hsx.hsv2rgb,
+	RGBToHSV = Hsx.rgb2hsv,
+}
 
 local function interpolateVector2D(vectorA, vectorB, t)
     local Interpolated = {
@@ -13,7 +27,7 @@ local function interpolateVector2D(vectorA, vectorB, t)
     return Vector(Interpolated.X, Interpolated.Y)
 end
 
-local DungeonVector = Vector(0, 0)
+local DungeonVector = Vector.Zero
 
 local teleportPoints = {
 	{X = 110, Y = 135},
@@ -31,7 +45,7 @@ function mod:EdithTargetLogic(effect)
 	
 	local playerPos = player.Position
 	local effectPos = effect.Position
-	local playerData = edithMod.GetData(player)
+	local playerData = funcs.GetData(player)
 	local targetSprite = effect:GetSprite()
 	local room = game:GetRoom()
 
@@ -56,8 +70,7 @@ function mod:EdithTargetLogic(effect)
 	
 	if room:GetType() == RoomType.ROOM_DUNGEON then
 		for _, v in ipairs(teleportPoints) do
-			DungeonVector.X = v.X
-			DungeonVector.Y = v.Y
+			edithMod.SetVector(DungeonVector, v.X, v.Y)
 			
 			if (effectPos - DungeonVector):Length() <= 20 then
 				player.Position = effectPos + effect.Velocity:Normalized():Resized(25)
@@ -70,9 +83,19 @@ function mod:EdithTargetLogic(effect)
 end 
 edithMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, mod.EdithTargetLogic, edithMod.Enums.EffectVariant.EFFECT_EDITH_TARGET)
 
-local targetPath = "gfx/effects/EdithTarget/effect_000_edith_target"
+local value = 0
 
-local targetlineColor = Color(1, 1, 1, 1)
+local function RGBFunction(color, step)
+	local newColor = color
+
+	value = value + step
+
+	newColor.R, newColor.B, newColor.G = funcs.RGBToHSV(newColor.R, newColor.B, newColor.G)
+	newColor.R = newColor.R - step
+	newColor.R, newColor.B, newColor.G = funcs.HSVToRGB(newColor.R, newColor.B, newColor.G)
+
+	color = newColor
+end
 
 function mod:EdithTargetSprite(effect)
 	local room = game:GetRoom()	
@@ -80,58 +103,72 @@ function mod:EdithTargetSprite(effect)
 	
     local player = effect.SpawnerEntity:ToPlayer()
     if not player then return end
+	if not funcs.IsEdith(player, false) then return end
+	if not saveManager:IsLoaded() then return end
+	local saveData = funcs.MenuData()
 
-	if player:GetPlayerType() ~= edithMod.Enums.PlayerType.PLAYER_EDITH then return end
+	if not saveData then return end
+	local edithData = saveData.EdithData
+	local targetColor = edithData.TargetColor
+	local RGBmode = edithData.RGBMode
+	local RGBspeed = edithData.RGBSpeed
+	local targetSpace = edithData.linespace
+	local targetDesign = edithData.targetdesign
+	local targetLine = edithData.targetline
+	local effectColor = effect.Color
+	local effectSprite = effect:GetSprite()
 
-	if edithMod.SaveManager:IsLoaded() then
-		local saveData = edithMod.SaveManager.GetDeadSeaScrollsSave()
-		if not saveData then return end
-		
-		local edithData = saveData.EdithData
+	local color = Color.Default
 
-		local targetColor = edithData.TargetColor
-
-		local RGBmode = edithData.RGBMode
-		local RGBspeed = edithData.RGBSpeed
-		local targetSpace = edithData.linespace
-		local targetDesign = edithData.targetdesign
-
-		local effectColor = effect.Color
-		local effectSprite = effect:GetSprite()
-		
-		local color = (targetDesign == 1 and 
-			(RGBmode and edithMod:RGBCycle(RGBspeed) or Color(targetColor.Red, targetColor.Green, targetColor.Blue)) 
-		) or Color.Default
-
-		effect:SetColor(color, -1, 100, false, false)
-		
-		effectSprite:ReplaceSpritesheet(0, targetPath .. tables.TargetSuffix[targetDesign] .. ".png", true)
-		
-		local targetLine = edithData.targetline
-
-		if targetLine ~= true then return end
-								
-		if targetDesign == 1 then
-			targetlineColor = effectColor
+	if targetDesign == 1 then
+		if RGBmode then
+			color = misc.HSVStartColor
+			RGBFunction(color, RGBspeed)
 		else
-			targetlineColor.R = tables.ColorValues[targetDesign].R
-			targetlineColor.G = tables.ColorValues[targetDesign].G
-			targetlineColor.B = tables.ColorValues[targetDesign].B
+			color = Color(targetColor.Red, targetColor.Green, targetColor.Blue)
 		end
-
-		local animation = effectSprite:GetAnimation()
-		local frame = effectSprite:GetFrame()
-		local isObscure = frame >= (tables.FrameLimits[animation] or 0)
-
-		if isObscure then
-			local newObcureColor = targetlineColor
-			newObcureColor.R = newObcureColor.R * misc.ObscureDiv
-			newObcureColor.G = newObcureColor.G * misc.ObscureDiv
-			newObcureColor.B = newObcureColor.B * misc.ObscureDiv
-		
-			targetlineColor = newObcureColor
-		end
-		edithMod:drawLine(player.Position, effect.Position, targetlineColor, targetSpace) 
 	end
+
+	print(RGBspeed)
+
+	-- effect.Color = Color(1, 0, 0)
+
+	-- local color = effect.Color 
+
+	-- RGBFunction(color, 0.0)
+	
+
+	-- print(color)
+
+	-- local color = (targetDesign == 1 and 
+	-- 	(RGBmode and funcs.RGBCycle(RGBspeed) or Color(targetColor.Red, targetColor.Green, targetColor.Blue)) 
+	-- ) or Color.Default
+
+	effect:SetColor(color, -1, 100, false, false)
+	effectSprite:ReplaceSpritesheet(0, misc.TargetPath .. tables.TargetSuffix[targetDesign] .. ".png", true)
+		
+	if targetLine ~= true then return end
+	local targetlineColor = misc.TargetLineColor
+	local animation = effectSprite:GetAnimation()
+	local frame = effectSprite:GetFrame()
+	local isObscure = frame >= funcs.Switch(animation, tables.FrameLimits, 0)	
+	
+	if targetDesign == 1 then
+		targetlineColor = effectColor
+	else
+		targetlineColor.R = tables.ColorValues[targetDesign].R
+		targetlineColor.G = tables.ColorValues[targetDesign].G
+		targetlineColor.B = tables.ColorValues[targetDesign].B
+	end
+
+	if isObscure then
+		local newObcureColor = targetlineColor
+		newObcureColor.R = newObcureColor.R * misc.ObscureDiv
+		newObcureColor.G = newObcureColor.G * misc.ObscureDiv
+		newObcureColor.B = newObcureColor.B * misc.ObscureDiv
+		
+		targetlineColor = newObcureColor
+	end
+	funcs.DrawLine(player.Position, effect.Position, targetlineColor, targetSpace) 
 end
 edithMod:AddCallback(ModCallbacks.MC_PRE_EFFECT_RENDER, mod.EdithTargetSprite,edithMod.Enums.EffectVariant.EFFECT_EDITH_TARGET)
