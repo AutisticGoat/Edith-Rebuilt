@@ -129,21 +129,6 @@ function mod:EdithTargetSprite(effect)
 		end
 	end
 
-	print(RGBspeed)
-
-	-- effect.Color = Color(1, 0, 0)
-
-	-- local color = effect.Color 
-
-	-- RGBFunction(color, 0.0)
-	
-
-	-- print(color)
-
-	-- local color = (targetDesign == 1 and 
-	-- 	(RGBmode and funcs.RGBCycle(RGBspeed) or Color(targetColor.Red, targetColor.Green, targetColor.Blue)) 
-	-- ) or Color.Default
-
 	effect:SetColor(color, -1, 100, false, false)
 	effectSprite:ReplaceSpritesheet(0, misc.TargetPath .. tables.TargetSuffix[targetDesign] .. ".png", true)
 		

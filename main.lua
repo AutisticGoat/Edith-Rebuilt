@@ -1,3 +1,4 @@
+---@diagnostic disable-next-line: lowercase-global
 edithMod = RegisterMod("Edith Kotry Build", 1)
 local mod = edithMod
 

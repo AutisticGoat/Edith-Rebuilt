@@ -4,18 +4,15 @@ local items = enums.CollectibleType
 local utils = enums.Utils
 local game = utils.Game 
 
----comment
 ---@param player EntityPlayer
 function mod:SalSpawnSaltCreep(player)
 	if not player:HasCollectible(items.COLLECTIBLE_SAL) then return end
-	local shouldSpawnSalt = game:GetFrameCount() % 15 == 0
+	if player.FrameCount % 15 ~= 0 then return end
 
-	if not shouldSpawnSalt then return end
 	mod:SpawnSaltCreep(player, player.Position, 1, 3, 2, "Sal")
 end
 mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, mod.SalSpawnSaltCreep)
 
----comment
 ---@param entity Entity
 ---@param amount number
 ---@param source EntityRef
@@ -42,6 +39,7 @@ function mod:KillingSalEnemy(entity, amount, _, source)
 		local tears = player:FireTear(entity.Position, RandomVector() * (player.ShotSpeed * 10), false, false, false, player, 1)
 		local tearData = edithMod.GetData(tears)
 		
+		mod.ForceSaltTear(tears)
 		tears:AddTearFlags(TearFlags.TEAR_PIERCING)
 		tearData.IsSalTear = true
 	end

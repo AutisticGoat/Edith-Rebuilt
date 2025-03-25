@@ -4,7 +4,9 @@ local items = enums.CollectibleType
 
 local RangeUse = 80
 
-function edithMod:UseSulfuricFire(Id, RNG, player, flags, slot, data)
+---@param player EntityPlayer
+---@return boolean
+function edithMod:UseSulfuricFire(_, _, player)
 	for _, enemy in pairs(Isaac.FindInRadius(player.Position, RangeUse, EntityPartition.ENEMY)) do
 		local Flame = Isaac.Spawn(
 			EntityType.ENTITY_EFFECT,

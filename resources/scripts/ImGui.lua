@@ -386,14 +386,14 @@ function edithMod:ResetSaveData(isTainted)
 		TEdithData.taintedStompVolume = 100
 		TEdithData.TaintedParrySound = 1
 		TEdithData.RGBMode = false
-		TEdithData.RGBSpeed = 16
+		TEdithData.RGBSpeed = 0.005
 	else
 		EdithData.TargetColor = {Red = 1, Green = 1, Blue = 1}
 		EdithData.stompsound = 1
 		EdithData.stompVolume = 100
 		EdithData.targetdesign = 1
 		EdithData.RGBMode = false
-		EdithData.RGBSpeed = 16
+		EdithData.RGBSpeed = 0.005
 		EdithData.targetline = false
 		EdithData.linespace = 16
 	end
@@ -468,7 +468,7 @@ function edithMod:InitSaveData()
 	EdithData.stompVolume = EdithData.stompVolume or 100
 	EdithData.targetdesign = EdithData.targetdesign or 1
 	EdithData.RGBMode = EdithData.RGBMode or false
-	EdithData.RGBSpeed = EdithData.RGBSpeed or 16
+	EdithData.RGBSpeed = EdithData.RGBSpeed or 0.5
 	EdithData.targetline = EdithData.targetline or false
 	EdithData.linespace = EdithData.linespace or 16
 	
@@ -478,7 +478,7 @@ function edithMod:InitSaveData()
 	TEdithData.taintedStompVolume = TEdithData.taintedStompVolume or 100
 	TEdithData.TaintedParrySound = TEdithData.TaintedParrySound or 1
 	TEdithData.RGBMode = TEdithData.RGBMode or false
-	TEdithData.RGBSpeed = TEdithData.RGBSpeed or 16
+	TEdithData.RGBSpeed = TEdithData.RGBSpeed or 0.5
 
 	miscData.shakescreen = miscData.shakescreen or true
 end

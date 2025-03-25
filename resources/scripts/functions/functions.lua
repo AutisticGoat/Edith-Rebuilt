@@ -746,7 +746,7 @@ end
 
 ---Function used to manage and change Shockwave sprites from `TSIL` Library
 ---@return string
-function edithMod:ShockwaveSprite()
+function edithMod.ShockwaveSprite()
 	local room = game:GetRoom()
     local bdType = room:GetBackdropType()
     local effectPath = "resources/gfx/effects/effect_062_"

@@ -60,7 +60,7 @@ function edithMod:SpawnRuneOnKill(entity)
 		
 		local trinketMult = player:GetTrinketMultiplier(edithMod.Enums.TrinketType.TRINKET_GEODE)
 		local rng = player:GetTrinketRNG(edithMod.Enums.TrinketType.TRINKET_GEODE)
-		local spawnRuneRoll = edithMod:RandomNumber(rng)
+		local spawnRuneRoll = edithMod.RandomNumber(1, _, rng)
 		
 		local effectMult = {
 			[2] = 1.25,

@@ -1,33 +1,29 @@
-print("CArgado archivo")
+local mod = edithMod
+local funcs = require("resources.scripts.stompSynergies.Funcs")
+local EdithJump = require("resources.scripts.stompSynergies.JumpData")
 
-function edithMod:BrimStomp(player)
-	-- if edithMod:IsKeyStompPressed(player) then return end
+---@param player EntityPlayer
+function mod:BrimStomp(player)
+	if funcs.KeyStompPressed(player) then return end
+	if not player:HasCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE) then return end
+
+	local totalRays = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and 6 or 4
+	local shootDegrees = 360 / totalRays
 	
-	if player:HasCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE) then
-		local totalRays = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and 6 or 4
-	
-		local shootDegrees = 360 / totalRays
-		
-		for	i = 1, totalRays do
-			local laser = player:FireDelayedBrimstone(shootDegrees * i, player):ToLaser()
-			laser:SetMaxDistance(player.TearRange / 5)
-			laser:AddTearFlags(player.TearFlags)
-			
-			local brimData = edithMod.GetData(laser)
-			
-			brimData.StompBrimstone = true
-		end
+	for	i = 1, totalRays do
+		local laser = player:FireDelayedBrimstone(shootDegrees * i, player)
+		local brimData = funcs.GetData(laser)
+		laser:SetMaxDistance(player.TearRange / 5)
+		laser:AddTearFlags(player.TearFlags)
+		brimData.StompBrimstone = true
 	end
 end
-edithMod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, edithMod.BrimStomp, {
-    tag = "edithMod_EdithJump",
-})
+mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, mod.BrimStomp, EdithJump)
 
-function edithMod:LaserSpin(laser)
-	local laserData = edithMod.GetData(laser)
+function mod:LaserSpin(laser)
+	local laserData = funcs.GetData(laser)
 
-	if laserData.StompBrimstone == true then	
-		laser.Angle = laser.Angle + 10
-	end
+	if laserData.StompBrimstone ~= true then return end	
+	laser.Angle = laser.Angle + 10
 end
-edithMod:AddCallback(ModCallbacks.MC_POST_LASER_UPDATE, edithMod.LaserSpin)
+mod:AddCallback(ModCallbacks.MC_POST_LASER_UPDATE, mod.LaserSpin)

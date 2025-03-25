@@ -1,6 +1,10 @@
-{	"runtime.version": "Lua 5.3",	"workspace.library": [
-		"c:\\Users\\Kotry\\.vscode\\extensions\\filloax.isaac-lua-api-vscode-1.12.0\\out\\emmylua\\repentogon"
-	],	"diagnostics.globals": [
+{
+	"runtime.version": "Lua 5.3",
+	"workspace.library": [
+		"c:\\Users\\Kotry\\.vscode\\extensions\\filloax.isaac-lua-api-vscode-1.12.0\\out\\emmylua\\repentogon",
+		"additional/library/path"  // Add any additional library paths here
+	],
+	"diagnostics.globals": [
 		"Achievement",
 		"Ambush",
 		"AnimRenderFlags",
@@ -241,4 +245,5 @@
 		"Encyclopedia",
 		"DetailedRespawn",
 		"MinimapAPI"
-	]}
+	]
+}

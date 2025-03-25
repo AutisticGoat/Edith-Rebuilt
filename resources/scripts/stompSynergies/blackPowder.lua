@@ -1,37 +1,23 @@
-local rng = RNG()
+local mod = edithMod
+local funcs = require("resources.scripts.stompSynergies.Funcs")
+local EdithJump = require("resources.scripts.stompSynergies.JumpData")
 
-function edithMod:BrimStomp(player)
-	if edithMod:IsKeyStompPressed(player) then return end
-	
-	local rng = edithMod.Enums.Utils.RNG
-	
-	if player:HasCollectible(CollectibleType.COLLECTIBLE_BLACK_POWDER) then
-		-- local randomSpawn = edithMod.RandomNumber(rng, 1, 3)
-		
-		-- if randomSpawn ~= 1 then return end
-	
-		local distance = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and 90 or 70
-		edithMod:SpawnBlackPowder(player, 2, player.Position, distance)
-	end
+---@param player EntityPlayer
+function mod:BlackPowderStomp(player)
+	if funcs.KeyStompPressed(player) then return end
+	if not player:HasCollectible(CollectibleType.COLLECTIBLE_BLACK_POWDER) then return end	
+
+	local randomSpawn = funcs.RandomNumber(1, 3)
+	if randomSpawn ~= 1 then return end
+	local distance = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and 90 or 70
+	mod:SpawnBlackPowder(player, 20, player.Position, distance)
 end
-edithMod:AddCallback(JumpLib.Callbacks.PLAYER_LAND, edithMod.BrimStomp, {
-    tag = "edithMod_EdithJump",
-})
+mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, mod.BlackPowderStomp, EdithJump)
 
-function edithMod:Stuff(effect)
-	local effectData = edithMod.GetData(effect)
-
-	local Vec1 = Vector(236.606, 224.768)
-	local Vec2 = Vector(236.606, 364.768)
-
-	-- print(Vec1:Distance(Vec2))
-
-	if effectData.CustomSpawn ~= true then
-		effect.Visible = false
-		effect:Remove()
-	else
-		-- print(effect.Position)
-	end
-	
+function mod:Stuff(effect)
+	local effectData = mod.GetData(effect)
+	if effectData.CustomSpawn == true then return end
+	effect.Visible = false
+	effect:Remove()
 end
-edithMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, edithMod.Stuff, EffectVariant.PLAYER_CREEP_BLACKPOWDER)
+mod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, mod.Stuff, EffectVariant.PLAYER_CREEP_BLACKPOWDER)

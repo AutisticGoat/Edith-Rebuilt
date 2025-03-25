@@ -201,7 +201,9 @@ edithMod.Enums = {
 		TargetPath = "gfx/effects/EdithTarget/effect_000_edith_target",
 		TargetLineColor = Color(1, 1, 1),
 		SaltShakerDist = Vector(0, 60),
-		HSVStartColor = Color(1, 0, 0)
+		HSVStartColor = Color(1, 0, 0),
+		StompFuncs = "resources.scripts.stompSynergies.Funcs",
+		StompData = "resources.scripts.stompSynergies.JumpData",
 	},
 }
 

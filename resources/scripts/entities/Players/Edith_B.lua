@@ -430,7 +430,7 @@ function mod:EdithParryJump(player, data)
 
 			if proj then
 				newVelocity = (playerPos - ent.SpawnerEntity.Position):Resized(30)
-				ent:AddKnockback(EntityRef(player), newVelocity, 15, true)
+				-- ent:AddKnockback(EntityRef(player), newVelocity, 15, true)
 			end
 
 			
