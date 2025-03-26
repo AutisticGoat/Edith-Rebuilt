@@ -378,6 +378,18 @@ function mod:EdithLanding(player, data, pitfall)
 end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, mod.EdithLanding, JumpParams.EdithJump)
 
+---@param ent Entity
+local function CustomAfterImage(ent)
+	local entSprite = ent:GetSprite()
+	print(entSprite:GetFilename())
+	local newSprite = Sprite(entSprite:GetFilename(), true)
+
+
+	entSprite:Render(Isaac.WorldToScreen(ent.Position), Vector.Zero, Vector.Zero)
+end
+
+
+
 ---comment
 ---@param player EntityPlayer
 ---@param data JumpData
@@ -391,6 +403,8 @@ function mod:EdithJumpLibStuff(player, data)
 	local isMovingTarget = funcs.TargetMov(player)
 	
 	funcs.EdithDash(player, direction, distance, div)
+
+	CustomAfterImage(player)
 
 	if not JumpLib:IsFalling(player) then return end
 	if not (player.CanFly and ((isMovingTarget and distance <= 50) or distance <= 5)) then return end

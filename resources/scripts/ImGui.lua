@@ -218,7 +218,7 @@ local function OptionsUpdate()
 		end, false)
 		agregarSliderDecimal("EdithSetting", "SetRGBSpeed", "Set RGB Speed", function(index, val)
 			EdithData.RGBSpeed = index
-		end, 1, 0.001, 0.03, "%.5f")
+		end, 0.005, 0.001, 0.03, "%.5f")
 		agregarCheckbox("EdithSetting", "TargetLine", "Enable Target line", function(check)
 			EdithData.targetline = check
 			end, false)
@@ -314,9 +314,9 @@ local function OptionsUpdate()
 		end, false)
 		actualizarCampo("TaintedSetRGB", "TEdithData", "RGBMode", false, "Checkbox")
 		
-		agregarSlider("TaintedEdithSetting", "TaintedSetRGBSpeed", "Set RGB Speed", function(index, val)
+		agregarSliderDecimal("TaintedEdithSetting", "TaintedSetRGBSpeed", "Set RGB Speed", function(index, val)
 			TEdithData.RGBSpeed = index
-		end, 1, 1, 255, "%d%")
+		end, 0.005, 0.001, 0.03, "%.5f")
 		actualizarCampo("TaintedSetRGBSpeed", "TEdithData", "RGBSpeed", 16,"Slider")	
 			
 		agregarElemento("TaintedEdithSetting", "taintedSoundSeparator", ImGuiElement.SeparatorText, "Sound")

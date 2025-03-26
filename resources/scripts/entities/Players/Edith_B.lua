@@ -362,8 +362,6 @@ function mod:EdithLanding(player)
 	local damageBase = 3.5
 	local DamageStat = player.Damage
 	
-	print(player.Damage)
-
 	playerData.HopParams = {
 		Radius = math.min((30 + (tearRange - 9)), 35),
 		Knockback = math.min(50, (7.7 + DamageStat ^ 1.2)) * player.ShotSpeed,
@@ -448,10 +446,6 @@ function mod:EdithParryJump(player, data)
 	end
 	local tableRef = (isenemy and parryJumpSounds) or hopSounds
 
-	for k, v in pairs(tableRef) do
-		print(k, v)
-	end
-
 	edithMod.LandFeedbackManager(player, tableRef, Color.Default, isenemy)
 end	
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, mod.EdithParryJump, {
@@ -472,12 +466,6 @@ local leftVector = Vector(-8, 10)
 local centerVector = Vector(0, 10)
 local rightVector = Vector(8, 10)
 
-local tEdithChargeBar = Sprite()
-local tEdithBrightChargebar = Sprite()
-
-tEdithChargeBar:Load("gfx/TEdithChargebar.anm2", true)
-tEdithBrightChargebar:Load("gfx/TEdithBRChargebar.anm2", true)
-
 function mod:HudBarRender(player)
 	if not funcs.IsEdith(player, true) then return end
 
@@ -488,12 +476,21 @@ function mod:HudBarRender(player)
 	local dashBRCharge = playerData.BirthrightCharge
 	local offset = centerVector
 
+	if not playerData.ChargeBar then
+		playerData.ChargeBar = Sprite("gfx/TEdithChargebar.anm2", true)
+	end
+
+	if not playerData.BRChargeBar then
+		playerData.BRChargeBar = Sprite("gfx/TEdithBRChargebar.anm2", true)
+	end
+
+	local chargeBar, BRChargebar = playerData.ChargeBar, playerData.BRChargeBar
 	
-	if player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and (playerData.MoveBrCharge > 0 and playerData.MoveCharge ~= 0) or (isTaintedEdithJump(player)) then
+	if player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and not BRChargebar:IsFinished("Disappear") then
 		offset = leftVector
 	end
 
-	HudHelper.RenderChargeBar(tEdithChargeBar, dashCharge, 100, playerpos + offset)
-	HudHelper.RenderChargeBar(tEdithBrightChargebar, dashBRCharge, 100, playerpos + rightVector)
+	HudHelper.RenderChargeBar(chargeBar, dashCharge, 100, playerpos + offset)
+	HudHelper.RenderChargeBar(BRChargebar, dashBRCharge, 100, playerpos + rightVector)
 end
 edithMod:AddCallback(ModCallbacks.MC_PRE_PLAYER_RENDER, mod.HudBarRender)
