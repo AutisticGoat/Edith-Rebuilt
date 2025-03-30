@@ -8,52 +8,59 @@ local myFolder = "resources.scripts.EdithKotryLibraryOfIsaac"
 local LOCAL_TSIL = require(myFolder .. ".TSIL")
 LOCAL_TSIL.Init(myFolder)
 
-edithMod.JumpLib = include("resources/scripts/EdithKotryJumpLib")
-edithMod.JumpLib.Init(mod)
-
-include("resources/scripts/incubus_at_home")
+mod.JumpLib = include("resources/scripts/EdithKotryJumpLib")
+mod.JumpLib.Init(mod)
 
 include("include")
 
-local tables = edithMod.Enums.Tables
+local tables = mod.Enums.Tables
 
 -- some shared functions between edith and tainted Edith, the behave almost the same 
-function edithMod:OverrideTaintedInputs(entity, input, action)
-	if not entity then return end
-	local player = entity:ToPlayer()
-	
-	if not player then return end
-	if not edithMod:IsAnyEdith(player) then return end
-	
-	if input == 2 then
-		return tables.OverrideActions[action]
-	end
+
+function mod:OverrideTaintedInputs(entity, input, action)
+    if not entity then return end
+    local player = entity:ToPlayer()
+    
+    if not player then return end
+    if not mod:IsAnyEdith(player) then return end
+    if input ~= 2 then return end
+    
+    return tables.OverrideActions[action]
 end
-edithMod:AddCallback(ModCallbacks.MC_INPUT_ACTION, edithMod.OverrideTaintedInputs)
+mod:AddCallback(ModCallbacks.MC_INPUT_ACTION, mod.OverrideTaintedInputs)
 
 ---@param player EntityPlayer
 ---@param cacheFlag CacheFlag
-function edithMod:SetEdithStats(player, cacheFlag)
-	if not edithMod:IsAnyEdith(player) then return end
+function mod:SetEdithStats(player, cacheFlag)
+    if not mod:IsAnyEdith(player) then return end
 
-	local cacheActions = {
-		[CacheFlag.CACHE_DAMAGE] = function()
-			player.Damage = player.Damage * 1.5
-		end,
-		[CacheFlag.CACHE_RANGE] = function()
-			player.TearRange = edithMod.rangeUp(player.TearRange, 2.5)
-		end,
-	}
-		
-	edithMod.WhenEval(cacheFlag, cacheActions)
+    local cacheActions = {
+        [CacheFlag.CACHE_DAMAGE] = function()
+            player.Damage = player.Damage * 1.5
+        end,
+        [CacheFlag.CACHE_RANGE] = function()
+            player.TearRange = mod.rangeUp(player.TearRange, 2.5)
+        end,
+    }
+        
+    mod.WhenEval(cacheFlag, cacheActions)
 end
-edithMod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, edithMod.SetEdithStats)
+mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, mod.SetEdithStats)
 
-function edithMod:PlayerDamageManager(player, damage, flags, source, countdown)
-	if not edithMod:IsAnyEdith(player) then return end
-	
-	if flags == DamageFlag.DAMAGE_SPIKES or flags == DamageFlag.DAMAGE_ACID then
-		return false
-	end
+-- Function to check if either of the specified flags is present in the bitmask
+function mod:CheckBitmaskFlags(bitmask)
+    local FLAG_1 = 1 << 7  -- 128
+    local FLAG_2 = 1 << 4  -- 16
+
+    return (bitmask & FLAG_1) ~= 0 or (bitmask & FLAG_2) ~= 0
 end
-edithMod:AddCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG, edithMod.PlayerDamageManager)
+
+---comment
+---@param player EntityPlayer
+---@param flags DamageFlag
+---@return boolean?
+function mod:PlayerDamageManager(player, _, flags)
+    if not mod:IsAnyEdith(player) then return end
+	if mod.HasBitFlags(flags, DamageFlag.DAMAGE_ACID) or mod.HasBitFlags(flags, DamageFlag.DAMAGE_SPIKES) then return false end
+end
+mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG, mod.PlayerDamageManager)

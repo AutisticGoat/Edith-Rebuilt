@@ -9,6 +9,7 @@ local includeFiles = {
 	"functions/helper_functions",
 	"functions/functions",
 	"functions/EdithClasses",
+	"functions/unlock_functions",
 	"ImGui",
 	"EdithKotryHudHelper",
 	"lhsx",
@@ -24,6 +25,9 @@ local includeFiles = {
 	col .. "items/Sal",
 	col .. "items/MoltenCore",
 	col .. "items/GildedStone",
+	col .. "items/FateOfTheUnfaithful",
+	col .. "items/SaltHeart",
+	col .. "items/DivineRetribution",
 	-- Items fin
 	
 	-- Trinkets

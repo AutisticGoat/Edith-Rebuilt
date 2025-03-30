@@ -50,7 +50,7 @@ local function actualizarCampo(nombre, subtabla, campo, valorPorDefecto, Tipo)
     local SaveManager = edithMod.SaveManager
     if not SaveManager then return end
 
-    local saveData = SaveManager.GetDeadSeaScrollsSave()
+    local saveData = SaveManager.GetSettingsSave()
 
 	if not saveData then return end
 
@@ -71,7 +71,6 @@ local function actualizarCampo(nombre, subtabla, campo, valorPorDefecto, Tipo)
     local updateValue = updateFunctions[Tipo]()
     ImGui.UpdateData(nombre, ImGuiData.Value, updateValue)
 end
-
 
 local function agregarCombobox(padre, nombre, titulo, opciones, callback, valorPorDefecto)
     if not ImGui.ElementExists(nombre) then
@@ -171,7 +170,7 @@ local function OptionsUpdate()
 	local SaveManager = edithMod.SaveManager
 	
 	if not SaveManager then return end
-	local saveData = SaveManager.GetDeadSeaScrollsSave()
+	local saveData = SaveManager.GetSettingsSave()
 
 	if not saveData then return end
 
@@ -213,6 +212,9 @@ local function OptionsUpdate()
 		function(index, val)
 			EdithData.targetdesign = index + 1
 		end, 0)
+		agregarCheckbox("EdithSetting", "DisableGibs", "Disable salt gibs", function(check)
+			EdithData.DisableGibs = check
+		end, false)
 		agregarCheckbox("EdithSetting", "SetRGB", "Set RGB Mode", function(check)
 			EdithData.RGBMode = check
 		end, false)
@@ -256,6 +258,7 @@ local function OptionsUpdate()
 		actualizarCampo("StompSound", "EdithData", "stompsound", 0, "ComboBox")
 		actualizarCampo("StompVolume", "EdithData", "stompVolume", 100, "Slider")
 		actualizarCampo("TargetDesign", "EdithData", "targetdesign", 0, "ComboBox")
+		actualizarCampo("DisableGibs", "EdithData", "DisableGibs", false, "Checkbox")
 		actualizarCampo("SetRGB", "EdithData", "RGBMode", false, "Checkbox")
 		actualizarCampo("SetRGBSpeed", "EdithData", "RGBSpeed", 16,"Slider")	
 		actualizarCampo("TargetLine", "EdithData", "targetline", false, "Checkbox")
@@ -309,6 +312,12 @@ local function OptionsUpdate()
 			arrowcolor.Green,
 			arrowcolor.Blue,
 		})
+
+		agregarCheckbox("TaintedEdithSetting", "TaintedDisableGibs", "Disable salt gibs", function(check)
+			TEdithData.DisableGibs = check
+		end, false)
+		actualizarCampo("TaintedDisableGibs", "TEdithData", "DisableGibs", false, "Checkbox")
+
 		agregarCheckbox("TaintedEdithSetting", "TaintedSetRGB", "Set RGB Mode", function(check)
 			TEdithData.RGBMode = check
 		end, false)
@@ -366,14 +375,14 @@ local function OptionsUpdate()
 		end, false)
 			
 		actualizarCampo("ScreenShake", "MiscData", "shakescreen", false, "Checkbox")
-	-- Misc Configs end
+		-- Misc Configs end
     end
 end
 
 function edithMod:ResetSaveData(isTainted)
 	local SaveManager = edithMod.SaveManager
 	if not SaveManager then return end
-	local menuData = SaveManager.GetDeadSeaScrollsSave()
+	local menuData = SaveManager.GetSettingsSave()
 	if not menuData then return end
 
 	local EdithData = menuData.EdithData
@@ -392,6 +401,7 @@ function edithMod:ResetSaveData(isTainted)
 		EdithData.stompsound = 1
 		EdithData.stompVolume = 100
 		EdithData.targetdesign = 1
+		EdithData.DisableGibs = false
 		EdithData.RGBMode = false
 		EdithData.RGBSpeed = 0.005
 		EdithData.targetline = false
@@ -407,13 +417,13 @@ local elements = {
 	"StompSound",
 	"StompVolume",
 	"TargetDesign", 
+	"DisableGibs",
 	"SetRGB", 
 	"SetRGBSpeed",
 	"TargetLine",
 	"TargetLineSpace",
 	"ScreenShake",
 	"resetButton",
-		
 		
 	"TaintedEdithArrowColor",
 	"arrowDesign",
@@ -441,7 +451,7 @@ end
 function edithMod:CheckMenuDataIntegrity()
 	local SaveManager = edithMod.SaveManager
 	if not SaveManager then return end
-	local menuData = SaveManager.GetDeadSeaScrollsSave()
+	local menuData = SaveManager.GetSettingsSave()
 	if not menuData then return end
 	
 	for k, v in pairs(menuData) do
@@ -452,7 +462,7 @@ end
 function edithMod:InitSaveData()
 	local SaveManager = edithMod.SaveManager
 	if not SaveManager then return end
-	local menuData = SaveManager.GetDeadSeaScrollsSave()
+	local menuData = SaveManager.GetSettingsSave()
 	if not menuData then return end
 	
 	menuData.EdithData = menuData.EdithData or {}
@@ -467,6 +477,7 @@ function edithMod:InitSaveData()
 	EdithData.stompsound = EdithData.stompsound or 1
 	EdithData.stompVolume = EdithData.stompVolume or 100
 	EdithData.targetdesign = EdithData.targetdesign or 1
+	EdithData.DisableGibs = EdithData.DisableGibs or false
 	EdithData.RGBMode = EdithData.RGBMode or false
 	EdithData.RGBSpeed = EdithData.RGBSpeed or 0.5
 	EdithData.targetline = EdithData.targetline or false

@@ -6,7 +6,8 @@ local effectVar = enums.EffectVariant
 local tables = enums.Tables
 local misc = enums.Misc
 local saveManager = mod.SaveManager
-local Hsx = edithMod.Hsx
+local Hsx = mod.Hsx
+local Arrow = {}
 
 local arrowPath = "gfx/effects/TaintedEdithArrow/effect_000_tainted_edith"
 
@@ -14,14 +15,12 @@ local funcs = {
 	IsEdith = mod.IsEdith,
 	SetVector = mod.SetVector,
 	GetData = mod.GetData,
-	DrawLine = mod.drawLine,
-	MenuData = saveManager.GetDeadSeaScrollsSave,
+	MenuData = saveManager.GetSettingsSave,
 	RGBCycle = mod.RGBCycle,
 	Switch = mod.When,
 	HSVToRGB = Hsx.hsv2rgb,
 	RGBToHSV = Hsx.rgb2hsv,
 }
-
 
 local value = 0
 
@@ -37,7 +36,7 @@ local function RGBFunction(color, step)
 	color = newColor
 end
 
-function edithMod:RenderTaintedEdithArrow(effect)
+function Arrow:RenderTaintedEdithArrow(effect)
 	local room = game:GetRoom()
 	local player = effect.SpawnerEntity:ToPlayer()
 	local effectSprite = effect:GetSprite()
@@ -45,7 +44,7 @@ function edithMod:RenderTaintedEdithArrow(effect)
 	local rendermode = room:GetRenderMode()
 	
 	if rendermode == RenderMode.RENDER_WATER_REFLECT then return false end
-	local saveData = saveManager.GetDeadSeaScrollsSave()
+	local saveData = saveManager.GetSettingsSave()
 
 	if not saveData then return end
 	if not player then return end
@@ -58,12 +57,9 @@ function edithMod:RenderTaintedEdithArrow(effect)
 
 	local playerData = edithMod.GetData(player)
 	local HopVec = playerData.HopVector
-	
+	local color 
+
 	effectSprite.Rotation = arrowDesign ~= 7 and HopVec:GetAngleDegrees() or 0 
-
-	local color = Color.Default
-
-	-- print(RGBspeed, RGBmode)
 
 	if RGBmode then
 		color = misc.HSVStartColor
@@ -72,19 +68,15 @@ function edithMod:RenderTaintedEdithArrow(effect)
 		color = Color(arrowColor.Red, arrowColor.Green, arrowColor.Blue)
 	end
 
-	-- for i = 1, 40 do
-		
-	-- end
-
 	effect:SetColor(color, -1, 100, false, false)
 	effectSprite:ReplaceSpritesheet(0, arrowPath .. tables.ArrowSuffix[arrowDesign] .. ".png", true)
 end
-edithMod:AddCallback(ModCallbacks.MC_PRE_EFFECT_RENDER, edithMod.RenderTaintedEdithArrow, effectVar.EFFECT_EDITH_B_TARGET)
+mod:AddCallback(ModCallbacks.MC_PRE_EFFECT_RENDER, Arrow.RenderTaintedEdithArrow, effectVar.EFFECT_EDITH_B_TARGET)
 
-function edithMod:taintedArrowUpdate(effect)
+function Arrow:taintedArrowUpdate(effect)
 	local player = effect.SpawnerEntity:ToPlayer()
 
 	if not player then return end
-	edithMod:TargetDoorManager(effect, player, 20)
+	mod:TargetDoorManager(effect, player, 20)
 end
-edithMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, edithMod.taintedArrowUpdate, effectVar.EFFECT_EDITH_B_TARGET)
+mod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, Arrow.taintedArrowUpdate, effectVar.EFFECT_EDITH_B_TARGET)

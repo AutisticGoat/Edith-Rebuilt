@@ -71,14 +71,8 @@ end
 ---@param player EntityPlayer
 function mod:EdithInit(player)
 	if not funcs.IsEdith(player, false) then return end
-	local playerSprite = player:GetSprite()
-
-	if playerSprite:GetFilename() ~= "gfx/EdithAnim.anm2" and not player:IsCoopGhost() then
-		playerSprite:Load("gfx/EdithAnim.anm2", true)
-		playerSprite:Update()
-	end
-
-	edithMod.ForceCharacterCostume(player, players.PLAYER_EDITH, costumes.ID_EDITH_SCARF)
+	mod.SetNewANM2(player, "gfx/EdithAnim.anm2")
+	mod.ForceCharacterCostume(player, players.PLAYER_EDITH, costumes.ID_EDITH_SCARF)
 end
 edithMod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, edithMod.EdithInit)
 
@@ -87,6 +81,9 @@ function mod:EdithSaltTears(tear)
 
 	if not player then return end
 	if not funcs.IsEdith(player, false) then return end
+
+	local SaltShakerUnlock = Isaac.GetAchievementIdByName("EdithRebuilt_SaltShaker")
+	Isaac.GetPersistentGameData():TryUnlock(SaltShakerUnlock)
 
 	funcs.ForceSalt(tear)
 
@@ -160,9 +157,7 @@ function mod:EdithJumpHandler(player)
 	playerData.ExtraJumps = playerData.ExtraJumps or 0
 	playerData.EdithJumpTimer = playerData.EdithJumpTimer or 20
 
-	if player:IsDead() == true then
-		funcs.RemoveTarget(player)
-	end
+	if player:IsDead() then return end
 
 	local input = {
 		up = Input.IsActionPressed(ButtonAction.ACTION_UP, player.ControllerIndex),
@@ -184,20 +179,18 @@ function mod:EdithJumpHandler(player)
 	if isMoving then
 		local movementVector = Vector.Zero
 		local CharSpeed = player.MoveSpeed + 2
+		local InverseX = room:IsMirrorWorld() and -1 or 1
 
 		movementVector.X = (
 			(input.left and -1 * MovementForce.left) or 
 			(input.right and 1 * MovementForce.right) or 
 			0
-		)
+		) * InverseX
 		movementVector.Y = (
 			(input.up and -1 * MovementForce.up) or 
 			(input.down and 1 * MovementForce.down) or
 			0
 		)
-
-		local InverseX = room:IsMirrorWorld() and -1 or 1
-		movementVector.X = movementVector.X * InverseX
 
 		local resizer = math.max(CharSpeed, 1)
 		local NormalMovement = movementVector:Normalized()
@@ -238,7 +231,7 @@ function mod:EdithJumpHandler(player)
 	if not weapon then return end
 	local override = funcs.Switch(weapon:GetWeaponType(), tables.OverrideWeapons, false)
 
-	if override == false then return end
+	if not override then return end
 	local newWeapon = Isaac.CreateWeapon(WeaponType.WEAPON_TEARS, player)
 	Isaac.DestroyWeapon(weapon)
 	player:EnableWeaponType(WeaponType.WEAPON_TEARS, true)
@@ -325,7 +318,7 @@ function mod:EdithLanding(player, data, pitfall)
 	local multiShot = player:GetMultiShotParams(WeaponType.WEAPON_TEARS) 
 	local tearCount = multiShot:GetNumTears()
 	
-	local multishotMult = TSIL.Utils.Math.Round(edithMod:exponentialFunction(tearCount, 1, 0.68), 2)
+	local multishotMult = TSIL.Utils.Math.Round(mod.exp(tearCount, 1, 0.68), 2)
 	local birthrightMult = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and 1.2 or 1		
 	local bloodClotMult = player:HasCollectible(CollectibleType.COLLECTIBLE_BLOOD_CLOT) and 1.1 or 1
 	local RawFormula = ((((damageBase + (DamageStat * tearsMult)) * multishotMult) * birthrightMult) * bloodClotMult) * flightMult.Damage
@@ -378,19 +371,6 @@ function mod:EdithLanding(player, data, pitfall)
 end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, mod.EdithLanding, JumpParams.EdithJump)
 
----@param ent Entity
-local function CustomAfterImage(ent)
-	local entSprite = ent:GetSprite()
-	print(entSprite:GetFilename())
-	local newSprite = Sprite(entSprite:GetFilename(), true)
-
-
-	entSprite:Render(Isaac.WorldToScreen(ent.Position), Vector.Zero, Vector.Zero)
-end
-
-
-
----comment
 ---@param player EntityPlayer
 ---@param data JumpData
 function mod:EdithJumpLibStuff(player, data)
@@ -404,8 +384,6 @@ function mod:EdithJumpLibStuff(player, data)
 	
 	funcs.EdithDash(player, direction, distance, div)
 
-	CustomAfterImage(player)
-
 	if not JumpLib:IsFalling(player) then return end
 	if not (player.CanFly and ((isMovingTarget and distance <= 50) or distance <= 5)) then return end
 	
@@ -418,11 +396,12 @@ end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_UPDATE_30, mod.EdithJumpLibStuff, JumpParams.EdithJump)
 
 function mod:EdithBomb(player, data)
-	local playerData = funcs.GetData(player)
 	if player:GetNumBombs() <= 0 and not player:HasGoldenBomb() then return end
 	if not Input.IsActionTriggered(ButtonAction.ACTION_BOMB, player.ControllerIndex) then return end
-	JumpLib:SetSpeed(player, 10 + (data.Height / 10))
+	if funcs.KeyStompPress(player) then return end
+	local playerData = funcs.GetData(player)
 	playerData.BombStomp = true
+	JumpLib:SetSpeed(player, 10 + (data.Height / 10))
 end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_UPDATE_60, mod.EdithBomb, JumpParams.EdithJump)
 
@@ -431,12 +410,9 @@ function mod:EdithOnNewRoom()
 
 	for _, player in pairs(players) do
 		if funcs.IsEdith(player, false) then
-			local newColor = player.Color
+			mod:ChangeColor(player, _, _, _, 1)
 			funcs.RemoveTarget(player)
 			setEdithJumps(player, 0)	
-			
-			newColor.A = 1
-			player.Color = newColor
 		end
 	end
 end
@@ -448,7 +424,6 @@ mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, mod.EdithOnNewRoom)
 function edithMod:DamageStuff(_, damage, _, source, _)
 	if source.Type == 0 then return end
 	local ent = source.Entity
-
 	local player = ent:ToPlayer()
 	local familiar = ent:ToFamiliar()
 
@@ -467,7 +442,6 @@ function edithMod:DamageStuff(_, damage, _, source, _)
 end
 edithMod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, edithMod.DamageStuff)
 
----comment
 ---@param player EntityPlayer
 function edithMod:SuplexUse(player)
 	if not funcs.IsEdith(player, false) then return end
@@ -506,7 +480,7 @@ end
 edithMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, edithMod.SuplexUse)
 
 ---@param player EntityPlayer
-function edithMod:OnEsauJrUse(_, _, player, _, _, _)
+function edithMod:OnEsauJrUse(_, _, player)
 	funcs.RemoveTarget(player)
 end
 edithMod:AddCallback(ModCallbacks.MC_PRE_USE_ITEM, edithMod.OnEsauJrUse, CollectibleType.COLLECTIBLE_ESAU_JR)

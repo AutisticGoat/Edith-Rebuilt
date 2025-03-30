@@ -1,14 +1,59 @@
 local mod = edithMod
+local enums = mod.Enums
+local items = enums.CollectibleType
+local MoltenCore = {}
 
-function edithMod:MoltenCoreStats(player)
-	local MoltenCoreCount = player:GetCollectibleNum(edithMod.Enums.CollectibleType.COLLECTIBLE_MOLTEN_CORE)
+function MoltenCore:MoltenCoreStats(player)
+	local MoltenCoreCount = player:GetCollectibleNum(items.COLLECTIBLE_MOLTEN_CORE)
 	if MoltenCoreCount < 1 then return end
-	player.Damage = player.Damage + (2.5 * MoltenCoreCount)
+	player.Damage = player.Damage + (1.2 * MoltenCoreCount)
 end
-mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, edithMod.MoltenCoreStats, CacheFlag.CACHE_DAMAGE)
+mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, MoltenCore.MoltenCoreStats, CacheFlag.CACHE_DAMAGE)
 
-function edithMod:MoltenCoreTear(tear)
+---@param tear EntityTear
+function MoltenCore:OnFiringTears(tear)
+	local player = mod:GetPlayerFromTear(tear)
 
+	if not player then return end 
+	if not player:HasCollectible(items.COLLECTIBLE_MOLTEN_CORE) then return end
 
+	local tearData = mod.GetData(tear)
+
+	tear:ChangeVariant(TearVariant.FIRE_MIND)
+	tear.Color = Color(0.8, 0.5, 0.4)
+
+	tearData.MoltenCoreTear = true
 end
-mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, edithMod.MoltenCoreTear)
+mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, MoltenCore.OnFiringTears)
+
+---@param entity Entity
+---@param amount number
+---@param source EntityRef
+function MoltenCore:KillingSalEnemy(entity, amount, _, source)
+	local Ent = source.Entity
+	if not Ent or Ent.Type == 0 then return end
+	local player = Ent:ToPlayer() or mod:GetPlayerFromTear(Ent)
+
+	if not player then return end
+	if not player:HasCollectible(items.COLLECTIBLE_MOLTEN_CORE) then return end
+	if not (entity:IsActiveEnemy() and entity:IsVulnerableEnemy()) then return end
+
+	entity:AddBurn(source, 120, 1)
+	
+	if entity.HitPoints > amount then return end
+
+	for _, enemies in pairs(Isaac.FindInRadius(entity.Position, 60, EntityPartition.ENEMY)) do
+		local Jet = Isaac.Spawn(
+			EntityType.ENTITY_EFFECT,
+			EffectVariant.FIRE_JET,
+			0,
+			enemies.Position,
+			Vector.Zero,
+			player
+		)
+
+		Jet.CollisionDamage = player.Damage * 1.2
+		enemies:AddBurn(source, 120, 1)
+	end
+end
+mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, MoltenCore.KillingSalEnemy)

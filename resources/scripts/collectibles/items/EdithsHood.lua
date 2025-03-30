@@ -1,8 +1,9 @@
 local mod = edithMod
 local enums = mod.Enums
 local items = enums.CollectibleType
+local EdithsHood = {}
 
-function mod:ShootSaltTears(tear)
+function EdithsHood:ShootSaltTears(tear)
 	local player = mod:GetPlayerFromTear(tear)
 	
 	if not player then return end
@@ -11,9 +12,9 @@ function mod:ShootSaltTears(tear)
 	
 	mod.ForceSaltTear(tear)
 end
-mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, mod.ShootSaltTears)
+mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, EdithsHood.ShootSaltTears)
 
-function mod:HoodStats(player, flags)
+function EdithsHood:Stats(player, flags)
 	if not player:HasCollectible(items.COLLECTIBLE_EDITHS_HOOD) then return end
 
 	if flags == CacheFlag.CACHE_DAMAGE then
@@ -22,28 +23,30 @@ function mod:HoodStats(player, flags)
 		player.MaxFireDelay = mod.tearsUp(player.MaxFireDelay, 0.8, true)
 	end	
 end
-mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, mod.HoodStats)
+mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, EdithsHood.Stats)
 
 local maxCreep = 5	
 local saltDegrees = 360 / maxCreep
 
----@param tear EntityTear
----@param collider Entity
-function mod:onKillWithTear(tear, collider)
-	local player = mod:GetPlayerFromTear(tear)
-	
-	if not player then return end 
+---@param entity Entity
+---@param amount number
+---@param source EntityRef
+function EdithsHood:KillingSalEnemy(entity, amount, _, source)
+	local Ent = source.Entity
+	if not Ent or Ent.Type == 0 then return end
+	local player = Ent:ToPlayer() or edithMod:GetPlayerFromTear(Ent)
+	if not player then return end
 	if not player:HasCollectible(items.COLLECTIBLE_EDITHS_HOOD) then return end
-	if not (collider:IsActiveEnemy() and collider:IsVulnerableEnemy()) then return end
-	if collider.HitPoints > tear.CollisionDamage then return end
+	if not (entity:IsActiveEnemy() and entity:IsVulnerableEnemy()) then return end
+	if entity.HitPoints > amount then return end
 
 	local rng = player:GetCollectibleRNG(items.COLLECTIBLE_EDITHS_HOOD)	
 	local randomSpawnChance = mod.RandomNumber(1, 5, rng)
 	
 	if randomSpawnChance ~= 1 then return end
-	
+
 	for i = 1, maxCreep do
-		mod:SpawnSaltCreep(player, collider.Position + Vector(0, 18):Rotated(saltDegrees*i), 1, 5, 1, "SaltShakerSpawn")
+		mod:SpawnSaltCreep(player, entity.Position + Vector(0, 18):Rotated(saltDegrees*i), 1, 5, 1, "Hood")
 	end
 end
-mod:AddCallback(ModCallbacks.MC_PRE_TEAR_COLLISION, mod.onKillWithTear)
+mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, EdithsHood.KillingSalEnemy)

@@ -41,4 +41,3 @@ function mod:RockStomp(player)
 	) 
 end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, mod.RockStomp, EdithJump)
-

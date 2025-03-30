@@ -37,6 +37,7 @@ function mod:SwordStomp(player)
     local spritePath = "gfx/008.010_spirit sword.anm2"
     effectSprite:Load(spritePath, true)
     effectSprite:Play("SpinDown")
+    
 
     -- Calcular el daño
     local damageMult = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and 0.75 or 0.5
@@ -60,4 +61,3 @@ function mod:RemoveStompKnife(knife)
     knife:Remove()
 end
 mod:AddCallback(ModCallbacks.MC_POST_KNIFE_UPDATE, mod.RemoveStompKnife)
-

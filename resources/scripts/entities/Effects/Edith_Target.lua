@@ -5,15 +5,16 @@ local tables = enums.Tables
 local game = utils.Game
 local misc = enums.Misc
 local saveManager = mod.SaveManager
-local Hsx = edithMod.Hsx
+local Hsx = mod.Hsx
+local effect = enums.EffectVariant
+local Target = {}
 
 local funcs = {
 	IsEdith = mod.IsEdith,
 	SetVector = mod.SetVector,
 	GetData = mod.GetData,
 	DrawLine = mod.drawLine,
-	MenuData = saveManager.GetDeadSeaScrollsSave,
-	RGBCycle = mod.RGBCycle,
+	MenuData = saveManager.GetSettingsSave,
 	Switch = mod.When,
 	HSVToRGB = Hsx.hsv2rgb,
 	RGBToHSV = Hsx.rgb2hsv,
@@ -35,7 +36,7 @@ local teleportPoints = {
 	{X = 595, Y = 272},
 }
 
-function mod:EdithTargetLogic(effect)	
+function Target:EdithTargetLogic(effect)	
 	local player = effect.SpawnerEntity:ToPlayer()
 	if player.ControlsEnabled == false then return end
 		
@@ -49,7 +50,7 @@ function mod:EdithTargetLogic(effect)
 	local targetSprite = effect:GetSprite()
 	local room = game:GetRoom()
 
-	if edithMod.IsKeyStompPressed(player) or playerData.ExtraJumps > 0 and playerData.EdithJumpTimer == 0 then
+	if mod.IsKeyStompPressed(player) or playerData.ExtraJumps > 0 and playerData.EdithJumpTimer == 0 then
 		targetSprite:Play("Blink")
 	end
 	
@@ -70,7 +71,7 @@ function mod:EdithTargetLogic(effect)
 	
 	if room:GetType() == RoomType.ROOM_DUNGEON then
 		for _, v in ipairs(teleportPoints) do
-			edithMod.SetVector(DungeonVector, v.X, v.Y)
+			mod.SetVector(DungeonVector, v.X, v.Y)
 			
 			if (effectPos - DungeonVector):Length() <= 20 then
 				player.Position = effectPos + effect.Velocity:Normalized():Resized(25)
@@ -79,9 +80,9 @@ function mod:EdithTargetLogic(effect)
 		end
 	end
 	
-	edithMod:TargetDoorManager(effect, player, 25)
+	mod:TargetDoorManager(effect, player, 25)
 end 
-edithMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, mod.EdithTargetLogic, edithMod.Enums.EffectVariant.EFFECT_EDITH_TARGET)
+mod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, Target.EdithTargetLogic, effect.EFFECT_EDITH_TARGET)
 
 local value = 0
 
@@ -97,7 +98,7 @@ local function RGBFunction(color, step)
 	color = newColor
 end
 
-function mod:EdithTargetSprite(effect)
+function Target:EdithTargetSprite(effect)
 	local room = game:GetRoom()	
 	if room:GetRenderMode() == RenderMode.RENDER_WATER_REFLECT then return false end
 	
@@ -156,4 +157,4 @@ function mod:EdithTargetSprite(effect)
 	end
 	funcs.DrawLine(player.Position, effect.Position, targetlineColor, targetSpace) 
 end
-edithMod:AddCallback(ModCallbacks.MC_PRE_EFFECT_RENDER, mod.EdithTargetSprite,edithMod.Enums.EffectVariant.EFFECT_EDITH_TARGET)
+mod:AddCallback(ModCallbacks.MC_PRE_EFFECT_RENDER, Target.EdithTargetSprite, effect.EFFECT_EDITH_TARGET)

@@ -27,5 +27,6 @@
 		healthtype="1"
 		birthright="Scorching leaps"
 		noshake="true"
+		achievement="EdithRebuilt_TaintedEdith"
 	/>
 </players>

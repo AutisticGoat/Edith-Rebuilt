@@ -7,7 +7,7 @@ local misc = enums.Misc
 
 ---Function to remove Edith's target
 ---@param player EntityPlayer
-function edithMod.RemoveEdithTarget(player)
+function mod.RemoveEdithTarget(player)
 	local playerData = edithMod.GetData(player)
 	if not edithMod.IsEdith(player, false) then return end
 	if not playerData.EdithTarget then return end
@@ -275,7 +275,7 @@ end
 ---Returns a random rune (Used for Geode trinket)
 ---@param rng RNG
 ---@return integer
-function edithMod:GetRandomRune(rng)
+function edithMod.GetRandomRune(rng)
 	local runes = #tables.Runes
 	
 	local runeRandomSelect = edithMod.RandomNumber(1, runes)
@@ -422,7 +422,7 @@ end
 ---@param coeffcient number
 ---@param power number
 ---@return integer
-function edithMod:exponentialFunction(number, coeffcient, power)
+function edithMod.exp(number, coeffcient, power)
     return number ~= 0 and coeffcient * number ^ (power - 1) or 0
 end
 
@@ -430,7 +430,7 @@ end
 ---@param x number
 ---@param base number
 ---@return number?
-function edithMod:Log(x, base)
+function edithMod.Log(x, base)
     if x <= 0 or base <= 1 then
         return nil
     end
@@ -439,6 +439,17 @@ function edithMod:Log(x, base)
     local logBase = math.log(base)
     
     return logNatural / logBase
+end
+
+---Changes `player`'s ANM2 file
+---@param player EntityPlayer
+---@param FilePath string
+function edithMod.SetNewANM2(player, FilePath)
+	local playerSprite = player:GetSprite()
+
+	if not (playerSprite:GetFilename() ~= FilePath and not player:IsCoopGhost()) then return end
+	playerSprite:Load(FilePath, true)
+	playerSprite:Update()
 end
 
 ---Spawns Salt Creep
@@ -639,7 +650,6 @@ function edithMod.drawLine(from, to, color, linespace)
 		targetSprite:Render(Isaac.WorldToScreen(from))
 		from = from + Vector.One * linespace * Vector.FromAngle(angle)
 	end
-
 	targetSprite.Rotation = 0
 end
 
@@ -773,6 +783,10 @@ function edithMod.ShockwaveSprite()
     }
 
     return effectPath .. (shockwaveSprites[bdType] or "groundbreak.png")
+end
+
+function edithMod.HasBitFlags(flags, checkFlag)
+	return flags & checkFlag == checkFlag
 end
 
 ---Checks if are in Chapter 4 (Womb, Utero, Scarred Womb, Corpse)
@@ -1009,7 +1023,7 @@ function edithMod.LandFeedbackManager(player, soundTable, GibColor, IsParryLand)
 
 	local saveManager = edithMod.SaveManager 
 	if not saveManager:IsLoaded() then return end
-	local menuData = saveManager:GetDeadSeaScrollsSave()
+	local menuData = saveManager:GetSettingsSave()
 	if not menuData then return end
 
 	local miscData = menuData.miscData
@@ -1030,7 +1044,7 @@ function edithMod.LandFeedbackManager(player, soundTable, GibColor, IsParryLand)
 		SizeX = isStomping and 0.6 or 0.7 * player.SpriteScale.X
 		SizeY = isStomping and 0.6 or 0.8 * player.SpriteScale.X
 		ScreenShakeIntensity = isStomping and 6 or 10
-		gibAmount = isStomping and 6 or 10
+		gibAmount = not EdithData.DisableGibs and 10 or 0
 	elseif edithMod.IsEdith(player, true) then
 		local TEdithData = menuData.TEdithData
 		SizeX = IsParryLand and 0.8 or 0.5
@@ -1038,7 +1052,7 @@ function edithMod.LandFeedbackManager(player, soundTable, GibColor, IsParryLand)
 		soundPick = IsParryLand and TEdithData.TaintedParrySound or TEdithData.TaintedHopSound ---@type number
 		volume = (IsParryLand and 1.5 or 1) * ((TEdithData.taintedStompVolume / 100) ^ 2) ---@type number
 		ScreenShakeIntensity = IsParryLand and 6 or 3
-		gibAmount = IsParryLand and 6 or 1
+		gibAmount = not TEdithData.DisableGibs and (IsParryLand and 6 or 2) or 0
 	end
 
 	local sound = edithMod.When(soundPick, soundTable, 1)

@@ -1,12 +1,12 @@
 local mod = edithMod
 local enums = mod.Enums
 local items = enums.CollectibleType
-
+local SulfuricFire = {}
 local RangeUse = 80
 
 ---@param player EntityPlayer
 ---@return boolean
-function edithMod:UseSulfuricFire(_, _, player)
+function SulfuricFire:UseSulfuricFire(_, _, player)
 	for _, enemy in pairs(Isaac.FindInRadius(player.Position, RangeUse, EntityPartition.ENEMY)) do
 		local Flame = Isaac.Spawn(
 			EntityType.ENTITY_EFFECT,
@@ -30,4 +30,4 @@ function edithMod:UseSulfuricFire(_, _, player)
 	end
 	return true
 end
-mod:AddCallback(ModCallbacks.MC_USE_ITEM, mod.UseSulfuricFire, items.COLLECTIBLE_SULFURIC_FIRE)
+mod:AddCallback(ModCallbacks.MC_USE_ITEM, SulfuricFire.UseSulfuricFire, items.COLLECTIBLE_SULFURIC_FIRE)

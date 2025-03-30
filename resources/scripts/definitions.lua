@@ -15,6 +15,9 @@ edithMod.Enums = {
 		COLLECTIBLE_SAL = Isaac.GetItemIdByName("Sal"),
 		COLLECTIBLE_MOLTEN_CORE = Isaac.GetItemIdByName("Molten Core"),
 		COLLECTIBLE_GILDED_STONE = Isaac.GetItemIdByName("Gilded Stone"),
+		COLLECTIBLE_FATE_OF_THE_UNFAITHFUL = Isaac.GetItemIdByName("Fate of the unfaithful"),
+		COLLECTIBLE_SALT_HEART = Isaac.GetItemIdByName("Salt Heart"),
+		COLLECTIBLE_DIVINE_RETRIBUTION = Isaac.GetItemIdByName("Divine Retribution"),
 	},
 	TrinketType = {
 		TRINKET_GEODE = Isaac.GetTrinketIdByName("Geode"),
@@ -44,6 +47,14 @@ edithMod.Enums = {
 		SOUND_YIPPEE = Isaac.GetSoundIdByName("Yippee"),
 		SOUND_SPRING = Isaac.GetSoundIdByName("Spring"),
 		SOUND_SOLARIAN = Isaac.GetSoundIdByName("Solarian"),
+	},
+	Achievements = {
+		ACHIEVEMENT_SALT_SHAKER = Isaac.GetAchievementIdByName("EdithRebuilt_SaltShaker"),
+		ACHIEVEMENT_PEPPER_GRINDER = Isaac.GetAchievementIdByName("EdithRebuilt_PepperGrinder"),
+		ACHIEVEMENT_SAL = Isaac.GetAchievementIdByName("EdithRebuilt_Sal"),
+		ACHIEVEMENT_SALT_HEART = Isaac.GetAchievementIdByName("EdithRebuilt_SaltHeart"),
+		ACHIEVEMENT_FAITH_OF_THE_UNFAITHFUL = Isaac.GetAchievementIdByName("EdithRebuilt_FaithOfTheUnfaithful"),
+		ACHIEVEMENT_TAINTED_EDITH = Isaac.GetAchievementIdByName("EdithRebuilt_TaintedEdith"),
 	},
 	Utils = {
 		Game = Game(),
@@ -202,11 +213,11 @@ edithMod.Enums = {
 		TargetLineColor = Color(1, 1, 1),
 		SaltShakerDist = Vector(0, 60),
 		HSVStartColor = Color(1, 0, 0),
-		StompFuncs = "resources.scripts.stompSynergies.Funcs",
-		StompData = "resources.scripts.stompSynergies.JumpData",
+		PerfectParryRadius = 25,
+		ImpreciseParryRadius = 40,
+		BurnedSaltColor = Color(0.3, 0.3, 0.3, 1),
+		ChargeBarleftVector = Vector(-8, 10),
+		ChargeBarcenterVector = Vector(0, 10),
+		ChargeBarrightVector = Vector(8, 10),
 	},
-}
-
-edithMod.Enums.Tables.StompSounds = {
-	mierda = 2,
 }

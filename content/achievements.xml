@@ -1,0 +1,11 @@
+<achievements gfxroot="gfx/ui/achievements/">
+
+    <achievement name="EdithRebuilt_SaltShaker" text='' gfx="achivement_saltshaker.png" />
+    <achievement name="EdithRebuilt_PepperGrinder" text='' gfx="achivement_peppergrinder.png" />
+    <achievement name="EdithRebuilt_Sal" text='' gfx="achivement_sal.png" />
+    <achievement name="EdithRebuilt_SaltHeart" text='' gfx="achivement_saltheart.png" />
+    <achievement name="EdithRebuilt_FaithOfTheUnfaithful" text='' gfx="achivement_FaithOfTheUnfaithful.png" />
+    <achievement name="EdithRebuilt_TaintedEdith" text='' gfx="achivement_TaintedEdith.png" />
+
+
+</achievements>

@@ -2,7 +2,6 @@ local mod = edithMod
 local enums = mod.Enums
 local trinket = enums.TrinketType
 
-
 function edithMod:DestroyRockWithPebble(rock)	
 
 	local players = PlayerManager.GetPlayers() 
@@ -11,7 +10,6 @@ function edithMod:DestroyRockWithPebble(rock)
 		
 		if not player:HasTrinket(trinket.TRINKET_RUMBLING_PEBBLE) then return end
 		
-		-- print(player:GetPlayerType())
 		local rng = player:GetTrinketRNG(trinket.TRINKET_RUMBLING_PEBBLE)
 		local trinketMult = player:GetTrinketMultiplier(trinket.TRINKET_RUMBLING_PEBBLE)
 		
@@ -22,7 +20,7 @@ function edithMod:DestroyRockWithPebble(rock)
 			[4] = 4,
 			[5] = 5,
 		}
-		local minRocks = edithMod.SwitchCase(trinketMult, minRockMult)
+		local minRocks = mod.When(trinketMult, minRockMult)
 		
 		local maxRockMult = {
 			[1] = 5,
@@ -31,16 +29,16 @@ function edithMod:DestroyRockWithPebble(rock)
 			[4] = 8,
 			[5] = 9,
 		}
-		local maxRocks = edithMod.SwitchCase(trinketMult, maxRockMult)
+		local maxRocks = mod.When(trinketMult, maxRockMult)
 			
-		local totalrocks = edithMod:RandomNumber(minRocks, maxRocks)
+		local totalrocks = mod.RandomNumber(minRocks, maxRocks, rng)
 		
 		local shootDegree = 360 / totalrocks
 
 		for i = 1, totalrocks do
-			local range = edithMod:GetPlayerRange(player)
+			local range = mod.GetPlayerRange(player)
 		
-			local variation = edithMod:RandomNumber(-10, 10)
+			local variation = mod.RandomNumber(-10, 10)
 			local rockTear = Isaac.Spawn(
 				EntityType.ENTITY_TEAR,
 				TearVariant.ROCK,
@@ -52,17 +50,17 @@ function edithMod:DestroyRockWithPebble(rock)
 			
 			if not rockTear then return end
 
-			local rockData = edithMod:GetData(rockTear)
+			local rockData = mod.GetData(rockTear)
 			
 			local baseHeight = -23.45			
 			rockTear:AddTearFlags(TearFlags.TEAR_ROCK | player.TearFlags)
 			
-			rockTear.FallingAcceleration = edithMod:RandomNumber(1.5, 2)			
+			rockTear.FallingAcceleration = mod.RandomNumber(1.5, 2, rng)			
 			
-			local FallSpeedVar = edithMod:RandomNumber(80, 120) / 100
+			local FallSpeedVar = mod.RandomNumber(80, 120, rng) / 100
 			rockTear.FallingSpeed = (-10 * (range / 6.5)) * FallSpeedVar
 			rockTear.Height = baseHeight * (range / 6.5)
-			rockTear.Scale = edithMod:RandomNumber(80, 120) / 100
+			rockTear.Scale = mod.RandomNumber(80, 120, rng) / 100
 			rockTear.CollisionDamage = 5.25 * rockTear.Scale
 			
 			rockData.IsPebbleTear = true
@@ -79,27 +77,25 @@ function mod:RandomRockTear(tear)
 	if not player then return end 
 	if not player:HasTrinket(trinket.TRINKET_RUMBLING_PEBBLE) then return end
 	local rng = player:GetTrinketRNG(trinket.TRINKET_RUMBLING_PEBBLE)
-	local randomRockTearChance = edithMod:RandomNumber(1, 100, rng)
+	local randomRockTearChance = mod.RandomNumber(1, 100, rng)
 
 	if randomRockTearChance <= 30 then
-		local randomDamageVar = edithMod:RandomNumber(500, 2000) / 1000
+		local data = mod.GetData(tear)
+		local randomDamageVar = mod.RandomNumber(500, 2000, rng) / 1000
 		tear:AddTearFlags(TearFlags.TEAR_ROCK)
 		tear:ChangeVariant(TearVariant.ROCK)
 		tear.CollisionDamage = tear.CollisionDamage * randomDamageVar
+		data.IsPebbleTear = true
 	end
 end
 mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, mod.RandomRockTear)
 
 function edithMod:ShootTear(tear, index, grid)
-	-- local tearData = edithMod:GetData(tear)
-	-- local player = edithMod:GetPlayerFromTear(tear)
+	local tearData = mod.GetData(tear)
 
-	-- local rock = grid:ToRock()	
-	-- if not rock then return end
-	-- if not tearData.IsPebbleTear then return end
-	
-	-- print("Es lágrima del guijarro ese")
-	
-	-- grid:Destroy()
+	if not grid:ToRock() then return end
+	if not tearData.IsPebbleTear then return end
+		
+	grid:Destroy()
 end
 edithMod:AddCallback(ModCallbacks.MC_PRE_TEAR_GRID_COLLISION, edithMod.ShootTear)

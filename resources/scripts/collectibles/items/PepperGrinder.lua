@@ -1,7 +1,6 @@
 local mod = edithMod
 local sfx = mod.Enums.Utils.SFX
 
-
 ---@param RNG RNG
 ---@param player EntityPlayer
 ---@return boolean

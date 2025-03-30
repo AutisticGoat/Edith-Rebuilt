@@ -7,10 +7,11 @@ local utils = enums.Utils
 local sfx = utils.SFX
 local SaltQuantity = 20
 local ndegree = 360 / SaltQuantity
+local SaltShaker = {}
 
 ---@param player EntityPlayer
 ---@return boolean?
-function mod:UseSaltShaker(_, _, player, _, _, _)	
+function SaltShaker:UseSaltShaker(_, _, player, _, _, _)	
 	for _, entity in ipairs(Isaac.FindByType(EntityType.ENTITY_EFFECT)) do
 		local effectData = mod.GetData(entity)
 		local effect = entity:ToEffect()
@@ -27,4 +28,4 @@ function mod:UseSaltShaker(_, _, player, _, _, _)
 	sfx:Play(sounds.SOUND_SALT_SHAKER, 2, 0, false, SoundPitch, 0)
 	return true
 end
-mod:AddCallback(ModCallbacks.MC_USE_ITEM, mod.UseSaltShaker, items.COLLECTIBLE_SALTSHAKER)
+mod:AddCallback(ModCallbacks.MC_USE_ITEM, SaltShaker.UseSaltShaker, items.COLLECTIBLE_SALTSHAKER)

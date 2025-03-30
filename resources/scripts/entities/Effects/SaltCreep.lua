@@ -19,17 +19,18 @@ function edithMod:AddSaltEffects(effect)
     local entities = Isaac.GetRoomEntities()
     
     for _, entity in pairs(entities) do
-        if entity:IsVulnerableEnemy() and entity:IsActiveEnemy() then
-			local distance = entity.Position:Distance(effect.Position)
+        if not (entity:IsVulnerableEnemy() and entity:IsActiveEnemy()) then goto Break end
+		local distance = entity.Position:Distance(effect.Position)
 
-            if distance <= 20 then
-                entity:AddFreeze(EntityRef(effect), 90)
-                if effectData.SpawnType == "Sal" then
-                    local enemyData = edithMod.GetData(entity)
-                    enemyData.SalFreeze = true
-                end
-            end
+        if distance > 20 then goto Break end
+        entity:AddFreeze(EntityRef(effect), 90)
+
+        if effectData.SpawnType == "Sal" then
+            local enemyData = edithMod.GetData(entity)
+            enemyData.SalFreeze = true
         end
+
+        ::Break::
     end
 end
 edithMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, edithMod.AddSaltEffects, EffectVariant.PLAYER_CREEP_RED)

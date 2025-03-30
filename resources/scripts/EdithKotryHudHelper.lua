@@ -1,4 +1,4 @@
----@diagnostic disable: undefined-global
+---@diagnostic disable: undefined-global, missing-parameter
 local Mod = edithMod
 local emptyShaderName = "HudHelperEmptyShader"
 

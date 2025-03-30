@@ -43,26 +43,52 @@
 	<passive
 		id="6" 
 		name="Gilded Stone" 
-		description="placeholder" 
+		description="Wealth amidst rubble" 
 		gfx="collectibles_Gilded_Stone.png"
-		cache="damage speed"
 		quality="2"
+		coins="5"
 	/>
 	<passive
 		id="7" 
 		name="Molten Core" 
-		description="placeholder" 
+		description="Flaming instability" 
 		cache="damage"
 		gfx="collectibles_Molten_Core.png"
 		quality="2"
 	/>
-	
+	<active
+		id="8" 
+		name="Fate of the unfaithful" 
+		description="Making it burn" 
+		gfx="collectibles_Fate_of_the_Unfaithful.png"
+		quality="3"
+		maxcharges="4"
+		cache="damage"
+	/>	
+	<passive
+		id="9" 
+		name="Salt Heart" 
+		description="As weak as salt" 
+		cache="damage"
+		gfx="collectibles_Salt_Heart.png"
+		quality="2"
+	/>
+	<active
+		id="10" 
+		name="Divine Retribution" 
+		description="Strike from heaven... but at what cost?" 
+		cache="damage"
+		gfx="collectibles_Divine_Retribution.png"
+		quality="2"
+		chargetype="timed"
+		maxcharges="420"
+	/>
+
 	<trinket 
 		name="Geode"
 		description="Crack it open" 
 		gfx="Geode.png" 
 	/>
-	
 	<trinket 
 		name="Rumbling Pebble"
 		description="Rock scattering" 
