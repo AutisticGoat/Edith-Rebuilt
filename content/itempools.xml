@@ -1,5 +1,33 @@
 <ItemPools>
 	<Pool Name="treasure">
 		<Item Name="Salt Shaker" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+		<Item Name="Sal" Weight="0.6" DecreaseBy="1" RemoveOn="0.1" />
+		<Item Name="Edith's Hood" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+	</Pool>
+
+	<Pool Name="angel">
+		<Item Name="Divine Retribution" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+		<Item Name="The Book Of Luke" Weight="1" DecreaseBy="1" RemoveOn="0.1" /> 
+	</Pool>
+
+	<Pool Name="shop">
+		<Item Name="Pepper Grinder" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+	</Pool>
+
+	<Pool Name="library">
+		<Item Name="The Book Of Luke" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+	</Pool>
+
+	<Pool Name="devil">
+		<Item Name="Fate of the unfaithful" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+		<Item Name="Sulfuric Fire" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+		<Item Name="Molten Core" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+	</Pool>
+
+	<Pool Name="secret">
+		<Item Name="Sal" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+		<Item Name="Gilded Stone" Weight="1" DecreaseBy="1" RemoveOn="0.1" />
+		<Item Name="Molten Core" Weight="0.5" DecreaseBy="1" RemoveOn="0.1" />
+		<Item Name="Salt Heart" Weight="0.5" DecreaseBy="1" RemoveOn="0.1" />
 	</Pool>
 </ItemPools>

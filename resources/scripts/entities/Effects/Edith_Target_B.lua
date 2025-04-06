@@ -26,7 +26,6 @@ local value = 0
 
 local function RGBFunction(color, step)
 	local newColor = color
-
 	value = value + step
 
 	newColor.R, newColor.B, newColor.G = funcs.RGBToHSV(newColor.R, newColor.B, newColor.G)
@@ -36,19 +35,20 @@ local function RGBFunction(color, step)
 	color = newColor
 end
 
+
 function Arrow:RenderTaintedEdithArrow(effect)
 	local room = game:GetRoom()
-	local player = effect.SpawnerEntity:ToPlayer()
-	local effectSprite = effect:GetSprite()
-	
 	local rendermode = room:GetRenderMode()
 	
 	if rendermode == RenderMode.RENDER_WATER_REFLECT then return false end
 	local saveData = saveManager.GetSettingsSave()
 
 	if not saveData then return end
+	local player = effect.SpawnerEntity:ToPlayer()
+
 	if not player then return end
 
+	local effectSprite = effect:GetSprite()
 	local tEdithdata = saveData.TEdithData
 	local arrowColor = tEdithdata.ArrowColor
 	local arrowDesign = tEdithdata.ArrowDesign
@@ -59,6 +59,7 @@ function Arrow:RenderTaintedEdithArrow(effect)
 	local HopVec = playerData.HopVector
 	local color 
 
+	effect.Visible = effect.FrameCount > 1
 	effectSprite.Rotation = arrowDesign ~= 7 and HopVec:GetAngleDegrees() or 0 
 
 	if RGBmode then

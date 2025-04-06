@@ -4,6 +4,8 @@ local trinkets = enums.TrinketType
 local Geode = {}
 local baseDestroyChance = 0.35
 local spawnChance = 0.025
+local baseRunes = 3
+local NonDestroyFlags = DamageFlag.DAMAGE_INVINCIBLE | DamageFlag.DAMAGE_NO_PENALTIES | DamageFlag.DAMAGE_CURSED_DOOR
 
 ---@param entity Entity
 ---@param damage number
@@ -44,8 +46,6 @@ function Geode:SpawnOnKill(entity, damage, _, source)
 end
 mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Geode.SpawnOnKill)
 
-local NonDestroyFlags = DamageFlag.DAMAGE_INVINCIBLE | DamageFlag.DAMAGE_NO_PENALTIES | DamageFlag.DAMAGE_CURSED_DOOR
-local baseRunes = 3
 ---@param player EntityPlayer
 ---@param flags DamageFlag
 function Geode:DestroyGeode(player, _, flags)

@@ -1,6 +1,8 @@
 local mod = edithMod
 local enums = mod.Enums
 local items = enums.CollectibleType
+local utils = enums.Utils
+local game = utils.Game
 local MoltenCore = {}
 
 function MoltenCore:MoltenCoreStats(player)
@@ -42,7 +44,8 @@ function MoltenCore:KillingSalEnemy(entity, amount, _, source)
 	
 	if entity.HitPoints > amount then return end
 
-	for _, enemies in pairs(Isaac.FindInRadius(entity.Position, 60, EntityPartition.ENEMY)) do
+	local nearEnemies = Isaac.FindInRadius(entity.Position, 60, EntityPartition.ENEMY)
+	for _, enemies in pairs(nearEnemies) do
 		local Jet = Isaac.Spawn(
 			EntityType.ENTITY_EFFECT,
 			EffectVariant.FIRE_JET,
@@ -54,6 +57,10 @@ function MoltenCore:KillingSalEnemy(entity, amount, _, source)
 
 		Jet.CollisionDamage = player.Damage * 1.2
 		enemies:AddBurn(source, 120, 1)
+
+		if #nearEnemies >= 5 then
+			game:ShakeScreen(10)
+		end
 	end
 end
 mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, MoltenCore.KillingSalEnemy)

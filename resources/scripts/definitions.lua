@@ -18,6 +18,7 @@ edithMod.Enums = {
 		COLLECTIBLE_FATE_OF_THE_UNFAITHFUL = Isaac.GetItemIdByName("Fate of the unfaithful"),
 		COLLECTIBLE_SALT_HEART = Isaac.GetItemIdByName("Salt Heart"),
 		COLLECTIBLE_DIVINE_RETRIBUTION = Isaac.GetItemIdByName("Divine Retribution"),
+		COLLECTIBLE_THE_BOOK_OF_LUKE = Isaac.GetItemIdByName("The Book Of Luke")
 	},
 	TrinketType = {
 		TRINKET_GEODE = Isaac.GetTrinketIdByName("Geode"),
@@ -47,14 +48,33 @@ edithMod.Enums = {
 		SOUND_YIPPEE = Isaac.GetSoundIdByName("Yippee"),
 		SOUND_SPRING = Isaac.GetSoundIdByName("Spring"),
 		SOUND_SOLARIAN = Isaac.GetSoundIdByName("Solarian"),
+		SOUND_MACHINE = Isaac.GetSoundIdByName("Machine"),
+		SOUND_MECHANIC = Isaac.GetSoundIdByName("Mechanic"),
+		SOUND_KNIGHT = Isaac.GetSoundIdByName("Knight"),
 	},
 	Achievements = {
+		-- Edith unlocks
 		ACHIEVEMENT_SALT_SHAKER = Isaac.GetAchievementIdByName("EdithRebuilt_SaltShaker"),
 		ACHIEVEMENT_PEPPER_GRINDER = Isaac.GetAchievementIdByName("EdithRebuilt_PepperGrinder"),
 		ACHIEVEMENT_SAL = Isaac.GetAchievementIdByName("EdithRebuilt_Sal"),
 		ACHIEVEMENT_SALT_HEART = Isaac.GetAchievementIdByName("EdithRebuilt_SaltHeart"),
 		ACHIEVEMENT_FAITH_OF_THE_UNFAITHFUL = Isaac.GetAchievementIdByName("EdithRebuilt_FaithOfTheUnfaithful"),
+		ACHIEVEMENT_MOLTEN_CORE = Isaac.GetAchievementIdByName("EdithRebuilt_MoltenCore"),
+		ACHIEVEMENT_GILDED_STONE = Isaac.GetAchievementIdByName("EdithRebuilt_GildedStone"),
+		ACHIEVEMENT_GEODE = Isaac.GetAchievementIdByName("EdithRebuilt_Geode"),
+		ACHIEVEMENT_SULFURIC_FIRE = Isaac.GetAchievementIdByName("EdithRebuilt_SulfuricFire"),
 		ACHIEVEMENT_TAINTED_EDITH = Isaac.GetAchievementIdByName("EdithRebuilt_TaintedEdith"),
+		ACHIEVEMENT_RUMBLING_PEBBLE = Isaac.GetAchievementIdByName("EdithRebuilt_RumblingPebble"),
+		ACHIEVEMENT_DIVINE_RETRIBUTION = Isaac.GetAchievementIdByName("EdithRebuilt_DivineRetribution"),
+		ACHIEVEMENT_THE_BOOK_OF_LUKE = Isaac.GetAchievementIdByName("EdithRebuilt_TheBookOfLuke"),
+		ACHIEVEMENT_EDITHS_HOOD = Isaac.GetAchievementIdByName("EdithRebuilt_EdithsHood"),
+
+		-- Edith unlocks end
+
+		-- Tainted Edith unlocks
+
+		-- Tainted Edith unlocks end
+		ACHIEVEMENT_THANK_YOU = Isaac.GetAchievementIdByName("EdithRebuilt_ThankYou"),
 	},
 	Utils = {
 		Game = Game(),
@@ -213,8 +233,9 @@ edithMod.Enums = {
 		TargetLineColor = Color(1, 1, 1),
 		SaltShakerDist = Vector(0, 60),
 		HSVStartColor = Color(1, 0, 0),
-		PerfectParryRadius = 25,
-		ImpreciseParryRadius = 40,
+		ColorDefault = Color(1, 1, 1, 1),
+		PerfectParryRadius = 18,
+		ImpreciseParryRadius = 55,
 		BurnedSaltColor = Color(0.3, 0.3, 0.3, 1),
 		ChargeBarleftVector = Vector(-8, 10),
 		ChargeBarcenterVector = Vector(0, 10),

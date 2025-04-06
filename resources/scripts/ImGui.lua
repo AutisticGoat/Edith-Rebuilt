@@ -224,9 +224,6 @@ local function OptionsUpdate()
 		agregarCheckbox("EdithSetting", "TargetLine", "Enable Target line", function(check)
 			EdithData.targetline = check
 			end, false)
-		agregarSlider("EdithSetting", "TargetLineSpace", "Set Line Space", function(index, val)
-			EdithData.linespace = index
-			end, 16, 1, 50, "%d%")
 		-- Visuals end
 		
 		-- sounds
@@ -262,7 +259,6 @@ local function OptionsUpdate()
 		actualizarCampo("SetRGB", "EdithData", "RGBMode", false, "Checkbox")
 		actualizarCampo("SetRGBSpeed", "EdithData", "RGBSpeed", 16,"Slider")	
 		actualizarCampo("TargetLine", "EdithData", "targetline", false, "Checkbox")
-		actualizarCampo("TargetLineSpace", "EdithData", "linespace", 16, "Slider")
 			
 		local color = EdithData.TargetColor
 			
@@ -349,6 +345,9 @@ local function OptionsUpdate()
 			"Vine Boom",
 			"Fart Reverb",
 			"Solarian",
+			"Machine",
+			"Mechanic",
+			"Knight",
 		}, 
 			
 		function(index, val)
@@ -405,7 +404,6 @@ function edithMod:ResetSaveData(isTainted)
 		EdithData.RGBMode = false
 		EdithData.RGBSpeed = 0.005
 		EdithData.targetline = false
-		EdithData.linespace = 16
 	end
 end
 
@@ -421,7 +419,6 @@ local elements = {
 	"SetRGB", 
 	"SetRGBSpeed",
 	"TargetLine",
-	"TargetLineSpace",
 	"ScreenShake",
 	"resetButton",
 		
@@ -481,7 +478,6 @@ function edithMod:InitSaveData()
 	EdithData.RGBMode = EdithData.RGBMode or false
 	EdithData.RGBSpeed = EdithData.RGBSpeed or 0.5
 	EdithData.targetline = EdithData.targetline or false
-	EdithData.linespace = EdithData.linespace or 16
 	
 	TEdithData.ArrowColor = TEdithData.ArrowColor or {Red = 1, Green = 0, Blue = 0}
 	TEdithData.ArrowDesign = TEdithData.ArrowDesign or 1

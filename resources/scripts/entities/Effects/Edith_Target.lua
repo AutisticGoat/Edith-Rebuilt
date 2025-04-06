@@ -98,6 +98,9 @@ local function RGBFunction(color, step)
 	color = newColor
 end
 
+local currentDate = os.date("*t") -- converts the current date to a table
+local isTDOV = (currentDate.month == 3 and currentDate.day == 31)
+
 function Target:EdithTargetSprite(effect)
 	local room = game:GetRoom()	
 	if room:GetRenderMode() == RenderMode.RENDER_WATER_REFLECT then return false end
@@ -113,7 +116,6 @@ function Target:EdithTargetSprite(effect)
 	local targetColor = edithData.TargetColor
 	local RGBmode = edithData.RGBMode
 	local RGBspeed = edithData.RGBSpeed
-	local targetSpace = edithData.linespace
 	local targetDesign = edithData.targetdesign
 	local targetLine = edithData.targetline
 	local effectColor = effect.Color
@@ -133,18 +135,29 @@ function Target:EdithTargetSprite(effect)
 	effect:SetColor(color, -1, 100, false, false)
 	effectSprite:ReplaceSpritesheet(0, misc.TargetPath .. tables.TargetSuffix[targetDesign] .. ".png", true)
 		
+	if isTDOV then
+		effectSprite:ReplaceSpritesheet(0, misc.TargetPath .. tables.TargetSuffix[2] .. ".png", true)
+		effect.Color = Color.Default
+	end
+
 	if targetLine ~= true then return end
 	local targetlineColor = misc.TargetLineColor
 	local animation = effectSprite:GetAnimation()
 	local frame = effectSprite:GetFrame()
 	local isObscure = frame >= funcs.Switch(animation, tables.FrameLimits, 0)	
-	
+
 	if targetDesign == 1 then
 		targetlineColor = effectColor
 	else
 		targetlineColor.R = tables.ColorValues[targetDesign].R
 		targetlineColor.G = tables.ColorValues[targetDesign].G
 		targetlineColor.B = tables.ColorValues[targetDesign].B
+	end
+
+	if isTDOV then
+		targetlineColor.R = tables.ColorValues[2].R
+		targetlineColor.G = tables.ColorValues[2].G
+		targetlineColor.B = tables.ColorValues[2].B
 	end
 
 	if isObscure then
@@ -155,6 +168,6 @@ function Target:EdithTargetSprite(effect)
 		
 		targetlineColor = newObcureColor
 	end
-	funcs.DrawLine(player.Position, effect.Position, targetlineColor, targetSpace) 
+	funcs.DrawLine(player.Position, effect.Position, targetlineColor) 
 end
 mod:AddCallback(ModCallbacks.MC_PRE_EFFECT_RENDER, Target.EdithTargetSprite, effect.EFFECT_EDITH_TARGET)

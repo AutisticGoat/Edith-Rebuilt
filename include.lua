@@ -3,6 +3,7 @@ local col = "collectibles/"
 local ent = "entities/"
 local stmpSyn = "stompSynergies/"
 
+
 local includeFiles = {
 	-- Cosas necesarias
 	"definitions",
@@ -18,21 +19,21 @@ local includeFiles = {
 
 	
 	-- Items
-	col .. "items/SaltShaker",
-	col .. "items/PepperGrinder",
-	col .. "items/EdithsHood",
-	col .. "items/SulfuricFire",
-	col .. "items/Sal",
-	col .. "items/MoltenCore",
-	col .. "items/GildedStone",
-	col .. "items/FateOfTheUnfaithful",
-	col .. "items/SaltHeart",
-	col .. "items/DivineRetribution",
+	col .. "items/Edith/SaltShaker",
+	col .. "items/Edith/PepperGrinder",
+	col .. "items/Edith/EdithsHood",
+	col .. "items/Edith/SulfuricFire",
+	col .. "items/Edith/Sal",
+	col .. "items/Edith/MoltenCore",
+	col .. "items/Edith/GildedStone",
+	col .. "items/Edith/FateOfTheUnfaithful",
+	col .. "items/Edith/SaltHeart",
+	col .. "items/Edith/DivineRetribution",
 	-- Items fin
-	
+
 	-- Trinkets
-	col .. "trinkets/geode",
-	col .. "trinkets/rumblingpebble",
+	col .. "trinkets/Edith/geode",
+	col .. "trinkets/Edith/rumblingpebble",
 	-- Trinkets fin
 	
 	-- Entidades

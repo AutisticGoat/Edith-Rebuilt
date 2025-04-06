@@ -82,39 +82,10 @@ function mod:EdithSaltTears(tear)
 	if not player then return end
 	if not funcs.IsEdith(player, false) then return end
 
-	local SaltShakerUnlock = Isaac.GetAchievementIdByName("EdithRebuilt_SaltShaker")
-	Isaac.GetPersistentGameData():TryUnlock(SaltShakerUnlock)
-
 	funcs.ForceSalt(tear)
 
 	local shotSpeed = player.ShotSpeed * 10
-	local closestEnemy = funcs.ClosestEnemy(player)
-
-	if closestEnemy and not player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED) then
-		tear.Velocity = funcs.VelTarget(player, closestEnemy, shotSpeed)
-	
-		local playerPos = player.Position	
-		local tearDisplacement = player:GetTearDisplacement()
-		local multiShot = player:GetMultiShotParams(WeaponType.WEAPON_TEARS)
-		local tearCounts = multiShot:GetNumTears()
-		local faceDir = funcs.Switch(funcs.VecToAng(tear.Velocity), tables.DegreesToDirection, Direction.DOWN)
-		local ticksPerSecond = funcs.GetTPS(player)
-
-		if tearCounts < 2 then
-			local randomFactor = funcs.RandomNum(3000, 5000) / 1000
-			local adjustmentVector = misc.HeadAdjustVec
-			local headAxis = funcs.Switch(faceDir, tables.HeadAxis, "Hor")
-			local tearDis = (tearDisplacement * randomFactor) * (shotSpeed / 10)
-			local SetX, SetY = headAxis == "Ver" and tearDis or 0, headAxis == "Hor" and tearDis or 0
-			funcs.SetVec(adjustmentVector, SetX, SetY)
-			local directionAdjustment = funcs.Switch(faceDir, tables.DirectionToVector, Vector.Zero):Resized(shotSpeed)
-					
-			tear.Position = playerPos + directionAdjustment + adjustmentVector	
-		end
-
-		local directionFrames = math.ceil(10 * (2.73 / ticksPerSecond)) + 10
-		player:SetHeadDirection(faceDir, directionFrames, true)
-	end
+	edithMod.ShootTearToNearestEnemy(tear, player)
 
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED) then return end	
 	local target = funcs.GetTarget(player)
@@ -294,7 +265,7 @@ function mod:EdithLanding(player, data, pitfall)
 	end
 
 	if isNearTrapdoor(player) == false then
-		edithMod.LandFeedbackManager(player, SoundPick, Color.Default, false)
+		edithMod.LandFeedbackManager(player, SoundPick, player.Color, false)
 	end
 
 	local tears = funcs.GetTPS(player)
@@ -364,7 +335,7 @@ function mod:EdithLanding(player, data, pitfall)
 			player:AddBombs(-1)
 		end
 
-		game:BombExplosionEffects(player.Position, 100, player.TearFlags, Color.Default, player, 1, false, false, 0)
+		game:BombExplosionEffects(player.Position, 100, player.TearFlags, misc.ColorDefault, player, 1, false, false, 0)
 		playerData.BombStomp = false
 	end
 	-------- Bomb Stomp  end --------

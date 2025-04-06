@@ -35,4 +35,13 @@
 	<sound name="Solarian">
 		<sample weight="1" path="Solarian.wav" />
 	</sound>
+	<sound name="Machine">
+		<sample weight="1" path="Machine.wav" />
+	</sound>
+	<sound name="Mechanic">
+		<sample weight="1" path="Mechanic.wav" />
+	</sound>
+	<sound name="Knight">
+		<sample weight="1" path="Knight.wav" />
+	</sound>
 </sounds>

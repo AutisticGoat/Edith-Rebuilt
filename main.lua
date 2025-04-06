@@ -1,11 +1,11 @@
 ---@diagnostic disable-next-line: lowercase-global
-edithMod = RegisterMod("Edith Kotry Build", 1)
+edithMod = RegisterMod("Edith: Rebuilt", 1)
 local mod = edithMod
 
 include("resources/scripts/save_manager").Init(mod)
 
 local myFolder = "resources.scripts.EdithKotryLibraryOfIsaac"
-local LOCAL_TSIL = require(myFolder .. ".TSIL")
+local LOCAL_TSIL = include(myFolder .. ".TSIL")
 LOCAL_TSIL.Init(myFolder)
 
 mod.JumpLib = include("resources/scripts/EdithKotryJumpLib")

@@ -39,7 +39,6 @@ function edithMod:RemoveTaintedEdithTargetArrow(player)
 	local playerData = edithMod.GetData(player)
 	
 	if not edithMod.IsEdith(player, true) then return end
-	
 	if not playerData.TaintedEdithTarget then return end
 	
 	playerData.TaintedEdithTarget:Remove()
@@ -248,14 +247,17 @@ local LINE_SPRITE = Sprite()
 LINE_SPRITE:Load("gfx/TinyBug.anm2", true)
 LINE_SPRITE:SetFrame("Dead", 0)
 
-local MAX_POINTS = 360
+local MAX_POINTS = 32
 local ANGLE_SEPARATION = 360 / MAX_POINTS
 
----
 ---@param entity Entity
 ---@param AreaSize number
 ---@param AreaColor Color
 function edithMod.RenderAreaOfEffect(entity, AreaSize, AreaColor) -- Took from Melee lib, tweaked a little bit
+	local room = game:GetRoom()
+
+	if room:GetRenderMode() == RenderMode.RENDER_WATER_REFLECT then return end
+
     local hitboxPosition = entity.Position
     local renderPosition = Isaac.WorldToScreen(hitboxPosition) - game.ScreenShakeOffset
     local hitboxSize = AreaSize
@@ -278,8 +280,8 @@ end
 function edithMod.GetRandomRune(rng)
 	local runes = #tables.Runes
 	
-	local runeRandomSelect = edithMod.RandomNumber(1, runes)
-	return tables.Runes[runeRandomSelect]
+	local RNGSelect = rng:RandomInt(1, runes)
+	return edithMod.When(RNGSelect, tables.Runes, 1)
 end
 
 ---Manages Edith's Target and Tainted Edith's arrow behavior when going trough doors
@@ -294,22 +296,22 @@ function edithMod:TargetDoorManager(effect, player, triggerDistance)
 
 	for i = 0, 7 do
 		local door = room:GetDoor(i)
-		if door then
-			local doorPos = room:GetDoorSlotPosition(i)
-			if doorPos and effectPos:Distance(doorPos) <= triggerDistance then
-				if door:IsOpen() or (roomName == "Mirror Room" and player:GetEffects():HasNullEffect(NullItemID.ID_LOST_CURSE)) then
-					player.Position = doorPos
-					edithMod.RemoveEdithTarget(player)
-					edithMod:RemoveTaintedEdithTargetArrow(player)
-					edithMod:ChangeColor(player, 1, 1, 1, 0)
-				else
-					door:TryUnlock(player)
-				end
-				break
-			end
+		if not door then goto Break end
+		local doorPos = room:GetDoorSlotPosition(i)
+		if not (doorPos and effectPos:Distance(doorPos) <= triggerDistance) then goto Break end
+		if door:IsOpen() or (roomName == "Mirror Room" and player:HasInstantDeathCurse()) then
+			player.Position = doorPos
+			edithMod.RemoveEdithTarget(player)
+			edithMod:RemoveTaintedEdithTargetArrow(player)
+			edithMod:ChangeColor(player, 1, 1, 1, 0)
+		else
+			door:TryUnlock(player)
 		end
+		break
+		::Break::
 	end
 end
+		
 
 ---@param tear EntityTear
 local function tearCol(_, tear)
@@ -344,7 +346,7 @@ edithMod:AddCallback(ModCallbacks.MC_POST_TEAR_DEATH, tearCol)
 ---@param IsBlood boolean
 ---@param isTainted boolean
 local function doEdithTear(tear, IsBlood, isTainted)
-	local player = tear.Parent:ToPlayer()	
+	local player = edithMod:GetPlayerFromTear(tear)
 
 	if not player then return end
 
@@ -369,7 +371,7 @@ end
 ---@param tainted? boolean
 function edithMod.ForceSaltTear(tear, tainted)
 	tainted = tainted or false
-	local IsBloodTear = tables.BloodytearVariants[tear.Variant] or false
+	local IsBloodTear = edithMod.When(tear.Variant, tables.BloodytearVariants, false) 
 	
 	doEdithTear(tear, IsBloodTear, tainted)
 end
@@ -477,10 +479,9 @@ function edithMod:SpawnSaltCreep(parent, position, damage, timeout, gibAmount, s
 	salt:SetTimeout(timeOutSeconds)
 	
 	if gibAmount and gibAmount > 0 then
-		edithMod:SpawnSaltGib(parent, gibAmount, Color.Default, 15, spawnType)
+		edithMod:SpawnSaltGib(parent, gibAmount, Color.Default)
 	end
 	local saltData = edithMod.GetData(salt)
-	
 	saltData.SpawnType = spawnType
 end
 
@@ -488,10 +489,8 @@ end
 ---@param player EntityPlayer
 ---@return number
 function edithMod.GetEdithTargetDistance(player)
----@diagnostic disable-next-line: missing-return-value
-	if not edithMod.IsEdith(player, false) then return end
 	local playerData = edithMod.GetData(player)
-	local target = playerData.EdithTarget ---@type EntityEffect
+	local target = playerData.EdithTarget---@type EntityEffect
 
 	return player.Position:Distance(target.Position)
 end
@@ -500,8 +499,6 @@ end
 ---@param player EntityPlayer
 ---@return Vector
 function edithMod.GetEdithTargetDirection(player)
----@diagnostic disable-next-line: missing-return-value
-	if not edithMod.IsEdith(player, false) then return end
 	local playerData = edithMod.GetData(player)
 	local target = playerData.EdithTarget ---@type EntityEffect
 	local dif = target.Position - player.Position
@@ -528,57 +525,6 @@ function edithMod:SpawnPepperCreep(parent, position, damage, timeout)
 	pepper.CollisionDamage = damage or 0
 	local timeOutSeconds = edithMod:SecondsToFrames(timeout) or 30
 	pepper:SetTimeout(timeOutSeconds)
-end
-
----comment
----@param n number
----@return integer
-function edithMod:contarCifras(n)
-    local str = tostring(n)
-	return str:gsub("%+", "."):gsub("%.", ""):len()
-end
-
----Returns a random number, it usually take Mod's RNG object but you can pass any other RNG object you'd like to use
----@param num1 number
----@param num2? number
----@param rng? RNG
----@return (integer|number)
-function edithMod.RandomNumber(num1, num2, rng)
-    rng = rng or edithMod.Enums.Utils.RNG
-
-    local isFloat = (num2 and math.type(num1 + num2) == "float") or math.type(num1) == "float"
-
-    local cifrasNum1 = edithMod:contarCifras(num1)
-    local cifrasNum2 = num2 and edithMod:contarCifras(num2) or 0
-
-    local longerNumber = math.max(cifrasNum1, cifrasNum2)
-
-    local power = isFloat and (num2 and 10 ^ (longerNumber - 1) or 10 ^ (cifrasNum1 - 1)) or 1
-
-	if num1 then
-		num1 = math.ceil(num1 * power)
-	end
-	if num2 then
-        num2 = math.ceil(num2 * power)
-    end
-
-    local result
-	if num1 then
-		if num2 then
-			result = rng:RandomInt(num1, num2) * (1 / power)
-		else
-			result = (rng:RandomInt(num1) + 1) * (1 / power)
-		end
-	else
-		result = rng:RandomFloat()
-	end
-	
-	if result % 1 == 0 then
-		result = math.tointeger(result)
-	end
-	
----@diagnostic disable-next-line: return-type-mismatch
-    return result
 end
 
 ---Forcefully adds a costume for a character
@@ -634,64 +580,54 @@ local targetSprite = Sprite("gfx/edith target.anm2", true)
 ---@param from Vector
 ---@param to Vector
 ---@param color Color
----@param linespace integer
-function edithMod.drawLine(from, to, color, linespace)
-	linespace = linespace or 16
+function edithMod.drawLine(from, to, color)
 	local diffVector = to - from
 	local angle = diffVector:GetAngleDegrees()
-	local sectionCount = math.floor(diffVector:Length() / linespace)
+	local sectionCount = math.floor(diffVector:Length() / 16)
+	local direction = Vector.FromAngle(angle)
 
 	targetSprite.Color = color
 	targetSprite.Rotation = angle
 	targetSprite:SetFrame("Line", 0)
-	targetSprite:Update()
-		
-	for _ = 1, sectionCount do
-		targetSprite:Render(Isaac.WorldToScreen(from))
-		from = from + Vector.One * linespace * Vector.FromAngle(angle)
+
+	for i = 0, sectionCount - 1 do
+		local currentPos = from + direction * (i * 16)
+		targetSprite:Render(Isaac.WorldToScreen(currentPos))
 	end
-	targetSprite.Rotation = 0
 end
 
 ---Spawns Salt gibs (Used as a visual feedback effect for edith stomps)
 ---@param parent Entity
 ---@param Number integer
 ---@param color? Color
----@param timeout? number
----@param spawnType? string
-function edithMod:SpawnSaltGib(parent, Number, color, timeout, spawnType)
-	for _ = 1, Number do	
-		local saltGib = Isaac.Spawn(
-			EntityType.ENTITY_EFFECT,
-			EffectVariant.TOOTH_PARTICLE,
-			0,
-			parent.Position,
-			RandomVector():Resized(3),
-			parent
-		):ToEffect() 
+function edithMod:SpawnSaltGib(parent, Number, color)
+    local parentColor = parent.Color
+	local parentPos = parent.Position
+    local finalColor = color or parent.Color 
 
-		if not saltGib then return end
+	if color then
+		local CTint = color:GetTint()
+		local PTint = parentColor:GetTint()
+		local COff = color:GetOffset()
+		local POff = parentColor:GetOffset()
+		local PCol = parentColor:GetColorize()
 
-		if color then 
-			saltGib.Color = Color(
-				(color.R + parent.Color.R - 1), 
-				(color.G + parent.Color.G - 1), 
-				(color.B + parent.Color.B - 1), 
-				(color.A + parent.Color.A - 1),
-				(color.RO + parent.Color.RO),
-				(color.GO + parent.Color.GO),
-				(color.BO + parent.Color.BO)
-			)
-		else
-			saltGib.Color = parent.Color
-		end
-
-	---@diagnostic disable-next-line: param-type-mismatch
-		local timeOutSeconds = edithMod:SecondsToFrames(timeout) or 30
-		local saltGibData = edithMod.GetData(saltGib)
-		saltGib:SetTimeout(timeOutSeconds)
-		saltGibData.SpawnType = spawnType
+		finalColor:SetTint(CTint.R + PTint.R - 1, CTint.G + PTint.G - 1, CTint.B + PTint.B - 1, 1)
+		finalColor:SetOffset(COff.R + (POff.R), COff.G + (POff.G), COff.B + (POff.B))
+		finalColor:SetColorize(PCol.R, PCol.G, PCol.B, PCol.A)
 	end
+
+    for _ = 1, Number do    
+        local saltGib = Isaac.Spawn(
+            EntityType.ENTITY_EFFECT,
+            EffectVariant.TOOTH_PARTICLE,
+            0,
+            parentPos,
+            RandomVector():Resized(3),
+            parent
+		)
+        saltGib.Color = finalColor
+    end
 end
 
 ---@param player EntityPlayer
@@ -717,18 +653,25 @@ end
 ---@param player EntityPlayer
 ---@return EntityNPC|nil
 function edithMod.GetClosestEnemy(player)
-	local closestDistance, closestEnemy
+    local closestDistance = math.huge
+    local closestEnemy = nil
+    local playerPosition = player.Position
+	local room = game:GetRoom()
+
     for _, enemy in ipairs(Isaac.GetRoomEntities()) do
-        if enemy:IsActiveEnemy() and enemy:IsVulnerableEnemy() then
-            local distanceToPlayer = enemy.Position:Distance(player.Position)
-            if not closestDistance or closestDistance > distanceToPlayer then
-                closestEnemy = enemy:ToNPC()
-                closestDistance = distanceToPlayer
-            end
-        end
+        if not (enemy:IsActiveEnemy() and enemy:IsVulnerableEnemy()) then goto Break end
+        if enemy:HasEntityFlags(EntityFlag.FLAG_CHARM) then goto Break end
+		local distanceToPlayer = enemy.Position:Distance(playerPosition)
+		local checkline = room:CheckLine(playerPosition, enemy.Position, LineCheckMode.PROJECTILE, 0, false, false)
+		if not checkline then goto Break end
+        if distanceToPlayer >= closestDistance then goto Break end
+
+        closestEnemy = enemy:ToNPC()
+        closestDistance = distanceToPlayer
+        ::Break::
     end
 
-	return closestEnemy
+    return closestEnemy
 end
 
 ---Spawns Tainted Edith Arrow and returns it
@@ -752,6 +695,15 @@ function edithMod:SpawnTaintedArrow(player)
 	end
 
 	return playerData.TaintedEdithTarget
+end
+
+---@param player EntityPlayer
+---@return EntityEffect
+function edithMod.GetTaintedArrow(player)
+	local playerData = mod.GetData(player)
+	local TEdithArrow = playerData.TaintedEdithTarget
+
+	return TEdithArrow
 end
 
 ---Function used to manage and change Shockwave sprites from `TSIL` Library
@@ -897,7 +849,7 @@ function edithMod:EdithStomp(parent, radius, damage, knockback, breakGrid)
 		
 			local damageMultiplier = entity:HasEntityFlags(EntityFlag.FLAG_FREEZE) and 1.3 or 1 
 			
-			local terraMultiplier = parent:HasCollectible(CollectibleType.COLLECTIBLE_TERRA) and edithMod.RandomNumber(500, 1500) / 1000 or 1								
+			local terraMultiplier = parent:HasCollectible(CollectibleType.COLLECTIBLE_TERRA) and utils.RNG:RandomInt(5000, 25000) / 1000 or 1								
 			damage = (damage * damageMultiplier) * terraMultiplier
 		
 			entity:TakeDamage(damage, DamageFlag.DAMAGE_CRUSH | DamageFlag.DAMAGE_IGNORE_ARMOR, EntityRef(parent), 0)
@@ -1088,10 +1040,40 @@ function edithMod.LandFeedbackManager(player, soundTable, GibColor, IsParryLand)
 
 	stompGFX.Color = color
 	GibColor = GibColor or Color.Default
-	edithMod:SpawnSaltGib(player, gibAmount, GibColor, 5, "StompGib")
+	edithMod:SpawnSaltGib(player, gibAmount, GibColor)
 end
 
----comment
+function edithMod.ShootTearToNearestEnemy(tear, player)
+	local shotSpeed = player.ShotSpeed * 10
+	local closestEnemy = mod.GetClosestEnemy(player)
+
+	if closestEnemy and not player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED) then
+		tear.Velocity = mod.ChangeVelToTarget(player, closestEnemy, shotSpeed)
+	
+		local playerPos = player.Position	
+		local tearDisplacement = player:GetTearDisplacement()
+		local multiShot = player:GetMultiShotParams(WeaponType.WEAPON_TEARS)
+		local tearCounts = multiShot:GetNumTears()
+		local faceDir = mod.When(mod.vectorToAngle(tear.Velocity), tables.DegreesToDirection, Direction.DOWN)
+		local ticksPerSecond = mod.GetTPS(player)
+
+		if tearCounts < 2 then
+			local randomFactor = utils.RNG:RandomInt(3000, 5000) / 1000
+			local adjustmentVector = misc.HeadAdjustVec
+			local headAxis = mod.When(faceDir, tables.HeadAxis, "Hor")
+			local tearDis = (tearDisplacement * randomFactor) * (shotSpeed / 10)
+			local SetX, SetY = headAxis == "Ver" and tearDis or 0, headAxis == "Hor" and tearDis or 0
+			mod.SetVector(adjustmentVector, SetX, SetY)
+			local directionAdjustment = mod.When(faceDir, tables.DirectionToVector, Vector.Zero):Resized(shotSpeed)
+					
+			tear.Position = playerPos + directionAdjustment + adjustmentVector	
+		end
+
+		local directionFrames = math.ceil(10 * (2.73 / ticksPerSecond)) + 10
+		player:SetHeadDirection(faceDir, directionFrames, true)
+	end
+end
+
 ---@param entity Entity
 ---@return EntityPlayer?
 function edithMod:GetPlayerFromTear(entity)

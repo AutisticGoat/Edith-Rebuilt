@@ -4,7 +4,7 @@
 		name="Salt Shaker" 
 		description="Stops the evil nearby" 
 		gfx="collectibles_SaltShaker.png"
-		quality="2" 
+		quality="3" 
 		chargetype="timed"
 		maxcharges="420"
 	/>
@@ -13,7 +13,7 @@
 		name="Pepper Grinder" 
 		description="To spice up the danger" 
 		gfx="collectibles_PepperGrinder.png"
-		quality="3" 
+		quality="2" 
 		maxcharges="1"
 	/>
 	<active
@@ -54,7 +54,7 @@
 		description="Flaming instability" 
 		cache="damage"
 		gfx="collectibles_Molten_Core.png"
-		quality="2"
+		quality="3"
 	/>
 	<active
 		id="8" 
@@ -79,6 +79,26 @@
 		description="Strike from heaven... but at what cost?" 
 		cache="damage"
 		gfx="collectibles_Divine_Retribution.png"
+		quality="2"
+		chargetype="timed"
+		maxcharges="420"
+	/>
+	<active
+		id="11" 
+		name="The Book Of Luke" 
+		description="Pending description" 
+		cache="damage"
+		gfx="collectibles_The_Book_Of_Luke.png"
+		quality="2"
+		chargetype="timed"
+		maxcharges="420"
+	/>
+	<active
+		id="12" 
+		name="Divine Wrath" 
+		description="Purify the wicked" 
+		cache="damage"
+		gfx="collectibles_The_Book_Of_Luke.png"
 		quality="2"
 		chargetype="timed"
 		maxcharges="420"

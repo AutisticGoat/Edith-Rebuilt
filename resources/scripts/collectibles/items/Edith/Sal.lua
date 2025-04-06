@@ -37,7 +37,10 @@ function Sal:KillingSalEnemy(entity, amount, _, source)
 	local randomTears = rng:RandomInt(4, 6)
 	
 	for _ = 1, randomTears do
-		local tears = player:FireTear(entity.Position, RandomVector() * (player.ShotSpeed * 10), false, false, false, player, 1)
+		local tears = Isaac.Spawn(EntityType.ENTITY_TEAR, 0, 0, entity.Position, RandomVector() * (player.ShotSpeed * 10), player):ToTear()
+
+		if not tears then return end
+
 		local tearData = mod.GetData(tears)
 		
 		mod.ForceSaltTear(tears)

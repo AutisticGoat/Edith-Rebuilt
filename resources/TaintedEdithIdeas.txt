@@ -1,0 +1,21 @@
+Main concepts: {
+    Fire 
+    Salt 
+    Destruction 
+    Rocks
+    Spices
+}
+
+Mega Satan: Salt rocks (consumable): On use, enemies got "Salted" (reduced speed, can leave salt creep that petrifies non-salted enemies) (salt)
+
+Soul of Edith: On use, player will jump in place, on landing, rock tears fill fall from ceil in random positions, landing nearby an enemy will damage it
+
+Delirium: Something that makes parryjumps, maybe an active item
+
+Ultra greed: Jack of clubs: a random quantity of enemies will explode, and have a low chance of drop bombs 
+
+Isaac, Blue Baby, Lamb, Satan: Burned Salt (trinket): Random chance to shot a burned salt tear,  
+
+Mother: trinket (rocks)
+
+Beast: Item

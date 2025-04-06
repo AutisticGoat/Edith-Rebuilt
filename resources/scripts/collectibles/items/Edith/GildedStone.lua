@@ -13,10 +13,10 @@ function GildedStone:ShootingRockTears(tear)
 	local rng = player:GetCollectibleRNG(items.COLLECTIBLE_GILDED_STONE)
 	local coins = player:GetNumCoins() 
 	local RockTearRoll = rng:RandomFloat() * 100
-
-	print(coins)
-
+	
 	if RockTearRoll > coins then return end
+	local tearDamageChange = rng:RandomInt(500, 2500) / 100
+	tear.CollisionDamage = tear.CollisionDamage * tearDamageChange
 	tear:AddTearFlags(TearFlags.TEAR_ROCK)
 	tear:ChangeVariant(TearVariant.ROCK)
 end
@@ -30,22 +30,24 @@ local RockRewards = {
     [1] = {Variant = PickupVariant.PICKUP_COLLECTIBLE, SubType = CollectibleType.COLLECTIBLE_DOLLAR},
 }
 
-local function getRandomReward()
+---comment
+---@param rng RNG
+---@return table
+local function getRandomReward(rng)
     local totalWeight = 0
     for weight in pairs(RockRewards) do
         totalWeight = totalWeight + weight
     end
 
-    local randomValue = math.random() * totalWeight
+    local randomValue = rng:RandomFloat() * totalWeight
     local cumulativeWeight = 0
-
-	print(totalWeight)
 
     for weight, reward in pairs(RockRewards) do
         cumulativeWeight = cumulativeWeight + weight
         if randomValue <= cumulativeWeight then
             return reward
         end
+---@diagnostic disable-next-line: missing-return
     end
 end
 
@@ -64,12 +66,12 @@ function GildedStone:OnDestroyingRockReward(rock)
 	end
 	local GeneralSpawnFormula = (CoinCount / 2) + (math.min(collectiveLuck, 1) - 1)
 
-	GeneralSpawnRoll = rng:RandomFloat() * 100
+	local GeneralSpawnRoll = rng:RandomFloat() * 100
 
 	if GeneralSpawnRoll > GeneralSpawnFormula then return end
 	RewardRoll = rng:RandomFloat() * 100
 
-	local reward = getRandomReward()
+	local reward = getRandomReward(rng)
 	local vel = reward.Variant == 20 and RandomVector():Resized(3) or Vector.Zero
 
 	Isaac.Spawn(EntityType.ENTITY_PICKUP, reward.Variant, reward.SubType, rock.Position, vel, nil)
