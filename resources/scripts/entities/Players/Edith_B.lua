@@ -470,12 +470,6 @@ function mod:HudBarRender(player)
 	local dashBRCharge = playerData.BirthrightCharge
 	local offset = misc.ChargeBarcenterVector
 
-	local capsule = Capsule(player.Position, Vector.One, 0, misc.PerfectParryRadius)
-	local capsuleTwo = Capsule(player.Position, Vector.One, 0, misc.ImpreciseParryRadius)
-	local DebugShape = DebugRenderer.Get(1, true)    
-    DebugShape:Capsule(capsule)
-    DebugShape:Capsule(capsuleTwo)
-
 	playerData.ChargeBar = playerData.ChargeBar or Sprite("gfx/TEdithChargebar.anm2", true)
 	playerData.BRChargeBar = playerData.BRChargeBar or Sprite("gfx/TEdithBRChargebar.anm2", true)
 	
