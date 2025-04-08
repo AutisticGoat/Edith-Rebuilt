@@ -186,10 +186,11 @@ function mod:EdithJumpHandler(player)
 	local distance = funcs.TargetDis(player)
 	local direction = funcs.TargetDir(player)
 	local angle = funcs.VecToAng(direction)				
-	local faceDirection = funcs.Switch(angle, tables.DegreesToDirection, Direction.DOWN) 
+	
 	local isClose = distance <= 5
 	local isShooting = edithMod:IsPlayerShooting(player)
 	local isStomping = funcs.KeyStompPress(player)
+	local faceDirection = funcs.Switch(angle, tables.DegreesToDirection, Direction.DOWN) 
 	local dir = isClose and Direction.DOWN or faceDirection
 
 	if isJumping or (not isShooting) or (isStomping) then

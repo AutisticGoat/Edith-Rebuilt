@@ -944,11 +944,6 @@ function edithMod:TaintedEdithStomp(parent, radius, damage, knockback, isParry)
 			entity:TakeDamage(damage, DamageFlag.DAMAGE_CRUSH | DamageFlag.DAMAGE_IGNORE_ARMOR, EntityRef(parent), 0)
 			
 			edithMod.TriggerPush(entity, parent, knockback, 5, false)
-			-- entity.Velocity = (entity.Position - parent.Position):Resized(knockback)
-
-			if isParry then
-				parent:SetMinDamageCooldown(30)
-			end
 		else
 			edithMod.When(entity.Type, stompBehavior, function() end)
 		end

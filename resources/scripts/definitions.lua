@@ -188,7 +188,7 @@ edithMod.Enums = {
 		},
 		JumpFlags = {
 			EdithJump = (JumpLib.Flags.DISABLE_SHOOTING_INPUT | JumpLib.Flags.DISABLE_LASER_FOLLOW | JumpLib.Flags.DISABLE_BOMB_INPUT),
-			TEdithHop = (JumpLib.Flags.COLLISION_GRID | JumpLib.Flags.COLLISION_ENTITY | JumpLib.Flags.OVERWRITABLE | JumpLib.Flags.DISABLE_COOL_BOMBS | JumpLib.Flags.IGNORE_CONFIG_OVERRIDE | JumpLib.Flags.FAMILIAR_FOLLOW_ORBITALS),
+			TEdithHop = (JumpLib.Flags.COLLISION_GRID | JumpLib.Flags.COLLISION_ENTITY | JumpLib.Flags.OVERWRITABLE | JumpLib.Flags.DISABLE_COOL_BOMBS | JumpLib.Flags.IGNORE_CONFIG_OVERRIDE | JumpLib.Flags.FAMILIAR_FOLLOW_ORBITALS | JumpLib.Flags.DAMAGE_CUSTOM),
 			TEdithJump = (JumpLib.Flags.COLLISION_GRID | JumpLib.Flags.OVERWRITABLE | JumpLib.Flags.DISABLE_COOL_BOMBS | JumpLib.Flags.IGNORE_CONFIG_OVERRIDE | JumpLib.Flags.FAMILIAR_FOLLOW_ORBITALS),
 		},
 		MovementBasedActives = {
@@ -234,11 +234,13 @@ edithMod.Enums = {
 		SaltShakerDist = Vector(0, 60),
 		HSVStartColor = Color(1, 0, 0),
 		ColorDefault = Color(1, 1, 1, 1),
-		PerfectParryRadius = 18,
-		ImpreciseParryRadius = 55,
+		PerfectParryRadius = 12,
+		ImpreciseParryRadius = 35,
 		BurnedSaltColor = Color(0.3, 0.3, 0.3, 1),
 		ChargeBarleftVector = Vector(-8, 10),
 		ChargeBarcenterVector = Vector(0, 10),
 		ChargeBarrightVector = Vector(8, 10),
+		ParryPartitions = EntityPartition.ENEMY | EntityPartition.BULLET,
+		NewProjectilFlags = ProjectileFlags.HIT_ENEMIES | ProjectileFlags.CANT_HIT_PLAYER,
 	},
 }

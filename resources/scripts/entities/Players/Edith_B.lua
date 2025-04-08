@@ -246,7 +246,7 @@ function mod:TaintedEdithUpdate(player)
 	else
 		if playerData.MoveCharge and playerData.MoveCharge >= 10 then
 			if playerData.IsHoping == true then
-				player.Velocity = (HopVec) * (7 + (player.MoveSpeed - 1)) * (playerData.MoveCharge / 100)
+				player.Velocity = (HopVec) * (8 + (player.MoveSpeed - 1)) * (playerData.MoveCharge / 100)
 			end
 					
 			if not (HopVec.X == 0 and HopVec.Y == 0) then
@@ -342,7 +342,6 @@ function mod:OnNewRoom()
 end
 mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, mod.OnNewRoom)
 
----comment
 ---@param player EntityPlayer
 function mod:EdithLanding(player)	
 	local playerData = funcs.GetData(player)
@@ -395,63 +394,67 @@ function mod:EdithParryJump(player, data)
 	local DamageStat = player.Damage 
 	local rawFormula = ((damageBase + DamageStat) / 1.5) 
 	local isenemy = false
-	local playerData = funcs.GetData(player)
-	local ParryEnts = getParriableEnemies()
 	local playerPos = player.Position
+	local playerData = funcs.GetData(player)
 
-	for _, ent in ipairs(ParryEnts) do 
+	local capsule = Capsule(player.Position, Vector.One, 0, misc.PerfectParryRadius)
+	local capsuleTwo = Capsule(player.Position, Vector.One, 0, misc.ImpreciseParryRadius)
+	-- local DebugShape = DebugRenderer.Get(1, true)    
+    -- DebugShape:Capsule(capsule)
+    -- DebugShape:Capsule(capsuleTwo)
+
+	local ImpreciseParryEnts = Isaac.FindInCapsule(capsuleTwo, misc.ParryPartitions)
+	local PerfectParryEnts = Isaac.FindInCapsule(capsule, misc.ParryPartitions)
+
+	for _, ent in pairs(ImpreciseParryEnts) do
 		local entPos = ent.Position
-		local distance = entPos:Distance(playerPos)
-		local proj = ent:ToProjectile()
 		local newVelocity = ((playerPos - entPos) * -1):Resized(20)
 
-		if distance <= misc.ImpreciseParryRadius then
+		if ent:IsActiveEnemy() and ent:IsVulnerableEnemy() then
+			ent:AddConfusion(EntityRef(player), 90, false)
+		end
+
+		ent:AddKnockback(EntityRef(player), newVelocity, 5, true)
+	end
+
+	for _, ent in pairs(PerfectParryEnts) do
+		local proj = ent:ToProjectile()
+
+		if proj then
+			local spawner = proj.Parent or proj.SpawnerEntity
+			local targetPos = spawner and spawner.Position or proj.Position
+			local newVelocity = ((playerPos - targetPos) * -1):Resized(25)
+
+			proj.FallingAccel = -0.1
+			proj.FallingSpeed = 0
+			proj.Height = -23
+			proj:AddProjectileFlags(misc.NewProjectilFlags)
+
 			ent:AddKnockback(EntityRef(player), newVelocity, 5, true)
-			if ent:IsActiveEnemy() and ent:IsVulnerableEnemy() then
-				ent:AddConfusion(EntityRef(player), 90, false)
+		else
+			ent:TakeDamage(rawFormula, 0, EntityRef(player), 0)
+			if ent.HitPoints <= rawFormula then
+				sfx:Play(SoundEffect.SOUND_MEATY_DEATHS)
+				game:ShakeScreen(20)
 			end
 		end
 
-		if distance <= misc.PerfectParryRadius then 
-			playerData.ParryCounter = 15
-			playerData.ImpulseCharge = playerData.ImpulseCharge + 20
-			player:SetMinDamageCooldown(20)
-			isenemy = true
-
-			if proj then
-				local spawner = proj.Parent or proj.SpawnerEntity
-				local targetPos = spawner and spawner.Position or proj.Position
-				local newVelocity = ((playerPos - targetPos) * -1):Resized(25)
-
-				proj.FallingAccel = -0.1
-				proj.FallingSpeed = 0
-				proj.Height = -23
-
-				proj.ProjectileFlags = proj.ProjectileFlags | ProjectileFlags.HIT_ENEMIES | ProjectileFlags.CANT_HIT_PLAYER
-
-				ent:AddKnockback(EntityRef(player), newVelocity, 5, true)
-			else
-				ent:TakeDamage(rawFormula, 0, EntityRef(player), 0)
-				if ent.HitPoints <= rawFormula then
-					sfx:Play(SoundEffect.SOUND_MEATY_DEATHS)
-					game:ShakeScreen(20)
-				end
-			end
-		end
+		isenemy = true
+		player:SetMinDamageCooldown(20)
 	end
 
 	playerData.ParryCounter = isenemy and 10 or 20
 
-	local tableRef = (isenemy and parryJumpSounds) or hopSounds
+	local tableRef = isenemy and parryJumpSounds or hopSounds
 	funcs.FeedbackMan(player, tableRef, misc.BurnedSaltColor, isenemy)
 end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, mod.EdithParryJump, jumpParams.TEdithJump)
 
 function mod:TaintedEdithDamageManager(player)
 	local playerData = funcs.GetData(player)
-	if not funcs.IsEdith(player, false) then return end
+	if not funcs.IsEdith(player, true) then return end
 
-	if playerData.IsHoping == true then
+	if playerData.IsHoping == true and playerData.MoveCharge >= 30 then
 		return false
 	end
 end
@@ -467,24 +470,20 @@ function mod:HudBarRender(player)
 	local dashBRCharge = playerData.BirthrightCharge
 	local offset = misc.ChargeBarcenterVector
 
-	-- mod.RenderAreaOfEffect(player, misc.ImpreciseParryRadius, Color(0, 0, 1))
-	-- mod.RenderAreaOfEffect(player, misc.PerfectParryRadius, Color(1, 0, 0))
+	local capsule = Capsule(player.Position, Vector.One, 0, misc.PerfectParryRadius)
+	local capsuleTwo = Capsule(player.Position, Vector.One, 0, misc.ImpreciseParryRadius)
+	local DebugShape = DebugRenderer.Get(1, true)    
+    DebugShape:Capsule(capsule)
+    DebugShape:Capsule(capsuleTwo)
 
-	if not playerData.ChargeBar then
-		playerData.ChargeBar = Sprite("gfx/TEdithChargebar.anm2", true)
-	end
-
-	if not playerData.BRChargeBar then
-		playerData.BRChargeBar = Sprite("gfx/TEdithBRChargebar.anm2", true)
-	end
-
-	local chargeBar, BRChargebar = playerData.ChargeBar, playerData.BRChargeBar
+	playerData.ChargeBar = playerData.ChargeBar or Sprite("gfx/TEdithChargebar.anm2", true)
+	playerData.BRChargeBar = playerData.BRChargeBar or Sprite("gfx/TEdithBRChargebar.anm2", true)
 	
-	if player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and not BRChargebar:IsFinished("Disappear") then
+	if player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and not (playerData.BRChargeBar and playerData.BRChargeBar:IsFinished("Disappear")) then
 		offset = misc.ChargeBarleftVector
 	end
 
-	HudHelper.RenderChargeBar(chargeBar, dashCharge, 100, playerpos + offset)
-	HudHelper.RenderChargeBar(BRChargebar, dashBRCharge, 100, playerpos + misc.ChargeBarrightVector)
+	HudHelper.RenderChargeBar(playerData.ChargeBar, dashCharge, 100, playerpos + offset)
+	HudHelper.RenderChargeBar(playerData.BRChargeBar, dashBRCharge, 100, playerpos + misc.ChargeBarrightVector)
 end
 mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_RENDER, mod.HudBarRender)
