@@ -31,7 +31,7 @@ local hopSounds = {
 }
 
 local parryJumpSounds = {
-	[1] = SoundEffect.SOUND_STONE_IMPACT,
+	[1] = SoundEffect.SOUND_ROCK_CRUMBLE,
 	[2] = sounds.SOUND_PIZZA_TAUNT,
 	[3] = sounds.SOUND_VINE_BOOM,
 	[4] = sounds.SOUND_FART_REVERB,
@@ -117,7 +117,7 @@ function mod:InitTaintedEdithJump(player)
 	)	
 
 	local var = DustCloud.Variant
-	local color = Color.Default
+	local color = Color(1, 1, 1)
 
 	local switch = {
 		[EffectVariant.BIG_SPLASH] = function()
@@ -137,6 +137,9 @@ function mod:InitTaintedEdithJump(player)
 	local dustSprite = DustCloud:GetSprite()
 	
 	dustSprite.PlaybackSpeed = room:HasWater() and 1.3 or 2	
+
+	DustCloud.SpriteScale = DustCloud.SpriteScale * player.SpriteScale.X
+
 	DustCloud.DepthOffset = -100
 	DustCloud:SetColor(color, -1, 100, false, false)
 	
@@ -196,7 +199,7 @@ function mod:TaintedEdithUpdate(player)
 		
 	playerData.HopVector = playerData.HopVector or Vector.Zero
 	
-	if player:CollidesWithGrid() then
+	if player:CollidesWithGrid() and playerData.IsHoping == true then
 		if not isJumping then
 			stopTEdithHops(player, 20, true, playerData.TaintedEdithTarget == nil)
 		end
@@ -311,11 +314,23 @@ function mod:RenderTaintedEdith(player)
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_RENDER, mod.RenderTaintedEdith)
 
-local function spawnFireJet(player, radius, damage)
+---comment
+---@param player EntityPlayer
+---@param radius number
+---@param damage number
+---@param useDefaultMult? boolean
+local function spawnFireJet(player, radius, damage, useDefaultMult)
+	useDefaultMult = useDefaultMult or false
+	
 	local playerData = funcs.GetData(player)
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) then return end
 
-	for _, enemy in ipairs(Isaac.FindInRadius(player.Position, radius, EntityPartition.ENEMY)) do
+	local capsule = Capsule(player.Position, Vector.One, 0, radius)
+	local enemiesInCapsule = Isaac.FindInCapsule(capsule, EntityPartition.ENEMY)
+
+	if #enemiesInCapsule < 1 then return end
+
+	for _, enemy in ipairs(enemiesInCapsule) do
 		local BirthrightFire = Isaac.Spawn(
 			EntityType.ENTITY_EFFECT,
 			EffectVariant.FIRE_JET,
@@ -324,8 +339,8 @@ local function spawnFireJet(player, radius, damage)
 			Vector.Zero,
 			player
 		):ToEffect()
-		local mult = (playerData.BirthrightCharge / 100) or 1
-		
+		local mult = useDefaultMult and 1 or (playerData.MoveBrCharge / 100) 
+
 		BirthrightFire.CollisionDamage = damage * mult
 	end
 end
@@ -352,10 +367,14 @@ function mod:EdithLanding(player)
 	playerData.HopParams = {
 		Radius = math.min((30 + (tearRange - 9)), 35),
 		Knockback = math.min(50, (7.7 + DamageStat ^ 1.2)) * player.ShotSpeed,
-		Damage = ((damageBase + DamageStat) / 2.5) * (playerData.MoveCharge + playerData.BirthrightCharge) / 100,
+		Damage = ((damageBase + DamageStat) / 2.5) * (playerData.MoveCharge + playerData.MoveBrCharge) / 100, ---@type number
 	}
 	
 	local HopParams = playerData.HopParams
+
+	if playerData.MoveBrCharge > 0 then
+		spawnFireJet(player, HopParams.Radius, HopParams.Damage)
+	end
 
 	player:SpawnWaterImpactEffects(player.Position, Vector(1, 1), 1)	
 	funcs.FeedbackMan(player, hopSounds, misc.BurnedSaltColor)
@@ -364,6 +383,7 @@ function mod:EdithLanding(player)
 end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, mod.EdithLanding, jumpParams.TEdithHop)
 
+---@param tear EntityTear
 function mod:OnTaintedShootTears(tear)
 	local player = mod:GetPlayerFromTear(tear)
 	if not player then return end
@@ -371,21 +391,10 @@ function mod:OnTaintedShootTears(tear)
 
 	mod.ForceSaltTear(tear, true)
 	mod.ShootTearToNearestEnemy(tear, player)
+
+	-- tear:AddVelocity(player.Velocity / 10)
 end
 mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, mod.OnTaintedShootTears)
-
----comment
----@return Entity[]
-local function getParriableEnemies()
-	local roomEntities = Isaac.GetRoomEntities()
-	local enemies = {}
-	for _, ent in ipairs(roomEntities) do
-		if ent:IsActiveEnemy() and ent:IsVulnerableEnemy() or ent:ToProjectile() then
-			table.insert(enemies, ent)
-		end
-	end
-	return enemies
-end
 
 local damageBase = 13.5
 ---@param player EntityPlayer
@@ -399,12 +408,12 @@ function mod:EdithParryJump(player, data)
 
 	local capsule = Capsule(player.Position, Vector.One, 0, misc.PerfectParryRadius)
 	local capsuleTwo = Capsule(player.Position, Vector.One, 0, misc.ImpreciseParryRadius)
-	-- local DebugShape = DebugRenderer.Get(1, true)    
-    -- DebugShape:Capsule(capsule)
-    -- DebugShape:Capsule(capsuleTwo)
 
 	local ImpreciseParryEnts = Isaac.FindInCapsule(capsuleTwo, misc.ParryPartitions)
 	local PerfectParryEnts = Isaac.FindInCapsule(capsule, misc.ParryPartitions)
+	local hasBirthright = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT)
+	local BirthrightMult = hasBirthright and 1.2 or 1
+	local DamageFormula = rawFormula * BirthrightMult
 
 	for _, ent in pairs(ImpreciseParryEnts) do
 		local entPos = ent.Position
@@ -430,25 +439,80 @@ function mod:EdithParryJump(player, data)
 			proj.Height = -23
 			proj:AddProjectileFlags(misc.NewProjectilFlags)
 
+			if hasBirthright then
+				proj:AddProjectileFlags(ProjectileFlags.FIRE_SPAWN)
+			end
+
 			ent:AddKnockback(EntityRef(player), newVelocity, 5, true)
 		else
-			ent:TakeDamage(rawFormula, 0, EntityRef(player), 0)
-			if ent.HitPoints <= rawFormula then
+			spawnFireJet(player, misc.PerfectParryRadius, DamageFormula / 1.5, true)
+
+			ent:TakeDamage(DamageFormula, 0, EntityRef(player), 0)
+			if ent.HitPoints <= DamageFormula then
 				sfx:Play(SoundEffect.SOUND_MEATY_DEATHS)
 				game:ShakeScreen(20)
 			end
 		end
-
 		isenemy = true
 		player:SetMinDamageCooldown(20)
 	end
 
 	playerData.ParryCounter = isenemy and 10 or 20
 
+	if isenemy == true then
+		game:MakeShockwave(playerPos, 0.035, 0.025, 2)
+		playerData.ImpulseCharge = playerData.ImpulseCharge + 20
+	end
+
+	local lasers = Isaac.FindByType(EntityType.ENTITY_LASER) ---@type EntityLaser[]
+
+	for _, laser in ipairs(lasers) do
+		local laserData = mod.GetData(laser)
+		local LaserCapsule = Capsule(laser.Position, laserData.EndPoint, laser.Size)
+		local DebugShape = DebugRenderer.Get(1, true)    
+		DebugShape:Capsule(LaserCapsule)
+
+
+		for _, player in ipairs(Isaac.FindInCapsule(LaserCapsule, EntityPartition.PLAYER)) do
+			local degree = mod.vectorToAngle((player.Position - laser.Position) * -1)
+			local divineShield = Isaac.Spawn(
+				EntityType.ENTITY_EFFECT,
+				EffectVariant.DIVINE_INTERVENTION,
+				0,
+				playerPos,
+				Vector.Zero,
+				player
+			):ToEffect()
+
+			local shieldData = mod.GetData(divineShield)
+			shieldData.ParryShield = true 
+			shieldData.StaticPos = player.Position
+
+			divineShield.Rotation = degree
+			divineShield.Timeout = 1			
+		end
+	end
+
 	local tableRef = isenemy and parryJumpSounds or hopSounds
 	funcs.FeedbackMan(player, tableRef, misc.BurnedSaltColor, isenemy)
 end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, mod.EdithParryJump, jumpParams.TEdithJump)
+
+function mod:CustomShieldBehavior(effect)
+	local effectData = mod.GetData(effect)
+	if not effectData.ParryShield then return end
+
+	effect.Visible = false
+	effect.Position = effectData.StaticPos
+end
+mod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, mod.CustomShieldBehavior,EffectVariant.DIVINE_INTERVENTION)
+
+---@param laser EntityLaser
+function mod:LaserStuff(laser)
+	local laserData = mod.GetData(laser)
+	laserData.EndPoint = laser.EndPoint
+end
+mod:AddCallback(ModCallbacks.MC_POST_LASER_UPDATE, mod.LaserStuff)
 
 function mod:TaintedEdithDamageManager(player)
 	local playerData = funcs.GetData(player)
@@ -469,6 +533,12 @@ function mod:HudBarRender(player)
 	local dashCharge = playerData.ImpulseCharge
 	local dashBRCharge = playerData.BirthrightCharge
 	local offset = misc.ChargeBarcenterVector
+
+	-- local capsule = Capsule(player.Position, Vector.One, 0, misc.PerfectParryRadius)
+	-- local capsuleTwo = Capsule(player.Position, Vector.One, 0, misc.ImpreciseParryRadius)
+	-- local DebugShape = DebugRenderer.Get(1, true)    
+    -- DebugShape:Capsule(capsule)
+    -- DebugShape:Capsule(capsuleTwo)
 
 	playerData.ChargeBar = playerData.ChargeBar or Sprite("gfx/TEdithChargebar.anm2", true)
 	playerData.BRChargeBar = playerData.BRChargeBar or Sprite("gfx/TEdithBRChargebar.anm2", true)

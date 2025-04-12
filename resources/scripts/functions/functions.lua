@@ -269,7 +269,7 @@ function edithMod.RenderAreaOfEffect(entity, AreaSize, AreaColor) -- Took from M
         local angle = ANGLE_SEPARATION * i
         LINE_SPRITE.Rotation = angle
         LINE_SPRITE.Offset = offset:Rotated(angle)
-		LINE_SPRITE.Color = AreaColor or Color.Default
+		LINE_SPRITE.Color = AreaColor or misc.ColorDefault
         LINE_SPRITE:Render(renderPosition)
     end
 end
@@ -603,7 +603,7 @@ end
 function edithMod:SpawnSaltGib(parent, Number, color)
     local parentColor = parent.Color
 	local parentPos = parent.Position
-    local finalColor = color or parent.Color 
+    local finalColor = Color(1, 1, 1) or parent.Color 
 
 	if color then
 		local CTint = color:GetTint()
@@ -1018,23 +1018,26 @@ function edithMod.LandFeedbackManager(player, soundTable, GibColor, IsParryLand)
 		player
 	)
 
+	local defColor = Color(1, 1, 1)
+
 	edithMod.SetVector(stompGFX.SpriteScale, SizeX, SizeY)
 
-	local color = Color.Default
+	local color = defColor
 	local switch = {
 		[EffectVariant.BIG_SPLASH] = function()
 			color = edithMod.When(BackDrop, backColor, Color(0.7, 0.75, 1))
 		end,
 		[EffectVariant.POOF02] = function()
-			color = BackDrop == BackdropType.DROSS and Color.Default or backColor[BackDrop] 
+			color = BackDrop == BackdropType.DROSS and defColor or backColor[BackDrop] 
 		end,
 	}
 	
 	edithMod.WhenEval(Variant, switch)
-	color = color or Color.Default
+	color = color or defColor
 
 	stompGFX.Color = color
-	GibColor = GibColor or Color.Default
+	stompGFX.SpriteScale = stompGFX.SpriteScale * player.SpriteScale.X
+	GibColor = GibColor or defColor
 	edithMod:SpawnSaltGib(player, gibAmount, GibColor)
 end
 

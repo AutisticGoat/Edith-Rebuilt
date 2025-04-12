@@ -44,7 +44,11 @@ local UnlockTable = {
         Difficulty = Difficulty.DIFFICULTY_HARD,
         Item = items.COLLECTIBLE_MOLTEN_CORE,
     },
-    -- [CompletionType.ULTRA_GREED] = achievements.ACHIEVEMENT_SALT_SHAKER,
+    [CompletionType.ULTRA_GREED] = {
+        Unlock = achievements.ACHIEVEMENT_HYDRARGYRUM,
+        Difficulty = Difficulty.DIFFICULTY_GREED,
+        Item = items.COLLECTIBLE_HYDRARGYRUM,
+    },
     [CompletionType.HUSH] = {
         Unlock = achievements.ACHIEVEMENT_SAL,
         Difficulty = Difficulty.DIFFICULTY_HARD,
@@ -78,15 +82,17 @@ function unlocks:CheckStartUnlocks()
     for unlock, table in pairs(UnlockTable) do
         if pgd:Unlocked(table.Unlock) then goto Break end
         
-        print(unlock, "Objeto bloqueado")
+        -- print(unlock, "Objeto bloqueado", )
         
-        -- if table.Item then
-        --     game:GetItemPool():RemoveCollectible(table.Item)
-        -- end
+        if table.Item then
+            print(unlock, "Objeto bloqueado", Isaac.GetItemConfig():GetCollectible(table.Item).Name)
+            game:GetItemPool():RemoveCollectible(table.Item)
+        end
 
-        -- if table.Trinket then
-        --     print(game:GetItemPool():RemoveTrinket(table.Trinket))
-        -- end
+        if table.Trinket then
+            print(unlock, "Trinket bloqueado", Isaac.GetItemConfig():GetTrinket(table.Trinket).Name)
+            game:GetItemPool():RemoveTrinket(table.Trinket)
+        end
 
         ::Break::
     end

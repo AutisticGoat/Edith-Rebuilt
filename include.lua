@@ -29,6 +29,7 @@ local includeFiles = {
 	col .. "items/Edith/FateOfTheUnfaithful",
 	col .. "items/Edith/SaltHeart",
 	col .. "items/Edith/DivineRetribution",
+	col .. "items/Edith/Hydrargyrum",
 	-- Items fin
 
 	-- Trinkets

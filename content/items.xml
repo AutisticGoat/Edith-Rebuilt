@@ -1,4 +1,5 @@
 <items gfxroot="gfx/items/" version="1">
+	<!-- Edith unlocks  -->
 	<active
 		id="1" 
 		name="Salt Shaker" 
@@ -93,17 +94,14 @@
 		chargetype="timed"
 		maxcharges="420"
 	/>
-	<active
+	<passive	
 		id="12" 
-		name="Divine Wrath" 
-		description="Purify the wicked" 
+		name="Hydrargyrum" 
+		description="Volatile Liquidity" 
 		cache="damage"
-		gfx="collectibles_The_Book_Of_Luke.png"
+		gfx="collectibles_Hydrargyrum.png"
 		quality="2"
-		chargetype="timed"
-		maxcharges="420"
 	/>
-
 	<trinket 
 		name="Geode"
 		description="Crack it open" 
@@ -114,4 +112,17 @@
 		description="Rock scattering" 
 		gfx="RumblingPebble.png" 
 	/>
+	<!-- Edith unlocks end -->
+
+	<!-- Tainted Edith unlocks -->
+	<active
+		id="13" 
+		name="Divine Wrath" 
+		description="Purify the wicked" 
+		cache="damage"
+		gfx="collectibles_The_Book_Of_Luke.png"
+		quality="2"
+		chargetype="timed"
+		maxcharges="420"
+	/>	
 </items>

@@ -14,6 +14,7 @@
     <achievement name="EdithRebuilt_DivineRetribution" text='' gfx="achivement_DivineRetribution" />
     <achievement name="EdithRebuilt_TheBookOfLuke" text='' gfx="achivement_TheBookOfLuke.png" />
     <achievement name="EdithRebuilt_EdithsHood" text='' gfx="achivement_EdithsHood.png" />
+    <achievement name="EdithRebuilt_Hydrargyrum" text='' gfx="achivement_Hydrargyrum.png" />
     <achievement name="EdithRebuilt_TaintedEdith" text='' gfx="achivement_TaintedEdith.png" />
 
     <!-- Tainted Edith unlocks -->
