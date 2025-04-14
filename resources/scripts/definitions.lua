@@ -56,29 +56,28 @@ edithMod.Enums = {
 	},
 	Achievements = {
 		-- Edith unlocks
-		ACHIEVEMENT_SALT_SHAKER = Isaac.GetAchievementIdByName("EdithRebuilt_SaltShaker"),
-		ACHIEVEMENT_PEPPER_GRINDER = Isaac.GetAchievementIdByName("EdithRebuilt_PepperGrinder"),
-		ACHIEVEMENT_SAL = Isaac.GetAchievementIdByName("EdithRebuilt_Sal"),
-		ACHIEVEMENT_SALT_HEART = Isaac.GetAchievementIdByName("EdithRebuilt_SaltHeart"),
-		ACHIEVEMENT_FAITH_OF_THE_UNFAITHFUL = Isaac.GetAchievementIdByName("EdithRebuilt_FaithOfTheUnfaithful"),
-		ACHIEVEMENT_MOLTEN_CORE = Isaac.GetAchievementIdByName("EdithRebuilt_MoltenCore"),
-		ACHIEVEMENT_GILDED_STONE = Isaac.GetAchievementIdByName("EdithRebuilt_GildedStone"),
-		ACHIEVEMENT_GEODE = Isaac.GetAchievementIdByName("EdithRebuilt_Geode"),
-		ACHIEVEMENT_SULFURIC_FIRE = Isaac.GetAchievementIdByName("EdithRebuilt_SulfuricFire"),
-		ACHIEVEMENT_RUMBLING_PEBBLE = Isaac.GetAchievementIdByName("EdithRebuilt_RumblingPebble"),
-		ACHIEVEMENT_DIVINE_RETRIBUTION = Isaac.GetAchievementIdByName("EdithRebuilt_DivineRetribution"),
-		ACHIEVEMENT_THE_BOOK_OF_LUKE = Isaac.GetAchievementIdByName("EdithRebuilt_TheBookOfLuke"),
-		ACHIEVEMENT_EDITHS_HOOD = Isaac.GetAchievementIdByName("EdithRebuilt_EdithsHood"),
-		ACHIEVEMENT_HYDRARGYRUM = Isaac.GetAchievementIdByName("EdithRebuilt_Hydrargyrum"),
-
-		ACHIEVEMENT_TAINTED_EDITH = Isaac.GetAchievementIdByName("EdithRebuilt_TaintedEdith"),
+		ACHIEVEMENT_SALT_SHAKER = Isaac.GetAchievementIdByName("Salt Shaker"),
+		ACHIEVEMENT_PEPPER_GRINDER = Isaac.GetAchievementIdByName("Pepper Grinder"),
+		ACHIEVEMENT_SAL = Isaac.GetAchievementIdByName("Sal"),
+		ACHIEVEMENT_SALT_HEART = Isaac.GetAchievementIdByName("Salt Heart"),
+		ACHIEVEMENT_FAITH_OF_THE_UNFAITHFUL = Isaac.GetAchievementIdByName("Faith Of The Unfaithful"),
+		ACHIEVEMENT_MOLTEN_CORE = Isaac.GetAchievementIdByName("Molten Core"),
+		ACHIEVEMENT_GILDED_STONE = Isaac.GetAchievementIdByName("Gilded Stone"),
+		ACHIEVEMENT_GEODE = Isaac.GetAchievementIdByName("Geode"),
+		ACHIEVEMENT_SULFURIC_FIRE = Isaac.GetAchievementIdByName("Sulfuric Fire"),
+		ACHIEVEMENT_RUMBLING_PEBBLE = Isaac.GetAchievementIdByName("Rumbling Pebble"),
+		ACHIEVEMENT_DIVINE_RETRIBUTION = Isaac.GetAchievementIdByName("Divine Retribution"),
+		ACHIEVEMENT_THE_BOOK_OF_LUKE = Isaac.GetAchievementIdByName("The Book Of Luke"),
+		ACHIEVEMENT_EDITHS_HOOD = Isaac.GetAchievementIdByName("Ediths Hood"),
+		ACHIEVEMENT_HYDRARGYRUM = Isaac.GetAchievementIdByName("Hydrargyrum"),
+		ACHIEVEMENT_TAINTED_EDITH = Isaac.GetAchievementIdByName("Tainted Edith"),
 
 		-- Edith unlocks end
 
 		-- Tainted Edith unlocks
 
 		-- Tainted Edith unlocks end
-		ACHIEVEMENT_THANK_YOU = Isaac.GetAchievementIdByName("EdithRebuilt_ThankYou"),
+		ACHIEVEMENT_THANK_YOU = Isaac.GetAchievementIdByName("Thank You"),
 	},
 	Utils = {
 		Game = Game(),
@@ -227,6 +226,11 @@ edithMod.Enums = {
 			[GridEntityType.GRID_TRAPDOOR] = true,
 			[GridEntityType.GRID_STAIRS] = true,
 			[GridEntityType.GRID_GRAVITY] = true,
+		},
+		Chap4Stages = {
+			[LevelStage.STAGE4_1] = true,
+			[LevelStage.STAGE4_2] = true,
+			[LevelStage.STAGE4_3] = true,
 		},
 	},
 	Misc = {

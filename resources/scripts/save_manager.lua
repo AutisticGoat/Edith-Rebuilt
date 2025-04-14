@@ -8,6 +8,8 @@ SaveManager.Utility = {}
 
 SaveManager.Debug = false
 
+SaveManager.AutoCreateRoomSaves = true
+
 local mFloor = math.floor
 
 -- Used in the DEFAULT_SAVE table as a key with the value being the default save data for a player in this save type.
@@ -68,21 +70,40 @@ SaveManager.Utility.JsonIncompatibilityType = {
 
 ---@enum SaveCallbacks
 SaveManager.SaveCallbacks = {
+	---(SaveData saveData): SaveData - Called before validating the save data to store into the mod's save file. This will not run if there happens to be an issue with copying the contents of the save data or its hourglass backup. Modify the existing contents of the table or return a new table to overwrite the provided save data. As this is a copy, it will not affect the save data currently accessible
 	PRE_DATA_SAVE = "ISAACSAVEMANAGER_PRE_DATA_SAVE",
+	---(SaveData saveData) - Called after storing save data into the mod's save file
 	POST_DATA_SAVE = "ISAACSAVEMANAGER_POST_DATA_SAVE",
+	---(SaveData saveData, boolean isLuamod): SaveData - Called after loading the data from the mod's save file but before loading it into the local save data. Modify the existing contents of the table or return a new table to overwrite the provided save data. `isLuamod` will return `true` if the mod's data was reloaded via the luamod command
 	PRE_DATA_LOAD = "ISAACSAVEMANAGER_PRE_DATA_LOAD",
+	---(SaveData saveData, boolean isLuamod) - Called after loading the mod's save file and storing it in local save data
 	POST_DATA_LOAD = "ISAACSAVEMANAGER_POST_DATA_LOAD",
+	---(Entity entity), Optional Arg: EntityType - Called after finishing initializing an entity
 	POST_ENTITY_DATA_LOAD = "ISAACSAVEMANAGER_POST_ENTITY_DATA_LOAD",
+	---() - Called on POST_PLAYER_INIT for the first player, the earliest data can load, to load arbitrary data
+	POST_GLOBAL_DATA_LOAD = "ISAACSAVEMANAGER_POST_GLOBAL_DATA_LOAD",
+	---(EntityPickup originalPickup, EntityPickup dupedPickup, PickupSave originalSave): boolean, Optional Arg: PickupVariant - Called when a pickup is initialized with the same InitSeed as an existing pickup in the room that has existing save data. Should not run twice for the same pickup. Return `true` to stop data from being copied.
 	DUPE_PICKUP_DATA_LOAD = "ISAACSAVEMANAGER_DUPE_PICKUP_DATA_LOAD",
+	---(EntityPickup pickup, NoRerollSave saveData), Optional Arg: PickupVariant - Called when the pickup is detected to have an InitSeed change before save data is updated
 	PRE_PICKUP_INITSEED_MORPH = "ISAACSAVEMANAGER_PRE_PICKUP_INITSEED_MORPH",
+	---(EntityPickup pickup, NoRerollSave saveData), Optional Arg: PickupVariant - Called when the pickup is detected to have an InitSeed change after save data is updated
 	POST_PICKUP_INITSEED_MORPH = "ISAACSAVEMANAGER_POST_PICKUP_INITSEED_MORPH",
+	---() - Called before all list-indexed room data is reset when changing floors
 	PRE_ROOM_DATA_RESET = "ISAACSAVEMANAGER_PRE_ROOM_DATA_RESET",
+	---() - Called after all list-indexed room data is reset when changing floors
 	POST_ROOM_DATA_RESET = "ISAACSAVEMANAGER_POST_ROOM_DATA_RESET",
+	---() - Called before all temporary room data is reset when changing rooms
 	PRE_TEMP_DATA_RESET = "ISAACSAVEMANAGER_PRE_TEMP_DATA_RESET",
+	---() - Called after all temporary room data is reset when changing rooms
 	POST_TEMP_DATA_RESET = "ISAACSAVEMANAGER_POST_TEMP_DATA_RESET",
+	---() - Called before all floor data is reset when changing floors
 	PRE_FLOOR_DATA_RESET = "ISAACSAVEMANAGER_PRE_FLOOR_DATA_RESET",
+	---() - Called after all floor data is reset when changing floors
 	POST_FLOOR_DATA_RESET = "ISAACSAVEMANAGER_POST_FLOOR_DATA_RESET",
-	GLOWING_HOURGLASS_RESET = "ISAACSAVEMANAGER_GLOWING_HOURGLASS_RESET"
+	---() - Called when Glowing Hourglass is detected to have activated and is queued to reset all save data to the hourglass save
+	PRE_GLOWING_HOURGLASS_RESET = "ISAACSAVEMANAGER_PRE_GLOWING_HOURGLASS_RESET",
+	---() - Called after Glowing Hourglass reverts all save data has to the hourglass save
+	POST_GLOWING_HOURGLASS_RESET = "ISAACSAVEMANAGER_POST_GLOWING_HOURGLASS_RESET"
 }
 
 SaveManager.Utility.CustomCallback = {}
@@ -697,6 +718,7 @@ function SaveManager.QueueHourglassRestore()
 		usedHourglass = true
 		skipRoomReset = true
 		SaveManager.Utility.DebugLog("Activated glowing hourglass. Data will be reset on new room.")
+		Isaac.RunCallback(SaveManager.SaveCallbacks.PRE_GLOWING_HOURGLASS_RESET)
 	end
 end
 
@@ -707,7 +729,7 @@ function SaveManager.TryHourglassRestore()
 		dataCache.game = SaveManager.Utility.PatchSaveFile(newData, SaveManager.DEFAULT_SAVE.game)
 		usedHourglass = false
 		SaveManager.Utility.DebugLog("Restored data from Glowing Hourglass")
-		Isaac.RunCallback(SaveManager.SaveCallbacks.GLOWING_HOURGLASS_RESET)
+		Isaac.RunCallback(SaveManager.SaveCallbacks.POST_GLOWING_HOURGLASS_RESET)
 	end
 end
 
@@ -926,7 +948,7 @@ local function populatePickupData(pickup)
 				local originalSaveData = dataCache.game.room[listIndex][originalSaveIndex]
 				if originalSaveData then
 					local result = Isaac.RunCallbackWithParam(SaveManager.SaveCallbacks.DUPE_PICKUP_DATA_LOAD, originalPickup.Variant, originalPickup, dupedPickup, originalSaveData)
-					if result ~= true then
+					if not result then
 						SaveManager.Utility.DebugLog("Duplicate data copied!")
 						dataCache.game.room[listIndex][saveIndex] = SaveManager.Utility.DeepCopy(originalSaveData)
 					else
@@ -984,12 +1006,8 @@ local function storeAndPopulateAscent()
 		end
 		local roomSaveData = dataCache.game.room[listIndex]
 
-		if roomSaveData
-			and roomSaveData.__SAVEMANAGER_ROOM_TYPE
-			and (roomSaveData.__SAVEMANAGER_ROOM_TYPE == RoomType.ROOM_TREASURE
-			or roomSaveData.__SAVEMANAGER_ROOM_TYPE == RoomType.ROOM_BOSS)
-		then
-			local roomType = roomSaveData.__SAVEMANAGER_ROOM_TYPE
+		if roomSaveData and roomSaveData.__SAVEMANAGER_ASCENT_ROOM_TYPE then
+			local roomType = roomSaveData.__SAVEMANAGER_ASCENT_ROOM_TYPE
 			SaveManager.Utility.DebugLog("Index", listIndex, "is a Treasure/Boss room. Storing all room data")
 			local targetTable = roomType == RoomType.ROOM_TREASURE and dataCache.game.treasureRoom or dataCache.game.bossRoom
 			local ascentIndex = SaveManager.Utility.GetAscentSaveIndex()
@@ -1011,10 +1029,6 @@ local function storeAndPopulateAscent()
 					ascentRoomData[saveIndex] = saveData
 				end
 			end
-		elseif roomSaveData and roomSaveData.__SAVEMANAGER_ROOM_TYPE then
-			SaveManager.Utility.DebugLog("RoomType", roomSaveData.__SAVEMANAGER_ROOM_TYPE, "is not a treasure/boss room")
-		else
-			SaveManager.Utility.DebugLog("Failed locating room save with ListIndex", listIndex)
 		end
 		checkLastIndex = false
 	elseif currentRoomDesc.Data.Type == RoomType.ROOM_TREASURE
@@ -1052,7 +1066,9 @@ end
 --#region game start/entity init
 
 local function onGameLoad()
-	skipFloorReset = true
+	if game:GetFrameCount() == 0 then
+		skipFloorReset = true
+	end
 	skipRoomReset = true
 	SaveManager.Load(false)
 	loadedData = true
@@ -1173,7 +1189,6 @@ local function onEntityInit(_, ent)
 		local pickup = ent:ToPickup()
 		---@cast pickup EntityPickup
 		populatePickupData(pickup)
-		Isaac.RunCallbackWithParam(SaveManager.SaveCallbacks.POST_ENTITY_DATA_LOAD, ent.Type, ent)
 	elseif game:GetLevel():IsAscent()
 		and game:GetRoom():IsFirstVisit()
 		and (game:GetRoom():GetType() == RoomType.ROOM_BOSS
@@ -1184,20 +1199,21 @@ local function onEntityInit(_, ent)
 	if defaultKey then
 		implementSaveKeys(SaveManager.DEFAULT_SAVE.game, dataCache.game, nil, defaultSaveIndex)
 		implementSaveKeys(SaveManager.DEFAULT_SAVE.gameNoBackup, dataCache.gameNoBackup, nil, defaultSaveIndex)
-		if ent then
-			Isaac.RunCallbackWithParam(SaveManager.SaveCallbacks.POST_ENTITY_DATA_LOAD, ent.Type, ent)
-		end
 	end
 	if ent and ent:ToPlayer() and ent:ToPlayer():GetSubPlayer() then
 		implementSaveKeys(SaveManager.DEFAULT_SAVE.game, dataCache.game, nil, altSaveIndex)
 		implementSaveKeys(SaveManager.DEFAULT_SAVE.gameNoBackup, dataCache.gameNoBackup, nil, altSaveIndex)
-		Isaac.RunCallbackWithParam(SaveManager.SaveCallbacks.POST_ENTITY_DATA_LOAD, ent.Type, ent)
 	end
 	if ent and ent.Type == EntityType.ENTITY_PICKUP then
 		resetNoRerollData(dataCache.game.temp, SaveManager.DEFAULT_SAVE.game.temp)
 		resetNoRerollData(dataCache.game.room, SaveManager.DEFAULT_SAVE.game.room, true)
 		resetNoRerollData(dataCache.gameNoBackup.temp, SaveManager.DEFAULT_SAVE.gameNoBackup.temp)
 		resetNoRerollData(dataCache.gameNoBackup.room, SaveManager.DEFAULT_SAVE.gameNoBackup.room, true)
+	end
+	if not ent then
+		Isaac.RunCallback(SaveManager.SaveCallbacks.POST_GLOBAL_DATA_LOAD)
+	else
+		Isaac.RunCallbackWithParam(SaveManager.SaveCallbacks.POST_ENTITY_DATA_LOAD, ent.Type, ent)
 	end
 end
 
@@ -1401,9 +1417,17 @@ local function postNewRoom()
 	currentListIndex = currentRoomDesc.ListIndex
 	resetData("temp")
 	tryRemoveLeftoverData()
+	if not SaveManager.AutoCreateRoomSaves then return end
 	local roomSaveData = SaveManager.GetRoomSave(nil, false, currentListIndex)
+	--Always keep track of for Curse of the Maze
 	roomSaveData.__SAVEMANAGER_SPAWN_SEED = currentRoomDesc.SpawnSeed
-	roomSaveData.__SAVEMANAGER_ROOM_TYPE = currentRoomDesc.Data.Type
+	local roomType = currentRoomDesc.Data.Type
+	--For knowing what the last room was after travelling down a floor in the same room
+	--Doesn't matter if its not boss/treasure
+	if roomType == RoomType.ROOM_BOSS or roomType == RoomType.ROOM_TREASURE then
+		roomSaveData.__SAVEMANAGER_ROOM_TYPE = currentRoomDesc.Data.Type
+	end
+	--To know which boss/treasure room is on what floor. Nil if not either room type
 	roomSaveData.__SAVEMANAGER_ASCENT_INDEX = SaveManager.Utility.GetAscentSaveIndex()
 end
 
@@ -1631,7 +1655,7 @@ end
 ---@return table
 local function getRespectiveSave(ent, noHourglass, initDataIfNotPresent, saveType, listIndex, allowSoulSave)
 	if not SaveManager.Utility.IsDataInitialized(not initDataIfNotPresent)
----@diagnostic disable-next-line: undefined-field
+		---@diagnostic disable-next-line: undefined-field
 		or (ent and type(ent) == "userdata" and not SaveManager.Utility.IsDataTypeAllowed(ent.Type, saveType))
 	then
 		---@diagnostic disable-next-line: missing-return-value
@@ -1951,5 +1975,5 @@ SaveManager.MenuProvider = MenuProvider
 
 --#endregion
 
-edithMod.SaveManager = SaveManager
+edithMod.SaveManager = SaveManager 
 return edithMod.SaveManager

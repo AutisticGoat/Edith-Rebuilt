@@ -104,13 +104,24 @@ function unlocks:OnTriggerCompletion(mark)
     local pgd = Isaac.GetPersistentGameData()
     local unlock = mod.When(mark, UnlockTable, 1)
 
+    if game.Difficulty == Difficulty.DIFFICULTY_GREEDIER then
+        pgd:TryUnlock(achievements.ACHIEVEMENT_HYDRARGYRUM)
+        pgd:TryUnlock(achievements.ACHIEVEMENT_GILDED_STONE)
+    end
+
     if game.Difficulty ~= unlock.Difficulty then return end
     pgd:TryUnlock(unlock.Unlock)
+
 
     if Isaac.AllMarksFilled(players.PLAYER_EDITH) ~= 2 then return end
     pgd:TryUnlock(achievements.ACHIEVEMENT_SALT_HEART)
 end
 mod:AddCallback(ModCallbacks.MC_COMPLETION_MARK_GET, unlocks.OnTriggerCompletion, players.PLAYER_EDITH)
+
+function unlocks:OnUnlocks(unlock)
+    print(unlock)
+end
+mod:AddCallback(ModCallbacks.MC_POST_ACHIEVEMENT_UNLOCK, unlocks.OnUnlocks)
 
 local taintedAchievement = {
     [players.PLAYER_EDITH] = {unlock = achievements.ACHIEVEMENT_TAINTED_EDITH, gfx = "gfx/characters/costumes/characterTaintedEdith.png"}

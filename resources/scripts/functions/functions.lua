@@ -4,6 +4,7 @@ local utils = enums.Utils
 local game = utils.Game
 local tables = enums.Tables
 local misc = enums.Misc
+local players = enums.PlayerType
 
 ---Function to remove Edith's target
 ---@param player EntityPlayer
@@ -23,7 +24,7 @@ end
 ---@param tainted boolean
 ---@return boolean
 function edithMod.IsEdith(player, tainted)
-	return player:GetPlayerType() == (tainted and edithMod.Enums.PlayerType.PLAYER_EDITH_B or edithMod.Enums.PlayerType.PLAYER_EDITH)
+	return player:GetPlayerType() == (tainted and players.PLAYER_EDITH_B or players.PLAYER_EDITH)
 end
 
 ---Checks if any player is Edith
@@ -231,24 +232,26 @@ function edithMod:DestroyGrid(entity, radius)
 	radius = radius or 10
 	local room = game:GetRoom()
 	local roomSize = room:GetGridSize()
+	local entPos = entity.Position
 
 	for i = 0, roomSize do
 		local grid = room:GetGridEntity(i)
-		if grid then
-			local distance = (entity.Position - grid.Position):Length()
-			if distance <= radius then
-				grid:Destroy()
-			end
-		end
+		if not grid then goto Break end
+		local gridPos = grid.Position
+		local distance = entPos:Distance(gridPos) 
+		if distance > radius then goto Break end
+		grid:Destroy()
+		::Break::
 	end
 end
 
-local LINE_SPRITE = Sprite()
-LINE_SPRITE:Load("gfx/TinyBug.anm2", true)
-LINE_SPRITE:SetFrame("Dead", 0)
+-- 631-115-1587 Oscar Esparza 
 
+local LINE_SPRITE = Sprite("gfx/TinyBug.anm2", true)
 local MAX_POINTS = 32
 local ANGLE_SEPARATION = 360 / MAX_POINTS
+
+LINE_SPRITE:SetFrame("Dead", 0)
 
 ---@param entity Entity
 ---@param AreaSize number
@@ -281,7 +284,7 @@ function edithMod.GetRandomRune(rng)
 	local runes = #tables.Runes
 	
 	local RNGSelect = rng:RandomInt(1, runes)
-	return edithMod.When(RNGSelect, tables.Runes, 1)
+	return edithMod.When(RNGSelect, tables.Runes, 32)
 end
 
 ---Manages Edith's Target and Tainted Edith's arrow behavior when going trough doors
@@ -307,11 +310,9 @@ function edithMod:TargetDoorManager(effect, player, triggerDistance)
 		else
 			door:TryUnlock(player)
 		end
-		break
 		::Break::
 	end
 end
-		
 
 ---@param tear EntityTear
 local function tearCol(_, tear)
@@ -328,16 +329,15 @@ local function tearCol(_, tear)
 	local shatterColor = tables.TearShatterColor[isBurnt][isBloody]
 
 	for _, ent in ipairs(Isaac.GetRoomEntities()) do
-		if ent.Type == 1000 and (ent.Variant == 145 or ent.Variant == 35) then
-			if tear.Position:Distance(ent.Position) <= 10 then
-				if ent.Variant == 35 then
-					ent.Color = tear.Color
-				elseif ent.Variant == 145 then
-					ent:GetSprite():ReplaceSpritesheet(0, misc.TearPath .. tearData.ShatterSprite .. ".png", true)
-				end
-				edithMod:ChangeColor(ent, shatterColor[1], shatterColor[2], shatterColor[3])
-			end
+		if not (ent.Type == 1000 and (ent.Variant == 145 or ent.Variant == 35)) then goto Break end
+		if tear.Position:Distance(ent.Position) > 10 then goto Break end
+		if ent.Variant == 35 then
+			ent.Color = tear.Color
+		elseif ent.Variant == 145 then
+			ent:GetSprite():ReplaceSpritesheet(0, misc.TearPath .. tearData.ShatterSprite .. ".png", true)
 		end
+		edithMod:ChangeColor(ent, shatterColor[1], shatterColor[2], shatterColor[3])
+		::Break::
 	end
 end
 edithMod:AddCallback(ModCallbacks.MC_POST_TEAR_DEATH, tearCol)
@@ -495,7 +495,7 @@ function edithMod.GetEdithTargetDistance(player)
 	return player.Position:Distance(target.Position)
 end
 
----Returns a normalize vector that represents direction regarding Edith and her Target
+---Returns a normalized vector that represents direction regarding Edith and her Target
 ---@param player EntityPlayer
 ---@return Vector
 function edithMod.GetEdithTargetDirection(player)
@@ -596,7 +596,7 @@ function edithMod.drawLine(from, to, color)
 	end
 end
 
----Spawns Salt gibs (Used as a visual feedback effect for edith stomps)
+---Spawns Salt gibs (Used as a visual feedback effect for edith stomps and salt related items)
 ---@param parent Entity
 ---@param Number integer
 ---@param color? Color
@@ -744,20 +744,11 @@ end
 ---Checks if are in Chapter 4 (Womb, Utero, Scarred Womb, Corpse)
 ---@return boolean
 function edithMod:isChap4()
-	local room = game:GetRoom()
-	local bdType = room:GetBackdropType()
+	local level = game:GetLevel()
+	local stage = level:GetStage()
+	local Chap4Stages = tables.Chap4Stages
 
-	local chap4bdType = {}
-
-	chap4bdType[10] = true
-	chap4bdType[11] = true
-	chap4bdType[12] = true
-	chap4bdType[13] = true
-	chap4bdType[34] = true
-	chap4bdType[43] = true
-	chap4bdType[44] = true
-	
-	return chap4bdType[bdType] or false
+	return mod.When(stage, Chap4Stages, false)
 end
 
 ---Returns player's tears stat as portrayed in game's stats HUD
@@ -767,6 +758,81 @@ function edithMod.GetTPS(p)
     return TSIL.Utils.Math.Round(30 / (p.MaxFireDelay + 1), 2)
 end
 
+function edithMod.HandleEntityInteraction(ent, parent, knockback)
+    local posDif = ent.Position - parent.Position
+    local stompBehavior = {
+        [EntityType.ENTITY_TEAR] = function()
+            local tear = ent:ToTear()
+            if not tear then return end
+			if mod.IsEdith(parent, true) then return end
+
+            tear:AddTearFlags(TearFlags.TEAR_QUADSPLIT)
+            tear.CollisionDamage = tear.CollisionDamage * 2
+            ent.Velocity = (posDif):Resized(knockback) * 1.5
+        end,
+        [EntityType.ENTITY_FIREPLACE] = function()
+            if ent.Variant == 4 then return end
+            ent:Die()
+        end,
+        [EntityType.ENTITY_FAMILIAR] = function()
+            local familiars = {
+                [FamiliarVariant.SAMSONS_CHAINS] = true,
+                [FamiliarVariant.PUNCHING_BAG] = true,
+                [FamiliarVariant.CUBE_BABY] = true,
+            }
+            
+            local isphysicFamiliar = mod.When(ent.Variant, familiars, false)
+            
+            if not isphysicFamiliar then return end
+            ent.Velocity = (posDif):Resized(knockback)
+        end,
+        [EntityType.ENTITY_BOMB] = function()
+            ent.Velocity = (posDif):Resized(knockback)
+        end,
+        [EntityType.ENTITY_PICKUP] = function()
+            local pickup = ent:ToPickup()
+            
+            if not pickup then return end
+
+            local BlacklisVariants = {
+                [PickupVariant.PICKUP_PILL] = true,
+                [PickupVariant.PICKUP_TAROTCARD] = true,
+                [PickupVariant.PICKUP_TRINKET] = true,
+                [PickupVariant.PICKUP_COLLECTIBLE] = true,
+                [PickupVariant.PICKUP_BROKEN_SHOVEL] = true,
+            }
+
+            local isFlavorTextPickup = mod.When(pickup.Variant, BlacklisVariants, false)
+            local IsLuckyPenny = ent.Variant == PickupVariant.PICKUP_COIN and ent.SubType == CoinSubType.COIN_LUCKYPENNY
+
+            if not isFlavorTextPickup and not IsLuckyPenny then
+                parent:ForceCollide(pickup, true)
+            end
+            
+            if ent.Variant == PickupVariant.PICKUP_BOMBCHEST then
+                pickup:TryOpenChest(parent)
+            end
+        end,
+        [EntityType.ENTITY_SLOT] = function()    
+        end,
+        [EntityType.ENTITY_SHOPKEEPER] = function()
+            ent:Kill()
+        end,
+    }
+
+	mod.WhenEval(ent.Type, stompBehavior)
+end
+
+local damageFlags = DamageFlag.DAMAGE_CRUSH | DamageFlag.DAMAGE_IGNORE_ARMOR
+
+function edithMod.LandDamage(ent, dealEnt, damage, knockback)
+	if not (ent:IsActiveEnemy() and ent:IsVulnerableEnemy()) then return end
+
+	ent:TakeDamage(damage, damageFlags, EntityRef(dealEnt), 0)
+	edithMod.TriggerPush(ent, dealEnt, knockback, 5, false)
+end
+
+
 ---Custom Edith stomp Behavior
 ---@param parent EntityPlayer
 ---@param radius number
@@ -774,93 +840,33 @@ end
 ---@param knockback number
 ---@param breakGrid boolean
 function edithMod:EdithStomp(parent, radius, damage, knockback, breakGrid)
-	for i, entity in pairs(Isaac.FindInRadius(parent.Position, radius, 0xFFFFFFFF)) do
-		local stompBehavior = {
-			[EntityType.ENTITY_TEAR] = function()
-				local tear = entity:ToTear()
-				if not tear then return end
-				tear:AddTearFlags(TearFlags.TEAR_QUADSPLIT)
-				tear.CollisionDamage = tear.CollisionDamage * 2
-				entity.Velocity = (entity.Position - parent.Position):Resized(knockback) * 1.5
-			end,
-			[EntityType.ENTITY_FIREPLACE] = function()
-				if entity.Variant ~= 4 then
-					entity:Die()
-				end
-			end,
-			[EntityType.ENTITY_FAMILIAR] = function()
-				local familiars = {
-					[FamiliarVariant.SAMSONS_CHAINS] = true,
-					[FamiliarVariant.PUNCHING_BAG] = true,
-					[FamiliarVariant.CUBE_BABY] = true,
-				}
-				
-				local isphysicFamiliar = familiars[entity.Variant]
-				
-			
-				if isphysicFamiliar then
-					entity.Velocity = (entity.Position - parent.Position):Resized(knockback)
-				end
-			end,
-			[EntityType.ENTITY_BOMB] = function()
-				entity.Velocity = (entity.Position - parent.Position):Resized(knockback)
-			end,
-			[EntityType.ENTITY_PICKUP] = function()
-				local pickup = entity:ToPickup()
-				
-				if not pickup then return end
+	local StompCapsule = Capsule(parent.Position, Vector.One, 0, radius)
+	local DebugShape = DebugRenderer.Get(1, true)    
+	DebugShape:Capsule(StompCapsule)
 
-				local FlavorTextPikcupVariants = {
-					[PickupVariant.PICKUP_PILL] = true,
-					[PickupVariant.PICKUP_TAROTCARD] = true,
-					[PickupVariant.PICKUP_TRINKET] = true,
-					[PickupVariant.PICKUP_COLLECTIBLE] = true,
-					[PickupVariant.PICKUP_BROKEN_SHOVEL] = true,
-				}
-				
-				local isCoinPenny = (
-					pickup.Variant == PickupVariant.PICKUP_COIN and
-					pickup.SubType == CoinSubType.COIN_LUCKYPENNY
-				)
-				
-				local isFlavorTextPickup = edithMod.SwitchCase(pickup.Variant, FlavorTextPikcupVariants) or isCoinPenny
-				
-				if not isFlavorTextPickup then
-					parent:ForceCollide(pickup, true)
-				end
-				
-				if entity.Variant == PickupVariant.PICKUP_BOMBCHEST then
-					pickup:TryOpenChest(parent)
-				end
-			end,
-			[EntityType.ENTITY_SLOT] = function()	
-			end,
-			[EntityType.ENTITY_SHOPKEEPER] = function()
-				entity:Kill()
-			end,
-			
-		}
+	local HasTerra = parent:HasCollectible(CollectibleType.COLLECTIBLE_TERRA)
+	local rng = utils.RNG
+
+	if breakGrid then
+		mod:DestroyGrid(parent, radius)
+	end
+
+	for _, ent in ipairs(Isaac.FindInCapsule(StompCapsule)) do
+		mod.HandleEntityInteraction(ent, parent, knockback)
+
+		if not (ent:IsActiveEnemy() and ent:IsVulnerableEnemy()) then goto Break end
+		if mod.IsKeyStompPressed(parent) then
+			ent:AddFreeze(EntityRef(parent), 150)
+			goto Break
+		end
 	
-		if entity:IsActiveEnemy() and entity:IsVulnerableEnemy() then
-			if edithMod.IsKeyStompPressed(parent) then
-				entity:AddFreeze(EntityRef(parent), 150)
-				return
-			end
-		
-			local damageMultiplier = entity:HasEntityFlags(EntityFlag.FLAG_FREEZE) and 1.3 or 1 
-			
-			local terraMultiplier = parent:HasCollectible(CollectibleType.COLLECTIBLE_TERRA) and utils.RNG:RandomInt(5000, 25000) / 1000 or 1								
-			damage = (damage * damageMultiplier) * terraMultiplier
-		
-			entity:TakeDamage(damage, DamageFlag.DAMAGE_CRUSH | DamageFlag.DAMAGE_IGNORE_ARMOR, EntityRef(parent), 0)
-			
-			edithMod.TriggerPush(entity, parent, knockback, 5, false)
-		else
-			edithMod.When(entity.Type, stompBehavior)
-		end
-		if breakGrid then
-			edithMod:DestroyGrid(entity, radius)
-		end
+		local FrozenEnt = ent:HasEntityFlags(EntityFlag.FLAG_FREEZE)
+		local damageMult = FrozenEnt and 1.3 or 1 
+		local terraMult = HasTerra and rng:RandomInt(500, 2500) / 100 or 1							
+		damage = (damage * damageMult) * terraMult
+	
+		mod.LandDamage(ent, parent, damage, knockback)
+		::Break::
 	end
 end
 
@@ -899,54 +905,12 @@ end
 ---@param damage number
 ---@param knockback number
 ---@param isParry boolean
-function edithMod:TaintedEdithStomp(parent, radius, damage, knockback, isParry)
-	for _, entity in ipairs(Isaac.FindInRadius(parent.Position, radius, 0xFFFFFFFF)) do
-		local stompBehavior = {
-			[EntityType.ENTITY_FIREPLACE] = function()
-				if entity.Variant ~= 4 then
-					entity:Die()
-				end
-			end,
-			[EntityType.ENTITY_PICKUP] = function()
-				local pickup = entity:ToPickup()
-				
-				if not pickup then return end
+function edithMod:TaintedEdithHop(parent, radius, damage, knockback, isParry)
+	local HopCapsule = Capsule(parent.Position, Vector.One, 0, radius)
 
-				local FlavorTextPikcupVariants = {
-					[PickupVariant.PICKUP_PILL] = true,
-					[PickupVariant.PICKUP_TAROTCARD] = true,
-					[PickupVariant.PICKUP_TRINKET] = true,
-					[PickupVariant.PICKUP_COLLECTIBLE] = true,
-					[PickupVariant.PICKUP_BROKEN_SHOVEL] = true,
-				}
-				
-				local isCoinPenny = (
-					pickup.Variant == PickupVariant.PICKUP_COIN and
-					pickup.SubType == CoinSubType.COIN_LUCKYPENNY
-				)
-				
-				local isFlavorTextPickup = edithMod.SwitchCase(pickup.Variant, FlavorTextPikcupVariants) or isCoinPenny
-				
-				if not isFlavorTextPickup then
-					parent:ForceCollide(pickup, true)
-				end
-				
-				if entity.Variant == PickupVariant.PICKUP_BOMBCHEST then
-					pickup:TryOpenChest(parent)
-				end
-			end,
-			[EntityType.ENTITY_PROJECTILE] = function()
-				entity.Velocity = (entity.Position - parent.Position):Resized(knockback)
-			end,
-		}
-	
-		if entity:IsActiveEnemy() and entity:IsVulnerableEnemy() then
-			entity:TakeDamage(damage, DamageFlag.DAMAGE_CRUSH | DamageFlag.DAMAGE_IGNORE_ARMOR, EntityRef(parent), 0)
-			
-			edithMod.TriggerPush(entity, parent, knockback, 5, false)
-		else
-			edithMod.When(entity.Type, stompBehavior, function() end)
-		end
+	for _, ent in ipairs(Isaac.FindInCapsule(HopCapsule)) do
+		mod.HandleEntityInteraction(ent, parent, knockback)
+		mod.LandDamage(ent, parent, damage, knockback)
 	end
 end
 

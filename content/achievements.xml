@@ -1,26 +1,26 @@
 <achievements gfxroot="gfx/ui/achievements/">
 
     <!-- Edith unlocks -->
-    <achievement name="EdithRebuilt_SaltShaker" text='' gfx="achivement_saltshaker.png" />
-    <achievement name="EdithRebuilt_PepperGrinder" text='' gfx="achivement_peppergrinder.png" />
-    <achievement name="EdithRebuilt_Sal" text='' gfx="achivement_sal.png" />
-    <achievement name="EdithRebuilt_SaltHeart" text='' gfx="achivement_saltheart.png" />
-    <achievement name="EdithRebuilt_FaithOfTheUnfaithful" text='' gfx="achivement_FaithOfTheUnfaithful.png" />
-    <achievement name="EdithRebuilt_Geode" text='' gfx="achivement_Geode.png" />
-    <achievement name="EdithRebuilt_GildedStone" text='' gfx="achivement_GildedStone.png" />
-    <achievement name="EdithRebuilt_MoltenCore" text='' gfx="achivement_MoltenCore.png" />
-    <achievement name="EdithRebuilt_RumblingPebble" text='' gfx="achivement_RumblingPebble.png" />
-    <achievement name="EdithRebuilt_SulfuricFire" text='' gfx="achivement_SulfuricFire.png" />
-    <achievement name="EdithRebuilt_DivineRetribution" text='' gfx="achivement_DivineRetribution" />
-    <achievement name="EdithRebuilt_TheBookOfLuke" text='' gfx="achivement_TheBookOfLuke.png" />
-    <achievement name="EdithRebuilt_EdithsHood" text='' gfx="achivement_EdithsHood.png" />
-    <achievement name="EdithRebuilt_Hydrargyrum" text='' gfx="achivement_Hydrargyrum.png" />
-    <achievement name="EdithRebuilt_TaintedEdith" text='' gfx="achivement_TaintedEdith.png" />
+    <achievement name="Salt Shaker" gfx="achivement_saltshaker.png" />
+    <achievement name="Pepper Grinder" gfx="achivement_peppergrinder.png" />
+    <achievement name="Sal" gfx="achivement_sal.png" />
+    <achievement name="SaltHeart" gfx="achivement_saltheart.png" />
+    <achievement name="Faith Of The Unfaithful" gfx="achivement_FaithOfTheUnfaithful.png" />
+    <achievement name="Geode" gfx="achivement_Geode.png" />
+    <achievement name="Gilded Stone" gfx="achivement_GildedStone.png" />
+    <achievement name="Molten Core" gfx="achivement_MoltenCore.png" />
+    <achievement name="Rumbling Pebble" gfx="achivement_RumblingPebble.png" />
+    <achievement name="Sulfuric Fire" gfx="achivement_SulfuricFire.png" />
+    <achievement name="Divine Retribution" gfx="achivement_DivineRetribution" />
+    <achievement name="The Book Of Luke" gfx="achivement_TheBookOfLuke.png" />
+    <achievement name="Ediths Hood" gfx="achivement_EdithsHood.png" />
+    <achievement name="Hydrargyrum" gfx="achivement_Hydrargyrum.png" />
+    <achievement name="The Punished" gfx="achivement_TaintedEdith.png" />
 
     <!-- Tainted Edith unlocks -->
 
 
     <!-- Thank you-->
-    <achievement name="EdithRebuilt_ThankYou" text='' gfx="achivement_ThankYou.png" />
+    <achievement name="Thank You" gfx="achivement_ThankYou.png" />
 
 </achievements>

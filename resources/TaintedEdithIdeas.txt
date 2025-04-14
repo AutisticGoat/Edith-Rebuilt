@@ -1,21 +1,13 @@
-Main concepts: {
-    Fire 
-    Salt 
-    Destruction 
-    Rocks
-    Spices
-}
-
-Mega Satan: Salt rocks (consumable): On use, enemies got "Salted" (reduced speed, can leave salt creep that petrifies non-salted enemies) (salt)
+Mega Satan: Salt rocks (consumable): On use, enemies got "Salted" (reduced speed, can leave salt creep that petrifies non-salted enemies) (salt) - Pending rework
 
 Soul of Edith: On use, player will jump in place, on landing, rock tears fill fall from ceil in random positions, landing nearby an enemy will damage it
 
-Delirium: Something that makes parryjumps, maybe an active item
+Delirium: Burned hood: 5 seconds charge cooldown, on use, player will perform a Tainted Edith's parry-jump
 
 Ultra greed: Jack of clubs: a random quantity of enemies will explode, and have a low chance of drop bombs 
 
-Isaac, Blue Baby, Lamb, Satan: Burned Salt (trinket): Random chance to shot a burned salt tear,  
+Isaac, Blue Baby, Lamb, Satan: Burned Salt (trinket): Random chance to shoot a burned salt tear, burned salt tears has increased damage (x1.2), killing with a burned salt tear will burst the enemy in 5-7 tears in random directions
 
-Mother: trinket (rocks)
+Mother: trinket 
 
-Beast: Item
+Beast: Divine Wrath: Active item, on use, player will throw burning rock tears in random directions, a circular shockwave will be triggered in player's position

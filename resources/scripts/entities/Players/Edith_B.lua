@@ -52,8 +52,6 @@ local function resetCharges(player)
 	local playerData = funcs.GetData(player)
 	playerData.ImpulseCharge = 0
 	playerData.BirthrightCharge = 0
-	-- playerData.MoveBrCharge = 0
-	-- playerData.MoveCharge = 0
 end
 
 ---@param player EntityPlayer
@@ -364,6 +362,8 @@ function mod:EdithLanding(player)
 	local damageBase = 3.5
 	local DamageStat = player.Damage
 	
+
+
 	playerData.HopParams = {
 		Radius = math.min((30 + (tearRange - 9)), 35),
 		Knockback = math.min(50, (7.7 + DamageStat ^ 1.2)) * player.ShotSpeed,
@@ -379,7 +379,7 @@ function mod:EdithLanding(player)
 	player:SpawnWaterImpactEffects(player.Position, Vector(1, 1), 1)	
 	funcs.FeedbackMan(player, hopSounds, misc.BurnedSaltColor)
 	
-	mod:TaintedEdithStomp(player, HopParams.Radius, HopParams.Damage, HopParams.Knockback, false)	
+	mod:TaintedEdithHop(player, HopParams.Radius, HopParams.Damage, HopParams.Knockback, false)	
 end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, mod.EdithLanding, jumpParams.TEdithHop)
 
@@ -391,8 +391,6 @@ function mod:OnTaintedShootTears(tear)
 
 	mod.ForceSaltTear(tear, true)
 	mod.ShootTearToNearestEnemy(tear, player)
-
-	-- tear:AddVelocity(player.Velocity / 10)
 end
 mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, mod.OnTaintedShootTears)
 
@@ -407,7 +405,7 @@ function mod:EdithParryJump(player, data)
 	local playerData = funcs.GetData(player)
 
 	local capsule = Capsule(player.Position, Vector.One, 0, misc.PerfectParryRadius)
-	local capsuleTwo = Capsule(player.Position, Vector.One, 0, misc.ImpreciseParryRadius)
+	local capsuleTwo = Capsule(player.Position, Vector.One, 0, misc.ImpreciseParryRadius)	
 
 	local ImpreciseParryEnts = Isaac.FindInCapsule(capsuleTwo, misc.ParryPartitions)
 	local PerfectParryEnts = Isaac.FindInCapsule(capsule, misc.ParryPartitions)
@@ -483,6 +481,8 @@ function mod:EdithParryJump(player, data)
 				Vector.Zero,
 				player
 			):ToEffect()
+
+			if not divineShield then return end	
 
 			local shieldData = mod.GetData(divineShield)
 			shieldData.ParryShield = true 
