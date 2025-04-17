@@ -81,9 +81,7 @@ function unlocks:CheckStartUnlocks()
 
     for unlock, table in pairs(UnlockTable) do
         if pgd:Unlocked(table.Unlock) then goto Break end
-        
-        -- print(unlock, "Objeto bloqueado", )
-        
+                
         if table.Item then
             print(unlock, "Objeto bloqueado", Isaac.GetItemConfig():GetCollectible(table.Item).Name)
             game:GetItemPool():RemoveCollectible(table.Item)
@@ -117,11 +115,6 @@ function unlocks:OnTriggerCompletion(mark)
     pgd:TryUnlock(achievements.ACHIEVEMENT_SALT_HEART)
 end
 mod:AddCallback(ModCallbacks.MC_COMPLETION_MARK_GET, unlocks.OnTriggerCompletion, players.PLAYER_EDITH)
-
-function unlocks:OnUnlocks(unlock)
-    print(unlock)
-end
-mod:AddCallback(ModCallbacks.MC_POST_ACHIEVEMENT_UNLOCK, unlocks.OnUnlocks)
 
 local taintedAchievement = {
     [players.PLAYER_EDITH] = {unlock = achievements.ACHIEVEMENT_TAINTED_EDITH, gfx = "gfx/characters/costumes/characterTaintedEdith.png"}

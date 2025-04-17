@@ -19,7 +19,7 @@ end
 
 --[[Checks if player is Edith.
 	Boolean argument checks for Tainted Edith
-]]
+	]]
 ---@param player EntityPlayer
 ---@param tainted boolean
 ---@return boolean
@@ -70,7 +70,6 @@ function edithMod.IsEdithTargetMoving(player)
     return (k_down or k_right or k_left or k_up) or false
 end
 
----
 ---@param entity Entity
 ---@return number
 function edithMod:GetAceleration(entity)
@@ -186,8 +185,7 @@ end
 ---@param vector Vector
 ---@return integer
 function edithMod.vectorToAngle(vector)
-	local x = vector.X 
-	local y = vector.Y
+	local x, y = vector.X, vector.Y
 
 	if x == 0 then
 		return y > 0 and 90 or y < 0 and 270 or 0
@@ -832,7 +830,6 @@ function edithMod.LandDamage(ent, dealEnt, damage, knockback)
 	edithMod.TriggerPush(ent, dealEnt, knockback, 5, false)
 end
 
-
 ---Custom Edith stomp Behavior
 ---@param parent EntityPlayer
 ---@param radius number
@@ -862,7 +859,7 @@ function edithMod:EdithStomp(parent, radius, damage, knockback, breakGrid)
 	
 		local FrozenEnt = ent:HasEntityFlags(EntityFlag.FLAG_FREEZE)
 		local damageMult = FrozenEnt and 1.3 or 1 
-		local terraMult = HasTerra and rng:RandomInt(500, 2500) / 100 or 1							
+		local terraMult = HasTerra and rng:RandomInt(500, 2500) / 1000 or 1							
 		damage = (damage * damageMult) * terraMult
 	
 		mod.LandDamage(ent, parent, damage, knockback)
@@ -925,20 +922,18 @@ local sfx = utils.SFX
 ---@param GibColor Color
 ---@param IsParryLand? boolean
 function edithMod.LandFeedbackManager(player, soundTable, GibColor, IsParryLand)
+	local saveManager = edithMod.SaveManager 
+	if not saveManager:IsLoaded() then return end
+	local menuData = saveManager:GetSettingsSave()
+	if not menuData then return end
+
 	local room = game:GetRoom()
 	local BackDrop = room:GetBackdropType()
 	local hasWater = room:HasWater()
 	local Variant = hasWater and EffectVariant.BIG_SPLASH or EffectVariant.POOF02
 	local SubType = hasWater and 2 or (edithMod:isChap4() and 3 or 1)
 	local backColor = tables.BackdropColors
-
-	local saveManager = edithMod.SaveManager 
-	if not saveManager:IsLoaded() then return end
-	local menuData = saveManager:GetSettingsSave()
-	if not menuData then return end
-
 	local miscData = menuData.miscData
-
 	local soundPick ---@type number
 	local SizeX ---@type number
 	local SizeY ---@type number
@@ -983,9 +978,6 @@ function edithMod.LandFeedbackManager(player, soundTable, GibColor, IsParryLand)
 	)
 
 	local defColor = Color(1, 1, 1)
-
-	edithMod.SetVector(stompGFX.SpriteScale, SizeX, SizeY)
-
 	local color = defColor
 	local switch = {
 		[EffectVariant.BIG_SPLASH] = function()
@@ -999,12 +991,14 @@ function edithMod.LandFeedbackManager(player, soundTable, GibColor, IsParryLand)
 	edithMod.WhenEval(Variant, switch)
 	color = color or defColor
 
+	stompGFX.SpriteScale = Vector(SizeX, SizeY) * player.SpriteScale.X
 	stompGFX.Color = color
-	stompGFX.SpriteScale = stompGFX.SpriteScale * player.SpriteScale.X
 	GibColor = GibColor or defColor
 	edithMod:SpawnSaltGib(player, gibAmount, GibColor)
 end
 
+---@param tear EntityTear
+---@param player EntityPlayer
 function edithMod.ShootTearToNearestEnemy(tear, player)
 	local shotSpeed = player.ShotSpeed * 10
 	local closestEnemy = mod.GetClosestEnemy(player)

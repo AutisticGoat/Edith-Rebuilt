@@ -11,6 +11,7 @@ local jumpParams = tables.JumpParams
 local players = enums.PlayerType
 local costumes = enums.NullItemID
 local misc = enums.Misc
+local TEdith = {}
 
 local funcs = {
 	IsEdith = mod.IsEdith,
@@ -21,7 +22,8 @@ local funcs = {
 	Switch = mod.When,
 	log = mod.Log,
 	exp = mod.exp,
-	FeedbackMan = mod.LandFeedbackManager
+	FeedbackMan = mod.LandFeedbackManager,
+	Clamp = TSIL.Utils.Math.Clamp
 }
 
 local hopSounds = {
@@ -41,12 +43,12 @@ local parryJumpSounds = {
 	[8] = sounds.SOUND_KNIGHT,
 }
 
-function mod:TaintedEdithInit(player)
+function TEdith:TaintedEdithInit(player)
 	if not funcs.IsEdith(player, true) then return end
 	mod.SetNewANM2(player, "gfx/EdithTaintedAnim.anm2")
 	mod.ForceCharacterCostume(player, players.PLAYER_EDITH_B, costumes.ID_EDITH_B_SCARF)
 end
-mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, mod.TaintedEdithInit)
+mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, TEdith.TaintedEdithInit)
 
 local function resetCharges(player)
 	local playerData = funcs.GetData(player)
@@ -63,14 +65,14 @@ local function stopTEdithHops(player, cooldown, useQuitJump, resetChrg)
 	playerData.IsHoping = false
 	player:MultiplyFriction(0.5)
 	playerData.HopVector = Vector(0, 0)
-	
+
 	cooldown = cooldown or 0
 	useQuitJump = useQuitJump or false
-	
+
 	if useQuitJump then
 		JumpLib:QuitJump(player)
 	end
-			
+	
 	if resetChrg then
 		resetCharges(player)
 	end
@@ -82,7 +84,7 @@ function mod:InitTaintedEdithHop(player)
 	local playerData = funcs.GetData(player)
 	local jumpHeight = 6.5 
 	local jumpSpeed = 2.8 * funcs.log(playerData.MoveCharge, 100)
-	
+
 	local config = {
 		Height = jumpHeight,
 		Speed = jumpSpeed,
@@ -97,7 +99,6 @@ function mod:InitTaintedEdithJump(player)
 	local room = game:GetRoom()
 	local jumpHeight = 8
 	local jumpSpeed = 2.5
-	
 	local isChap4 = mod:isChap4()
 	local BackDrop = room:GetBackdropType()
 	local variant = room:HasWater() and EffectVariant.BIG_SPLASH or (isChap4 and EffectVariant.POOF02 or EffectVariant.POOF01)
@@ -112,7 +113,7 @@ function mod:InitTaintedEdithJump(player)
 		player.Position, 
 		Vector.Zero, 
 		player
-	)	
+	)
 
 	local var = DustCloud.Variant
 	local color = Color(1, 1, 1)
@@ -133,14 +134,13 @@ function mod:InitTaintedEdithJump(player)
 	switch[var]()
 
 	local dustSprite = DustCloud:GetSprite()
-	
+
 	dustSprite.PlaybackSpeed = room:HasWater() and 1.3 or 2	
 
 	DustCloud.SpriteScale = DustCloud.SpriteScale * player.SpriteScale.X
-
 	DustCloud.DepthOffset = -100
 	DustCloud:SetColor(color, -1, 100, false, false)
-	
+
 	local config = {
 		Height = jumpHeight,
 		Speed = jumpSpeed,
@@ -153,7 +153,7 @@ end
 local function isTaintedEdithJump(player)
 	local jumpData = JumpLib:GetData(player)
 	local tags = jumpData.Tags
-	
+
 	return tags["edithMod_TaintedEdithJump"] or false
 end
 
@@ -171,19 +171,14 @@ function mod:TaintedEdithUpdate(player)
 		right = Input.IsActionPressed(ButtonAction.ACTION_RIGHT, player.ControllerIndex)
 	}
 
-	playerData.movementVector = playerData.movementVector or Vector.Zero
-	playerData.movementVector.Y = (input.up and -1) or (input.down and 1) or 0
-	playerData.movementVector.X = (input.left and -1) or (input.right and 1) or 0
+	local MovX = (((input.left and -1) or (input.right and 1)) or 0) * (room:IsMirrorWorld() and -1 or 1) 
+	local MovY = (input.up and -1) or (input.down and 1) or 0
+
+	playerData.movementVector = Vector(MovX, MovY):Normalized() 
 	playerData.ImpulseCharge = playerData.ImpulseCharge or 0
 	playerData.BirthrightCharge = playerData.BirthrightCharge or 0
 	playerData.ParryCounter = playerData.ParryCounter or 20
 
-	local NormalizedMovementVector = playerData.movementVector:Normalized()
-
-	if room:IsMirrorWorld() then
-		playerData.movementVector.X = playerData.movementVector.X * -1
-	end
-	
 	if playerData.ParryCounter > 0 then
 		if isTaintedEdithJump(player) ~= true then
 			playerData.ParryCounter = playerData.ParryCounter - 1
@@ -194,9 +189,9 @@ function mod:TaintedEdithUpdate(player)
 			sfx:Play(SoundEffect.SOUND_STONE_IMPACT)
 		end
 	end
-		
+
 	playerData.HopVector = playerData.HopVector or Vector.Zero
-	
+
 	if player:CollidesWithGrid() and playerData.IsHoping == true then
 		if not isJumping then
 			stopTEdithHops(player, 20, true, playerData.TaintedEdithTarget == nil)
@@ -211,25 +206,24 @@ function mod:TaintedEdithUpdate(player)
 		local posDifLenght = posDif:Length()	
 		local posDifNormal = posDif:Normalized()
 		local maxDist = 2.5
-		local dir = funcs.VecToAngle(HopVec)	
-		local faceDirection = tables.DegreesToDirection[dir]
+		local faceDirection = TSIL.Vector.VectorToDirection(HopVec)
 
-		playerData.HopVector = posDif:Normalized()		
+		playerData.HopVector = posDif:Normalized()
 
 		if target.FrameCount < 2 and playerData.IsHoping == true then
 			stopTEdithHops(player, 20, true, true)
 			funcs.FeedbackMan(player, hopSounds, misc.BurnedSaltColor, false)
 		end
 
-		target.Velocity = NormalizedMovementVector:Resized(10)
+		target.Velocity = playerData.movementVector:Resized(10)
 		if posDifLenght >= maxDist then
 			target.Velocity = target.Velocity - (posDifNormal * (posDifLenght / (maxDist))) 
 		end
-		
+
 		if not mod:IsPlayerShooting(player) then
 			player:SetHeadDirection(faceDirection, 2, true)
 		end
-			
+
 		local baseTearsStat = 2.73
 		local tearMult = funcs.GetTPS(player) / baseTearsStat							
 		local jumpData = JumpLib:GetData(player)
@@ -240,8 +234,8 @@ function mod:TaintedEdithUpdate(player)
 
 		if target.FrameCount > 1 then
 			if playerData.IsHoping == false and isJumping == false then
-				playerData.ImpulseCharge = math.min(playerData.ImpulseCharge + chargeAdd, 100)
-				playerData.BirthrightCharge = shouldChargeBrCharge and math.min(playerData.BirthrightCharge + (chargeAdd * 0.5), 100) or 0
+				playerData.ImpulseCharge = funcs.Clamp(playerData.ImpulseCharge + chargeAdd, 0, 100)
+				playerData.BirthrightCharge = shouldChargeBrCharge and funcs.Clamp(playerData.BirthrightCharge + (chargeAdd * 0.5), 0, 100) or 0
 			end
 		end
 	else
@@ -270,7 +264,7 @@ function mod:EdithPlayerUpdate(player)
 	local playerData = funcs.GetData(player)
 
 	if mod:IsKeyStompTriggered(player) then
-		if playerData.ParryCounter == 0 and isTaintedEdithJump(player) == false  then
+		if playerData.ParryCounter == 0 and not isTaintedEdithJump(player) then
 			stopTEdithHops(player, 0, true, true)
 			mod:InitTaintedEdithJump(player)
 		end
@@ -296,10 +290,8 @@ function mod:RenderTaintedEdith(player)
 
 	local arrow = mod.GetTaintedArrow(player)
 	local playerData = funcs.GetData(player)
-	local HopVec = playerData.HopVector
 	local isShooting = mod:IsPlayerShooting(player)
-	local HopVectorDegree = mod.vectorToAngle(HopVec)
-	local faceDirection = funcs.Switch(HopVectorDegree, tables.DegreesToDirection, Direction.DOWN)
+	local faceDirection = TSIL.Vector.VectorToDirection(playerData.HopVector)
 	local chosenDir = Direction.DOWN	
 
 	if playerData.IsHoping or (arrow and arrow.Visible == true) then
@@ -312,7 +304,6 @@ function mod:RenderTaintedEdith(player)
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_RENDER, mod.RenderTaintedEdith)
 
----comment
 ---@param player EntityPlayer
 ---@param radius number
 ---@param damage number
@@ -338,7 +329,6 @@ local function spawnFireJet(player, radius, damage, useDefaultMult)
 			player
 		):ToEffect()
 		local mult = useDefaultMult and 1 or (playerData.MoveBrCharge / 100) 
-
 		BirthrightFire.CollisionDamage = damage * mult
 	end
 end
@@ -362,8 +352,6 @@ function mod:EdithLanding(player)
 	local damageBase = 3.5
 	local DamageStat = player.Damage
 	
-
-
 	playerData.HopParams = {
 		Radius = math.min((30 + (tearRange - 9)), 35),
 		Knockback = math.min(50, (7.7 + DamageStat ^ 1.2)) * player.ShotSpeed,
@@ -444,7 +432,6 @@ function mod:EdithParryJump(player, data)
 			ent:AddKnockback(EntityRef(player), newVelocity, 5, true)
 		else
 			spawnFireJet(player, misc.PerfectParryRadius, DamageFormula / 1.5, true)
-
 			ent:TakeDamage(DamageFormula, 0, EntityRef(player), 0)
 			if ent.HitPoints <= DamageFormula then
 				sfx:Play(SoundEffect.SOUND_MEATY_DEATHS)
@@ -470,7 +457,6 @@ function mod:EdithParryJump(player, data)
 		local DebugShape = DebugRenderer.Get(1, true)    
 		DebugShape:Capsule(LaserCapsule)
 
-
 		for _, player in ipairs(Isaac.FindInCapsule(LaserCapsule, EntityPartition.PLAYER)) do
 			local degree = mod.vectorToAngle((player.Position - laser.Position) * -1)
 			local divineShield = Isaac.Spawn(
@@ -487,7 +473,6 @@ function mod:EdithParryJump(player, data)
 			local shieldData = mod.GetData(divineShield)
 			shieldData.ParryShield = true 
 			shieldData.StaticPos = player.Position
-
 			divineShield.Rotation = degree
 			divineShield.Timeout = 1			
 		end
@@ -505,7 +490,7 @@ function mod:CustomShieldBehavior(effect)
 	effect.Visible = false
 	effect.Position = effectData.StaticPos
 end
-mod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, mod.CustomShieldBehavior,EffectVariant.DIVINE_INTERVENTION)
+mod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, mod.CustomShieldBehavior, EffectVariant.DIVINE_INTERVENTION)
 
 ---@param laser EntityLaser
 function mod:LaserStuff(laser)

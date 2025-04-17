@@ -47,14 +47,6 @@ function mod:SetEdithStats(player, cacheFlag)
 end
 mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, mod.SetEdithStats)
 
--- Function to check if either of the specified flags is present in the bitmask
-function mod:CheckBitmaskFlags(bitmask)
-    local FLAG_1 = 1 << 7  -- 128
-    local FLAG_2 = 1 << 4  -- 16
-
-    return (bitmask & FLAG_1) ~= 0 or (bitmask & FLAG_2) ~= 0
-end
-
 ---comment
 ---@param player EntityPlayer
 ---@param flags DamageFlag

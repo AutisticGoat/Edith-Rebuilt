@@ -1,4 +1,4 @@
-Mega Satan: Salt rocks (consumable): On use, enemies got "Salted" (reduced speed, can leave salt creep that petrifies non-salted enemies) (salt) - Pending rework
+Mega Satan: Salt rocks (consumable): On use, enemies got "Salted" (reduced speed, lower chance to attack and they'll be weaker (receive more damage))
 
 Soul of Edith: On use, player will jump in place, on landing, rock tears fill fall from ceil in random positions, landing nearby an enemy will damage it
 
@@ -8,6 +8,6 @@ Ultra greed: Jack of clubs: a random quantity of enemies will explode, and have 
 
 Isaac, Blue Baby, Lamb, Satan: Burned Salt (trinket): Random chance to shoot a burned salt tear, burned salt tears has increased damage (x1.2), killing with a burned salt tear will burst the enemy in 5-7 tears in random directions
 
-Mother: trinket 
+Mother: Paprika: When killing an enemy, There's a chance to explode in a paprika cloud, enemies nearby the explosion will receive damage and burn for  (3?) seconds
 
 Beast: Divine Wrath: Active item, on use, player will throw burning rock tears in random directions, a circular shockwave will be triggered in player's position

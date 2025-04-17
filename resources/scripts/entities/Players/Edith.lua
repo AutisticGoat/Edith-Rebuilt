@@ -1,5 +1,6 @@
 local mod = edithMod
 local enums = mod.Enums
+local sounds = enums.SoundEffect
 local misc = enums.Misc
 local players = enums.PlayerType
 local costumes = enums.NullItemID
@@ -9,6 +10,7 @@ local game, sfx = utils.Game, utils.SFX
 local jumpFlags = tables.JumpFlags
 local jumpTags = tables.JumpTags
 local JumpParams = tables.JumpParams
+local Edith = {}
 local funcs = {
 	Switch = mod.When,
 	ForceSalt = mod.ForceSaltTear,
@@ -28,9 +30,10 @@ local funcs = {
 	GetTarget = mod.GetEdithTarget,
 	GetData = mod.GetData,
 	SpawnTarget = mod.SpawnEdithTarget,
+	FeedbackMan = mod.LandFeedbackManager,
 }	
 
-function mod:InitEdithJump(player)
+function Edith.InitEdithJump(player)
 	local distance = funcs.TargetDis(player)
 	local jumpSpeed = player.CanFly and 1 or 1.5
 	local soundeffect = player.CanFly and SoundEffect.SOUND_ANGEL_WING or SoundEffect.SOUND_SHELLGAME
@@ -69,15 +72,15 @@ local function setEdithJumps(player, jumps)
 end
 
 ---@param player EntityPlayer
-function mod:EdithInit(player)
+function Edith:EdithInit(player)
 	if not funcs.IsEdith(player, false) then return end
 	mod.SetNewANM2(player, "gfx/EdithAnim.anm2")
 	mod.ForceCharacterCostume(player, players.PLAYER_EDITH, costumes.ID_EDITH_SCARF)
 end
-edithMod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, edithMod.EdithInit)
+mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, Edith.EdithInit)
 
-function mod:EdithSaltTears(tear)
-	local player = edithMod:GetPlayerFromTear(tear)
+function Edith:EdithSaltTears(tear)
+	local player = mod:GetPlayerFromTear(tear)
 
 	if not player then return end
 	if not funcs.IsEdith(player, false) then return end
@@ -92,10 +95,10 @@ function mod:EdithSaltTears(tear)
 	if not target then return end
 	tear.Velocity = funcs.VelTarget(tear, target, shotSpeed)
 end
-mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, mod.EdithSaltTears)
+mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, Edith.EdithSaltTears)
 
-function mod:EdithKnockbackTears(tear)
-	local player = edithMod:GetPlayerFromTear(tear)
+function Edith:EdithKnockbackTears(tear)
+	local player = mod:GetPlayerFromTear(tear)
 
 	if not player then return end
 	if not funcs.IsEdith(player, false) then return end
@@ -103,11 +106,11 @@ function mod:EdithKnockbackTears(tear)
 
 	tear.Mass = tear.Mass * 10
 end
-mod:AddCallback(ModCallbacks.MC_POST_TEAR_UPDATE, mod.EdithKnockbackTears)
+mod:AddCallback(ModCallbacks.MC_POST_TEAR_UPDATE, Edith.EdithKnockbackTears)
 
 ---comment
 ---@param player EntityPlayer
-function mod:EdithJumpHandler(player)
+function Edith:EdithJumpHandler(player)
 	local room = game:GetRoom()
 	if not funcs.IsEdith(player, false) then return end
 
@@ -115,7 +118,7 @@ function mod:EdithJumpHandler(player)
 	local isMoving = funcs.TargetMov(player)
 	local isKeyStompPressed = funcs.KeyStompPress(player)
 	local hasMarked = player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED)
-	local isShooting = edithMod:IsPlayerShooting(player)
+	local isShooting = mod:IsPlayerShooting(player)
 	local isJumping = JumpLib:GetData(player).Jumping
 		
 	local MovementForce = {
@@ -178,7 +181,7 @@ function mod:EdithJumpHandler(player)
 	end
 
 	if playerData.EdithJumpTimer == 0 and playerData.ExtraJumps > 0 and not isJumping then
-		mod:InitEdithJump(player)
+		Edith.InitEdithJump(player)
 	end	
 
 	target.Velocity = (isKeyStompPressed and target.Velocity * 0.6) or target.Velocity
@@ -188,7 +191,7 @@ function mod:EdithJumpHandler(player)
 	local angle = funcs.VecToAng(direction)				
 	
 	local isClose = distance <= 5
-	local isShooting = edithMod:IsPlayerShooting(player)
+	local isShooting = mod:IsPlayerShooting(player)
 	local isStomping = funcs.KeyStompPress(player)
 	local faceDirection = funcs.Switch(angle, tables.DegreesToDirection, Direction.DOWN) 
 	local dir = isClose and Direction.DOWN or faceDirection
@@ -209,13 +212,13 @@ function mod:EdithJumpHandler(player)
 	player:EnableWeaponType(WeaponType.WEAPON_TEARS, true)
 	player:SetWeapon(newWeapon, 1)	
 end
-mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, mod.EdithJumpHandler)
+mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, Edith.EdithJumpHandler)
 
 local SoundPick = {
 	[1] = SoundEffect.SOUND_STONE_IMPACT, ---@type SoundEffect
-	[2] = edithMod.Enums.SoundEffect.SOUND_EDITH_STOMP,
-	[3] = edithMod.Enums.SoundEffect.SOUND_FART_REVERB,
-	[4] = edithMod.Enums.SoundEffect.SOUND_VINE_BOOM,
+	[2] = sounds.SOUND_EDITH_STOMP,
+	[3] = sounds.SOUND_FART_REVERB,
+	[4] = sounds.SOUND_VINE_BOOM,
 }
 
 ---@param player EntityPlayer
@@ -248,7 +251,7 @@ end
 ---@param player EntityPlayer
 ---@param data JumpData
 ---@param pitfall boolean
-function mod:EdithLanding(player, data, pitfall)
+function Edith:EdithLanding(player, data, pitfall)
 	local playerData = funcs.GetData(player)	
 	local edithTarget = funcs.GetTarget(player)
 	
@@ -266,7 +269,7 @@ function mod:EdithLanding(player, data, pitfall)
 	end
 
 	if isNearTrapdoor(player) == false then
-		edithMod.LandFeedbackManager(player, SoundPick, player.Color, false)
+		funcs.FeedbackMan(player, SoundPick, player.Color, false)
 	end
 
 	local tears = funcs.GetTPS(player)
@@ -297,7 +300,7 @@ function mod:EdithLanding(player, data, pitfall)
 	local damageFormula = TSIL.Utils.Math.Round(RawFormula, 2)
 	local stompDamage = funcs.KeyStompPress(player) and 0 or math.max(damageFormula, 1)
 	
-	edithMod:EdithStomp(player, radius, stompDamage, knockbackFormula, true)
+	mod:EdithStomp(player, radius, stompDamage, knockbackFormula, true)
 
 	local targetSprte = playerData.EdithTarget:GetSprite()
 
@@ -341,11 +344,11 @@ function mod:EdithLanding(player, data, pitfall)
 	end
 	-------- Bomb Stomp  end --------
 end
-mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, mod.EdithLanding, JumpParams.EdithJump)
+mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, Edith.EdithLanding, JumpParams.EdithJump)
 
 ---@param player EntityPlayer
 ---@param data JumpData
-function mod:EdithJumpLibStuff(player, data)
+function Edith:EdithJumpLibStuff(player, data)
 	if not funcs.GetTarget(player) then return end
 
 	local iskeystomp = funcs.KeyStompPress(player)
@@ -365,9 +368,9 @@ function mod:EdithJumpLibStuff(player, data)
 
 	JumpLib:SetSpeed(player, 10 + (data.Height / 10))
 end
-mod:AddCallback(JumpLib.Callbacks.ENTITY_UPDATE_30, mod.EdithJumpLibStuff, JumpParams.EdithJump)
+mod:AddCallback(JumpLib.Callbacks.ENTITY_UPDATE_30, Edith.EdithJumpLibStuff, JumpParams.EdithJump)
 
-function mod:EdithBomb(player, data)
+function Edith:EdithBomb(player, data)
 	if player:GetNumBombs() <= 0 and not player:HasGoldenBomb() then return end
 	if not Input.IsActionTriggered(ButtonAction.ACTION_BOMB, player.ControllerIndex) then return end
 	if funcs.KeyStompPress(player) then return end
@@ -375,9 +378,9 @@ function mod:EdithBomb(player, data)
 	playerData.BombStomp = true
 	JumpLib:SetSpeed(player, 10 + (data.Height / 10))
 end
-mod:AddCallback(JumpLib.Callbacks.ENTITY_UPDATE_60, mod.EdithBomb, JumpParams.EdithJump)
+mod:AddCallback(JumpLib.Callbacks.ENTITY_UPDATE_60, Edith.EdithBomb, JumpParams.EdithJump)
 
-function mod:EdithOnNewRoom()	
+function Edith:EdithOnNewRoom()	
 	local players = PlayerManager.GetPlayers()
 
 	for _, player in pairs(players) do
@@ -388,12 +391,12 @@ function mod:EdithOnNewRoom()
 		end
 	end
 end
-mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, mod.EdithOnNewRoom)
+mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, Edith.EdithOnNewRoom)
 
 ---@param damage number
 ---@param source EntityRef
 ---@return boolean?
-function edithMod:DamageStuff(_, damage, _, source, _)
+function Edith:DamageStuff(_, damage, _, source, _)
 	if source.Type == 0 then return end
 	local ent = source.Entity
 	local player = ent:ToPlayer()
@@ -412,10 +415,10 @@ function edithMod:DamageStuff(_, damage, _, source, _)
 		end
 	end
 end
-edithMod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, edithMod.DamageStuff)
+mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Edith.DamageStuff)
 
 ---@param player EntityPlayer
-function edithMod:SuplexUse(player)
+function Edith:SuplexUse(player)
 	if not funcs.IsEdith(player, false) then return end
 	local edithTarget = funcs.GetTarget(player)
 
@@ -449,10 +452,10 @@ function edithMod:SuplexUse(player)
 	player:UseActiveItem(activeItem)
 	player:SetActiveCharge(usedCharge, ActiveSlot.SLOT_PRIMARY)
 end
-edithMod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, edithMod.SuplexUse)
+mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, Edith.SuplexUse)
 
 ---@param player EntityPlayer
-function edithMod:OnEsauJrUse(_, _, player)
+function Edith:OnEsauJrUse(_, _, player)
 	funcs.RemoveTarget(player)
 end
-edithMod:AddCallback(ModCallbacks.MC_PRE_USE_ITEM, edithMod.OnEsauJrUse, CollectibleType.COLLECTIBLE_ESAU_JR)
+mod:AddCallback(ModCallbacks.MC_PRE_USE_ITEM, Edith.OnEsauJrUse, CollectibleType.COLLECTIBLE_ESAU_JR)
