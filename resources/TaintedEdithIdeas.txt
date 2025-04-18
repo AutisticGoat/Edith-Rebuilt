@@ -2,7 +2,7 @@ Mega Satan: Salt rocks (consumable): On use, enemies got "Salted" (reduced speed
 
 Soul of Edith: On use, player will jump in place, on landing, rock tears fill fall from ceil in random positions, landing nearby an enemy will damage it
 
-Delirium: Burned hood: 5 seconds charge cooldown, on use, player will perform a Tainted Edith's parry-jump
+Delirium: Burned hood: 3 seconds charge cooldown, on use, player will perform a Tainted Edith's parry-jump
 
 Ultra greed: Jack of clubs: a random quantity of enemies will explode, and have a low chance of drop bombs 
 

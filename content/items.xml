@@ -125,4 +125,23 @@
 		chargetype="timed"
 		maxcharges="420"
 	/>	
+	<active
+		id="14" 
+		name="Burned Hood" 
+		description="Deflect the destruction" 
+		gfx="collectibles_Broken_Hood.png"
+		quality="2"
+		chargetype="timed"
+		maxcharges="90"
+	/>	
+	<trinket 
+		name="Paprika"
+		description="Spicy death" 
+		gfx="Paprika.png" 
+	/>
+	<trinket 
+		name="Burned Salt"
+		description="Burns to death" 
+		gfx="BurnedSalt.png" 
+	/>
 </items>

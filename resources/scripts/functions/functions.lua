@@ -951,7 +951,7 @@ function edithMod.LandFeedbackManager(player, soundTable, GibColor, IsParryLand)
 		SizeY = isStomping and 0.6 or 0.8 * player.SpriteScale.X
 		ScreenShakeIntensity = isStomping and 6 or 10
 		gibAmount = not EdithData.DisableGibs and 10 or 0
-	elseif edithMod.IsEdith(player, true) then
+	else 
 		local TEdithData = menuData.TEdithData
 		SizeX = IsParryLand and 0.8 or 0.5
 		SizeY = IsParryLand and 0.7 or 0.5

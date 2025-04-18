@@ -3,7 +3,7 @@
          nameimageroot="gfx/ui/boss/">
 		 
 	<player 
-		name="Edith" 
+		name="Edith​​​" 
 		skin="characterEdith.png" 
 		armor="6"
 		nameimage="PlayerName_04xa_Edith.png" 
@@ -16,8 +16,8 @@
 		noshake="true"
 	/>
 	<player 
-		bSkinParent="Edith" 
-		name="Edith" 
+		bSkinParent="Edith​​​" 
+		name="Edith​​​" 
 		skin="characterTaintedEdith.png" 
 		armor="6"
 		nameimage="PlayerName_04xa_Edith.png" 
@@ -27,6 +27,6 @@
 		healthtype="1"
 		birthright="Scorching leaps"
 		noshake="true"
-		achievement="EdithRebuilt_TaintedEdith"
+		achievement="The Punished"
 	/>
 </players>

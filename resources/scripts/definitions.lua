@@ -4,8 +4,8 @@ local tedithHopTag = "edithMod_TaintedEdithHop"
 
 edithMod.Enums = {
 	PlayerType = {
-		PLAYER_EDITH = Isaac.GetPlayerTypeByName("Edith", false),
-		PLAYER_EDITH_B = Isaac.GetPlayerTypeByName("Edith", true),
+		PLAYER_EDITH = Isaac.GetPlayerTypeByName("Edith​​​", false),
+		PLAYER_EDITH_B = Isaac.GetPlayerTypeByName("Edith​​​", true),
 	},
 	CollectibleType = {
 		-- Edith Items
@@ -21,10 +21,19 @@ edithMod.Enums = {
 		COLLECTIBLE_DIVINE_RETRIBUTION = Isaac.GetItemIdByName("Divine Retribution"),
 		COLLECTIBLE_THE_BOOK_OF_LUKE = Isaac.GetItemIdByName("The Book Of Luke"),
 		COLLECTIBLE_HYDRARGYRUM = Isaac.GetItemIdByName("Hydrargyrum"),
+
+		--- Tainted Edith Items
+		COLLECTIBLE_BURNED_HOOD = Isaac.GetItemIdByName("Burned Hood"),
 	},
 	TrinketType = {
 		TRINKET_GEODE = Isaac.GetTrinketIdByName("Geode"),
 		TRINKET_RUMBLING_PEBBLE = Isaac.GetTrinketIdByName("Rumbling Pebble"),
+		
+		TRINKET_PAPRIKA = Isaac.GetTrinketIdByName("Paprika"),
+		TRINKET_BURNED_SALT = Isaac.GetTrinketIdByName("Burned Salt"),
+	},
+	Card = {
+		CARD_JACK_OF_CLUBS = Isaac.GetCardIdByName("Jack_of_Clubs")
 	},
 	NullItemID = {
 		ID_EDITH_SCARF = Isaac.GetCostumeIdByPath("gfx/characters/EdithHood.anm2"),
@@ -70,7 +79,7 @@ edithMod.Enums = {
 		ACHIEVEMENT_THE_BOOK_OF_LUKE = Isaac.GetAchievementIdByName("The Book Of Luke"),
 		ACHIEVEMENT_EDITHS_HOOD = Isaac.GetAchievementIdByName("Ediths Hood"),
 		ACHIEVEMENT_HYDRARGYRUM = Isaac.GetAchievementIdByName("Hydrargyrum"),
-		ACHIEVEMENT_TAINTED_EDITH = Isaac.GetAchievementIdByName("Tainted Edith"),
+		ACHIEVEMENT_TAINTED_EDITH = Isaac.GetAchievementIdByName("The Punished"),
 
 		-- Edith unlocks end
 
@@ -209,17 +218,17 @@ edithMod.Enums = {
 			EdithJump = {
 				tag = edithJumpTag,
 				type = EntityType.ENTITY_PLAYER,
-				player = Isaac.GetPlayerTypeByName("Edith", false),
+				player = Isaac.GetPlayerTypeByName("Edith​​​", false),
 			},
 			TEdithJump = {
 				tag = tedithJumpTag,
 				type = EntityType.ENTITY_PLAYER,
-				player = Isaac.GetPlayerTypeByName("Edith", true),
+				player = Isaac.GetPlayerTypeByName("Edith​​​", true),
 			},
 			TEdithHop = {
 				tag = tedithHopTag,
 				type = EntityType.ENTITY_PLAYER,
-				player = Isaac.GetPlayerTypeByName("Edith", true),
+				player = Isaac.GetPlayerTypeByName("Edith​​​", true),
 			}
 		},
 		GridEntTypes = {
@@ -232,6 +241,53 @@ edithMod.Enums = {
 			[LevelStage.STAGE4_2] = true,
 			[LevelStage.STAGE4_3] = true,
 		},
+		ImGuiTables = {
+			TargetDesign = {
+				"Choose Color", 
+				"Trans", 
+				"Rainbow",
+				"Lesbian",
+				"Bisexual", 
+				"Gay", 
+				"Ace",
+				"Enby",
+				"Venezuela",
+			},
+			StompSound = {
+				"Stone", 
+				"Antibirth", 
+				"Fart Reverb",
+				"Vine Boom"
+			}, 	
+			ShakerSlot = {
+				"Primary",
+				"Pocket"
+			},
+			ArrowDesign = {
+				"Arrow", 
+				"Arrow (pointy)", 
+				"Triangle (line)",
+				"Triangle (full)",
+				"Chevron (line)", 
+				"Chevron (full)", 
+				"Grudge", 
+			}, 
+			HopSound = {
+				"Stone", 
+				"Yippee", 
+				"Spring",
+			}, 
+			ParrySound = {
+				"Stone", 
+				"Taunt", 
+				"Vine Boom",
+				"Fart Reverb",
+				"Solarian",
+				"Machine",
+				"Mechanic",
+				"Knight",
+			}, 
+		}
 	},
 	Misc = {
 		TearPath = "gfx/tears/",
@@ -248,6 +304,7 @@ edithMod.Enums = {
 		ChargeBarleftVector = Vector(-8, 10),
 		ChargeBarcenterVector = Vector(0, 10),
 		ChargeBarrightVector = Vector(8, 10),
+		PaprikaColor = Color(0.8, 0.2, 0),
 		ParryPartitions = EntityPartition.ENEMY | EntityPartition.BULLET,
 		NewProjectilFlags = ProjectileFlags.HIT_ENEMIES | ProjectileFlags.CANT_HIT_PLAYER,
 	},

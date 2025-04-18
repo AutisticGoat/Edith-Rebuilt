@@ -14,9 +14,7 @@ local includeFiles = {
 	"ImGui",
 	"EdithKotryHudHelper",
 	"lhsx",
-	"resources/scripts/functions/EdithClasses",  -- Added for better autocomplete
 	"resources/scripts/functions/functions",       -- Added for better autocomplete
-
 	
 	-- Items
 	col .. "items/Edith/SaltShaker",
@@ -30,13 +28,18 @@ local includeFiles = {
 	col .. "items/Edith/SaltHeart",
 	col .. "items/Edith/DivineRetribution",
 	col .. "items/Edith/Hydrargyrum",
+	col .. "items/TEdith/BurnedHood",
 	-- Items fin
 
 	-- Trinkets
 	col .. "trinkets/Edith/geode",
 	col .. "trinkets/Edith/rumblingpebble",
+	col .. "trinkets/TEdith/Paprika",
+	col .. "trinkets/TEdith/BurnedSalt",
 	-- Trinkets fin
 	
+	col .. "consumables/JackOfClubs",
+
 	-- Entidades
 	ent .. "Effects/SaltCreep",
 	ent .. "Effects/PepperCreep",
@@ -50,12 +53,12 @@ local includeFiles = {
 	-- Personajes fin
 	
 	-- sinergias pisotones
-	stmpSyn .. "blackPowder",
-	stmpSyn .. "brimstone",
-	stmpSyn .. "techX",
-	stmpSyn .. "MomsKnife",
-	stmpSyn .. "Rockwaves",
-	stmpSyn .. "SpiritSword",
+	-- stmpSyn .. "blackPowder",
+	-- stmpSyn .. "brimstone",
+	-- stmpSyn .. "techX",
+	-- stmpSyn .. "MomsKnife",
+	-- stmpSyn .. "Rockwaves",
+	-- stmpSyn .. "SpiritSword",
 	-- stmpSyn .. "EpicFetus",
 		
 	"RNG",
