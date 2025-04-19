@@ -39,6 +39,7 @@ local includeFiles = {
 	-- Trinkets fin
 	
 	col .. "consumables/JackOfClubs",
+	col .. "consumables/SaltRocks",
 
 	-- Entidades
 	ent .. "Effects/SaltCreep",

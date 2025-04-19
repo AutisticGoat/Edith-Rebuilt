@@ -33,7 +33,8 @@ edithMod.Enums = {
 		TRINKET_BURNED_SALT = Isaac.GetTrinketIdByName("Burned Salt"),
 	},
 	Card = {
-		CARD_JACK_OF_CLUBS = Isaac.GetCardIdByName("Jack_of_Clubs")
+		CARD_JACK_OF_CLUBS = Isaac.GetCardIdByName("Jack_of_Clubs"),
+		CARD_SALT_ROCKS = Isaac.GetCardIdByName("SaltRocks"),
 	},
 	NullItemID = {
 		ID_EDITH_SCARF = Isaac.GetCostumeIdByPath("gfx/characters/EdithHood.anm2"),

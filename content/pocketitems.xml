@@ -1,5 +1,6 @@
 <pocketitems>
 <!--  Lost Cards  -->
-    <card type="suit" pickup="2390" hud="Jack_of_Clubs" name="Jack of Clubs​​​" description="Partial destruction" mimiccharge="4"/>
+    <card type="suit" pickup="2" hud="Jack_of_Clubs" name="Jack of Clubs​​​" description="Partial destruction" mimiccharge="4"/>
+    <card type="object" pickup="230" name="Salt Rocks" description="Mierda" hud="SaltRocks"/>
 </pocketitems>
 

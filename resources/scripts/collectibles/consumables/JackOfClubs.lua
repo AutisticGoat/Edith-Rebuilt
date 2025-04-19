@@ -11,7 +11,6 @@ local function GetEnemies()
     local roomEnt = Isaac.GetRoomEntities()
     local enemyTable = {}
 
-
     for _, ent in ipairs(roomEnt) do
         if not (ent:IsActiveEnemy() and ent:IsVulnerableEnemy()) then goto Break end
         table.insert(enemyTable, ent)
