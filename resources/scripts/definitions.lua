@@ -24,6 +24,7 @@ edithMod.Enums = {
 
 		--- Tainted Edith Items
 		COLLECTIBLE_BURNED_HOOD = Isaac.GetItemIdByName("Burned Hood"),
+		COLLECTIBLE_DIVINE_WRATH = Isaac.GetItemIdByName("Divine Wrath"),
 	},
 	TrinketType = {
 		TRINKET_GEODE = Isaac.GetTrinketIdByName("Geode"),
@@ -35,6 +36,7 @@ edithMod.Enums = {
 	Card = {
 		CARD_JACK_OF_CLUBS = Isaac.GetCardIdByName("Jack_of_Clubs"),
 		CARD_SALT_ROCKS = Isaac.GetCardIdByName("SaltRocks"),
+		CARD_SOUL_EDITH = Isaac.GetCardIdByName("SoulOfEdith"),
 	},
 	NullItemID = {
 		ID_EDITH_SCARF = Isaac.GetCostumeIdByPath("gfx/characters/EdithHood.anm2"),
@@ -63,6 +65,9 @@ edithMod.Enums = {
 		SOUND_MACHINE = Isaac.GetSoundIdByName("Machine"),
 		SOUND_MECHANIC = Isaac.GetSoundIdByName("Mechanic"),
 		SOUND_KNIGHT = Isaac.GetSoundIdByName("Knight"),
+		SOUND_SALT_ROCKS = Isaac.GetSoundIdByName("SaltRocks"),
+		SOUND_JACK_OF_CLUBS = Isaac.GetSoundIdByName("JackOfClubs"),
+		SOUND_SOUL_OF_EDITH = Isaac.GetSoundIdByName("SoulOfEdith"),
 	},
 	Achievements = {
 		-- Edith unlocks

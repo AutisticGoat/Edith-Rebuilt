@@ -12,9 +12,6 @@ function mod:RockStomp(player)
 	local birthright = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT)
 	local shockwaveDamage = (birthright and player.Damage * 1.4 or player.Damage) * 0.5
 	local shockwaveRings = birthright and 2 or 1
-	
-	print(shockwaveDamage)
-
 	local shockwaveParams = {
 		Duration = 6,
 		Size = 1,

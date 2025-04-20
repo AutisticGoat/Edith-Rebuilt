@@ -896,6 +896,21 @@ function edithMod.EdithDash(player, dir, dist, div)
 	player.Velocity = player.Velocity + dir * dist / div
 end
 
+--- Helper function that returns a table containing all existing enemies
+---@return Entity[]
+function edithMod.GetEnemies()
+    local roomEnt = Isaac.GetRoomEntities()
+    local enemyTable = {}
+
+    for _, ent in ipairs(roomEnt) do
+        if not (ent:IsActiveEnemy() and ent:IsVulnerableEnemy()) then goto Break end
+        table.insert(enemyTable, ent)
+        ::Break::
+    end
+
+    return enemyTable
+end 
+
 ---Tainted Edith parry land behavior
 ---@param parent EntityPlayer
 ---@param radius number
@@ -941,14 +956,18 @@ function edithMod.LandFeedbackManager(player, soundTable, GibColor, IsParryLand)
 	local ScreenShakeIntensity ---@type number
 	local gibAmount ---@type number
 
-	if edithMod.IsEdith(player, false) then 
+	local playerData = mod.GetData(player)
+	local IsSoulOfEdith = playerData.IsSoulOfEdithJump 
+	-- return tags["edithMod_TaintedEdithJump"] or false
+
+	if edithMod.IsEdith(player, false) or IsSoulOfEdith then
 		local isStomping = edithMod.IsKeyStompPressed(player)
 		local EdithData = menuData.EdithData
 
 		soundPick = EdithData.stompsound ---@type number
 		volume = (isStomping and 1.5 or 2) * ((EdithData.stompVolume / 100) ^ 2) ---@type number
-		SizeX = isStomping and 0.6 or 0.7 * player.SpriteScale.X
-		SizeY = isStomping and 0.6 or 0.8 * player.SpriteScale.X
+		SizeX = (IsSoulOfEdith and 0.8 or (isStomping and 0.6 or 0.7)) * player.SpriteScale.X
+		SizeY = (IsSoulOfEdith and 0.8 or (isStomping and 0.6 or 0.8)) * player.SpriteScale.X
 		ScreenShakeIntensity = isStomping and 6 or 10
 		gibAmount = not EdithData.DisableGibs and 10 or 0
 	else 

@@ -120,10 +120,9 @@
 		name="Divine Wrath" 
 		description="Purify the wicked" 
 		cache="damage"
-		gfx="collectibles_The_Book_Of_Luke.png"
+		gfx="collectibles_Divine_Wrath.png"
 		quality="2"
-		chargetype="timed"
-		maxcharges="420"
+		maxcharges="4"
 	/>	
 	<active
 		id="14" 

@@ -6,30 +6,15 @@ local rng = utils.RNG
 local game = utils.Game
 local JackOfClubs = {}
 
----@return Entity[]
-local function GetEnemies()
-    local roomEnt = Isaac.GetRoomEntities()
-    local enemyTable = {}
-
-    for _, ent in ipairs(roomEnt) do
-        if not (ent:IsActiveEnemy() and ent:IsVulnerableEnemy()) then goto Break end
-        table.insert(enemyTable, ent)
-        ::Break::
-    end
-
-    return enemyTable
-end 
-
 ---@param player EntityPlayer
 function JackOfClubs:myFunction2(_, player)
-    local enemies = GetEnemies()
-
-    for _, enemy in pairs(enemies) do
+    for _, enemy in pairs(mod.GetEnemies()) do
         local explosionRoll = rng:RandomFloat()
+        local enemyPos = enemy.Position
 
         if explosionRoll > 0.4 then goto Break end
         game:BombExplosionEffects(
-            enemy.Position,
+            enemyPos,
             100,
             TearFlags.TEAR_NORMAL,
             Color.Default,
@@ -47,7 +32,7 @@ function JackOfClubs:myFunction2(_, player)
             EntityType.ENTITY_PICKUP,
             PickupVariant.PICKUP_BOMB,
             0,
-            enemy.Position,
+            enemyPos,
             Vector.Zero,
             nil
         )

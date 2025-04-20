@@ -29,6 +29,7 @@ local includeFiles = {
 	col .. "items/Edith/DivineRetribution",
 	col .. "items/Edith/Hydrargyrum",
 	col .. "items/TEdith/BurnedHood",
+	col .. "items/TEdith/DivineWrath",
 	-- Items fin
 
 	-- Trinkets
@@ -40,6 +41,7 @@ local includeFiles = {
 	
 	col .. "consumables/JackOfClubs",
 	col .. "consumables/SaltRocks",
+	col .. "consumables/SoulOfEdith",
 
 	-- Entidades
 	ent .. "Effects/SaltCreep",
@@ -54,13 +56,13 @@ local includeFiles = {
 	-- Personajes fin
 	
 	-- sinergias pisotones
-	-- stmpSyn .. "blackPowder",
-	-- stmpSyn .. "brimstone",
-	-- stmpSyn .. "techX",
-	-- stmpSyn .. "MomsKnife",
-	-- stmpSyn .. "Rockwaves",
-	-- stmpSyn .. "SpiritSword",
-	-- stmpSyn .. "EpicFetus",
+	stmpSyn .. "blackPowder",
+	stmpSyn .. "brimstone",
+	stmpSyn .. "techX",
+	stmpSyn .. "MomsKnife",
+	stmpSyn .. "Rockwaves",
+	stmpSyn .. "SpiritSword",
+	stmpSyn .. "EpicFetus",
 		
 	"RNG",
 }

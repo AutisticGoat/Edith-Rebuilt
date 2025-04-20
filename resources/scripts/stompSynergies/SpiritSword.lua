@@ -34,17 +34,13 @@ function mod:SwordStomp(player)
     -- Configurar el efecto
     effect:FollowParent(player)
     local effectSprite = effect:GetSprite()
-    local spritePath = "gfx/008.010_spirit sword.anm2"
-    effectSprite:Load(spritePath, true)
+    effectSprite:Load("gfx/008.010_spirit sword.anm2", true)
     effectSprite:Play("SpinDown")
     
-
-    -- Calcular el daño
     local damageMult = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and 0.75 or 0.5
     local baseDamage = ((player.Damage * 8) + 10)
     local formula = baseDamage * damageMult
 
-    -- Configurar el cuchillo
     knife.SpriteScale = knife.SpriteScale * 1.7
     knifeData.StompSword = true
     knife.CollisionDamage = formula
