@@ -8,7 +8,7 @@ local MoltenCore = {}
 function MoltenCore:MoltenCoreStats(player)
 	local MoltenCoreCount = player:GetCollectibleNum(items.COLLECTIBLE_MOLTEN_CORE)
 	if MoltenCoreCount < 1 then return end
-	player.Damage = player.Damage + (1.2 * MoltenCoreCount)
+	player.Damage = player.Damage + (0.8 * MoltenCoreCount)
 end
 mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, MoltenCore.MoltenCoreStats, CacheFlag.CACHE_DAMAGE)
 
@@ -55,7 +55,7 @@ function MoltenCore:KillingSalEnemy(entity, amount, _, source)
 			player
 		)
 
-		Jet.CollisionDamage = player.Damage * 1.2
+		Jet.CollisionDamage = player.Damage 
 		enemies:AddBurn(source, 120, 1)
 
 		if #nearEnemies >= 5 then

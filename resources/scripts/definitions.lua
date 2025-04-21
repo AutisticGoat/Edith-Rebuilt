@@ -105,6 +105,7 @@ edithMod.Enums = {
 			[ButtonAction.ACTION_RIGHT] = 0,
 			[ButtonAction.ACTION_UP] = 0,
 			[ButtonAction.ACTION_DOWN] = 0,
+			-- [ButtonAction.ACTION_DROP] = false,
 		},
 		OverrideWeapons = {
 			[WeaponType.WEAPON_BRIMSTONE] = true,
@@ -313,5 +314,6 @@ edithMod.Enums = {
 		PaprikaColor = Color(0.8, 0.2, 0),
 		ParryPartitions = EntityPartition.ENEMY | EntityPartition.BULLET,
 		NewProjectilFlags = ProjectileFlags.HIT_ENEMIES | ProjectileFlags.CANT_HIT_PLAYER,
+		NearEnemyDetectionDist = 150,
 	},
 }

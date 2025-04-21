@@ -198,7 +198,15 @@ function mod:TaintedEdithUpdate(player)
 		end
 	end
 
-	local target = funcs.TargetMov(player) and mod:SpawnTaintedArrow(player)
+	if mod.IsDogmaAppearCutscene() then
+		stopTEdithHops(player, 0, false, true)
+	end
+
+	if funcs.TargetMov(player) then
+		mod.SpawnEdithTarget(player, true)
+	end
+
+	local target = mod.GetEdithTarget(player, true)
 	local HopVec = playerData.HopVector
 
 	if target then
@@ -255,8 +263,11 @@ function mod:TaintedEdithUpdate(player)
 				resetCharges(player)
 			end
 		end
-		mod:RemoveTaintedEdithTargetArrow(player)
-	end	
+	end
+	
+	if not funcs.TargetMov(player) and target then
+		mod.RemoveEdithTarget(player, true)
+	end
 end
 mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, mod.TaintedEdithUpdate)
 
@@ -280,6 +291,7 @@ function mod:EdithPlayerUpdate(player)
 	else
 		playerData.MoveBrCharge = playerData.BirthrightCharge
 		playerData.MoveCharge = playerData.ImpulseCharge
+		player:MultiplyFriction(0.5)
 	end	
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, mod.EdithPlayerUpdate)
@@ -288,7 +300,7 @@ mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, mod.EdithPlayerUpdate)
 function mod:RenderTaintedEdith(player)
 	if not funcs.IsEdith(player, true) then return end
 
-	local arrow = mod.GetTaintedArrow(player)
+	local arrow = mod.GetEdithTarget(player, true)
 	local playerData = funcs.GetData(player)
 	local isShooting = mod:IsPlayerShooting(player)
 	local faceDirection = TSIL.Vector.VectorToDirection(playerData.HopVector)
@@ -340,7 +352,7 @@ function mod:OnNewRoom()
 		if not funcs.IsEdith(player, true) then return end
 		mod:ChangeColor(player, _, _, _, 1)
 		stopTEdithHops(player, 0, true, true)
-		mod:RemoveTaintedEdithTargetArrow(player)
+		mod.RemoveEdithTarget(player, true)
 	end
 end
 mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, mod.OnNewRoom)
@@ -355,7 +367,7 @@ function mod:EdithLanding(player)
 	playerData.HopParams = {
 		Radius = math.min((30 + (tearRange - 9)), 35),
 		Knockback = math.min(50, (7.7 + DamageStat ^ 1.2)) * player.ShotSpeed,
-		Damage = ((damageBase + DamageStat) / 2.5) * (playerData.MoveCharge + playerData.MoveBrCharge) / 100, ---@type number
+		Damage = ((damageBase + DamageStat) / 4) * (playerData.MoveCharge + playerData.MoveBrCharge) / 100, ---@type number
 	}
 	
 	local HopParams = playerData.HopParams
@@ -378,7 +390,6 @@ function mod:OnTaintedShootTears(tear)
 	if not funcs.IsEdith(player, true) then return end
 
 	mod.ForceSaltTear(tear, true)
-	mod.ShootTearToNearestEnemy(tear, player)
 end
 mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, mod.OnTaintedShootTears)
 

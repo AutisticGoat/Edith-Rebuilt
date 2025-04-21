@@ -1,25 +1,13 @@
 local mod = edithMod
 local enums = mod.Enums
+local effectVariant = enums.EffectVariant
 local utils = enums.Utils
 local game = utils.Game
 local tables = enums.Tables
 local misc = enums.Misc
 local players = enums.PlayerType
 
----Function to remove Edith's target
----@param player EntityPlayer
-function mod.RemoveEdithTarget(player)
-	local playerData = edithMod.GetData(player)
-	if not edithMod.IsEdith(player, false) then return end
-	if not playerData.EdithTarget then return end
-	
-	playerData.EdithTarget:Remove()
-	playerData.EdithTarget = nil
-end
-
---[[Checks if player is Edith.
-	Boolean argument checks for Tainted Edith
-	]]
+---Checks if player is Edith. Boolean argument checks for Tainted Edith
 ---@param player EntityPlayer
 ---@param tainted boolean
 ---@return boolean
@@ -34,18 +22,6 @@ function edithMod:IsAnyEdith(player)
 	return edithMod.IsEdith(player, true) or edithMod.IsEdith(player, false)
 end
 	
----Function to remove Tainted Edith's arrow 
----@param player EntityPlayer
-function edithMod:RemoveTaintedEdithTargetArrow(player)
-	local playerData = edithMod.GetData(player)
-	
-	if not edithMod.IsEdith(player, true) then return end
-	if not playerData.TaintedEdithTarget then return end
-	
-	playerData.TaintedEdithTarget:Remove()
-	playerData.TaintedEdithTarget = nil
-end
-
 ---Changes `Entity` velocity so now it goes to `Target`'s Position, `strenght` determines how fast it'll go
 ---@param Entity Entity
 ---@param Target Entity
@@ -246,7 +222,7 @@ end
 -- 631-115-1587 Oscar Esparza 
 
 local LINE_SPRITE = Sprite("gfx/TinyBug.anm2", true)
-local MAX_POINTS = 32
+local MAX_POINTS = 360
 local ANGLE_SEPARATION = 360 / MAX_POINTS
 
 LINE_SPRITE:SetFrame("Dead", 0)
@@ -256,6 +232,8 @@ LINE_SPRITE:SetFrame("Dead", 0)
 ---@param AreaColor Color
 function edithMod.RenderAreaOfEffect(entity, AreaSize, AreaColor) -- Took from Melee lib, tweaked a little bit
 	local room = game:GetRoom()
+
+	-- local aditionalPoints = 
 
 	if room:GetRenderMode() == RenderMode.RENDER_WATER_REFLECT then return end
 
@@ -279,10 +257,7 @@ end
 ---@param rng RNG
 ---@return integer
 function edithMod.GetRandomRune(rng)
-	local runes = #tables.Runes
-	
-	local RNGSelect = rng:RandomInt(1, runes)
-	return edithMod.When(RNGSelect, tables.Runes, 32)
+	return edithMod.When(rng:RandomInt(1, #tables.Runes), tables.Runes, 32)
 end
 
 ---Manages Edith's Target and Tainted Edith's arrow behavior when going trough doors
@@ -294,22 +269,40 @@ function edithMod:TargetDoorManager(effect, player, triggerDistance)
 	local level = game:GetLevel()
 	local effectPos = effect.Position
 	local roomName = level:GetCurrentRoomDesc().Data.Name
+	local isTainted = mod.IsEdith(player, true) or false
 
 	for i = 0, 7 do
 		local door = room:GetDoor(i)
 		if not door then goto Break end
 		local doorPos = room:GetDoorSlotPosition(i)
-		if not (doorPos and effectPos:Distance(doorPos) <= triggerDistance) then goto Break end
+		if not (doorPos and effectPos:Distance(doorPos) <= triggerDistance) then 			
+			if player.Color.A then
+				mod:ChangeColor(player, 1, 1, 1, 1)
+			end
+			goto Break 
+		end
 		if door:IsOpen() or (roomName == "Mirror Room" and player:HasInstantDeathCurse()) then
 			player.Position = doorPos
-			edithMod.RemoveEdithTarget(player)
-			edithMod:RemoveTaintedEdithTargetArrow(player)
-			edithMod:ChangeColor(player, 1, 1, 1, 0)
+			mod.RemoveEdithTarget(player, isTainted)
+			mod:ChangeColor(player, 1, 1, 1, 0)
 		else
+			mod:ChangeColor(player, 1, 1, 1, 1)
 			door:TryUnlock(player)
 		end
 		::Break::
 	end
+end
+
+---Returns `true` if Dogma's appear cutscene is playing
+---@return boolean
+function edithMod.IsDogmaAppearCutscene()
+	local TV = Isaac.FindByType(EntityType.ENTITY_GENERIC_PROP, 4)[1] -- Im sure there's only one TV, if needed i'll improve this function with more checks and stuff
+	local Dogma = Isaac.FindByType(EntityType.ENTITY_DOGMA)[1] -- Again, there's only One Dogma, but who knows maybe i'll add more checks in the future 
+
+	if not TV then return false end
+	TVSprite = TV:GetSprite()
+
+	return TVSprite:GetAnimation() == "Idle2" and Dogma ~= nil
 end
 
 ---@param tear EntityTear
@@ -628,80 +621,93 @@ function edithMod:SpawnSaltGib(parent, Number, color)
     end
 end
 
+---Function to spawn Edith's Target, setting `tainted` to `true` will Spawn Tainted Edith's Arrow
 ---@param player EntityPlayer
-function edithMod.SpawnEdithTarget(player)
+---@param tainted? boolean
+function edithMod.SpawnEdithTarget(player, tainted)
+	tainted = tainted or false
 	local playerData = edithMod.GetData(player)
 
-	if not playerData.EdithTarget then 
-		local target = Isaac.Spawn(	
-			EntityType.ENTITY_EFFECT,
-			edithMod.Enums.EffectVariant.EFFECT_EDITH_TARGET,
-			0,
-			player.Position,
-			Vector.Zero,
-			player
-		):ToEffect()
-		playerData.EdithTarget = target
+	local TargetVariant = tainted and effectVariant.EFFECT_EDITH_B_TARGET or effectVariant.EFFECT_EDITH_TARGET
 
-		target.DepthOffset = -100
+	local TargetData = (tainted and playerData.TaintedEdithTarget) or playerData.EdithTarget
+
+	if mod.IsDogmaAppearCutscene() then return end
+	if TargetData then return end 
+
+	local target = Isaac.Spawn(	
+		EntityType.ENTITY_EFFECT,
+		TargetVariant,
+		0,
+		player.Position,
+		Vector.Zero,
+		player
+	):ToEffect()
+	target.DepthOffset = -100
+	
+	if tainted then
+		playerData.TaintedEdithTarget = target
+	else
+		target.GridCollisionClass = GridCollisionClass.COLLISION_SOLID
+		playerData.EdithTarget = target
+	end
+end
+
+---Function to get Edith's Target, setting `tainted` to `true` will return Tainted Edith's Arrow
+---@param player EntityPlayer
+---@return EntityEffect
+function edithMod.GetEdithTarget(player, tainted)
+	tainted = tainted or false
+	local playerData = edithMod.GetData(player)
+	local target = (tainted and playerData.TaintedEdithTarget) or playerData.EdithTarget
+
+	return target
+end
+
+---Function to remove Edith's target
+---@param player EntityPlayer
+---@param tainted? boolean
+function edithMod.RemoveEdithTarget(player, tainted)
+	tainted = tainted or false
+	local target = mod.GetEdithTarget(player, tainted)
+
+	if not target then return end
+
+	local playerData = edithMod.GetData(player)
+
+	target:Remove()
+
+	if tainted then
+		playerData.TaintedEdithTarget = nil
+	else
+		playerData.EdithTarget = nil
 	end
 end
 
 ---Returns the closest enemy to player
 ---@param player EntityPlayer
+---@param dist number
 ---@return EntityNPC|nil
-function edithMod.GetClosestEnemy(player)
-    local closestDistance = math.huge
+function edithMod.GetClosestEnemy(player, dist)
+    local closestDistance = dist
     local closestEnemy = nil
-    local playerPosition = player.Position
+    local playerPos = player.Position
 	local room = game:GetRoom()
+	local DetectCapsule = Capsule(player.Position, Vector.One, 0, dist)
 
-    for _, enemy in ipairs(Isaac.GetRoomEntities()) do
-        if not (enemy:IsActiveEnemy() and enemy:IsVulnerableEnemy()) then goto Break end
-        if enemy:HasEntityFlags(EntityFlag.FLAG_CHARM) then goto Break end
-		local distanceToPlayer = enemy.Position:Distance(playerPosition)
-		local checkline = room:CheckLine(playerPosition, enemy.Position, LineCheckMode.PROJECTILE, 0, false, false)
+	for _, enemy in ipairs(Isaac.FindInCapsule(DetectCapsule, EntityPartition.ENEMY)) do
+		if enemy:HasEntityFlags(EntityFlag.FLAG_CHARM) then goto Break end
+		local enemyPos = enemy.Position
+		local distanceToPlayer = enemyPos:Distance(playerPos)
+		local checkline = room:CheckLine(playerPos, enemyPos, LineCheckMode.PROJECTILE, 0, false, false)
 		if not checkline then goto Break end
         if distanceToPlayer >= closestDistance then goto Break end
 
         closestEnemy = enemy:ToNPC()
         closestDistance = distanceToPlayer
         ::Break::
-    end
-
-    return closestEnemy
-end
-
----Spawns Tainted Edith Arrow and returns it
----@param player EntityPlayer
----@return EntityEffect
-function edithMod:SpawnTaintedArrow(player)
-	local playerData = edithMod.GetData(player)
-
-	if not playerData.TaintedEdithTarget then 
-		local arrow = Isaac.Spawn(	
-			EntityType.ENTITY_EFFECT,
-			edithMod.Enums.EffectVariant.EFFECT_EDITH_B_TARGET,
-			0,
-			player.Position,
-			Vector.Zero,
-			player
-		):ToEffect()
-		playerData.TaintedEdithTarget = arrow
-
-		arrow.DepthOffset = -100
 	end
-
-	return playerData.TaintedEdithTarget
-end
-
----@param player EntityPlayer
----@return EntityEffect
-function edithMod.GetTaintedArrow(player)
-	local playerData = mod.GetData(player)
-	local TEdithArrow = playerData.TaintedEdithTarget
-
-	return TEdithArrow
+    return closestEnemy
 end
 
 ---Function used to manage and change Shockwave sprites from `TSIL` Library
@@ -785,6 +791,11 @@ function edithMod.HandleEntityInteraction(ent, parent, knockback)
             ent.Velocity = (posDif):Resized(knockback)
         end,
         [EntityType.ENTITY_BOMB] = function()
+			local playerData = mod.GetData(parent)
+			if mod.IsEdith(parent, true) and playerData.MoveCharge < 80 then
+				return
+			end
+
             ent.Velocity = (posDif):Resized(knockback)
         end,
         [EntityType.ENTITY_PICKUP] = function()
@@ -838,9 +849,6 @@ end
 ---@param breakGrid boolean
 function edithMod:EdithStomp(parent, radius, damage, knockback, breakGrid)
 	local StompCapsule = Capsule(parent.Position, Vector.One, 0, radius)
-	local DebugShape = DebugRenderer.Get(1, true)    
-	DebugShape:Capsule(StompCapsule)
-
 	local HasTerra = parent:HasCollectible(CollectibleType.COLLECTIBLE_TERRA)
 	local rng = utils.RNG
 
@@ -865,15 +873,6 @@ function edithMod:EdithStomp(parent, radius, damage, knockback, breakGrid)
 		mod.LandDamage(ent, parent, damage, knockback)
 		::Break::
 	end
-end
-
----@param player EntityPlayer
----@return EntityEffect
-function edithMod.GetEdithTarget(player)
-	local playerData = edithMod.GetData(player)
-	local edithTarget = playerData.EdithTarget
-
-	return edithTarget
 end
 
 ---Triggers a push to `pushed` from `pusher`
@@ -1018,35 +1017,38 @@ end
 
 ---@param tear EntityTear
 ---@param player EntityPlayer
-function edithMod.ShootTearToNearestEnemy(tear, player)
+---@param dist number
+function edithMod.ShootTearToNearestEnemy(tear, player, dist)
 	local shotSpeed = player.ShotSpeed * 10
-	local closestEnemy = mod.GetClosestEnemy(player)
+	local closestEnemy = mod.GetClosestEnemy(player, dist)
 
-	if closestEnemy and not player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED) then
-		tear.Velocity = mod.ChangeVelToTarget(player, closestEnemy, shotSpeed)
-	
-		local playerPos = player.Position	
-		local tearDisplacement = player:GetTearDisplacement()
-		local multiShot = player:GetMultiShotParams(WeaponType.WEAPON_TEARS)
-		local tearCounts = multiShot:GetNumTears()
-		local faceDir = mod.When(mod.vectorToAngle(tear.Velocity), tables.DegreesToDirection, Direction.DOWN)
-		local ticksPerSecond = mod.GetTPS(player)
+	if not (closestEnemy and not player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED)) then return end
 
-		if tearCounts < 2 then
-			local randomFactor = utils.RNG:RandomInt(3000, 5000) / 1000
-			local adjustmentVector = misc.HeadAdjustVec
-			local headAxis = mod.When(faceDir, tables.HeadAxis, "Hor")
-			local tearDis = (tearDisplacement * randomFactor) * (shotSpeed / 10)
-			local SetX, SetY = headAxis == "Ver" and tearDis or 0, headAxis == "Hor" and tearDis or 0
-			mod.SetVector(adjustmentVector, SetX, SetY)
-			local directionAdjustment = mod.When(faceDir, tables.DirectionToVector, Vector.Zero):Resized(shotSpeed)
-					
-			tear.Position = playerPos + directionAdjustment + adjustmentVector	
-		end
+	-- if (player.Position:Distance(closestEnemy.Position)) > dist then return end
 
-		local directionFrames = math.ceil(10 * (2.73 / ticksPerSecond)) + 10
-		player:SetHeadDirection(faceDir, directionFrames, true)
+	tear.Velocity = mod.ChangeVelToTarget(player, closestEnemy, shotSpeed)
+
+	local playerPos = player.Position	
+	local tearDisplacement = player:GetTearDisplacement()
+	local multiShot = player:GetMultiShotParams(WeaponType.WEAPON_TEARS)
+	local tearCounts = multiShot:GetNumTears()
+	local faceDir = mod.When(mod.vectorToAngle(tear.Velocity), tables.DegreesToDirection, Direction.DOWN)
+	local ticksPerSecond = mod.GetTPS(player)
+
+	if tearCounts < 2 then
+		local randomFactor = utils.RNG:RandomInt(3000, 5000) / 1000
+		local adjustmentVector = misc.HeadAdjustVec
+		local headAxis = mod.When(faceDir, tables.HeadAxis, "Hor")
+		local tearDis = (tearDisplacement * randomFactor) * (shotSpeed / 10)
+		local SetX, SetY = headAxis == "Ver" and tearDis or 0, headAxis == "Hor" and tearDis or 0
+		mod.SetVector(adjustmentVector, SetX, SetY)
+		local directionAdjustment = mod.When(faceDir, tables.DirectionToVector, Vector.Zero):Resized(shotSpeed)
+				
+		tear.Position = playerPos + directionAdjustment + adjustmentVector	
 	end
+
+	local directionFrames = math.ceil(10 * (2.73 / ticksPerSecond)) + 10
+	player:SetHeadDirection(faceDir, directionFrames, true)
 end
 
 ---@param entity Entity

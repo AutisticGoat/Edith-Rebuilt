@@ -20,7 +20,6 @@ local funcs = {
 	GetTPS = mod.GetTPS,
 	ClosestEnemy = mod.GetClosestEnemy,
 	IsEdith = mod.IsEdith,
-	RandomNum = mod.RandomNumber,
 	RemoveTarget = mod.RemoveEdithTarget,
 	VelTarget = mod.ChangeVelToTarget,
 	SetVec = mod.SetVector,
@@ -88,7 +87,7 @@ function Edith:EdithSaltTears(tear)
 	funcs.ForceSalt(tear)
 
 	local shotSpeed = player.ShotSpeed * 10
-	edithMod.ShootTearToNearestEnemy(tear, player)
+	mod.ShootTearToNearestEnemy(tear, player, misc.NearEnemyDetectionDist)
 
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED) then return end	
 	local target = funcs.GetTarget(player)
@@ -113,6 +112,8 @@ mod:AddCallback(ModCallbacks.MC_POST_TEAR_UPDATE, Edith.EdithKnockbackTears)
 function Edith:EdithJumpHandler(player)
 	local room = game:GetRoom()
 	if not funcs.IsEdith(player, false) then return end
+
+	
 
 	local playerData = funcs.GetData(player)	
 	local isMoving = funcs.TargetMov(player)
@@ -146,10 +147,13 @@ function Edith:EdithJumpHandler(player)
 		funcs.SpawnTarget(player)
 	end
 
+	if not isJumping then
+		player:MultiplyFriction(0.5)
+	end
+
 	local target = funcs.GetTarget(player)
 
 	if not target then return end
-
 	if isMoving then
 		local movementVector = Vector.Zero
 		local CharSpeed = player.MoveSpeed + 2
@@ -221,29 +225,30 @@ local SoundPick = {
 	[4] = sounds.SOUND_VINE_BOOM,
 }
 
+local entityTypes = { 
+	[GridEntityType.GRID_TRAPDOOR] = true, 
+	[GridEntityType.GRID_STAIRS] = true, 
+	[GridEntityType.GRID_GRAVITY] = true,
+}
 ---@param player EntityPlayer
 ---@return boolean
 local function isNearTrapdoor(player)
 	local room = game:GetRoom()
 	local gridSize = room:GetGridSize()
-	local entityTypes = { 
-		[GridEntityType.GRID_TRAPDOOR] = true, 
-		[GridEntityType.GRID_STAIRS] = true, 
-		[GridEntityType.GRID_GRAVITY] = true,
-	}
-
+	
 	for i = 1, gridSize do
 		local gent = room:GetGridEntity(i)
-		if gent then
-			if gent:GetType() == GridEntityType.GRID_GRAVITY then
-				return true
-			end
-		end
-		
-		if gent and entityTypes[gent:GetType()] then
+
+		if not gent then goto Break end
+		local GentType = gent:GetType()
+		local isValidGentType = mod.When(GentType, entityTypes, false)
+
+		if GentType == GridEntityType.GRID_GRAVITY then return true end
+		if isValidGentType then
 			local distance = (player.Position - gent.Position):Length()	
 			return distance <= 20 
 		end
+		::Break::
 	end
 	return false
 end
@@ -451,6 +456,7 @@ function Edith:SuplexUse(player)
 	funcs.EdithDash(player, direction, distance, 50)
 	player:UseActiveItem(activeItem)
 	player:SetActiveCharge(usedCharge, ActiveSlot.SLOT_PRIMARY)
+	
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, Edith.SuplexUse)
 
@@ -459,3 +465,45 @@ function Edith:OnEsauJrUse(_, _, player)
 	funcs.RemoveTarget(player)
 end
 mod:AddCallback(ModCallbacks.MC_PRE_USE_ITEM, Edith.OnEsauJrUse, CollectibleType.COLLECTIBLE_ESAU_JR)
+
+function Edith:CustomDropButton(player)
+	local isJumping = JumpLib:GetData(player).Jumping
+	local height = JumpLib:GetData(player).Height
+	local IsFalling = JumpLib:IsFalling(player)
+	local playerData = funcs.GetData(player)
+
+	playerData.ShouldDrop = playerData.ShouldDrop or false
+	
+
+	if playerData.ShouldDrop == false then
+		player:SetActionHoldDrop(0)
+	end
+
+	-- if JumpLib:GetData(player).Height > 0 then
+	-- 	print(JumpLib:GetData(player).Height)
+	-- end
+	-- for k, v in pairs(JumpLib:GetData(player)) do
+	-- 	print(k, v)
+	-- end
+
+	if not isJumping then playerData.ShouldDrop = false return end
+		-- print(Input.IsActionTriggered(ButtonAction.ACTION_DROP, player.ControllerIndex))
+
+	if not Input.IsActionTriggered(ButtonAction.ACTION_DROP, player.ControllerIndex) then return end
+		
+	if not (height > 10 and not IsFalling) then return end
+		playerData.ShouldDrop = true
+		player:SetActionHoldDrop(119)
+	-- end
+	
+		
+
+
+	-- print(player:GetActionHoldDrop())
+end
+mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE,	 Edith.CustomDropButton)
+
+-- function Edith:Render(player)
+-- 	mod.RenderAreaOfEffect(player, misc.NearEnemyDetectionDist, Color(1, 1, 1))
+-- end
+-- mod:AddCallback(ModCallbacks.MC_POST_PLAYER_RENDER, Edith.Render)

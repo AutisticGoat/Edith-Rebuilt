@@ -102,13 +102,18 @@ function unlocks:OnTriggerCompletion(mark)
     local pgd = Isaac.GetPersistentGameData()
     local unlock = mod.When(mark, UnlockTable, 1)
 
+    -- if not unlock then return end
+
     if game.Difficulty == Difficulty.DIFFICULTY_GREEDIER then
         pgd:TryUnlock(achievements.ACHIEVEMENT_HYDRARGYRUM)
         pgd:TryUnlock(achievements.ACHIEVEMENT_GILDED_STONE)
     end
 
     if game.Difficulty ~= unlock.Difficulty then return end
-    pgd:TryUnlock(unlock.Unlock)
+    
+    if unlock then
+        pgd:TryUnlock(unlock.Unlock)
+    end
 
 
     if Isaac.AllMarksFilled(players.PLAYER_EDITH) ~= 2 then return end

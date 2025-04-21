@@ -41,8 +41,8 @@ function Target:EdithTargetLogic(effect)
 	if player.ControlsEnabled == false then return end
 		
 	effect.Velocity = effect.Velocity * 0.6
-	effect.DepthOffset = -100
-	effect.GridCollisionClass = EntityGridCollisionClass.GRIDCOLL_WALLS
+	-- effect.DepthOffset = -100
+	effect.GridCollisionClass = GridCollisionClass.COLLISION_SOLID
 	
 	local playerPos = player.Position
 	local effectPos = effect.Position
