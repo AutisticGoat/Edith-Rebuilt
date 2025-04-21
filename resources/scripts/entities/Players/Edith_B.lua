@@ -272,6 +272,7 @@ end
 mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, mod.TaintedEdithUpdate)
 
 function mod:EdithPlayerUpdate(player)
+	if not funcs.IsEdith(player, true) then return end
 	local playerData = funcs.GetData(player)
 
 	if mod:IsKeyStompTriggered(player) then

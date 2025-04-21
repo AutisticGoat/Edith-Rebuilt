@@ -467,43 +467,22 @@ end
 mod:AddCallback(ModCallbacks.MC_PRE_USE_ITEM, Edith.OnEsauJrUse, CollectibleType.COLLECTIBLE_ESAU_JR)
 
 function Edith:CustomDropButton(player)
-	local isJumping = JumpLib:GetData(player).Jumping
-	local height = JumpLib:GetData(player).Height
+	local jumpData = JumpLib:GetData(player)
+	local isJumping = jumpData.Jumping
+	local height = jumpData.Height
 	local IsFalling = JumpLib:IsFalling(player)
 	local playerData = funcs.GetData(player)
 
 	playerData.ShouldDrop = playerData.ShouldDrop or false
 	
-
 	if playerData.ShouldDrop == false then
 		player:SetActionHoldDrop(0)
 	end
 
-	-- if JumpLib:GetData(player).Height > 0 then
-	-- 	print(JumpLib:GetData(player).Height)
-	-- end
-	-- for k, v in pairs(JumpLib:GetData(player)) do
-	-- 	print(k, v)
-	-- end
-
 	if not isJumping then playerData.ShouldDrop = false return end
-		-- print(Input.IsActionTriggered(ButtonAction.ACTION_DROP, player.ControllerIndex))
-
 	if not Input.IsActionTriggered(ButtonAction.ACTION_DROP, player.ControllerIndex) then return end
-		
 	if not (height > 10 and not IsFalling) then return end
-		playerData.ShouldDrop = true
-		player:SetActionHoldDrop(119)
-	-- end
-	
-		
-
-
-	-- print(player:GetActionHoldDrop())
+	playerData.ShouldDrop = true
+	player:SetActionHoldDrop(119)
 end
-mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE,	 Edith.CustomDropButton)
-
--- function Edith:Render(player)
--- 	mod.RenderAreaOfEffect(player, misc.NearEnemyDetectionDist, Color(1, 1, 1))
--- end
--- mod:AddCallback(ModCallbacks.MC_POST_PLAYER_RENDER, Edith.Render)
+mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, Edith.CustomDropButton)
