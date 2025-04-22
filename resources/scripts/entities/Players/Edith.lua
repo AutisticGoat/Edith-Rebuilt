@@ -424,6 +424,13 @@ mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Edith.DamageStuff)
 
 ---@param player EntityPlayer
 function Edith:SuplexUse(player)
+	-- print("===========================================")
+	-- for k, v in pairs(EvaluateStatStage) do
+		
+	-- 	print(k, v)
+	-- end
+
+
 	if not funcs.IsEdith(player, false) then return end
 	local edithTarget = funcs.GetTarget(player)
 

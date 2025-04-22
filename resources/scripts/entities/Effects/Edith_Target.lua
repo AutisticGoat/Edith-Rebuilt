@@ -42,7 +42,6 @@ function Target:EdithTargetLogic(effect)
 		
 	effect.Velocity = effect.Velocity * 0.6
 	-- effect.DepthOffset = -100
-	effect.GridCollisionClass = GridCollisionClass.COLLISION_SOLID
 	
 	local playerPos = player.Position
 	local effectPos = effect.Position
@@ -122,6 +121,10 @@ function Target:EdithTargetSprite(effect)
 	local effectSprite = effect:GetSprite()
 
 	local color = Color.Default
+
+	-- for k, v in pairs(targetColor) do
+	-- 	print(k,v)
+	-- end
 
 	if targetDesign == 1 then
 		if RGBmode then

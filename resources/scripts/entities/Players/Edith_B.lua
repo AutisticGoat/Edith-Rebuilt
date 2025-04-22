@@ -64,7 +64,7 @@ local function stopTEdithHops(player, cooldown, useQuitJump, resetChrg)
 	local playerData = funcs.GetData(player)
 	playerData.IsHoping = false
 	player:MultiplyFriction(0.5)
-	playerData.HopVector = Vector(0, 0)
+	playerData.HopVector = Vector.Zero
 
 	cooldown = cooldown or 0
 	useQuitJump = useQuitJump or false
@@ -210,11 +210,11 @@ function mod:TaintedEdithUpdate(player)
 	local HopVec = playerData.HopVector
 
 	if target then
+		
 		local posDif = target.Position - player.Position
 		local posDifLenght = posDif:Length()	
 		local posDifNormal = posDif:Normalized()
 		local maxDist = 2.5
-		local faceDirection = TSIL.Vector.VectorToDirection(HopVec)
 
 		playerData.HopVector = posDif:Normalized()
 
@@ -226,10 +226,6 @@ function mod:TaintedEdithUpdate(player)
 		target.Velocity = playerData.movementVector:Resized(10)
 		if posDifLenght >= maxDist then
 			target.Velocity = target.Velocity - (posDifNormal * (posDifLenght / (maxDist))) 
-		end
-
-		if not mod:IsPlayerShooting(player) then
-			player:SetHeadDirection(faceDirection, 2, true)
 		end
 
 		local baseTearsStat = 2.73
@@ -261,6 +257,8 @@ function mod:TaintedEdithUpdate(player)
 		else
 			if not funcs.TargetMov(player) and playerData.IsHoping == false then
 				resetCharges(player)
+				playerData.HopVector = Vector.Zero
+
 			end
 		end
 	end
@@ -274,6 +272,8 @@ mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, mod.TaintedEdithUpdate)
 function mod:EdithPlayerUpdate(player)
 	if not funcs.IsEdith(player, true) then return end
 	local playerData = funcs.GetData(player)
+	local IsJumping = JumpLib:GetData(player).Jumping
+	local arrow = mod.GetEdithTarget(player, true)
 
 	if mod:IsKeyStompTriggered(player) then
 		if playerData.ParryCounter == 0 and not isTaintedEdithJump(player) then
@@ -292,7 +292,10 @@ function mod:EdithPlayerUpdate(player)
 	else
 		playerData.MoveBrCharge = playerData.BirthrightCharge
 		playerData.MoveCharge = playerData.ImpulseCharge
-		player:MultiplyFriction(0.5)
+
+		if not IsJumping then
+			player:MultiplyFriction(0.5)
+		end
 	end	
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, mod.EdithPlayerUpdate)
@@ -305,14 +308,18 @@ function mod:RenderTaintedEdith(player)
 	local playerData = funcs.GetData(player)
 	local isShooting = mod:IsPlayerShooting(player)
 	local faceDirection = TSIL.Vector.VectorToDirection(playerData.HopVector)
-	local chosenDir = Direction.DOWN	
+	local chosenDir = faceDirection	or Direction.DOWN
 
 	if playerData.IsHoping or (arrow and arrow.Visible == true) then
 		chosenDir = faceDirection
+	else
+		if TSIL.Vector.VectorEquals(playerData.HopVector, Vector.Zero) then
+			chosenDir = Direction.DOWN
+		end
 	end
 
 	if not isShooting then
-		player:SetHeadDirection(chosenDir, 1, true)
+		player:SetHeadDirection(chosenDir, 2, true)
 	end
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_RENDER, mod.RenderTaintedEdith)
@@ -462,6 +469,8 @@ function mod:EdithParryJump(player, data)
 	end
 
 	local lasers = Isaac.FindByType(EntityType.ENTITY_LASER) ---@type EntityLaser[]
+
+	print(#lasers)
 
 	for _, laser in ipairs(lasers) do
 		local laserData = mod.GetData(laser)

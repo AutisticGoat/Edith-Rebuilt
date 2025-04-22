@@ -10,7 +10,7 @@ if not ImGui.ElementExists("edithMod") then
 end
 
 local function manageElement(nombre, titulo)
-	if RenderMenu == false then return end
+	if RenderMenu == false and ImGui.ElementExists(nombre) then return end
     ImGui.AddElement("edithMod", nombre, ImGuiElement.MenuItem, "\u{f013} " .. titulo)
 end
 
@@ -29,7 +29,7 @@ local ventanas = {
 }
 
 for _, ventana in ipairs(ventanas) do
-	if RenderMenu == false then return end
+	if RenderMenu == false and ImGui.ElementExists(ventana.nombre) then return end
     ImGui.CreateWindow(ventana.nombre, ventana.titulo .. " \u{f118}\u{f5b3}\u{f118}")
 end
 
@@ -67,9 +67,44 @@ local function ResetSaveData(isTainted)
 	RenderMenu = true
 end
 
-local function OptionsUpdate()
-	if RenderMenu == false then return end 
+local OptionsIDs = {
+	"StompSound", 
+	"StompVolume", 
+	"TargetDesign", 
+	"DisableGibs", 
+	"SetRGB", 
+	"SetRGBSpeed", 
+	"TargetLine", 
+	"SaltShakerSlot", 
+	"arrowDesign", 
+	"hopSound", 
+	"parrySound", 
+	"TaintedDisableGibs", 
+	"TaintedSetRGB", 
+	"TaintedSetRGBSpeed", 
+	"StompTaintedVolume", 
+	"ScreenShake",
+	"EdithSetting", 
+	"TaintedEdithSetting", 
+	"MiscSetting", 
+	"EdithTargetColor", 
+	"resetButton", 
+	"TaintedEdithArrowColor", 
+	"taintedresetButton", 
+	"Settings",
+} 
 
+function CheckIntegrity()
+	for _, ID in ipairs(OptionsIDs) do
+		if not ImGui.ElementExists(ID) then 
+			return false
+		end
+	end
+
+	return true
+end
+
+local function OptionsUpdate()
 	local SaveManager = mod.SaveManager
 	
 	if not SaveManager then return end
@@ -80,6 +115,8 @@ local function OptionsUpdate()
 	local EdithData = saveData.EdithData
 	local TEdithData = saveData.TEdithData
 	local miscData = saveData.miscData
+
+	if CheckIntegrity() then return end
 
 	ImGui.AddTabBar("settingswindow", "Settings")
 	ImGui.AddTab("Settings", "EdithSetting", "Edith")
@@ -95,6 +132,7 @@ local function OptionsUpdate()
 				Green = g,
 				Blue = b,
 			}
+			print(EdithData.TargetColor.Red, EdithData.TargetColor.Green, EdithData.TargetColor.Blue)
 		end, 
 	1, 1, 1)
 	ImGui.AddCombobox("EdithSetting", "TargetDesign", "Set Target Design", 
@@ -141,15 +179,6 @@ local function OptionsUpdate()
 	ImGui.AddButton("EdithSetting", "resetButton", "Reset settings", function()
 		ResetSaveData(false)
 	end, false)
-
-	ImGui.UpdateData("StompSound", ImGuiData.Value, (EdithData.stompsound - 1) or 0) 
-	ImGui.UpdateData("StompVolume", ImGuiData.Value, EdithData.stompVolume or 100) 
-	ImGui.UpdateData("TargetDesign", ImGuiData.Value, (EdithData.targetdesign - 1) or 0)
-	ImGui.UpdateData("DisableGibs", ImGuiData.Value, EdithData.DisableGibs or false)
-	ImGui.UpdateData("SetRGB", ImGuiData.Value, EdithData.RGBMode or false)
-	ImGui.UpdateData("SetRGBSpeed", ImGuiData.Value, EdithData.RGBSpeed or 0.005)
-	ImGui.UpdateData("TargetLine", ImGuiData.Value, EdithData.targetline or false)
-	ImGui.UpdateData("SaltShakerSlot", ImGuiData.Value, EdithData.ShakerSlot or 0)
 		
 	local color = EdithData.TargetColor
 		
@@ -164,6 +193,8 @@ local function OptionsUpdate()
 	
 -- Tainted Edith Configs
 	ImGui.AddElement("TaintedEdithSetting", "taintedVisualSeparator", ImGuiElement.SeparatorText, "Visuals")
+
+	local arrowcolor = TEdithData.ArrowColor
 	ImGui.AddInputColor("TaintedEdithSetting", "TaintedEdithArrowColor", "Arror Color", 
 	function(r, g, b)
 		TEdithData.ArrowColor = {
@@ -205,15 +236,7 @@ local function OptionsUpdate()
 	ImGui.AddButton("TaintedEdithSetting", "taintedresetButton", "Reset settings", function()
 		ResetSaveData(true)
 	end, false)
-	ImGui.UpdateData("arrowDesign", ImGuiData.Value, (TEdithData.ArrowDesign - 1) or 0)
-	ImGui.UpdateData("hopSound", ImGuiData.Value, (TEdithData.TaintedHopSound - 1) or 0)
-	ImGui.UpdateData("parrySound", ImGuiData.Value, (TEdithData.TaintedParrySound - 1) or 0)
-	ImGui.UpdateData("TaintedDisableGibs", ImGuiData.Value, TEdithData.DisableGibs or false)
-	ImGui.UpdateData("TaintedSetRGB", ImGuiData.Value, TEdithData.RGBMode or false)
-	ImGui.UpdateData("TaintedSetRGBSpeed", ImGuiData.Value, TEdithData.RGBSpeed or 0.005)
-	ImGui.UpdateData("StompTaintedVolume", ImGuiData.Value, TEdithData.taintedStompVolume or 100)
-
-	local arrowcolor = TEdithData.ArrowColor
+	
 	ImGui.UpdateData("TaintedEdithArrowColor", ImGuiData.ColorValues, 
 	{
 		arrowcolor.Red,
@@ -226,9 +249,36 @@ local function OptionsUpdate()
 	ImGui.AddCheckbox("MiscSetting", "ScreenShake", "Enable Stomp screen shake", function(check)
 		miscData.shakescreen = check
 	end, false)
+
+	ImGui.UpdateData("StompSound", ImGuiData.Value, (EdithData.stompsound - 1) or 0) 
+	ImGui.UpdateData("StompVolume", ImGuiData.Value, EdithData.stompVolume or 100) 
+	ImGui.UpdateData("TargetDesign", ImGuiData.Value, (EdithData.targetdesign - 1) or 0)
+	ImGui.UpdateData("DisableGibs", ImGuiData.Value, EdithData.DisableGibs or false)
+	ImGui.UpdateData("SetRGB", ImGuiData.Value, EdithData.RGBMode or false)
+	ImGui.UpdateData("SetRGBSpeed", ImGuiData.Value, EdithData.RGBSpeed or 0.005)
+	ImGui.UpdateData("TargetLine", ImGuiData.Value, EdithData.targetline or false)
+	ImGui.UpdateData("SaltShakerSlot", ImGuiData.Value, EdithData.ShakerSlot or 0)
+	ImGui.UpdateData("arrowDesign", ImGuiData.Value, (TEdithData.ArrowDesign - 1) or 0)
+	ImGui.UpdateData("hopSound", ImGuiData.Value, (TEdithData.TaintedHopSound - 1) or 0)
+	ImGui.UpdateData("parrySound", ImGuiData.Value, (TEdithData.TaintedParrySound - 1) or 0)
+	ImGui.UpdateData("TaintedDisableGibs", ImGuiData.Value, TEdithData.DisableGibs or false)
+	ImGui.UpdateData("TaintedSetRGB", ImGuiData.Value, TEdithData.RGBMode or false)
+	ImGui.UpdateData("TaintedSetRGBSpeed", ImGuiData.Value, TEdithData.RGBSpeed or 0.005)
+	ImGui.UpdateData("StompTaintedVolume", ImGuiData.Value, TEdithData.taintedStompVolume or 100)
 	ImGui.UpdateData("ScreenShake", ImGuiData.Value, miscData.shakescreen or false)
 
 	RenderMenu = false
+end
+
+function DestroyImGuiOptions()
+	-- if not CheckIntegrity() then return end
+
+	for _, ID in ipairs(OptionsIDs) do
+		if ImGui.ElementExists(ID) then
+			ImGui.RemoveElement(ID)
+		end
+		
+	end
 end
 
 local function InitSaveData()
@@ -266,9 +316,10 @@ local function InitSaveData()
 
 	miscData.shakescreen = miscData.shakescreen or true
 
-	print(mod.SaveManager:IsLoaded())
+	DestroyImGuiOptions()
 end
 
+mod:AddCallback(ModCallbacks.MC_MAIN_MENU_RENDER, DestroyImGuiOptions)
 mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, InitSaveData)
 mod:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT, InitSaveData)
 mod:AddCallback(ModCallbacks.MC_PRE_MOD_UNLOAD, InitSaveData)

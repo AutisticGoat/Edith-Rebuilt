@@ -12,7 +12,7 @@
 		costumeSuffix="editha"
 		healthtype="1"
 		birthright="Super Stomps"
-		pocketActive="Salt Shaker"
+		items="Salt Shaker"
 		noshake="true"
 	/>
 	<player 
