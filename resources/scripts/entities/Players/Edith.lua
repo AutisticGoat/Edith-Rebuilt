@@ -86,12 +86,10 @@ function Edith:EdithSaltTears(tear)
 
 	funcs.ForceSalt(tear)
 
-	local shotSpeed = player.ShotSpeed * 10
-	mod.ShootTearToNearestEnemy(tear, player, misc.NearEnemyDetectionDist)
-
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED) then return end	
 	local target = funcs.GetTarget(player)
 	if not target then return end
+	local shotSpeed = player.ShotSpeed * 10
 	tear.Velocity = funcs.VelTarget(tear, target, shotSpeed)
 end
 mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, Edith.EdithSaltTears)
@@ -147,9 +145,9 @@ function Edith:EdithJumpHandler(player)
 		funcs.SpawnTarget(player)
 	end
 
-	if not isJumping then
-		player:MultiplyFriction(0.5)
-	end
+	-- if not isJumping and not (player.Velocity:Length() <= 1) then
+	-- 	player:MultiplyFriction(0.5)
+	-- end
 
 	local target = funcs.GetTarget(player)
 
@@ -390,7 +388,7 @@ function Edith:EdithOnNewRoom()
 
 	for _, player in pairs(players) do
 		if funcs.IsEdith(player, false) then
-			mod:ChangeColor(player, _, _, _, 1)
+			mod:ChangeColor(player.Color, _, _, _, 1)
 			funcs.RemoveTarget(player)
 			setEdithJumps(player, 0)	
 		end
@@ -460,10 +458,10 @@ function Edith:SuplexUse(player)
 	if not isMoveBasedActive or totalItemCharge < maxItemCharge then return end
 	if not Input.IsActionTriggered(ButtonAction.ACTION_ITEM, player.ControllerIndex) then return end
 
+
 	funcs.EdithDash(player, direction, distance, 50)
 	player:UseActiveItem(activeItem)
 	player:SetActiveCharge(usedCharge, ActiveSlot.SLOT_PRIMARY)
-	
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, Edith.SuplexUse)
 
@@ -474,6 +472,8 @@ end
 mod:AddCallback(ModCallbacks.MC_PRE_USE_ITEM, Edith.OnEsauJrUse, CollectibleType.COLLECTIBLE_ESAU_JR)
 
 function Edith:CustomDropButton(player)
+	if not funcs.IsEdith(player, false) then return end
+
 	local jumpData = JumpLib:GetData(player)
 	local isJumping = jumpData.Jumping
 	local height = jumpData.Height

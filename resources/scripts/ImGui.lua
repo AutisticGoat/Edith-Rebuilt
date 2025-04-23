@@ -62,7 +62,6 @@ local function ResetSaveData(isTainted)
 		EdithData.RGBMode = false
 		EdithData.RGBSpeed = 0.005
 		EdithData.targetline = false
-		EdithData.ShakerSlot = 0
 	end
 	RenderMenu = true
 end
@@ -75,7 +74,6 @@ local OptionsIDs = {
 	"SetRGB", 
 	"SetRGBSpeed", 
 	"TargetLine", 
-	"SaltShakerSlot", 
 	"arrowDesign", 
 	"hopSound", 
 	"parrySound", 
@@ -96,9 +94,7 @@ local OptionsIDs = {
 
 function CheckIntegrity()
 	for _, ID in ipairs(OptionsIDs) do
-		if not ImGui.ElementExists(ID) then 
-			return false
-		end
+		if not ImGui.ElementExists(ID) then return false end
 	end
 
 	return true
@@ -168,12 +164,6 @@ local function OptionsUpdate()
 
 	ImGui.AddElement("EdithSetting", "GameplaySeparator", ImGuiElement.SeparatorText, "Gameplay")
 	-- reset
-	
-	ImGui.AddCombobox("EdithSetting", "SaltShakerSlot", "Salt Shaker slot", 
-		function(index)
-			EdithData.ShakerSlot = index
-		end,
-	ImGuiTables.ShakerSlot, 1, true)
 
 	ImGui.AddElement("EdithSetting", "ResetSeparator", ImGuiElement.SeparatorText, "Reset")
 	ImGui.AddButton("EdithSetting", "resetButton", "Reset settings", function()
@@ -257,7 +247,6 @@ local function OptionsUpdate()
 	ImGui.UpdateData("SetRGB", ImGuiData.Value, EdithData.RGBMode or false)
 	ImGui.UpdateData("SetRGBSpeed", ImGuiData.Value, EdithData.RGBSpeed or 0.005)
 	ImGui.UpdateData("TargetLine", ImGuiData.Value, EdithData.targetline or false)
-	ImGui.UpdateData("SaltShakerSlot", ImGuiData.Value, EdithData.ShakerSlot or 0)
 	ImGui.UpdateData("arrowDesign", ImGuiData.Value, (TEdithData.ArrowDesign - 1) or 0)
 	ImGui.UpdateData("hopSound", ImGuiData.Value, (TEdithData.TaintedHopSound - 1) or 0)
 	ImGui.UpdateData("parrySound", ImGuiData.Value, (TEdithData.TaintedParrySound - 1) or 0)
@@ -304,7 +293,6 @@ local function InitSaveData()
 	EdithData.RGBMode = EdithData.RGBMode or false
 	EdithData.RGBSpeed = EdithData.RGBSpeed or 0.5
 	EdithData.targetline = EdithData.targetline or false
-	EdithData.ShakerSlot = EdithData.ShakerSlot or ActiveSlot.SLOT_PRIMARY
 	
 	TEdithData.ArrowColor = TEdithData.ArrowColor or {Red = 1, Green = 0, Blue = 0}
 	TEdithData.ArrowDesign = TEdithData.ArrowDesign or 1

@@ -28,8 +28,6 @@ local function interpolateVector2D(vectorA, vectorB, t)
     return Vector(Interpolated.X, Interpolated.Y)
 end
 
-local DungeonVector = Vector.Zero
-
 local teleportPoints = {
 	{X = 110, Y = 135},
 	{X = 595, Y = 385},
@@ -70,7 +68,7 @@ function Target:EdithTargetLogic(effect)
 	
 	if room:GetType() == RoomType.ROOM_DUNGEON then
 		for _, v in ipairs(teleportPoints) do
-			mod.SetVector(DungeonVector, v.X, v.Y)
+			local DungeonVector = Vector(v.X, v.Y)
 			
 			if (effectPos - DungeonVector):Length() <= 20 then
 				player.Position = effectPos + effect.Velocity:Normalized():Resized(25)
@@ -122,10 +120,6 @@ function Target:EdithTargetSprite(effect)
 
 	local color = Color.Default
 
-	-- for k, v in pairs(targetColor) do
-	-- 	print(k,v)
-	-- end
-
 	if targetDesign == 1 then
 		if RGBmode then
 			color = misc.HSVStartColor
@@ -152,9 +146,10 @@ function Target:EdithTargetSprite(effect)
 	if targetDesign == 1 then
 		targetlineColor = effectColor
 	else
-		targetlineColor.R = tables.ColorValues[targetDesign].R
-		targetlineColor.G = tables.ColorValues[targetDesign].G
-		targetlineColor.B = tables.ColorValues[targetDesign].B
+		local lineColor = funcs.Switch(targetDesign, tables.ColorValues, 1)
+		targetlineColor.R = lineColor.R
+		targetlineColor.G = lineColor.G
+		targetlineColor.B = lineColor.B
 	end
 
 	if isTDOV then

@@ -88,14 +88,6 @@ function edithMod.WhenEval(value, cases, default)
     return v
 end
 
----Changes `Vec` components (works the same as setting them manually)
----@param Vec Vector
----@param x number
----@param y number
-function edithMod.SetVector(Vec, x, y)
-	Vec.X = x
-	Vec.Y = y
-end
 ---Checks if player is pressing Edith's jump button
 ---@param player EntityPlayer
 ---@return boolean
@@ -178,7 +170,7 @@ function edithMod.vectorToAngle(vector)
 end
 
 ---
----@param entity Entity
+---@param color Color
 ---@param red number
 ---@param green number
 ---@param blue number
@@ -186,17 +178,17 @@ end
 ---@param redOff? number
 ---@param greenOff? number
 ---@param blueOff? number
-function edithMod:ChangeColor(entity, red, green, blue, alpha, redOff, greenOff, blueOff)
-	local color = entity.Color
-	color.R = red or entity.Color.R
-	color.G = green or entity.Color.G
-	color.B = blue or entity.Color.B
-	color.A = alpha or entity.Color.A
-	color.RO = redOff or entity.Color.RO
-	color.GO = greenOff or entity.Color.GO
-	color.BO = blueOff or entity.Color.BO
+function edithMod:ChangeColor(color, red, green, blue, alpha, redOff, greenOff, blueOff)
+	local newcolor = color
+	color.R = red or newcolor.R
+	color.G = green or newcolor.G
+	color.B = blue or newcolor.B
+	color.A = alpha or newcolor.A
+	color.RO = redOff or newcolor.RO
+	color.GO = greenOff or newcolor.GO
+	color.BO = blueOff or newcolor.BO
 	
-	entity.Color = color
+	color = newcolor
 end
 
 ---Helper grid destroyer function
@@ -219,8 +211,6 @@ function edithMod:DestroyGrid(entity, radius)
 	end
 end
 
--- 631-115-1587 Oscar Esparza 
-
 local LINE_SPRITE = Sprite("gfx/TinyBug.anm2", true)
 local MAX_POINTS = 360
 local ANGLE_SEPARATION = 360 / MAX_POINTS
@@ -232,8 +222,6 @@ LINE_SPRITE:SetFrame("Dead", 0)
 ---@param AreaColor Color
 function edithMod.RenderAreaOfEffect(entity, AreaSize, AreaColor) -- Took from Melee lib, tweaked a little bit
 	local room = game:GetRoom()
-
-	-- local aditionalPoints = 
 
 	if room:GetRenderMode() == RenderMode.RENDER_WATER_REFLECT then return end
 
@@ -270,23 +258,34 @@ function edithMod:TargetDoorManager(effect, player, triggerDistance)
 	local effectPos = effect.Position
 	local roomName = level:GetCurrentRoomDesc().Data.Name
 	local isTainted = mod.IsEdith(player, true) or false
+	local MirrorRoomCheck = roomName == "Mirror Room" and player:HasInstantDeathCurse()
 
 	for i = 0, 7 do
 		local door = room:GetDoor(i)
 		if not door then goto Break end
+		local sprite = door:GetSprite()
+		local MausoleumRoomCheck = string.find(sprite:GetLayer(0):GetSpritesheetPath(), "mausoleum") ~= nil
 		local doorPos = room:GetDoorSlotPosition(i)
 		if not (doorPos and effectPos:Distance(doorPos) <= triggerDistance) then 			
 			if player.Color.A then
-				mod:ChangeColor(player, 1, 1, 1, 1)
+				mod:ChangeColor(player.Color, 1, 1, 1, 1)
 			end
 			goto Break 
 		end
-		if door:IsOpen() or (roomName == "Mirror Room" and player:HasInstantDeathCurse()) then
+		if door:IsOpen() or MirrorRoomCheck then
 			player.Position = doorPos
 			mod.RemoveEdithTarget(player, isTainted)
-			mod:ChangeColor(player, 1, 1, 1, 0)
+			mod:ChangeColor(player.Color, 1, 1, 1, 0)
+		elseif MausoleumRoomCheck then
+			if not sprite:IsPlaying("KeyOpen") then
+				sprite:Play("KeyOpen")
+			end
+
+			if sprite:IsFinished("KeyOpen") then
+				door:TryUnlock(player, true)
+			end
 		else
-			mod:ChangeColor(player, 1, 1, 1, 1)
+			mod:ChangeColor(player.Color, 1, 1, 1, 1)
 			door:TryUnlock(player)
 		end
 		::Break::
@@ -327,7 +326,7 @@ local function tearCol(_, tear)
 		elseif ent.Variant == 145 then
 			ent:GetSprite():ReplaceSpritesheet(0, misc.TearPath .. tearData.ShatterSprite .. ".png", true)
 		end
-		edithMod:ChangeColor(ent, shatterColor[1], shatterColor[2], shatterColor[3])
+		edithMod:ChangeColor(ent.Color, shatterColor[1], shatterColor[2], shatterColor[3])
 		::Break::
 	end
 end
@@ -672,42 +671,14 @@ function edithMod.RemoveEdithTarget(player, tainted)
 	local target = mod.GetEdithTarget(player, tainted)
 
 	if not target then return end
-
-	local playerData = edithMod.GetData(player)
-
 	target:Remove()
 
+	local playerData = edithMod.GetData(player)
 	if tainted then
 		playerData.TaintedEdithTarget = nil
 	else
 		playerData.EdithTarget = nil
 	end
-end
-
----Returns the closest enemy to player
----@param player EntityPlayer
----@param dist number
----@return EntityNPC|nil
-function edithMod.GetClosestEnemy(player, dist)
-    local closestDistance = dist
-    local closestEnemy = nil
-    local playerPos = player.Position
-	local room = game:GetRoom()
-	local DetectCapsule = Capsule(player.Position, Vector.One, 0, dist)
-
-	for _, enemy in ipairs(Isaac.FindInCapsule(DetectCapsule, EntityPartition.ENEMY)) do
-		if enemy:HasEntityFlags(EntityFlag.FLAG_CHARM) then goto Break end
-		local enemyPos = enemy.Position
-		local distanceToPlayer = enemyPos:Distance(playerPos)
-		local checkline = room:CheckLine(playerPos, enemyPos, LineCheckMode.PROJECTILE, 0, false, false)
-		if not checkline then goto Break end
-        if distanceToPlayer >= closestDistance then goto Break end
-
-        closestEnemy = enemy:ToNPC()
-        closestDistance = distanceToPlayer
-        ::Break::
-	end
-    return closestEnemy
 end
 
 ---Function used to manage and change Shockwave sprites from `TSIL` Library
@@ -915,9 +886,9 @@ end
 ---@param radius number
 ---@param damage number
 ---@param knockback number
----@param isParry boolean
-function edithMod:TaintedEdithHop(parent, radius, damage, knockback, isParry)
+function edithMod:TaintedEdithHop(parent, radius, damage, knockback)
 	local HopCapsule = Capsule(parent.Position, Vector.One, 0, radius)
+	DebugRenderer.Get(1, true):Capsule(HopCapsule)
 
 	for _, ent in ipairs(Isaac.FindInCapsule(HopCapsule)) do
 		mod.HandleEntityInteraction(ent, parent, knockback)
@@ -1013,42 +984,6 @@ function edithMod.LandFeedbackManager(player, soundTable, GibColor, IsParryLand)
 	stompGFX.Color = color
 	GibColor = GibColor or defColor
 	edithMod:SpawnSaltGib(player, gibAmount, GibColor)
-end
-
----@param tear EntityTear
----@param player EntityPlayer
----@param dist number
-function edithMod.ShootTearToNearestEnemy(tear, player, dist)
-	local shotSpeed = player.ShotSpeed * 10
-	local closestEnemy = mod.GetClosestEnemy(player, dist)
-
-	if not (closestEnemy and not player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED)) then return end
-
-	-- if (player.Position:Distance(closestEnemy.Position)) > dist then return end
-
-	tear.Velocity = mod.ChangeVelToTarget(player, closestEnemy, shotSpeed)
-
-	local playerPos = player.Position	
-	local tearDisplacement = player:GetTearDisplacement()
-	local multiShot = player:GetMultiShotParams(WeaponType.WEAPON_TEARS)
-	local tearCounts = multiShot:GetNumTears()
-	local faceDir = mod.When(mod.vectorToAngle(tear.Velocity), tables.DegreesToDirection, Direction.DOWN)
-	local ticksPerSecond = mod.GetTPS(player)
-
-	if tearCounts < 2 then
-		local randomFactor = utils.RNG:RandomInt(3000, 5000) / 1000
-		local adjustmentVector = misc.HeadAdjustVec
-		local headAxis = mod.When(faceDir, tables.HeadAxis, "Hor")
-		local tearDis = (tearDisplacement * randomFactor) * (shotSpeed / 10)
-		local SetX, SetY = headAxis == "Ver" and tearDis or 0, headAxis == "Hor" and tearDis or 0
-		mod.SetVector(adjustmentVector, SetX, SetY)
-		local directionAdjustment = mod.When(faceDir, tables.DirectionToVector, Vector.Zero):Resized(shotSpeed)
-				
-		tear.Position = playerPos + directionAdjustment + adjustmentVector	
-	end
-
-	local directionFrames = math.ceil(10 * (2.73 / ticksPerSecond)) + 10
-	player:SetHeadDirection(faceDir, directionFrames, true)
 end
 
 ---@param entity Entity

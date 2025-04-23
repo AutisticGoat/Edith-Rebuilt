@@ -358,7 +358,7 @@ function mod:OnNewRoom()
 	
 	for _, player in ipairs(players) do
 		if not funcs.IsEdith(player, true) then return end
-		mod:ChangeColor(player, _, _, _, 1)
+		mod:ChangeColor(player.Color, _, _, _, 1)
 		stopTEdithHops(player, 0, true, true)
 		mod.RemoveEdithTarget(player, true)
 	end
@@ -387,7 +387,7 @@ function mod:EdithLanding(player)
 	player:SpawnWaterImpactEffects(player.Position, Vector(1, 1), 1)	
 	funcs.FeedbackMan(player, hopSounds, misc.BurnedSaltColor)
 	
-	mod:TaintedEdithHop(player, HopParams.Radius, HopParams.Damage, HopParams.Knockback, false)	
+	mod:TaintedEdithHop(player, HopParams.Radius, HopParams.Damage, HopParams.Knockback)	
 end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, mod.EdithLanding, jumpParams.TEdithHop)
 
@@ -467,10 +467,12 @@ function mod:EdithParryJump(player, data)
 		game:MakeShockwave(playerPos, 0.035, 0.025, 2)
 		playerData.ImpulseCharge = playerData.ImpulseCharge + 20
 	end
+	
+	local tableRef = isenemy and parryJumpSounds or hopSounds
+	funcs.FeedbackMan(player, tableRef, misc.BurnedSaltColor, isenemy)
 
 	local lasers = Isaac.FindByType(EntityType.ENTITY_LASER) ---@type EntityLaser[]
-
-	print(#lasers)
+	if #lasers < 1 then return end
 
 	for _, laser in ipairs(lasers) do
 		local laserData = mod.GetData(laser)
@@ -498,9 +500,6 @@ function mod:EdithParryJump(player, data)
 			divineShield.Timeout = 1			
 		end
 	end
-
-	local tableRef = isenemy and parryJumpSounds or hopSounds
-	funcs.FeedbackMan(player, tableRef, misc.BurnedSaltColor, isenemy)
 end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, mod.EdithParryJump, jumpParams.TEdithJump)
 
@@ -539,12 +538,6 @@ function mod:HudBarRender(player)
 	local dashCharge = playerData.ImpulseCharge
 	local dashBRCharge = playerData.BirthrightCharge
 	local offset = misc.ChargeBarcenterVector
-
-	-- local capsule = Capsule(player.Position, Vector.One, 0, misc.PerfectParryRadius)
-	-- local capsuleTwo = Capsule(player.Position, Vector.One, 0, misc.ImpreciseParryRadius)
-	-- local DebugShape = DebugRenderer.Get(1, true)    
-    -- DebugShape:Capsule(capsule)
-    -- DebugShape:Capsule(capsuleTwo)
 
 	playerData.ChargeBar = playerData.ChargeBar or Sprite("gfx/TEdithChargebar.anm2", true)
 	playerData.BRChargeBar = playerData.BRChargeBar or Sprite("gfx/TEdithBRChargebar.anm2", true)

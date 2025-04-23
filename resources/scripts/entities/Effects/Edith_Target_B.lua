@@ -57,16 +57,15 @@ function Arrow:RenderTaintedEdithArrow(effect)
 
 	local playerData = edithMod.GetData(player)
 	local HopVec = playerData.HopVector
-	local color 
+	local color = misc.HSVStartColor
 
 	effect.Visible = effect.FrameCount > 1
 	effectSprite.Rotation = arrowDesign ~= 7 and HopVec:GetAngleDegrees() or 0 
 
 	if RGBmode then
-		color = misc.HSVStartColor
 		RGBFunction(color, RGBspeed)
 	else
-		color = Color(arrowColor.Red, arrowColor.Green, arrowColor.Blue)
+		mod:ChangeColor(color, arrowColor.Red, arrowColor.Green, arrowColor.Blue)
 	end
 
 	effect:SetColor(color, -1, 100, false, false)
