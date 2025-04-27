@@ -60,7 +60,7 @@ local UnlockTable = {
         Item = items.COLLECTIBLE_GILDED_STONE,
     },
     [CompletionType.DELIRIUM] = {
-        Unlock = achievements.ACHIEVEMENT_THE_BOOK_OF_LUKE,
+        Unlock = achievements.ACHIEVEMENT_CHUNK_OF_BASALT,
         Difficulty = Difficulty.DIFFICULTY_HARD,
         Item = items.COLLECTIBLE_THE_BOOK_OF_LUKE,
     },
@@ -79,16 +79,14 @@ local UnlockTable = {
 function unlocks:CheckStartUnlocks()
     local pgd = Isaac.GetPersistentGameData()
 
-    for unlock, table in pairs(UnlockTable) do
+    for _, table in ipairs(UnlockTable) do
         if pgd:Unlocked(table.Unlock) then goto Break end
                 
         if table.Item then
-            print(unlock, "Objeto bloqueado", Isaac.GetItemConfig():GetCollectible(table.Item).Name)
             game:GetItemPool():RemoveCollectible(table.Item)
         end
 
         if table.Trinket then
-            print(unlock, "Trinket bloqueado", Isaac.GetItemConfig():GetTrinket(table.Trinket).Name)
             game:GetItemPool():RemoveTrinket(table.Trinket)
         end
 
@@ -110,11 +108,10 @@ function unlocks:OnTriggerCompletion(mark)
     end
 
     if game.Difficulty ~= unlock.Difficulty then return end
-    
+
     if unlock then
         pgd:TryUnlock(unlock.Unlock)
     end
-
 
     if Isaac.AllMarksFilled(players.PLAYER_EDITH) ~= 2 then return end
     pgd:TryUnlock(achievements.ACHIEVEMENT_SALT_HEART)

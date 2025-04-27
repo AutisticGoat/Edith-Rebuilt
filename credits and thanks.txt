@@ -12,16 +12,15 @@ Used resources and utilities:
 - Joakim Sandberg (Konjak): Iconoclasts parry sound
 
 Credits:
-(Minor colaborators)
-- JJ: Main inspiration
+(Colaborators)
+- JJ: Inspiration to start this project
 - D!Edith team: Inspiration to resume this project
-- Skulldier: Sal initial concept
+- Skulldier: Sal concept
 - Marcy: Tainted Edith Birthright idea
 - Sr Kalaka: Edith Sprite
 - Yuls: Tainted Edith sprite base
+
+(Team members)
 - gigamouse: finished Tainted Edith sprite, items sprites
-- Patricio: Testing, First Tainted Edith sprite
-
-(Actual team members)
-- Kotry: Project leader, code leader, unlock sheets sprites
-
+- Patricio: Testing, First Tainted Edith sprite, items sprites
+- Kotry: Project leader, code leader, unlock sheets sprite

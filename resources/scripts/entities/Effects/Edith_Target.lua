@@ -34,12 +34,14 @@ local teleportPoints = {
 	{X = 595, Y = 272},
 }
 
+---@param effect EntityEffect
 function Target:EdithTargetLogic(effect)	
 	local player = effect.SpawnerEntity:ToPlayer()
+	if not player then return end
+
 	if player.ControlsEnabled == false then return end
 		
 	effect.Velocity = effect.Velocity * 0.6
-	-- effect.DepthOffset = -100
 	
 	local playerPos = player.Position
 	local effectPos = effect.Position
@@ -59,13 +61,6 @@ function Target:EdithTargetLogic(effect)
 	local Camera = room:GetCamera()
 	Camera:SetFocusPosition(cameraPos)
 	
-	local markedTarget = player:GetMarkedTarget()
-	if markedTarget then
-		markedTarget.Position = effect.Position
-		markedTarget.Velocity = Vector.Zero
-		markedTarget.Visible = false
-	end
-	
 	if room:GetType() == RoomType.ROOM_DUNGEON then
 		for _, v in ipairs(teleportPoints) do
 			local DungeonVector = Vector(v.X, v.Y)
@@ -78,30 +73,37 @@ function Target:EdithTargetLogic(effect)
 	end
 	
 	mod:TargetDoorManager(effect, player, 25)
+	
+	local markedTarget = player:GetMarkedTarget()
+	if not markedTarget then return end
+
+	markedTarget.Position = effect.Position
+	markedTarget.Velocity = Vector.Zero
+	markedTarget.Visible = false
 end 
 mod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, Target.EdithTargetLogic, effect.EFFECT_EDITH_TARGET)
 
 local value = 0
 
+---@param color Color
+---@param step number
 local function RGBFunction(color, step)
-	local newColor = color
-
 	value = value + step
 
-	newColor.R, newColor.B, newColor.G = funcs.RGBToHSV(newColor.R, newColor.B, newColor.G)
-	newColor.R = newColor.R - step
-	newColor.R, newColor.B, newColor.G = funcs.HSVToRGB(newColor.R, newColor.B, newColor.G)
-
-	color = newColor
+	color.R, color.G, color.B = funcs.RGBToHSV(color.R, color.G, color.B)
+	color.R = color.R + step
+	color.R, color.G, color.B = funcs.HSVToRGB(color.R, color.G, color.B)
 end
 
 local currentDate = os.date("*t") -- converts the current date to a table
 local isTDOV = (currentDate.month == 3 and currentDate.day == 31)
 
+---@param effect EntityEffect
+---@return boolean?
 function Target:EdithTargetSprite(effect)
 	local room = game:GetRoom()	
 	if room:GetRenderMode() == RenderMode.RENDER_WATER_REFLECT then return false end
-	
+
     local player = effect.SpawnerEntity:ToPlayer()
     if not player then return end
 	if not funcs.IsEdith(player, false) then return end
@@ -118,16 +120,19 @@ function Target:EdithTargetSprite(effect)
 	local effectColor = effect.Color
 	local effectSprite = effect:GetSprite()
 
-	local color = Color.Default
+	local color = misc.HSVStartColor
 
 	if targetDesign == 1 then
 		if RGBmode then
-			color = misc.HSVStartColor
 			RGBFunction(color, RGBspeed)
 		else
-			color = Color(targetColor.Red, targetColor.Green, targetColor.Blue)
+			color:SetTint(targetColor.Red, targetColor.Green, targetColor.Blue, 1)
 		end
+	else
+		color = Color.Default
 	end
+
+	-- print(color)
 
 	effect:SetColor(color, -1, 100, false, false)
 	effectSprite:ReplaceSpritesheet(0, misc.TargetPath .. tables.TargetSuffix[targetDesign] .. ".png", true)
@@ -147,24 +152,16 @@ function Target:EdithTargetSprite(effect)
 		targetlineColor = effectColor
 	else
 		local lineColor = funcs.Switch(targetDesign, tables.ColorValues, 1)
-		targetlineColor.R = lineColor.R
-		targetlineColor.G = lineColor.G
-		targetlineColor.B = lineColor.B
+		targetlineColor:SetColorize(lineColor.R, lineColor.G, lineColor.B, 1)
 	end
 
 	if isTDOV then
-		targetlineColor.R = tables.ColorValues[2].R
-		targetlineColor.G = tables.ColorValues[2].G
-		targetlineColor.B = tables.ColorValues[2].B
+		local tableColor = tables.ColorValues[2]
+		targetlineColor:SetColorize(tableColor.R, tableColor.G, tableColor.B, 1)
 	end
 
 	if isObscure then
-		local newObcureColor = targetlineColor
-		newObcureColor.R = newObcureColor.R * misc.ObscureDiv
-		newObcureColor.G = newObcureColor.G * misc.ObscureDiv
-		newObcureColor.B = newObcureColor.B * misc.ObscureDiv
-		
-		targetlineColor = newObcureColor
+		targetlineColor = targetlineColor * misc.Obscurecolor
 	end
 	funcs.DrawLine(player.Position, effect.Position, targetlineColor) 
 end

@@ -84,15 +84,12 @@
 		chargetype="timed"
 		maxcharges="420"
 	/>
-	<active
+	<passive
 		id="11" 
-		name="The Book Of Luke" 
-		description="Pending description" 
-		cache="damage"
-		gfx="collectibles_The_Book_Of_Luke.png"
+		name="Chunk of Basalt" 
+		description="Rocky grudge" 
+		gfx="collectibles_Chunk_Of_Basalt.png"
 		quality="2"
-		chargetype="timed"
-		maxcharges="420"
 	/>
 	<passive	
 		id="12" 

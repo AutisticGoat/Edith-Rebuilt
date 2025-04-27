@@ -65,7 +65,6 @@ function GildedStone:OnDestroyingRockReward(rock)
 		CoinCount = player:GetNumCoins()
 	end
 	local GeneralSpawnFormula = (CoinCount / 2) + (math.min(collectiveLuck, 1) - 1)
-
 	local GeneralSpawnRoll = rng:RandomFloat() * 100
 
 	if GeneralSpawnRoll > GeneralSpawnFormula then return end

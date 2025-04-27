@@ -21,6 +21,7 @@ edithMod.Enums = {
 		COLLECTIBLE_DIVINE_RETRIBUTION = Isaac.GetItemIdByName("Divine Retribution"),
 		COLLECTIBLE_THE_BOOK_OF_LUKE = Isaac.GetItemIdByName("The Book Of Luke"),
 		COLLECTIBLE_HYDRARGYRUM = Isaac.GetItemIdByName("Hydrargyrum"),
+		COLLECTIBLE_CHUNK_OF_BASALT = Isaac.GetItemIdByName("Chunk of Basalt"),
 
 		--- Tainted Edith Items
 		COLLECTIBLE_BURNED_HOOD = Isaac.GetItemIdByName("Burned Hood"),
@@ -65,7 +66,6 @@ edithMod.Enums = {
 		SOUND_MACHINE = Isaac.GetSoundIdByName("Machine"),
 		SOUND_MECHANIC = Isaac.GetSoundIdByName("Mechanic"),
 		SOUND_KNIGHT = Isaac.GetSoundIdByName("Knight"),
-		SOUND_SALT_ROCKS = Isaac.GetSoundIdByName("SaltRocks"),
 		SOUND_JACK_OF_CLUBS = Isaac.GetSoundIdByName("JackOfClubs"),
 		SOUND_SOUL_OF_EDITH = Isaac.GetSoundIdByName("SoulOfEdith"),
 	},
@@ -82,7 +82,7 @@ edithMod.Enums = {
 		ACHIEVEMENT_SULFURIC_FIRE = Isaac.GetAchievementIdByName("Sulfuric Fire"),
 		ACHIEVEMENT_RUMBLING_PEBBLE = Isaac.GetAchievementIdByName("Rumbling Pebble"),
 		ACHIEVEMENT_DIVINE_RETRIBUTION = Isaac.GetAchievementIdByName("Divine Retribution"),
-		ACHIEVEMENT_THE_BOOK_OF_LUKE = Isaac.GetAchievementIdByName("The Book Of Luke"),
+		ACHIEVEMENT_CHUNK_OF_BASALT = Isaac.GetAchievementIdByName("Chunk of Basalt"),
 		ACHIEVEMENT_EDITHS_HOOD = Isaac.GetAchievementIdByName("Ediths Hood"),
 		ACHIEVEMENT_HYDRARGYRUM = Isaac.GetAchievementIdByName("Hydrargyrum"),
 		ACHIEVEMENT_TAINTED_EDITH = Isaac.GetAchievementIdByName("The Punished"),
@@ -98,6 +98,7 @@ edithMod.Enums = {
 		Game = Game(),
 		SFX = SFXManager(),
 		RNG = RNG(),
+		Level = Game():GetLevel(),
 	},
 	Tables = {
 		OverrideActions = {
@@ -299,6 +300,7 @@ edithMod.Enums = {
 	Misc = {
 		TearPath = "gfx/tears/",
 		ObscureDiv = 155/255,
+		Obscurecolor = Color(155/255, 155/255, 155/255),
 		HeadAdjustVec = Vector.Zero,
 		TargetPath = "gfx/effects/EdithTarget/effect_000_edith_target",
 		TargetLineColor = Color(1, 1, 1),

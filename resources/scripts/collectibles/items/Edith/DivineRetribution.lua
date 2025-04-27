@@ -4,20 +4,7 @@ local items = enums.CollectibleType
 local utils = enums.Utils
 local game = utils.Game
 local sfx = utils.SFX
-
 local DivineRetribution = {}
-
----@return Entity[]
-local function GetRoomEnemies()
-	local roomEntities = Isaac.GetRoomEntities()
-	local enemies = {}
-	for _, ent in ipairs(roomEntities) do
-		if ent:IsActiveEnemy() and ent:IsVulnerableEnemy() then
-			table.insert(enemies, ent)
-		end
-	end
-	return enemies
-end
 
 ---@param rng RNG
 ---@param player EntityPlayer
@@ -36,7 +23,7 @@ function DivineRetribution:OnDRUse(_, rng, player, flags)
         sfx:Play(SoundEffect.SOUND_THUMBS_DOWN, 1, 0, false, 1, 0)
         Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.CRACK_THE_SKY, 1, player.Position, Vector.Zero, nil)
     else
-        local enemiesCount = GetRoomEnemies()
+        local enemiesCount = mod.GetEnemies()
         if #enemiesCount <= 0 then return end
         local Hascarbattery = player:HasCollectible(CollectibleType.COLLECTIBLE_CAR_BATTERY)
 

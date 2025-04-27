@@ -12,7 +12,7 @@ function BurnedSalt:SaltTearShoot(tear)
 
     local rng = player:GetTrinketRNG(trinket.TRINKET_BURNED_SALT)
 
-    -- if rng:RandomFloat() > 0.5 then return end
+    if rng:RandomFloat() > 0.5 then return end
     local tearData = mod.GetData(tear)
     mod.ForceSaltTear(tear, true)
     tear.CollisionDamage = tear.CollisionDamage * 1.2
@@ -22,10 +22,8 @@ mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, BurnedSalt.SaltTearShoot)
 
 ---@param entity Entity
 ---@param amount number
----@param flags DamageFlag
 ---@param source EntityRef
----@param cooldown integer
-function BurnedSalt:OnKill(entity, amount, flags, source, cooldown)
+function BurnedSalt:OnKill(entity, amount, _, source)
     local ent = source.Entity
 
     if not ent then return end
@@ -35,19 +33,16 @@ function BurnedSalt:OnKill(entity, amount, flags, source, cooldown)
     local player = mod:GetPlayerFromTear(tear)
 
     if not player then return end
-
     if entity.HitPoints > amount then return end
-
     local tearData = mod.GetData(tear)
-    if not tearData.BurnedSaltTear then return end 
 
+    if not tearData.BurnedSaltTear then return end 
     local rng = player:GetTrinketRNG(trinket.TRINKET_BURNED_SALT)
 
     if rng:RandomFloat() > 0.5 then return end
-
     local randomTears = rng:RandomInt(4, 7)
 
-    for i = 1, randomTears do
+    for _ = 1, randomTears do
         local burnedSaltTear = Isaac.Spawn(
             EntityType.ENTITY_TEAR,
             0,
@@ -55,12 +50,10 @@ function BurnedSalt:OnKill(entity, amount, flags, source, cooldown)
             ent.Position,
             RandomVector():Resized(player.ShotSpeed * 10),
             player
-        ):ToTear() ---@type EntityTear
+        ):ToTear() 
 
         if not burnedSaltTear then return end
-
         mod.ForceSaltTear(burnedSaltTear, true)
-
     end
 end
 mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, BurnedSalt.OnKill)

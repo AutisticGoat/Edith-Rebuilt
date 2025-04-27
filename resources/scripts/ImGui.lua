@@ -63,6 +63,11 @@ local function ResetSaveData(isTainted)
 		EdithData.RGBSpeed = 0.005
 		EdithData.targetline = false
 	end
+
+	for k, v in pairs(EdithData) do
+		print(k, v)
+	end
+
 	RenderMenu = true
 end
 
@@ -100,6 +105,37 @@ function CheckIntegrity()
 	return true
 end
 
+function mod:UpdateImGuiData()
+	local SaveManager = mod.SaveManager
+	
+	if not SaveManager then return end
+	if not SaveManager.IsLoaded() then return end
+	local saveData = SaveManager.GetSettingsSave()
+
+	if not saveData then return end
+	local EdithData = saveData.EdithData
+	local TEdithData = saveData.TEdithData
+	local miscData = saveData.miscData
+
+	if not CheckIntegrity() then return end
+
+	ImGui.UpdateData("StompSound", ImGuiData.Value, (EdithData.stompsound - 1) or 0) 
+	ImGui.UpdateData("StompVolume", ImGuiData.Value, EdithData.stompVolume or 100) 
+	ImGui.UpdateData("TargetDesign", ImGuiData.Value, (EdithData.targetdesign - 1) or 0)
+	ImGui.UpdateData("DisableGibs", ImGuiData.Value, EdithData.DisableGibs or false)
+	ImGui.UpdateData("SetRGB", ImGuiData.Value, EdithData.RGBMode or false)
+	ImGui.UpdateData("SetRGBSpeed", ImGuiData.Value, EdithData.RGBSpeed or 0.005)
+	ImGui.UpdateData("TargetLine", ImGuiData.Value, EdithData.targetline or false)
+	ImGui.UpdateData("arrowDesign", ImGuiData.Value, (TEdithData.ArrowDesign - 1) or 0)
+	ImGui.UpdateData("hopSound", ImGuiData.Value, (TEdithData.TaintedHopSound - 1) or 0)
+	ImGui.UpdateData("parrySound", ImGuiData.Value, (TEdithData.TaintedParrySound - 1) or 0)
+	ImGui.UpdateData("TaintedDisableGibs", ImGuiData.Value, TEdithData.DisableGibs or false)
+	ImGui.UpdateData("TaintedSetRGB", ImGuiData.Value, TEdithData.RGBMode or false)
+	ImGui.UpdateData("TaintedSetRGBSpeed", ImGuiData.Value, TEdithData.RGBSpeed or 0.005)
+	ImGui.UpdateData("StompTaintedVolume", ImGuiData.Value, TEdithData.taintedStompVolume or 100)
+	ImGui.UpdateData("ScreenShake", ImGuiData.Value, miscData.shakescreen or false)
+end
+
 local function OptionsUpdate()
 	local SaveManager = mod.SaveManager
 	
@@ -128,7 +164,6 @@ local function OptionsUpdate()
 				Green = g,
 				Blue = b,
 			}
-			print(EdithData.TargetColor.Red, EdithData.TargetColor.Green, EdithData.TargetColor.Blue)
 		end, 
 	1, 1, 1)
 	ImGui.AddCombobox("EdithSetting", "TargetDesign", "Set Target Design", 
@@ -161,8 +196,6 @@ local function OptionsUpdate()
 		end, 
 	ImGuiTables.StompSound, 0)
 	-- sounds end
-
-	ImGui.AddElement("EdithSetting", "GameplaySeparator", ImGuiElement.SeparatorText, "Gameplay")
 	-- reset
 
 	ImGui.AddElement("EdithSetting", "ResetSeparator", ImGuiElement.SeparatorText, "Reset")
@@ -240,33 +273,16 @@ local function OptionsUpdate()
 		miscData.shakescreen = check
 	end, false)
 
-	ImGui.UpdateData("StompSound", ImGuiData.Value, (EdithData.stompsound - 1) or 0) 
-	ImGui.UpdateData("StompVolume", ImGuiData.Value, EdithData.stompVolume or 100) 
-	ImGui.UpdateData("TargetDesign", ImGuiData.Value, (EdithData.targetdesign - 1) or 0)
-	ImGui.UpdateData("DisableGibs", ImGuiData.Value, EdithData.DisableGibs or false)
-	ImGui.UpdateData("SetRGB", ImGuiData.Value, EdithData.RGBMode or false)
-	ImGui.UpdateData("SetRGBSpeed", ImGuiData.Value, EdithData.RGBSpeed or 0.005)
-	ImGui.UpdateData("TargetLine", ImGuiData.Value, EdithData.targetline or false)
-	ImGui.UpdateData("arrowDesign", ImGuiData.Value, (TEdithData.ArrowDesign - 1) or 0)
-	ImGui.UpdateData("hopSound", ImGuiData.Value, (TEdithData.TaintedHopSound - 1) or 0)
-	ImGui.UpdateData("parrySound", ImGuiData.Value, (TEdithData.TaintedParrySound - 1) or 0)
-	ImGui.UpdateData("TaintedDisableGibs", ImGuiData.Value, TEdithData.DisableGibs or false)
-	ImGui.UpdateData("TaintedSetRGB", ImGuiData.Value, TEdithData.RGBMode or false)
-	ImGui.UpdateData("TaintedSetRGBSpeed", ImGuiData.Value, TEdithData.RGBSpeed or 0.005)
-	ImGui.UpdateData("StompTaintedVolume", ImGuiData.Value, TEdithData.taintedStompVolume or 100)
-	ImGui.UpdateData("ScreenShake", ImGuiData.Value, miscData.shakescreen or false)
+	mod:UpdateImGuiData()
 
 	RenderMenu = false
 end
 
 function DestroyImGuiOptions()
-	-- if not CheckIntegrity() then return end
-
 	for _, ID in ipairs(OptionsIDs) do
 		if ImGui.ElementExists(ID) then
 			ImGui.RemoveElement(ID)
 		end
-		
 	end
 end
 

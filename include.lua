@@ -30,6 +30,7 @@ local includeFiles = {
 	col .. "items/Edith/Hydrargyrum",
 	col .. "items/TEdith/BurnedHood",
 	col .. "items/TEdith/DivineWrath",
+	col .. "items/Edith/ChunkOfBasalt",
 	-- Items fin
 
 	-- Trinkets

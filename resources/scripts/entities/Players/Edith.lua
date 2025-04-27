@@ -6,11 +6,11 @@ local players = enums.PlayerType
 local costumes = enums.NullItemID
 local utils = enums.Utils
 local tables = enums.Tables
+local level = utils.Level
 local game, sfx = utils.Game, utils.SFX
-local jumpFlags = tables.JumpFlags
-local jumpTags = tables.JumpTags
 local JumpParams = tables.JumpParams
 local Edith = {}
+
 local funcs = {
 	Switch = mod.When,
 	ForceSalt = mod.ForceSaltTear,
@@ -30,38 +30,10 @@ local funcs = {
 	GetData = mod.GetData,
 	SpawnTarget = mod.SpawnEdithTarget,
 	FeedbackMan = mod.LandFeedbackManager,
+	EdithWeapons = mod.ManageEdithWeapons,
+	DashBehavior = mod.DashItemBehavior,
+	CustomDrop = mod.CustomDropBehavior,
 }	
-
-function Edith.InitEdithJump(player)
-	local distance = funcs.TargetDis(player)
-	local jumpSpeed = player.CanFly and 1 or 1.5
-	local soundeffect = player.CanFly and SoundEffect.SOUND_ANGEL_WING or SoundEffect.SOUND_SHELLGAME
-	local div = player.CanFly and 15 or 25
-
-	sfx:Play(soundeffect)
-
-	local epicFetusMult = player:HasCollectible(CollectibleType.COLLECTIBLE_EPIC_FETUS) and 3 or 1
-	local jumpHeight = (10 + (distance / 40) / div) * epicFetusMult
-
-	local DustCloud = Isaac.Spawn(
-		EntityType.ENTITY_EFFECT,
-		EffectVariant.POOF01,
-		1,
-		player.Position,
-		Vector.Zero,
-		player
-	)
-	DustCloud.DepthOffset = -100
-
-	local config = {
-		Height = jumpHeight,
-		Speed = jumpSpeed,
-		Tags = jumpTags.EdithJump,
-		Flags = jumpFlags.EdithJump,
-	}
-
-	JumpLib:Jump(player, config)
-end
 
 ---@param player EntityPlayer
 ---@param jumps integer
@@ -111,33 +83,18 @@ function Edith:EdithJumpHandler(player)
 	local room = game:GetRoom()
 	if not funcs.IsEdith(player, false) then return end
 
-	
-
 	local playerData = funcs.GetData(player)	
 	local isMoving = funcs.TargetMov(player)
 	local isKeyStompPressed = funcs.KeyStompPress(player)
 	local hasMarked = player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED)
 	local isShooting = mod:IsPlayerShooting(player)
-	local isJumping = JumpLib:GetData(player).Jumping
-		
-	local MovementForce = {
-		up = Input.GetActionValue(ButtonAction.ACTION_UP, player.ControllerIndex),
-		down = Input.GetActionValue(ButtonAction.ACTION_DOWN, player.ControllerIndex),
-		left = Input.GetActionValue(ButtonAction.ACTION_LEFT, player.ControllerIndex),
-		right = Input.GetActionValue(ButtonAction.ACTION_RIGHT, player.ControllerIndex),
-	}
+	local jumpData = JumpLib:GetData(player)
+	local isJumping = jumpData.Jumping
 
 	playerData.ExtraJumps = playerData.ExtraJumps or 0
 	playerData.EdithJumpTimer = playerData.EdithJumpTimer or 20
 
 	if player:IsDead() then return end
-
-	local input = {
-		up = Input.IsActionPressed(ButtonAction.ACTION_UP, player.ControllerIndex),
-		down = Input.IsActionPressed(ButtonAction.ACTION_DOWN, player.ControllerIndex),
-		left = Input.IsActionPressed(ButtonAction.ACTION_LEFT, player.ControllerIndex),
-		right = Input.IsActionPressed(ButtonAction.ACTION_RIGHT, player.ControllerIndex)
-	}
 
 	playerData.EdithJumpTimer = math.max(playerData.EdithJumpTimer - 1, 0)
 
@@ -145,14 +102,27 @@ function Edith:EdithJumpHandler(player)
 		funcs.SpawnTarget(player)
 	end
 
-	-- if not isJumping and not (player.Velocity:Length() <= 1) then
-	-- 	player:MultiplyFriction(0.5)
-	-- end
+	funcs.EdithWeapons(player)
+	funcs.CustomDrop(player, jumpData)
+	funcs.DashBehavior(player)
 
 	local target = funcs.GetTarget(player)
-
 	if not target then return end
 	if isMoving then
+
+		local MovementForce = {
+			up = Input.GetActionValue(ButtonAction.ACTION_UP, player.ControllerIndex),
+			down = Input.GetActionValue(ButtonAction.ACTION_DOWN, player.ControllerIndex),
+			left = Input.GetActionValue(ButtonAction.ACTION_LEFT, player.ControllerIndex),
+			right = Input.GetActionValue(ButtonAction.ACTION_RIGHT, player.ControllerIndex),
+		}
+	
+		local input = {
+			up = Input.IsActionPressed(ButtonAction.ACTION_UP, player.ControllerIndex),
+			down = Input.IsActionPressed(ButtonAction.ACTION_DOWN, player.ControllerIndex),
+			left = Input.IsActionPressed(ButtonAction.ACTION_LEFT, player.ControllerIndex),
+			right = Input.IsActionPressed(ButtonAction.ACTION_RIGHT, player.ControllerIndex)
+		}
 		local movementVector = Vector.Zero
 		local CharSpeed = player.MoveSpeed + 2
 		local InverseX = room:IsMirrorWorld() and -1 or 1
@@ -183,7 +153,7 @@ function Edith:EdithJumpHandler(player)
 	end
 
 	if playerData.EdithJumpTimer == 0 and playerData.ExtraJumps > 0 and not isJumping then
-		Edith.InitEdithJump(player)
+		mod.InitEdithJump(player)
 	end	
 
 	target.Velocity = (isKeyStompPressed and target.Velocity * 0.6) or target.Velocity
@@ -201,18 +171,6 @@ function Edith:EdithJumpHandler(player)
 	if isJumping or (not isShooting) or (isStomping) then
 		player:SetHeadDirection(dir, 1, true)
 	end
-
-	--- Weapon Manager ---
-	local weapon = player:GetWeapon(1)
-	
-	if not weapon then return end
-	local override = funcs.Switch(weapon:GetWeaponType(), tables.OverrideWeapons, false)
-
-	if not override then return end
-	local newWeapon = Isaac.CreateWeapon(WeaponType.WEAPON_TEARS, player)
-	Isaac.DestroyWeapon(weapon)
-	player:EnableWeaponType(WeaponType.WEAPON_TEARS, true)
-	player:SetWeapon(newWeapon, 1)	
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, Edith.EdithJumpHandler)
 
@@ -259,13 +217,7 @@ function Edith:EdithLanding(player, data, pitfall)
 	local edithTarget = funcs.GetTarget(player)
 	
 	if not edithTarget then return end
-
-	local distance = funcs.TargetDis(player)
-	local level = game:GetLevel()
-	local stage = level:GetStage()
-	
 	playerData.ExtraJumps = math.max(playerData.ExtraJumps - 1, 0)
-						
 	if pitfall then
 		funcs.RemoveTarget(player)
 		return
@@ -275,6 +227,8 @@ function Edith:EdithLanding(player, data, pitfall)
 		funcs.FeedbackMan(player, SoundPick, player.Color, false)
 	end
 
+	local distance = funcs.TargetDis(player)
+	local stage = level:GetStage()
 	local tears = funcs.GetTPS(player)
 	local level = math.ceil(stage / 2)
 		
@@ -293,6 +247,8 @@ function Edith:EdithLanding(player, data, pitfall)
 	local damageBase = 10 + (5.25 * (level - 1))
 	local DamageStat = player.Damage + ((player.Damage / 5.25) - 1)
 	
+	print(DamageStat)
+
 	local multiShot = player:GetMultiShotParams(WeaponType.WEAPON_TEARS) 
 	local tearCount = multiShot:GetNumTears()
 	
@@ -420,76 +376,16 @@ function Edith:DamageStuff(_, damage, _, source, _)
 end
 mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Edith.DamageStuff)
 
+local RemoveTargetItems = {
+	[CollectibleType.COLLECTIBLE_ESAU_JR] = true,
+	[CollectibleType.COLLECTIBLE_CLICKER] = true,
+}
+
+---@param ID CollectibleType
 ---@param player EntityPlayer
-function Edith:SuplexUse(player)
-	-- print("===========================================")
-	-- for k, v in pairs(EvaluateStatStage) do
-		
-	-- 	print(k, v)
-	-- end
-
-
-	if not funcs.IsEdith(player, false) then return end
-	local edithTarget = funcs.GetTarget(player)
-
-	if not edithTarget or not edithTarget:Exists() then return end
-	local effects = player:GetEffects()
-	local hasMarsEffect = effects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_MARS)
-	local direction = funcs.TargetDir(player)
-	local distance = funcs.TargetDis(player)
-
-	if hasMarsEffect then
-		funcs.EdithDash(player, direction, distance, 50)
-	end
-
-	local primaryActiveSlot = player:GetActiveItemDesc(ActiveSlot.SLOT_PRIMARY)
-	local activeItem = primaryActiveSlot.Item
-
-	if activeItem == 0 then return end
-
-	local isMoveBasedActive = tables.MovementBasedActives[activeItem] or false
-	local itemConfig = Isaac.GetItemConfig():GetCollectible(activeItem)
-	local maxItemCharge = itemConfig.MaxCharges
-	local currentItemCharge = primaryActiveSlot.Charge
-	local itemBatteryCharge = primaryActiveSlot.BatteryCharge
-	local totalItemCharge = currentItemCharge + itemBatteryCharge
-	local usedCharge = totalItemCharge - maxItemCharge
-
-	if not isMoveBasedActive or totalItemCharge < maxItemCharge then return end
-	if not Input.IsActionTriggered(ButtonAction.ACTION_ITEM, player.ControllerIndex) then return end
-
-
-	funcs.EdithDash(player, direction, distance, 50)
-	player:UseActiveItem(activeItem)
-	player:SetActiveCharge(usedCharge, ActiveSlot.SLOT_PRIMARY)
-end
-mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, Edith.SuplexUse)
-
----@param player EntityPlayer
-function Edith:OnEsauJrUse(_, _, player)
+function Edith:OnEsauJrUse(ID, _, player)
+	local shouldRemoveItem = funcs.Switch(ID, RemoveTargetItems, false)
+	if not shouldRemoveItem then return end
 	funcs.RemoveTarget(player)
 end
-mod:AddCallback(ModCallbacks.MC_PRE_USE_ITEM, Edith.OnEsauJrUse, CollectibleType.COLLECTIBLE_ESAU_JR)
-
-function Edith:CustomDropButton(player)
-	if not funcs.IsEdith(player, false) then return end
-
-	local jumpData = JumpLib:GetData(player)
-	local isJumping = jumpData.Jumping
-	local height = jumpData.Height
-	local IsFalling = JumpLib:IsFalling(player)
-	local playerData = funcs.GetData(player)
-
-	playerData.ShouldDrop = playerData.ShouldDrop or false
-	
-	if playerData.ShouldDrop == false then
-		player:SetActionHoldDrop(0)
-	end
-
-	if not isJumping then playerData.ShouldDrop = false return end
-	if not Input.IsActionTriggered(ButtonAction.ACTION_DROP, player.ControllerIndex) then return end
-	if not (height > 10 and not IsFalling) then return end
-	playerData.ShouldDrop = true
-	player:SetActionHoldDrop(119)
-end
-mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, Edith.CustomDropButton)
+mod:AddCallback(ModCallbacks.MC_PRE_USE_ITEM, Edith.OnEsauJrUse)

@@ -2,7 +2,6 @@ local mod = edithMod
 local enums = mod.Enums
 local items = enums.CollectibleType
 local utils = enums.Utils
-local game = utils.Game
 local Hydrargyrum = {}
 
 ---@param entity Entity
@@ -63,8 +62,6 @@ function Hydrargyrum:OnNPCUpdate(npc)
 
     if not randTear then return end
     randTear.CollisionDamage = randTear.CollisionDamage * 0.1
-
-
     randTear:AddTearFlags(TearFlags.TEAR_PIERCING)
 end
 mod:AddCallback(ModCallbacks.MC_NPC_UPDATE, Hydrargyrum.OnNPCUpdate)

@@ -11,7 +11,6 @@
 ---@field Sound SoundEffect
 ---@field SoundMode ShockwaveSoundMode
 
-
 ---Creates a new `CustomShockwaveParams` object.
 ---@return CustomShockwaveParams
 function TSIL.ShockWaves.CustomShockwaveParams()

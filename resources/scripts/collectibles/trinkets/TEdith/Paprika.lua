@@ -1,15 +1,12 @@
 local mod = edithMod
 local enums = mod.Enums 
 local trinket = enums.TrinketType
-local misc = enums.Misc
 local Paprika = {}
 
 ---@param entity Entity
 ---@param amount number
----@param flags DamageFlag
 ---@param source EntityRef
----@param countdown integer
-function Paprika:OnKilling(entity, amount, flags, source, countdown)
+function Paprika:OnKilling(entity, amount, _, source)
     local ent = source.Entity
 
     if not ent or ent.Type == EntityType.ENTITY_NULL then return end
@@ -33,9 +30,12 @@ function Paprika:OnKilling(entity, amount, flags, source, countdown)
         nil
     )
 
-    Paprikacloud.Color = misc.PaprikaColor
+    local color = Paprikacloud.Color
+    color:SetTint(0.8, 0.2, 0, 1)
+    Paprikacloud.Color = color
 
     local capsule = Capsule(entity.Position, Vector.One, 0, 40)
+    DebugRenderer.Get(1, true):Capsule(capsule)
 
     for _, CapsuleEnt in ipairs(Isaac.FindInCapsule(capsule, EntityPartition.ENEMY)) do
         CapsuleEnt:TakeDamage(amount * 0.25, 0, source, 0)

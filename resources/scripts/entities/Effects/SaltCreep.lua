@@ -3,6 +3,7 @@ local enums = mod.Enums
 local subtype = enums.SubTypes
 local utils = enums.Utils
 local rng = utils.RNG
+local SaltCreep = {}
 
 local function isSaltCreepEffect(effect)
     return effect.SubType == subtype.SALT_CREEP
@@ -16,26 +17,25 @@ function mod:OnSpawningSalt(effect)
 end
 mod:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, mod.OnSpawningSalt, EffectVariant.PLAYER_CREEP_RED)
 
-function edithMod:AddSaltEffects(effect)
+function SaltCreep:AddSaltEffects(effect)
     if not isSaltCreepEffect(effect) then return end
     
-    local effectData = edithMod.GetData(effect)
-    local entities = Isaac.GetRoomEntities()
+    local effectData = mod.GetData(effect)
+    local entities = mod.GetEnemies()
     local effectPos = effect.Position
 
     for _, entity in pairs(entities) do
-        if not (entity:IsVulnerableEnemy() and entity:IsActiveEnemy()) then goto Break end
 		local distance = entity.Position:Distance(effectPos)
 
         if distance > 20 then goto Break end
         entity:AddFreeze(EntityRef(effect), 90)
 
         if effectData.SpawnType == "Sal" then
-            local enemyData = edithMod.GetData(entity)
+            local enemyData = mod.GetData(entity)
             enemyData.SalFreeze = true
         end
 
         ::Break::
     end
 end
-edithMod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, edithMod.AddSaltEffects, EffectVariant.PLAYER_CREEP_RED)
+mod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, SaltCreep.AddSaltEffects, EffectVariant.PLAYER_CREEP_RED)

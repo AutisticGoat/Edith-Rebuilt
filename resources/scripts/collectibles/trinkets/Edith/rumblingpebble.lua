@@ -66,7 +66,7 @@ function mod:RandomRockTear(tear)
 end
 mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, mod.RandomRockTear)
 
-function edithMod:ShootTear(tear, index, grid)
+function edithMod:ShootTear(tear, _, grid)
 	local tearData = mod.GetData(tear)
 
 	if not grid:ToRock() then return end
