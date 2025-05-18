@@ -123,7 +123,8 @@ function Edith:EdithJumpHandler(player)
 		player:SetColor(misc.JumpReadyColor, 5, 100, true, false)
 		local saveManager = EdithRebuilt.SaveManager
 		local EdithSave = saveManager.GetSettingsSave().EdithData
-		sfx:Play(funcs.Switch(EdithSave.CooldownSound, CooldownSounds), 2)
+		local sound = EdithSave.CooldownSound or 1
+		sfx:Play(funcs.Switch(sound, CooldownSounds), 2)
 	end
 
 	if player.FrameCount > 0 and (isMoving or isKeyStompPressed or (hasMarked and isShooting)) then
@@ -333,30 +334,8 @@ function Edith:EdithJumpLibStuff(player)
 	if RoomTransition:GetTransitionMode() == 2 then return end
 	local playerData = funcs.GetData(player)
 	if playerData.isJumping == true then
-
-	-- if not funcs.IsEdith(player, false) then return end
-	-- if not JumpLib:GetData(player).Jumping then return end
 	if not funcs.GetTarget(player) then return end
-	
-	
 
-	
-
-	-- print(RoomTransition:GetTransitionMode())
-
-	-- print(playerData.IsJumping)
-
-	-- if not playerData.IsJumping then return end
-
-	-- if not JumpLib then return end
-	-- if not JumpLib:GetData(player) then return end
-	-- if not JumpLib:GetData(player).Jumping then return end
-
-	-- if 
-
-	-- print()
-
-	-- if JumpLib:GetData(player).Jumping then 
 		local iskeystomp = funcs.KeyStompPress(player)
 		local direction = funcs.TargetDir(player)
 		local distance = funcs.TargetDis(player)
@@ -375,7 +354,6 @@ function Edith:EdithJumpLibStuff(player)
 		end
 	end
 end
-	-- 
 mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, Edith.EdithJumpLibStuff)
 
 local contador = 0

@@ -62,7 +62,7 @@ local function ResetSaveData(isTainted)
 		EdithData.RGBMode = false
 		EdithData.RGBSpeed = 0.005
 		EdithData.targetline = false
-		EdithData.CooldownSound = 0
+		EdithData.CooldownSound = 1
 	end
 
 	for k, v in pairs(EdithData) do
@@ -311,7 +311,7 @@ local function InitSaveData()
 	EdithData.TargetColor = EdithData.TargetColor or {Red = 1, Green = 1, Blue = 1}
 	EdithData.stompsound = EdithData.stompsound or 1
 	EdithData.stompVolume = EdithData.stompVolume or 100
-	EdithData.CooldownSound = EdithData.CooldownSound or 0
+	EdithData.CooldownSound = EdithData.CooldownSound or 1
 	EdithData.targetdesign = EdithData.targetdesign or 1
 	EdithData.DisableGibs = EdithData.DisableGibs or false
 	EdithData.RGBMode = EdithData.RGBMode or false
