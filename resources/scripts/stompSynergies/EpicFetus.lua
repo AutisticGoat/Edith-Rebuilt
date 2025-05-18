@@ -1,4 +1,4 @@
-local game = edithMod.Enums.Utils.Game
+local game = EdithRebuilt.Enums.Utils.Game
 
 -- function edithMod:TechXStomp(player)
 	-- if edithMod:IsKeyStompPressed(player) then return end

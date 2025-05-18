@@ -1,17 +1,17 @@
-local mod = edithMod
+local mod = EdithRebuilt
 local enums = mod.Enums
 local tables = enums.Tables
 local ImGuiTables = tables.ImGuiTables
 local RenderMenu = true
 
-if not ImGui.ElementExists("edithMod") then
+if not ImGui.ElementExists("edithRebuilt") then
 	if RenderMenu == false then return end
-    ImGui.CreateMenu('edithMod', '\u{f11a} Edith: Rebuild')
+    ImGui.CreateMenu('edithRebuilt', '\u{f11a} Edith: Rebuilt')
 end
 
 local function manageElement(nombre, titulo)
 	if RenderMenu == false and ImGui.ElementExists(nombre) then return end
-    ImGui.AddElement("edithMod", nombre, ImGuiElement.MenuItem, "\u{f013} " .. titulo)
+    ImGui.AddElement("edithRebuilt", nombre, ImGuiElement.MenuItem, "\u{f013} " .. titulo)
 end
 
 local elementos = {
@@ -62,6 +62,7 @@ local function ResetSaveData(isTainted)
 		EdithData.RGBMode = false
 		EdithData.RGBSpeed = 0.005
 		EdithData.targetline = false
+		EdithData.CooldownSound = 0
 	end
 
 	for k, v in pairs(EdithData) do
@@ -122,6 +123,7 @@ function mod:UpdateImGuiData()
 	ImGui.UpdateData("StompSound", ImGuiData.Value, (EdithData.stompsound - 1) or 0) 
 	ImGui.UpdateData("StompVolume", ImGuiData.Value, EdithData.stompVolume or 100) 
 	ImGui.UpdateData("TargetDesign", ImGuiData.Value, (EdithData.targetdesign - 1) or 0)
+	ImGui.UpdateData("JumpCooldownSound", ImGuiData.Value, (EdithData.CooldownSound - 1) or 0)
 	ImGui.UpdateData("DisableGibs", ImGuiData.Value, EdithData.DisableGibs or false)
 	ImGui.UpdateData("SetRGB", ImGuiData.Value, EdithData.RGBMode or false)
 	ImGui.UpdateData("SetRGBSpeed", ImGuiData.Value, EdithData.RGBSpeed or 0.005)
@@ -195,6 +197,11 @@ local function OptionsUpdate()
 			EdithData.stompsound = index + 1
 		end, 
 	ImGuiTables.StompSound, 0)
+	ImGui.AddCombobox("EdithSetting", "JumpCooldownSound", "Set jump cooldown sound", 
+		function(index, val)
+			EdithData.CooldownSound = index + 1
+		end, 
+	{"Stone", "Beep"}, 0, true)
 	-- sounds end
 	-- reset
 
@@ -304,6 +311,7 @@ local function InitSaveData()
 	EdithData.TargetColor = EdithData.TargetColor or {Red = 1, Green = 1, Blue = 1}
 	EdithData.stompsound = EdithData.stompsound or 1
 	EdithData.stompVolume = EdithData.stompVolume or 100
+	EdithData.CooldownSound = EdithData.CooldownSound or 0
 	EdithData.targetdesign = EdithData.targetdesign or 1
 	EdithData.DisableGibs = EdithData.DisableGibs or false
 	EdithData.RGBMode = EdithData.RGBMode or false

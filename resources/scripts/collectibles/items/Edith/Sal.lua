@@ -1,8 +1,6 @@
-local mod = edithMod
+local mod = EdithRebuilt
 local enums = mod.Enums
 local items = enums.CollectibleType
-local utils = enums.Utils
-local game = utils.Game 
 local Sal = {}
 
 ---@param player EntityPlayer
@@ -18,7 +16,7 @@ mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, Sal.SalSpawnSaltCreep)
 ---@param amount number
 ---@param source EntityRef
 function Sal:KillingSalEnemy(entity, amount, _, source)
-	local entityData = edithMod.GetData(entity)
+	local entityData = mod.GetData(entity)
 	if entityData.SalFreeze ~= true then return end
 	if entity.HitPoints >= amount then return end
 

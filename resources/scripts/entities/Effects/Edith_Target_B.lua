@@ -1,4 +1,4 @@
-local mod = edithMod
+local mod = EdithRebuilt
 local enums = mod.Enums
 local utils = enums.Utils
 local game = utils.Game
@@ -55,7 +55,7 @@ function Arrow:RenderTaintedEdithArrow(effect)
 	local RGBmode = tEdithdata.RGBMode
 	local RGBspeed = tEdithdata.RGBSpeed
 
-	local playerData = edithMod.GetData(player)
+	local playerData = mod.GetData(player)
 	local HopVec = playerData.HopVector
 	local color = misc.HSVStartColor
 

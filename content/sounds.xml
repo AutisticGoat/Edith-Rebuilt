@@ -44,9 +44,6 @@
 	<sound name="Knight">
 		<sample weight="1" path="Knight.wav" />
 	</sound>
-	<sound name="SaltRocks">
-		<sample weight="1" path="SaltRocks.wav" />
-	</sound>
 	<sound name="JackOfClubs">
 		<sample weight="1" path="JackOfClubs.wav" />
 	</sound>

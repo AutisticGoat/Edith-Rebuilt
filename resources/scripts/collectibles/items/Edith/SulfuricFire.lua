@@ -1,4 +1,4 @@
-local mod = edithMod
+local mod = EdithRebuilt
 local enums = mod.Enums
 local items = enums.CollectibleType
 local SulfuricFire = {}
@@ -18,7 +18,7 @@ function SulfuricFire:UseSulfuricFire(_, _, player)
 		)
 		
 		local enemyMaxHP = enemy.MaxHitPoints
-		local damageFormula = player.Damage + (enemyMaxHP * 0.15)
+		local damageFormula = player.Damage + (enemyMaxHP * 0.175)
 		local enemyHP = enemy.HitPoints
 		
 		Flame.CollisionDamage = player.Damage + damageFormula

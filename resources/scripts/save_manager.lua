@@ -1975,5 +1975,5 @@ SaveManager.MenuProvider = MenuProvider
 
 --#endregion
 
-edithMod.SaveManager = SaveManager 
-return edithMod.SaveManager
+EdithRebuilt.SaveManager = SaveManager 
+return EdithRebuilt.SaveManager

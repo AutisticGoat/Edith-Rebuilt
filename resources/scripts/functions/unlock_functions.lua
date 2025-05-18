@@ -1,4 +1,4 @@
-local mod = edithMod
+local mod = EdithRebuilt
 local enums = mod.Enums
 local players = enums.PlayerType
 local achievements = enums.Achievements
@@ -76,6 +76,23 @@ local UnlockTable = {
     },
 }
 
+function mod:ThankYou()
+    local pgd = Isaac.GetPersistentGameData()
+    local isComplete = true
+
+    for k, v in pairs(achievements) do
+        if v == achievements.ACHIEVEMENT_THANK_YOU then goto Break end
+        if not pgd:Unlocked(v) then
+            isComplete = false
+            break
+        end
+        ::Break::
+    end
+
+    if not isComplete then return end
+    pgd:TryUnlock(achievements.ACHIEVEMENT_THANK_YOU)
+end
+
 function unlocks:CheckStartUnlocks()
     local pgd = Isaac.GetPersistentGameData()
 
@@ -98,9 +115,9 @@ mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, unlocks.CheckStartUnlocks)
 ---@param mark CompletionType
 function unlocks:OnTriggerCompletion(mark)
     local pgd = Isaac.GetPersistentGameData()
-    local unlock = mod.When(mark, UnlockTable, 1)
+    local unlock = mod.When(mark, UnlockTable)
 
-    -- if not unlock then return end
+    if not unlock then return end
 
     if game.Difficulty == Difficulty.DIFFICULTY_GREEDIER then
         pgd:TryUnlock(achievements.ACHIEVEMENT_HYDRARGYRUM)
@@ -108,15 +125,67 @@ function unlocks:OnTriggerCompletion(mark)
     end
 
     if game.Difficulty ~= unlock.Difficulty then return end
-
-    if unlock then
-        pgd:TryUnlock(unlock.Unlock)
-    end
+    pgd:TryUnlock(unlock.Unlock)
 
     if Isaac.AllMarksFilled(players.PLAYER_EDITH) ~= 2 then return end
     pgd:TryUnlock(achievements.ACHIEVEMENT_SALT_HEART)
+
+    mod:ThankYou()
 end
-mod:AddCallback(ModCallbacks.MC_COMPLETION_MARK_GET, unlocks.OnTriggerCompletion, players.PLAYER_EDITH)
+mod:AddCallback(ModCallbacks.MC_POST_COMPLETION_MARK_GET, unlocks.OnTriggerCompletion, players.PLAYER_EDITH)
+
+local TUnlock = {
+    [CompletionType.MEGA_SATAN] = {
+        Unlock = achievements.ACHIEVEMENT_SALT_ROCKS,
+        Difficulty = Difficulty.DIFFICULTY_HARD,
+        -- Item = items.COLLECTIBLE_EDITHS_HOOD,
+    },
+    [CompletionType.MOTHER] = {
+        Unlock = achievements.ACHIEVEMENT_PAPRIKA,
+        Difficulty = Difficulty.DIFFICULTY_HARD,
+        -- Item = items.COLLECTIBLE_EDITHS_HOOD,
+    },
+    [CompletionType.DELIRIUM] = {
+        Unlock = achievements.ACHIEVEMENT_BURNT_HOOD,
+        Difficulty = Difficulty.DIFFICULTY_HARD,
+        -- Item = items.COLLECTIBLE_EDITHS_HOOD,
+    },
+    [CompletionType.BEAST] = {
+        Unlock = achievements.ACHIEVEMENT_DIVINE_WRATH,
+        Difficulty = Difficulty.DIFFICULTY_HARD,
+        -- Item = items.COLLECTIBLE_EDITHS_HOOD,
+    },
+}
+function unlocks:TaintedEdithUnlocks(mark)
+    local unlock = mod.When(mark, TUnlock)
+    local pgd = Isaac.GetPersistentGameData()
+
+    if not unlock then
+        if Isaac.AllTaintedCompletion(players.PLAYER_EDITH_B, TaintedMarksGroup.SOULSTONE) == 2 then
+            pgd:TryUnlock(achievements.ACHIEVEMENT_SOUL_OF_EDITH)
+        end
+
+        if Isaac.AllTaintedCompletion(players.PLAYER_EDITH_B, TaintedMarksGroup.POLAROID_NEGATIVE) == 2 then
+            pgd:TryUnlock(achievements.ACHIEVEMENT_BURNT_SALT)
+        end
+
+        if game.Difficulty == Difficulty.DIFFICULTY_GREEDIER then
+            pgd:TryUnlock(achievements.ACHIEVEMENT_JACK_OF_CLUBS)
+        end
+        return
+    end
+
+    if game.Difficulty ~= unlock.Difficulty then return end
+
+    pgd:TryUnlock(unlock.Unlock)
+    mod:ThankYou()
+end 
+mod:AddCallback(ModCallbacks.MC_POST_COMPLETION_MARK_GET, unlocks.TaintedEdithUnlocks)
+
+function mod:UnlockThankYou()
+    mod:ThankYou()
+end
+mod:AddCallback(ModCallbacks.MC_POST_ACHIEVEMENT_UNLOCK, mod.UnlockThankYou)
 
 local taintedAchievement = {
     [players.PLAYER_EDITH] = {unlock = achievements.ACHIEVEMENT_TAINTED_EDITH, gfx = "gfx/characters/costumes/characterTaintedEdith.png"}
@@ -128,6 +197,7 @@ function mod:SlotUpdate(slot)
     local d = slot:GetData().Tainted
     if not d then return end
     pgd:TryUnlock(d.unlock)
+    mod:ThankYou()
 end
 mod:AddCallback(ModCallbacks.MC_POST_SLOT_UPDATE, mod.SlotUpdate, 14)
 

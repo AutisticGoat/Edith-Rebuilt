@@ -1,6 +1,7 @@
 ---@diagnostic disable: undefined-field 
-local mod = edithMod
+local mod = EdithRebuilt
 local enums = mod.Enums
+local misc = enums.Misc
 local items = enums.CollectibleType
 local utils = enums.Utils
 local ChunkOfBasalt = {}
@@ -44,7 +45,7 @@ function ChunkOfBasalt:Timer(player)
 
     if playerData.BasaltCount ~= 1 then return end
     utils.SFX:Play(SoundEffect.SOUND_STONE_IMPACT)
-    player:SetColor(Color(0.3, 0.3, 0.3, 1), 5, -1, true, false)
+    player:SetColor(misc.BurnedSaltColor, 5, -1, true, false)
 end
 mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, ChunkOfBasalt.Timer)
 
@@ -78,8 +79,6 @@ mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_COLLISION, ChunkOfBasalt.OnCollidingW
 
 function ChunkOfBasalt:DenyDamage(player)
     local playerData = mod.GetData(player)
-
-    -- print(playerData.IsBasaltDassh)
 
     if playerData.IsBasaltDassh then 
         playerData.IsBasaltDassh = false

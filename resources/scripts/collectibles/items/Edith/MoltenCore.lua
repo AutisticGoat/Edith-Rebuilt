@@ -1,4 +1,4 @@
-local mod = edithMod
+local mod = EdithRebuilt
 local enums = mod.Enums
 local items = enums.CollectibleType
 local utils = enums.Utils
@@ -22,7 +22,9 @@ function MoltenCore:OnFiringTears(tear)
 	local tearData = mod.GetData(tear)
 
 	tear:ChangeVariant(TearVariant.FIRE_MIND)
-	tear.Color = Color(0.8, 0.5, 0.4)
+	local color = tear.Color
+	color:SetTint(0.8, 0.5, 0.4, 1)
+	tear.Color = color
 
 	tearData.MoltenCoreTear = true
 end

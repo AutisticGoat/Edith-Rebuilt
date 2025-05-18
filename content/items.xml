@@ -123,9 +123,9 @@
 	/>	
 	<active
 		id="14" 
-		name="Burned Hood" 
+		name="Burnt Hood" 
 		description="Deflect the destruction" 
-		gfx="collectibles_Broken_Hood.png"
+		gfx="collectibles_Burnt_Hood.png"
 		quality="2"
 		chargetype="timed"
 		maxcharges="90"
@@ -136,8 +136,8 @@
 		gfx="Paprika.png" 
 	/>
 	<trinket 
-		name="Burned Salt"
+		name="Burnt Salt"
 		description="Burns to death" 
-		gfx="BurnedSalt.png" 
+		gfx="BurntSalt.png" 
 	/>
 </items>

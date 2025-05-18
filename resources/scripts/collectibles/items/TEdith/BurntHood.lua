@@ -1,4 +1,4 @@
-local mod = edithMod
+local mod = EdithRebuilt
 local enums = mod.Enums
 local items = enums.CollectibleType
 local misc = enums.Misc
@@ -8,14 +8,14 @@ local game = utils.Game
 local sounds = enums.SoundEffect
 local tables = enums.Tables
 local jumpFlags = tables.JumpFlags
-local BrokenHood = {}
+local BurntHood = {}
 local funcs = {
     GetData = mod.GetData,
     FeedbackMan = mod.LandFeedbackManager
 }
 
 local backdropColors = tables.BackdropColors
-function BrokenHood:InitTaintedEdithJump(player)
+function BurntHood:InitTaintedEdithJump(player)
 	local room = game:GetRoom()
 	local jumpHeight = 8
 	local jumpSpeed = 2.5
@@ -83,16 +83,16 @@ local parryJumpSounds = {
 
 ---comment
 ---@param player EntityPlayer
-function BrokenHood:OnUse(_, _, player)
+function BurntHood:OnUse(_, _, player)
     if JumpLib:GetData(player).Jumping then return end
-    BrokenHood:InitTaintedEdithJump(player)
+    BurntHood:InitTaintedEdithJump(player)
 end
-mod:AddCallback(ModCallbacks.MC_USE_ITEM, BrokenHood.OnUse,items.COLLECTIBLE_BURNED_HOOD)
+mod:AddCallback(ModCallbacks.MC_USE_ITEM, BurntHood.OnUse,items.COLLECTIBLE_BURNT_HOOD)
 
 local damageBase = 13.5
 ---@param player EntityPlayer
 ---@param data JumpData
-function BrokenHood:ParryJump(player, data)
+function BurntHood:ParryJump(player, data)
 	local DamageStat = player.Damage 
 	local rawFormula = ((damageBase + DamageStat) / 1.5) 
 	local isenemy = false
@@ -105,8 +105,6 @@ function BrokenHood:ParryJump(player, data)
 	local ImpreciseParryEnts = Isaac.FindInCapsule(capsuleTwo, misc.ParryPartitions)
 	local PerfectParryEnts = Isaac.FindInCapsule(capsule, misc.ParryPartitions)
 	local hasBirthright = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT)
-	local BirthrightMult = hasBirthright and 1.2 or 1
-	local DamageFormula = rawFormula * BirthrightMult
 
 	for _, ent in pairs(ImpreciseParryEnts) do
 		local entPos = ent.Position
@@ -138,10 +136,11 @@ function BrokenHood:ParryJump(player, data)
 
 			ent:AddKnockback(EntityRef(player), newVelocity, 5, true)
 		else
-			ent:TakeDamage(DamageFormula, 0, EntityRef(player), 0)
-			if ent.HitPoints <= DamageFormula then
+			ent:TakeDamage(rawFormula, 0, EntityRef(player), 0)
+			if ent.HitPoints <= rawFormula then
 				sfx:Play(SoundEffect.SOUND_MEATY_DEATHS)
 				game:ShakeScreen(20)
+				player:AddActiveCharge(90, ActiveSlot.SLOT_PRIMARY, true, false, true)
 			end
 		end
 		isenemy = true
@@ -152,7 +151,6 @@ function BrokenHood:ParryJump(player, data)
 
 	if isenemy == true then
 		game:MakeShockwave(playerPos, 0.035, 0.025, 2)
-		playerData.ImpulseCharge = playerData.ImpulseCharge + 20
 	end
 
 	local lasers = Isaac.FindByType(EntityType.ENTITY_LASER) ---@type EntityLaser[]
@@ -186,6 +184,6 @@ function BrokenHood:ParryJump(player, data)
 
 	funcs.FeedbackMan(player, parryJumpSounds, Color(1, 1, 1, 0), isenemy)
 end
-mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, BrokenHood.ParryJump, {
+mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, BurntHood.ParryJump, {
     tag = "BrokenHoodParry"
 })

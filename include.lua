@@ -3,18 +3,14 @@ local col = "collectibles/"
 local ent = "entities/"
 local stmpSyn = "stompSynergies/"
 
-
 local includeFiles = {
 	-- Cosas necesarias
 	"definitions",
-	"functions/helper_functions",
 	"functions/functions",
-	"functions/EdithClasses",
 	"functions/unlock_functions",
 	"ImGui",
 	"EdithKotryHudHelper",
 	"lhsx",
-	"resources/scripts/functions/functions",       -- Added for better autocomplete
 	
 	-- Items
 	col .. "items/Edith/SaltShaker",
@@ -28,7 +24,7 @@ local includeFiles = {
 	col .. "items/Edith/SaltHeart",
 	col .. "items/Edith/DivineRetribution",
 	col .. "items/Edith/Hydrargyrum",
-	col .. "items/TEdith/BurnedHood",
+	col .. "items/TEdith/BurntHood",
 	col .. "items/TEdith/DivineWrath",
 	col .. "items/Edith/ChunkOfBasalt",
 	-- Items fin
@@ -37,7 +33,7 @@ local includeFiles = {
 	col .. "trinkets/Edith/geode",
 	col .. "trinkets/Edith/rumblingpebble",
 	col .. "trinkets/TEdith/Paprika",
-	col .. "trinkets/TEdith/BurnedSalt",
+	col .. "trinkets/TEdith/BurntSalt",
 	-- Trinkets fin
 	
 	col .. "consumables/JackOfClubs",

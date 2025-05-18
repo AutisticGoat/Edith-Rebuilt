@@ -1,4 +1,4 @@
-local mod = edithMod
+local mod = EdithRebuilt
 local funcs = require("resources.scripts.stompSynergies.Funcs")
 local EdithJump = require("resources.scripts.stompSynergies.JumpData")
 local shockwaveDir = Vector(-1, 0)

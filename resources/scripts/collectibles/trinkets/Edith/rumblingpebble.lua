@@ -1,9 +1,10 @@
-local mod = edithMod
+local mod = EdithRebuilt
 local enums = mod.Enums
 local trinket = enums.TrinketType
 local plyMan = PlayerManager
+local RumblingPebble = {}
 
-function edithMod:DestroyRockWithPebble(rock)	
+function RumblingPebble:DestroyRockWithPebble(rock)	
 	local players = plyMan.GetPlayers() 
 	for _, player in pairs(players) do
 		if not player:HasTrinket(trinket.TRINKET_RUMBLING_PEBBLE) then return end
@@ -44,12 +45,12 @@ function edithMod:DestroyRockWithPebble(rock)
 		end
 	end
 end
-edithMod:AddCallback(ModCallbacks.MC_POST_GRID_ROCK_DESTROY, edithMod.DestroyRockWithPebble)
+mod:AddCallback(ModCallbacks.MC_POST_GRID_ROCK_DESTROY, RumblingPebble.DestroyRockWithPebble)
 
 ---comment
 ---@param tear EntityTear
 function mod:RandomRockTear(tear)
-	local player = edithMod:GetPlayerFromTear(tear)
+	local player = mod:GetPlayerFromTear(tear)
 
 	if not player then return end 
 	if not player:HasTrinket(trinket.TRINKET_RUMBLING_PEBBLE) then return end
@@ -66,7 +67,7 @@ function mod:RandomRockTear(tear)
 end
 mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, mod.RandomRockTear)
 
-function edithMod:ShootTear(tear, _, grid)
+function RumblingPebble:ShootTear(tear, _, grid)
 	local tearData = mod.GetData(tear)
 
 	if not grid:ToRock() then return end
@@ -74,4 +75,4 @@ function edithMod:ShootTear(tear, _, grid)
 		
 	grid:Destroy()
 end
-edithMod:AddCallback(ModCallbacks.MC_PRE_TEAR_GRID_COLLISION, edithMod.ShootTear)
+mod:AddCallback(ModCallbacks.MC_PRE_TEAR_GRID_COLLISION, RumblingPebble.ShootTear)

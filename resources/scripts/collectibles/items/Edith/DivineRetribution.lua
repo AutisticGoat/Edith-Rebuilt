@@ -1,4 +1,4 @@
-local mod = edithMod
+local mod = EdithRebuilt
 local enums = mod.Enums
 local items = enums.CollectibleType
 local utils = enums.Utils

@@ -1,4 +1,4 @@
-local mod = edithMod
+local mod = EdithRebuilt
 local enums = mod.Enums
 local utils = enums.Utils
 local game, sfx = utils.Game, utils.SFX

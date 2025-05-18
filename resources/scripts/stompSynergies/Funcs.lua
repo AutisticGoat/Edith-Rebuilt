@@ -1,4 +1,4 @@
-local mod = edithMod
+local mod = EdithRebuilt
 local funcs = {
 	KeyStompPressed = mod.IsKeyStompPressed,
 	GetData = mod.GetData,

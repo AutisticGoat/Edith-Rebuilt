@@ -22,7 +22,7 @@
 local min, max, abs = math.min, math.max, math.abs
 
 local Hsx = {}
-edithMod.Hsx = Hsx
+EdithRebuilt.Hsx = Hsx
 
 ---@param r number
 ---@param g number
@@ -176,7 +176,7 @@ function Hsx.hsi2rgb( h, s, i )
 	return i * r, i * g, i * b
 end
 
-return edithMod.Hsx
+return EdithRebuilt.Hsx
 
 --[[
 ------------------------------------------------------------------------------

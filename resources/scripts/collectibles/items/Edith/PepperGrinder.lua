@@ -1,4 +1,4 @@
-local mod = edithMod
+local mod = EdithRebuilt
 local sfx = mod.Enums.Utils.SFX
 local subColor = 0.45
 

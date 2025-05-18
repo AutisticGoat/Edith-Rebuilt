@@ -1,4 +1,4 @@
-local mod = edithMod
+local mod = EdithRebuilt
 local enums = mod.Enums
 local items = enums.CollectibleType
 local EdithsHood = {}
@@ -34,7 +34,7 @@ local saltDegrees = 360 / maxCreep
 function EdithsHood:KillingSalEnemy(entity, amount, _, source)
 	local Ent = source.Entity
 	if not Ent or Ent.Type == 0 then return end
-	local player = Ent:ToPlayer() or edithMod:GetPlayerFromTear(Ent)
+	local player = Ent:ToPlayer() or mod:GetPlayerFromTear(Ent)
 	if not player then return end
 	if not player:HasCollectible(items.COLLECTIBLE_EDITHS_HOOD) then return end
 	if not (entity:IsActiveEnemy() and entity:IsVulnerableEnemy()) then return end

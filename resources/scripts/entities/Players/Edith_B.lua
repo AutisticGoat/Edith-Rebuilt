@@ -1,4 +1,4 @@
-local mod = edithMod
+local mod = EdithRebuilt
 local enums = mod.Enums
 local utils = enums.Utils
 local sounds = enums.SoundEffect
@@ -66,9 +66,9 @@ end
 
 local backdropColors = tables.BackdropColors
 function mod:InitTaintedEdithJump(player)
-	local room = game:GetRoom()
 	local jumpHeight = 8
 	local jumpSpeed = 2.5
+	local room = game:GetRoom()
 	local isChap4 = mod:isChap4()
 	local BackDrop = room:GetBackdropType()
 	local variant = room:HasWater() and EffectVariant.BIG_SPLASH or (isChap4 and EffectVariant.POOF02 or EffectVariant.POOF01)
@@ -86,7 +86,7 @@ function mod:InitTaintedEdithJump(player)
 	)
 
 	local var = DustCloud.Variant
-	local color = Color(1, 1, 1)
+	local color = DustCloud.Color
 
 	local switch = {
 		[EffectVariant.BIG_SPLASH] = function()
@@ -124,7 +124,7 @@ local function isTaintedEdithJump(player)
 	local jumpData = JumpLib:GetData(player)
 	local tags = jumpData.Tags
 
-	return tags["edithMod_TaintedEdithJump"] or false
+	return tags["edithRebuilt_EdithJump"] or false
 end
 
 function mod:TaintedEdithUpdate(player)
@@ -190,7 +190,7 @@ function mod:TaintedEdithUpdate(player)
 
 		if target.FrameCount < 2 and playerData.IsHoping == true then
 			mod.stopTEdithHops(player, 20, true, true)
-			funcs.FeedbackMan(player, hopSounds, misc.BurnedSaltColor, false)
+			funcs.FeedbackMan(player, hopSounds, misc.BurntSaltColor, false)
 		end
 
 		target.Velocity = playerData.movementVector:Resized(10)
@@ -202,7 +202,7 @@ function mod:TaintedEdithUpdate(player)
 		local tearMult = funcs.GetTPS(player) / baseTearsStat							
 		local jumpData = JumpLib:GetData(player)
 		local isJumping = jumpData.Jumping
-		local chargeAdd = 10 * funcs.exp(tearMult, 1, 1.5)
+		local chargeAdd = 8 * funcs.exp(tearMult, 1, 1.5)
 		local hasBirthright = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT)
 		local shouldChargeBrCharge = hasBirthright and playerData.ImpulseCharge >= 100
 
@@ -356,7 +356,7 @@ function mod:EdithLanding(player)
 	playerData.HopParams = {
 		Radius = math.min((30 + (tearRange - 9)), 35),
 		Knockback = math.min(50, (7.7 + DamageStat ^ 1.2)) * player.ShotSpeed,
-		Damage = ((damageBase + DamageStat) / 4) * (playerData.MoveCharge + playerData.MoveBrCharge) / 100, ---@type number
+		Damage = ((damageBase + DamageStat) / 3) * (playerData.MoveCharge + playerData.MoveBrCharge) / 100, ---@type number
 	}
 	
 	local HopParams = playerData.HopParams
@@ -366,8 +366,8 @@ function mod:EdithLanding(player)
 	end
 
 	player:SpawnWaterImpactEffects(player.Position, Vector(1, 1), 1)	
-	funcs.FeedbackMan(player, hopSounds, misc.BurnedSaltColor)
-	
+	funcs.FeedbackMan(player, hopSounds, misc.BurntSaltColor)
+
 	mod:TaintedEdithHop(player, HopParams.Radius, HopParams.Damage, HopParams.Knockback)	
 end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, mod.EdithLanding, jumpParams.TEdithHop)
@@ -450,7 +450,7 @@ function mod:EdithParryJump(player, data)
 	end
 	
 	local tableRef = isenemy and parryJumpSounds or hopSounds
-	funcs.FeedbackMan(player, tableRef, misc.BurnedSaltColor, isenemy)
+	funcs.FeedbackMan(player, tableRef, misc.BurntSaltColor, isenemy)
 
 	-- local lasers = Isaac.FindByType(EntityType.ENTITY_LASER) ---@type EntityLaser[]
 	-- if #lasers < 1 then return end

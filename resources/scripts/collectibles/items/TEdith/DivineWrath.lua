@@ -1,11 +1,10 @@
-local mod = edithMod
+local mod = EdithRebuilt
 local enums = mod.Enums
 local items = enums.CollectibleType
 local DivineWrath = {}
 
 local baseRange = 6.5
 local baseHeight = -23.45
-local maxBlocks = 6
 
 ---comment
 ---@param player EntityPlayer

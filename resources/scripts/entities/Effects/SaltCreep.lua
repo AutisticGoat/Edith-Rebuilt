@@ -1,4 +1,4 @@
-local mod = edithMod
+local mod = EdithRebuilt
 local enums = mod.Enums
 local subtype = enums.SubTypes
 local utils = enums.Utils

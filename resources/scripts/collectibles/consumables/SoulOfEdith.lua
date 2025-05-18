@@ -1,4 +1,4 @@
-local mod = edithMod
+local mod = EdithRebuilt
 local enums = mod.Enums 
 local card = enums.Card
 local sounds = enums.SoundEffect

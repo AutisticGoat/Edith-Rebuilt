@@ -1,8 +1,8 @@
-local edithJumpTag = "edithMod_EdithJump"
-local tedithJumpTag = "edithMod_TaintedEdithJump"
-local tedithHopTag = "edithMod_TaintedEdithHop"
+local edithJumpTag = "edithRebuilt_EdithJump"
+local tedithJumpTag = "edithRebuilt_TaintedEdithJump"
+local tedithHopTag = "edithRebuilt_TaintedEdithHop"
 
-edithMod.Enums = {
+EdithRebuilt.Enums = {
 	PlayerType = {
 		PLAYER_EDITH = Isaac.GetPlayerTypeByName("Edith​​​", false),
 		PLAYER_EDITH_B = Isaac.GetPlayerTypeByName("Edith​​​", true),
@@ -24,7 +24,7 @@ edithMod.Enums = {
 		COLLECTIBLE_CHUNK_OF_BASALT = Isaac.GetItemIdByName("Chunk of Basalt"),
 
 		--- Tainted Edith Items
-		COLLECTIBLE_BURNED_HOOD = Isaac.GetItemIdByName("Burned Hood"),
+		COLLECTIBLE_BURNT_HOOD = Isaac.GetItemIdByName("Burnt Hood"),
 		COLLECTIBLE_DIVINE_WRATH = Isaac.GetItemIdByName("Divine Wrath"),
 	},
 	TrinketType = {
@@ -32,7 +32,7 @@ edithMod.Enums = {
 		TRINKET_RUMBLING_PEBBLE = Isaac.GetTrinketIdByName("Rumbling Pebble"),
 		
 		TRINKET_PAPRIKA = Isaac.GetTrinketIdByName("Paprika"),
-		TRINKET_BURNED_SALT = Isaac.GetTrinketIdByName("Burned Salt"),
+		TRINKET_BURNT_SALT = Isaac.GetTrinketIdByName("Burnt Salt"),
 	},
 	Card = {
 		CARD_JACK_OF_CLUBS = Isaac.GetCardIdByName("Jack_of_Clubs"),
@@ -88,7 +88,13 @@ edithMod.Enums = {
 		ACHIEVEMENT_TAINTED_EDITH = Isaac.GetAchievementIdByName("The Punished"),
 
 		-- Edith unlocks end
-
+		ACHIEVEMENT_SALT_ROCKS = Isaac.GetAchievementIdByName("Salt Rocks"),
+		ACHIEVEMENT_BURNT_SALT = Isaac.GetAchievementIdByName("Burnt Salt"),
+		ACHIEVEMENT_JACK_OF_CLUBS = Isaac.GetAchievementIdByName("Jack of Clubs"),
+		ACHIEVEMENT_PAPRIKA = Isaac.GetAchievementIdByName("Paprika"),
+		ACHIEVEMENT_BURNT_HOOD = Isaac.GetAchievementIdByName("Burnt Hood"),
+		ACHIEVEMENT_SOUL_OF_EDITH = Isaac.GetAchievementIdByName("Soul of Edith"),
+		ACHIEVEMENT_DIVINE_WRATH = Isaac.GetAchievementIdByName("Divine Wrath"),
 		-- Tainted Edith unlocks
 
 		-- Tainted Edith unlocks end
@@ -295,6 +301,7 @@ edithMod.Enums = {
 				"Mechanic",
 				"Knight",
 			}, 
+
 		}
 	},
 	Misc = {
@@ -307,9 +314,10 @@ edithMod.Enums = {
 		SaltShakerDist = Vector(0, 60),
 		HSVStartColor = Color(1, 0, 0),
 		ColorDefault = Color(1, 1, 1, 1),
+		JumpReadyColor = Color(1, 1, 1, 1, 0.5, 0.5, 0.5),
 		PerfectParryRadius = 12,
 		ImpreciseParryRadius = 35,
-		BurnedSaltColor = Color(0.3, 0.3, 0.3, 1),
+		BurntSaltColor = Color(0.3, 0.3, 0.3, 1),
 		ChargeBarleftVector = Vector(-8, 10),
 		ChargeBarcenterVector = Vector(0, 10),
 		ChargeBarrightVector = Vector(8, 10),

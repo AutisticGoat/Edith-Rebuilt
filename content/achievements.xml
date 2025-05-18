@@ -11,16 +11,21 @@
     <achievement name="Molten Core" gfx="achivement_MoltenCore.png" />
     <achievement name="Rumbling Pebble" gfx="achivement_RumblingPebble.png" />
     <achievement name="Sulfuric Fire" gfx="achivement_SulfuricFire.png" />
-    <achievement name="Divine Retribution" gfx="achivement_DivineRetribution" />
-    <achievement name="Chunk of Basalt" gfx="achivement_TheBookOfLuke.png" />
+    <achievement name="Divine Retribution" gfx="achivement_DivineRetribution.png" />
+    <achievement name="Chunk of Basalt" gfx="achivement_ChunkOfBasalt.png" />
     <achievement name="Ediths Hood" gfx="achivement_EdithsHood.png" />
     <achievement name="Hydrargyrum" gfx="achivement_Hydrargyrum.png" />
     <achievement name="The Punished" gfx="achivement_TaintedEdith.png" />
 
     <!-- Tainted Edith unlocks -->
-
+    <achievement name="Salt Rocks" gfx="achievement_SaltRocks.png" />
+    <achievement name="Burnt Salt" gfx="achievement_BurntSalt.png" />
+    <achievement name="Jack of Clubs" gfx="achievement_JackOfClubs.png" />
+    <achievement name="Paprika" gfx="achievement_Paprika.png" />
+    <achievement name="Burnt Hood" gfx="achivement_BurntHood.png" />
+    <achievement name="Soul of Edith" gfx="achievement_SoulOfEdith.png" />
+    <achievement name="Divine Wrath" gfx="achivement_DivineWrath.png" />
 
     <!-- Thank you-->
     <achievement name="Thank You" gfx="achivement_ThankYou.png" />
-
 </achievements>

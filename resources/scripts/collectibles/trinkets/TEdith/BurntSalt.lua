@@ -1,29 +1,29 @@
-local mod = edithMod
+local mod = EdithRebuilt
 local enums = mod.Enums
 local trinket = enums.TrinketType
-local BurnedSalt = {}
+local BurntSalt = {}
 
 ---@param tear EntityTear
-function BurnedSalt:SaltTearShoot(tear)
+function BurntSalt:SaltTearShoot(tear)
     local player = mod:GetPlayerFromTear(tear) 
 
     if not player then return end
-    if not player:HasTrinket(trinket.TRINKET_BURNED_SALT) then return end
+    if not player:HasTrinket(trinket.TRINKET_BURNT_SALT) then return end
 
-    local rng = player:GetTrinketRNG(trinket.TRINKET_BURNED_SALT)
+    local rng = player:GetTrinketRNG(trinket.TRINKET_BURNT_SALT)
 
     if rng:RandomFloat() > 0.5 then return end
     local tearData = mod.GetData(tear)
     mod.ForceSaltTear(tear, true)
     tear.CollisionDamage = tear.CollisionDamage * 1.2
-    tearData.BurnedSaltTear = true
+    tearData.BurntSaltTear = true
 end
-mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, BurnedSalt.SaltTearShoot)
+mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, BurntSalt.SaltTearShoot)
 
 ---@param entity Entity
 ---@param amount number
 ---@param source EntityRef
-function BurnedSalt:OnKill(entity, amount, _, source)
+function BurntSalt:OnKill(entity, amount, _, source)
     local ent = source.Entity
 
     if not ent then return end
@@ -36,14 +36,14 @@ function BurnedSalt:OnKill(entity, amount, _, source)
     if entity.HitPoints > amount then return end
     local tearData = mod.GetData(tear)
 
-    if not tearData.BurnedSaltTear then return end 
-    local rng = player:GetTrinketRNG(trinket.TRINKET_BURNED_SALT)
+    if not tearData.BurntSaltTear then return end 
+    local rng = player:GetTrinketRNG(trinket.TRINKET_BURNT_SALT)
 
     if rng:RandomFloat() > 0.5 then return end
     local randomTears = rng:RandomInt(4, 7)
 
     for _ = 1, randomTears do
-        local burnedSaltTear = Isaac.Spawn(
+        local burntSaltTear = Isaac.Spawn(
             EntityType.ENTITY_TEAR,
             0,
             0,
@@ -52,8 +52,8 @@ function BurnedSalt:OnKill(entity, amount, _, source)
             player
         ):ToTear() 
 
-        if not burnedSaltTear then return end
-        mod.ForceSaltTear(burnedSaltTear, true)
+        if not burntSaltTear then return end
+        mod.ForceSaltTear(burntSaltTear, true)
     end
 end
-mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, BurnedSalt.OnKill)
+mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, BurntSalt.OnKill)

@@ -1,6 +1,6 @@
 ---@diagnostic disable-next-line: lowercase-global
-edithMod = RegisterMod("Edith: Rebuilt", 1)
-local mod = edithMod
+EdithRebuilt = RegisterMod("Edith: Rebuilt", 1)
+local mod = EdithRebuilt
 
 include("resources/scripts/save_manager").Init(mod)
 
