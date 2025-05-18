@@ -264,9 +264,17 @@ function mod:EdithPlayerUpdate(player)
 	local IsJumping = JumpLib:GetData(player).Jumping
 	local arrow = mod.GetEdithTarget(player, true)
 
+	print(playerData.ParryCounter)
+
+	playerData.IsParryJump = playerData.IsParryJump or false
+
 	if mod:IsKeyStompTriggered(player) then
-		if playerData.ParryCounter == 0 and not isTaintedEdithJump(player) then
-			mod.stopTEdithHops(player, 0, true, true)
+		if playerData.ParryCounter == 0 and not isTaintedEdithJump(player) and not playerData.IsParryJump then
+			playerData.IsParryJump = true
+
+			if IsJumping then
+				mod.stopTEdithHops(player, 0, true, true)
+			end
 			mod:InitTaintedEdithJump(player)
 		end
 	end
@@ -451,6 +459,8 @@ function mod:EdithParryJump(player, data)
 	
 	local tableRef = isenemy and parryJumpSounds or hopSounds
 	funcs.FeedbackMan(player, tableRef, misc.BurntSaltColor, isenemy)
+
+	playerData.IsParryJump = false
 
 	-- local lasers = Isaac.FindByType(EntityType.ENTITY_LASER) ---@type EntityLaser[]
 	-- if #lasers < 1 then return end

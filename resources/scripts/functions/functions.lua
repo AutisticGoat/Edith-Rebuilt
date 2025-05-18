@@ -872,7 +872,6 @@ function EdithRebuilt.RemoveEdithTarget(player, tainted)
 	local target = mod.GetEdithTarget(player, tainted)
 
 	if not target then return end
-	if not target:Exists() then return end
 
 	target:Remove()
 

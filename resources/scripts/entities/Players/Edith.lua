@@ -329,10 +329,9 @@ mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, Edith.EdithLanding, JumpParams.Ed
 
 ---@param player EntityPlayer
 function Edith:EdithJumpLibStuff(player)
+	if not funcs.IsEdith(player, false) then return end
 	if RoomTransition:GetTransitionMode() == 2 then return end
 	local playerData = funcs.GetData(player)
-	print(playerData.isJumping)
-
 	if playerData.isJumping == true then
 
 	-- if not funcs.IsEdith(player, false) then return end
