@@ -4,11 +4,12 @@ local card = enums.Card
 local utils = enums.Utils
 local rng = utils.RNG
 local SaltRocks = {}
+local getData = mod.CustomDataWrapper.getData
 
 ---@param player EntityPlayer
 function SaltRocks:OnSaltRockUse(_, player)
     for _, enemy in pairs(mod.GetEnemies()) do
-        local enemyData = mod.GetData(enemy)
+        local enemyData = getData(enemy)
         enemyData.Salted = true
         enemy:AddSlowing(EntityRef(player), 10000, 0.7, Color(1, 1, 1, 1, 0.2, 0.2, 0.2))
     end
@@ -25,7 +26,7 @@ local AttackState = {
 
 ---@param NPC EntityNPC
 function SaltRocks:OnSaltedEnemiesUpdate(NPC)
-    local enemyData = mod.GetData(NPC)
+    local enemyData = getData(NPC)
     local IsInAttackState = mod.When(NPC.State, AttackState, false)
     local Projectiles = Isaac.FindByType(EntityType.ENTITY_PROJECTILE)
 
@@ -52,7 +53,7 @@ local flag = false
 ---@param source EntityRef
 ---@param Cooldown integer
 function SaltRocks:OnSaltedEnemyTakingDamage(entity, amount, flags, source, Cooldown)    
-    local enemyData = mod.GetData(entity)
+    local enemyData = getData(entity)
 
     if not enemyData.Salted then return end
     if not amount == (amount * 1.2) then return end

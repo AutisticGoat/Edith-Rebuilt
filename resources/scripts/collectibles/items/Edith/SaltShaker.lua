@@ -7,6 +7,7 @@ local utils = enums.Utils
 local sfx = utils.SFX
 local SaltQuantity = 20
 local ndegree = 360 / SaltQuantity
+local data = mod.CustomDataWrapper.getData
 local SaltShaker = {}
 
 ---@param rng RNG
@@ -18,9 +19,10 @@ function SaltShaker:UseSaltShaker(_, rng, player, flag, _, _)
     local Hascarbattery = player:HasCollectible(CollectibleType.COLLECTIBLE_CAR_BATTERY) 
 	local playerPos = player.Position
 	local SaltTime = Hascarbattery and 14 or 7
+	local SoundPitch = rng:RandomInt(90, 110) / 100
 
 	for _, entity in ipairs(Isaac.FindByType(EntityType.ENTITY_EFFECT)) do
-		local effectData = mod.GetData(entity)
+		local effectData = data(entity)
 		local effect = entity:ToEffect()
 		if not effect then return end
 
@@ -32,7 +34,7 @@ function SaltShaker:UseSaltShaker(_, rng, player, flag, _, _)
 	for i = 1, SaltQuantity do	
 		mod:SpawnSaltCreep(player, playerPos + misc.SaltShakerDist:Rotated(ndegree*i), 0, SaltTime, 1, "SaltShakerSpawn")
 	end
-	local SoundPitch = rng:RandomInt(90, 110) / 100
+	
 	sfx:Play(sounds.SOUND_SALT_SHAKER, 2, 0, false, SoundPitch, 0)
 	return true
 end

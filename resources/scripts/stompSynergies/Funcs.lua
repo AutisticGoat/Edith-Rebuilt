@@ -1,7 +1,7 @@
 local mod = EdithRebuilt
 local funcs = {
 	KeyStompPressed = mod.IsKeyStompPressed,
-	GetData = mod.GetData,
+	GetData = mod.CustomDataWrapper.getData,
 	ShockwaveSprite = mod.ShockwaveSprite,
 	SpawnBlackPowder = mod.SpawnBlackPowder,
 	RandomNumber = mod.RandomNumber,

@@ -1,26 +1,23 @@
 local mod = EdithRebuilt
 local enums = mod.Enums
 local items = enums.CollectibleType
-local utils = enums.Utils
 local Hydrargyrum = {}
+local data = mod.CustomDataWrapper.getData
 
 ---@param entity Entity
 ---@param amount number
 ---@param flags DamageFlag
 ---@param source EntityRef
 function Hydrargyrum:GettingDamage(entity, amount, flags, source)
-    local sourceEnt = source.Entity
+    if source.Type == 0 then return end
 
-    if not sourceEnt then return end
-
-    local player = source.Entity:ToPlayer() or mod:GetPlayerFromTear(sourceEnt)
+    local player = mod.GetPlayerFromRef(source)
     
-    if sourceEnt.Type == 0  then return end
     if not player then return end
     if not player:HasCollectible(items.COLLECTIBLE_HYDRARGYRUM) then return end
     if not (entity:IsActiveEnemy() and entity:IsVulnerableEnemy()) then return end
 
-    local entData = mod.GetData(entity)
+    local entData = data(entity)
 
     if entData.MercuryTimer and entity.HitPoints <= amount then
         Isaac.Spawn(
@@ -41,7 +38,7 @@ mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Hydrargyrum.GettingDamage)
 
 ---@param npc EntityNPC
 function Hydrargyrum:OnNPCUpdate(npc)
-    local entData = mod.GetData(npc)
+    local entData = data(npc)
     if not entData.MercuryTimer then return end
     entData.MercuryTimer = math.max(entData.MercuryTimer - 1, 0)
     if entData.MercuryTimer % 15 ~= 0 or entData.MercuryTimer == 0 then return end

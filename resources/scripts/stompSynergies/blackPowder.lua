@@ -15,7 +15,7 @@ end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, mod.BlackPowderStomp, EdithJump)
 
 function mod:Stuff(effect)
-	local effectData = mod.GetData(effect)
+	local effectData = funcs.GetData(effect)
 	if effectData.CustomSpawn == true then return end
 	effect.Visible = false
 	effect:Remove()

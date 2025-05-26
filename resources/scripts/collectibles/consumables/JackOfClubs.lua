@@ -2,12 +2,12 @@ local mod = EdithRebuilt
 local enums = mod.Enums
 local card = enums.Card
 local utils = enums.Utils
-local rng = utils.RNG
 local game = utils.Game
 local JackOfClubs = {}
 
 ---@param player EntityPlayer
 function JackOfClubs:myFunction2(_, player)
+    local rng = player:GetCardRNG(card.CARD_JACK_OF_CLUBS)
     for _, enemy in pairs(mod.GetEnemies()) do
         local explosionRoll = rng:RandomFloat()
         local enemyPos = enemy.Position

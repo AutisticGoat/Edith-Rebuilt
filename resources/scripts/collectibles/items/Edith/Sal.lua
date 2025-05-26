@@ -1,6 +1,7 @@
 local mod = EdithRebuilt
 local enums = mod.Enums
 local items = enums.CollectibleType
+local data = mod.CustomDataWrapper.getData
 local Sal = {}
 
 ---@param player EntityPlayer
@@ -16,7 +17,7 @@ mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, Sal.SalSpawnSaltCreep)
 ---@param amount number
 ---@param source EntityRef
 function Sal:KillingSalEnemy(entity, amount, _, source)
-	local entityData = mod.GetData(entity)
+	local entityData = data(entity)
 	if entityData.SalFreeze ~= true then return end
 	if entity.HitPoints >= amount then return end
 
@@ -25,7 +26,7 @@ function Sal:KillingSalEnemy(entity, amount, _, source)
 	local tear = Ent:ToTear()
 
 	if tear then
-		local entTearData = mod.GetData(tear)
+		local entTearData = data(tear)
 		if entTearData.IsSalTear == true then return end
 	end
 
@@ -39,7 +40,7 @@ function Sal:KillingSalEnemy(entity, amount, _, source)
 
 		if not tears then return end
 
-		local tearData = mod.GetData(tears)
+		local tearData = data(tears)
 		
 		mod.ForceSaltTear(tears)
 		tears:AddTearFlags(TearFlags.TEAR_PIERCING)

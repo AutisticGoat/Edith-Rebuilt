@@ -2,6 +2,7 @@ local mod = EdithRebuilt
 local enums = mod.Enums
 local trinket = enums.TrinketType
 local plyMan = PlayerManager
+local data = mod.CustomDataWrapper.getData
 local RumblingPebble = {}
 
 function RumblingPebble:DestroyRockWithPebble(rock)	
@@ -28,7 +29,7 @@ function RumblingPebble:DestroyRockWithPebble(rock)
 			):ToTear()
 			
 			if not rockTear then return end
-			local rockData = mod.GetData(rockTear)
+			local rockData = data(rockTear)
 			
 			local baseHeight = -23.45			
 			rockTear:AddTearFlags(TearFlags.TEAR_ROCK | player.TearFlags)
@@ -58,7 +59,7 @@ function mod:RandomRockTear(tear)
 	local randomRockTearChance = rng:RandomInt(1, 100)
 
 	if randomRockTearChance > 30 then return end
-	local data = mod.GetData(tear)
+	local data = data(tear)
 	local randomDamageVar = rng:RandomInt(500, 2000) / 1000
 	tear:AddTearFlags(TearFlags.TEAR_ROCK)
 	tear:ChangeVariant(TearVariant.ROCK)
@@ -68,7 +69,7 @@ end
 mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, mod.RandomRockTear)
 
 function RumblingPebble:ShootTear(tear, _, grid)
-	local tearData = mod.GetData(tear)
+	local tearData = data(tear)
 
 	if not grid:ToRock() then return end
 	if not tearData.IsPebbleTear then return end

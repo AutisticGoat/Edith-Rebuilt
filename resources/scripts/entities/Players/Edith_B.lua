@@ -1,3 +1,4 @@
+---@diagnostic disable: undefined-global
 local mod = EdithRebuilt
 local enums = mod.Enums
 local utils = enums.Utils
@@ -10,12 +11,13 @@ local jumpTags = tables.JumpTags
 local jumpParams = tables.JumpParams
 local players = enums.PlayerType
 local costumes = enums.NullItemID
+local callback = enums.Callbacks
 local misc = enums.Misc
 local TEdith = {}
 
 local funcs = {
 	IsEdith = mod.IsEdith,
-	GetData = mod.GetData,
+	GetData = mod.CustomDataWrapper.getData,
 	TargetMov = mod.IsEdithTargetMoving,
 	VecToAngle = mod.vectorToAngle,
 	GetTPS = mod.GetTPS,
@@ -131,6 +133,11 @@ function mod:TaintedEdithUpdate(player)
 	if not funcs.IsEdith(player, true) then return end
 
 	local playerData = funcs.GetData(player)
+
+	playerData.ImpulseCharge = playerData.ImpulseCharge or 0
+	playerData.BirthrightCharge = playerData.BirthrightCharge or 0
+	playerData.ParryCounter = playerData.ParryCounter or 20
+
 	local jumpData = JumpLib:GetData(player)
 	local isJumping = jumpData.Jumping
 	local room = game:GetRoom()
@@ -145,9 +152,9 @@ function mod:TaintedEdithUpdate(player)
 	local MovY = (input.up and -1) or (input.down and 1) or 0
 
 	playerData.movementVector = Vector(MovX, MovY):Normalized() 
-	playerData.ImpulseCharge = playerData.ImpulseCharge or 0
-	playerData.BirthrightCharge = playerData.BirthrightCharge or 0
-	playerData.ParryCounter = playerData.ParryCounter or 20
+	-- playerData.ImpulseCharge = playerData.ImpulseCharge or 0
+	-- playerData.BirthrightCharge = playerData.BirthrightCharge or 0
+	-- playerData.ParryCounter = playerData.ParryCounter or 20
 
 	if playerData.ParryCounter > 0 then
 		if isTaintedEdithJump(player) ~= true then
@@ -180,7 +187,6 @@ function mod:TaintedEdithUpdate(player)
 	local HopVec = playerData.HopVector
 
 	if target then
-		
 		local posDif = target.Position - player.Position
 		local posDifLenght = posDif:Length()	
 		local posDifNormal = posDif:Normalized()
@@ -207,7 +213,7 @@ function mod:TaintedEdithUpdate(player)
 		local shouldChargeBrCharge = hasBirthright and playerData.ImpulseCharge >= 100
 
 		if target.FrameCount > 1 then
-			if playerData.IsHoping == false and isJumping == false then
+			if not playerData.IsHoping and not isJumping then
 				playerData.ImpulseCharge = funcs.Clamp(playerData.ImpulseCharge + chargeAdd, 0, 100)
 				playerData.BirthrightCharge = shouldChargeBrCharge and funcs.Clamp(playerData.BirthrightCharge + (chargeAdd * 0.5), 0, 100) or 0
 			end
@@ -215,7 +221,7 @@ function mod:TaintedEdithUpdate(player)
 	else
 		if playerData.MoveCharge and playerData.MoveCharge >= 10 then
 			if playerData.IsHoping == true then
-				player.Velocity = (HopVec) * (8 + (player.MoveSpeed - 1)) * (playerData.MoveCharge / 100)
+				player.Velocity = (HopVec) * (8.5 + (player.MoveSpeed - 1)) * (playerData.MoveCharge / 100)
 			end
 					
 			if not (HopVec.X == 0 and HopVec.Y == 0) then
@@ -239,32 +245,11 @@ function mod:TaintedEdithUpdate(player)
 end
 mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, mod.TaintedEdithUpdate)
 
-function TEdith:OnCollidingWithBigEnemies(player, collider, low)
-	if not mod.IsEdith(player, true) then return end
-	if not (collider:IsActiveEnemy() and collider:IsVulnerableEnemy()) then return end
-	if collider.Mass < 100 then return end
-	local playerData = mod.GetData(player)
-
-	if not playerData.IsHoping then return end
-
-	-- collider.Velocity = collider.Velocity * RandomVector():Resized(10)
-
-	-- local IsJumping = JumpLib:GetData(player).Jumping
-	-- if IsJumping then return end
-	-- print("sao[djaojdspo]")
-
-	-- mod.stopTEdithHops(player, 30, false, true)
-	-- mod.TriggerPush(player, collider, 5, 1, false)
-end
-mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_COLLISION, TEdith.OnCollidingWithBigEnemies)
-
 function mod:EdithPlayerUpdate(player)
 	if not funcs.IsEdith(player, true) then return end
 	local playerData = funcs.GetData(player)
 	local IsJumping = JumpLib:GetData(player).Jumping
 	local arrow = mod.GetEdithTarget(player, true)
-
-	print(playerData.ParryCounter)
 
 	playerData.IsParryJump = playerData.IsParryJump or false
 
@@ -406,8 +391,10 @@ function mod:EdithParryJump(player, data)
 	local ImpreciseParryEnts = Isaac.FindInCapsule(capsuleTwo, misc.ParryPartitions)
 	local PerfectParryEnts = Isaac.FindInCapsule(capsule, misc.ParryPartitions)
 	local hasBirthright = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT)
-	local BirthrightMult = hasBirthright and 1.2 or 1
-	local DamageFormula = rawFormula * BirthrightMult
+	local BirthrightMult = hasBirthright and 1.25 or 1
+	local hasBirthcake = BirthcakeRebaked and player:HasTrinket(BirthcakeRebaked.Birthcake.ID) or false
+	local DamageFormula = (rawFormula * BirthrightMult) * (hasBirthcake and 1.15 or 1)
+	
 
 	for _, ent in pairs(ImpreciseParryEnts) do
 		local entPos = ent.Position
@@ -422,6 +409,8 @@ function mod:EdithParryJump(player, data)
 
 	for _, ent in pairs(PerfectParryEnts) do
 		local proj = ent:ToProjectile()
+
+		Isaac.RunCallback(callback.PERFECT_PARRY, player, ent)
 
 		if proj then
 			local spawner = proj.Parent or proj.SpawnerEntity
@@ -441,8 +430,14 @@ function mod:EdithParryJump(player, data)
 		else
 			spawnFireJet(player, misc.PerfectParryRadius, DamageFormula / 1.5, true)
 			ent:TakeDamage(DamageFormula, 0, EntityRef(player), 0)
+			sfx:Play(SoundEffect.SOUND_MEATY_DEATHS)
+
 			if ent.HitPoints <= DamageFormula then
-				sfx:Play(SoundEffect.SOUND_MEATY_DEATHS)
+				Isaac.RunCallback(callback.PERFECT_PARRY_KILL, player, ent)
+				
+				ent:AddEntityFlags(EntityFlag.FLAG_EXTRA_GORE)
+				ent:MakeBloodPoof(ent.Position, nil, 0.5)
+				sfx:Play(SoundEffect.SOUND_DEATH_BURST_LARGE)
 				game:ShakeScreen(20)
 			end
 		end
@@ -450,11 +445,15 @@ function mod:EdithParryJump(player, data)
 		player:SetMinDamageCooldown(20)
 	end
 
-	playerData.ParryCounter = isenemy and 10 or 20
+	playerData.ParryCounter = isenemy and (hasBirthcake and 8 or 10) or 20
 
 	if isenemy == true then
 		game:MakeShockwave(playerPos, 0.035, 0.025, 2)
 		playerData.ImpulseCharge = playerData.ImpulseCharge + 20
+
+		if playerData.ImpulseCharge >= 100 and hasBirthright then
+			playerData.BirthrightCharge = playerData.BirthrightCharge + 15
+		end
 	end
 	
 	local tableRef = isenemy and parryJumpSounds or hopSounds
@@ -466,30 +465,14 @@ function mod:EdithParryJump(player, data)
 	-- if #lasers < 1 then return end
 
 	-- for _, laser in ipairs(lasers) do
-	-- 	local laserData = mod.GetData(laser)
-	-- 	local LaserCapsule = laser:GetCollisionCapsule(Vector.Zero)
-	-- 	local DebugShape = DebugRenderer.Get(1, true)    
-	-- 	DebugShape:Capsule(LaserCapsule)
+	-- local samplePoints = EntityLaser:GetSamples()
 
-		-- for _, player in ipairs(Isaac.FindInCapsule(LaserCapsule, EntityPartition.PLAYER)) do
-		-- 	local degree = mod.vectorToAngle((player.Position - laser.Position) * -1)
-		-- 	local divineShield = Isaac.Spawn(
-		-- 		EntityType.ENTITY_EFFECT,
-		-- 		EffectVariant.DIVINE_INTERVENTION,
-		-- 		0,
-		-- 		playerPos,
-		-- 		Vector.Zero,
-		-- 		player
-		-- 	):ToEffect()
-
-		-- 	if not divineShield then return end	
-
-		-- 	local shieldData = mod.GetData(divineShield)
-		-- 	shieldData.ParryShield = true 
-		-- 	shieldData.StaticPos = player.Position
-		-- 	divineShield.Rotation = degree
-		-- 	divineShield.Timeout = 1			
-		-- end
+	-- print(samplePoints)
+	-- 	-- for i=0, #samplePoints-1 do
+	-- 	-- 	print("apdjaopjdo")
+	-- 	-- 	-- local pos = samplePoints:Get(i)
+	-- 	-- 	-- ...
+	-- 	-- end
 	-- end
 end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, mod.EdithParryJump, jumpParams.TEdithJump)
@@ -503,12 +486,12 @@ function mod:CustomShieldBehavior(effect)
 end
 mod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, mod.CustomShieldBehavior, EffectVariant.DIVINE_INTERVENTION)
 
----@param laser EntityLaser
-function mod:LaserStuff(laser)
-	local laserData = mod.GetData(laser)
-	laserData.EndPoint = laser.EndPoint
-end
-mod:AddCallback(ModCallbacks.MC_POST_LASER_UPDATE, mod.LaserStuff)
+-- ---@param laser EntityLaser
+-- function mod:LaserStuff(laser)
+-- 	local laserData = mod.GetData(laser)
+-- 	laserData.EndPoint = laser.EndPoint
+-- end
+-- mod:AddCallback(ModCallbacks.MC_POST_LASER_UPDATE, mod.LaserStuff)
 
 function mod:TaintedEdithDamageManager(player)
 	local playerData = funcs.GetData(player)
@@ -526,14 +509,16 @@ function mod:HudBarRender(player)
 	local room = game:GetRoom()
 	local playerpos = room:WorldToScreenPosition(player.Position)
 	local playerData = funcs.GetData(player)
-	local dashCharge = playerData.ImpulseCharge
-	local dashBRCharge = playerData.BirthrightCharge
+	local dashCharge = playerData.ImpulseCharge 
+	local dashBRCharge = playerData.BirthrightCharge 
 	local offset = misc.ChargeBarcenterVector
+
+	if not dashCharge or not dashBRCharge then return end
 
 	playerData.ChargeBar = playerData.ChargeBar or Sprite("gfx/TEdithChargebar.anm2", true)
 	playerData.BRChargeBar = playerData.BRChargeBar or Sprite("gfx/TEdithBRChargebar.anm2", true)
 	
-	if player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and not (playerData.BRChargeBar and playerData.BRChargeBar:IsFinished("Disappear")) then
+	if player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and not playerData.BRChargeBar:IsFinished("Disappear") then
 		offset = misc.ChargeBarleftVector
 	end
 

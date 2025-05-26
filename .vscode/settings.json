@@ -3,6 +3,7 @@
         "*.anm2": "xml",
         ".anm2": "xml"
     },
-    "editor.wordWrap": "on"
+    "editor.wordWrap": "on",
+    "Lua.codeLens.enable": true
 
 }

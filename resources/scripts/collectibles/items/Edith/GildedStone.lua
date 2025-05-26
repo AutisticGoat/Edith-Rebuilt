@@ -68,7 +68,6 @@ function GildedStone:OnDestroyingRockReward(rock)
 	local GeneralSpawnRoll = rng:RandomFloat() * 100
 
 	if GeneralSpawnRoll > GeneralSpawnFormula then return end
-	RewardRoll = rng:RandomFloat() * 100
 
 	local reward = getRandomReward(rng)
 	local vel = reward.Variant == 20 and RandomVector():Resized(3) or Vector.Zero

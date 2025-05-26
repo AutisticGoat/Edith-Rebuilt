@@ -3,10 +3,6 @@ local game = utils.Game
 local RECOMMENDED_SHIFT_IDX = 35
 
 local function setRNG()
-	local rng = utils.RNG
-	local seeds = game:GetSeeds()
-	local startSeed = seeds:GetStartSeed()
-
-	rng:SetSeed(startSeed, RECOMMENDED_SHIFT_IDX)
+	utils.RNG:SetSeed(game:GetSeeds():GetStartSeed(), RECOMMENDED_SHIFT_IDX)
 end
 EdithRebuilt:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, setRNG)

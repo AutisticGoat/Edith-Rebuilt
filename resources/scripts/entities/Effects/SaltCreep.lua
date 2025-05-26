@@ -3,6 +3,7 @@ local enums = mod.Enums
 local subtype = enums.SubTypes
 local utils = enums.Utils
 local rng = utils.RNG
+local data = mod.CustomDataWrapper.getData
 local SaltCreep = {}
 
 local function isSaltCreepEffect(effect)
@@ -20,7 +21,7 @@ mod:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, mod.OnSpawningSalt, EffectVari
 function SaltCreep:AddSaltEffects(effect)
     if not isSaltCreepEffect(effect) then return end
     
-    local effectData = mod.GetData(effect)
+    local effectData = data(effect)
     local entities = mod.GetEnemies()
     local effectPos = effect.Position
 
@@ -31,7 +32,7 @@ function SaltCreep:AddSaltEffects(effect)
         entity:AddFreeze(EntityRef(effect), 90)
 
         if effectData.SpawnType == "Sal" then
-            local enemyData = mod.GetData(entity)
+            local enemyData = data(entity)
             enemyData.SalFreeze = true
         end
 

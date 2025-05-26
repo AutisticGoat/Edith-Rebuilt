@@ -109,8 +109,7 @@ end
 function mod:UpdateImGuiData()
 	local SaveManager = mod.SaveManager
 	
-	if not SaveManager then return end
-	if not SaveManager.IsLoaded() then return end
+	if not SaveManager and not SaveManager.IsLoaded() then return end
 	local saveData = SaveManager.GetSettingsSave()
 
 	if not saveData then return end
@@ -141,8 +140,7 @@ end
 local function OptionsUpdate()
 	local SaveManager = mod.SaveManager
 	
-	if not SaveManager then return end
-	if not SaveManager.IsLoaded() then return end
+	if not SaveManager and not SaveManager.IsLoaded() then return end
 	local saveData = SaveManager.GetSettingsSave()
 
 	if not saveData then return end
@@ -169,7 +167,7 @@ local function OptionsUpdate()
 		end, 
 	1, 1, 1)
 	ImGui.AddCombobox("EdithSetting", "TargetDesign", "Set Target Design", 
-		function(index, val)
+		function(index)
 			EdithData.targetdesign = index + 1
 		end, 
 	ImGuiTables.TargetDesign, 0, false)
@@ -193,12 +191,12 @@ local function OptionsUpdate()
 		EdithData.stompVolume = index
 	end, 100, 25, 100, "%d%")
 	ImGui.AddCombobox("EdithSetting", "StompSound", "Set Stomp Sound", 
-		function(index, val)
+		function(index)
 			EdithData.stompsound = index + 1
 		end, 
 	ImGuiTables.StompSound, 0)
 	ImGui.AddCombobox("EdithSetting", "JumpCooldownSound", "Set jump cooldown sound", 
-		function(index, val)
+		function(index)
 			EdithData.CooldownSound = index + 1
 		end, 
 	{"Stone", "Beep"}, 0, true)
@@ -282,10 +280,42 @@ local function OptionsUpdate()
 
 	mod:UpdateImGuiData()
 
+	ImGui.AddText("creditsWindow", 
+	[[
+		(Used resources and utilities)
+		- Library of Isaac (ThiccoCatto)
+		- JumpLib (Kerkel)
+		- Pre NPC kill callback (Kerkel)
+		- Isaac Save Manager (Catinsurance, Benny)
+		- HudHelper (Benny, CatWizard)
+		- SaveData System (AgentCucco)
+		- lhsx (Ilya Kolbin (iskolbin))
+		- Salt Shaker Sound Effect (Joshua Hadley): 
+		- Edith water stomp sound effect (ArtNinja) 
+		- Nine Sols Perfect Parry sound effect (Red Candle Games) 
+		- Pizza Tower taunt sound effect (Tour De Pizza)
+		- Ultrakill parry sound effect (New Blood, Arsi "Hakita" Patala)
+		- Hollow Knight parry sound effect (Team Cherry) 
+		- Iconoclasts parry sound effect (Joakim Sandberg (Konjak))
+
+		(Colaborators)
+		- JJ: Inspiration to start this project
+		- D!Edith team: Inspiration to resume this project
+		- Skulldier: Sal concept
+		- Marcy: Tainted Edith Birthright idea
+		- Sr Kalaka: Edith Sprite
+		- Yuls: Tainted Edith sprite base
+
+		(Team members)
+		- gigamouse: finished Tainted Edith sprite, items sprites
+		- Pattowolfx220: Testing, First Tainted Edith sprite, items sprites
+		- Kotry: Project leader, coder, unlock sheets sprite
+	]], true, "creditsText")
+
 	RenderMenu = false
 end
 
-function DestroyImGuiOptions()
+local function DestroyImGuiOptions()
 	for _, ID in ipairs(OptionsIDs) do
 		if ImGui.ElementExists(ID) then
 			ImGui.RemoveElement(ID)
@@ -295,8 +325,7 @@ end
 
 local function InitSaveData()
 	local SaveManager = mod.SaveManager
-	if not SaveManager then return end
-	if not SaveManager:IsLoaded() then return end
+	if not SaveManager and not SaveManager:IsLoaded() then return end
 	local menuData = SaveManager.GetSettingsSave()
 	if not menuData then return end
 	

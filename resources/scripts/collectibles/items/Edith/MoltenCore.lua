@@ -4,6 +4,7 @@ local items = enums.CollectibleType
 local utils = enums.Utils
 local game = utils.Game
 local MoltenCore = {}
+local data = mod.CustomDataWrapper.getData
 
 function MoltenCore:MoltenCoreStats(player)
 	local MoltenCoreCount = player:GetCollectibleNum(items.COLLECTIBLE_MOLTEN_CORE)
@@ -19,7 +20,7 @@ function MoltenCore:OnFiringTears(tear)
 	if not player then return end 
 	if not player:HasCollectible(items.COLLECTIBLE_MOLTEN_CORE) then return end
 
-	local tearData = mod.GetData(tear)
+	local tearData = data(tear)
 
 	tear:ChangeVariant(TearVariant.FIRE_MIND)
 	local color = tear.Color

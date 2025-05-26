@@ -7,12 +7,13 @@ local misc = enums.Misc
 local saveManager = mod.SaveManager
 local Hsx = mod.Hsx
 local effect = enums.EffectVariant
+local callbacks = enums.Callbacks
 local Target = {}
 
 local funcs = {
 	IsEdith = mod.IsEdith,
 	SetVector = mod.SetVector,
-	GetData = mod.GetData,
+	GetData = mod.CustomDataWrapper.getData,
 	DrawLine = mod.drawLine,
 	MenuData = saveManager.GetSettingsSave,
 	Switch = mod.When,
@@ -41,8 +42,6 @@ function Target:EdithTargetLogic(effect)
 
 	if player.ControlsEnabled == false then return end
 		
-	effect.Velocity = effect.Velocity * 0.6
-	
 	local playerPos = player.Position
 	local effectPos = effect.Position
 	local playerData = funcs.GetData(player)
@@ -53,10 +52,6 @@ function Target:EdithTargetLogic(effect)
 		targetSprite:Play("Blink")
 	end
 	
-	if targetSprite:GetAnimation() == "Blink" then
-		effect.Velocity = effect.Velocity * 0.3
-	end
-
 	local cameraPos = interpolateVector2D(playerPos, effectPos, 0.6)
 	local Camera = room:GetCamera()
 	Camera:SetFocusPosition(cameraPos)
@@ -64,14 +59,13 @@ function Target:EdithTargetLogic(effect)
 	if room:GetType() == RoomType.ROOM_DUNGEON then
 		for _, v in ipairs(teleportPoints) do
 			local DungeonVector = Vector(v.X, v.Y)
-			
-			if (effectPos - DungeonVector):Length() <= 20 then
-				player.Position = effectPos + effect.Velocity:Normalized():Resized(25)
-				break
-			end
+			if (effectPos - DungeonVector):Length() > 20 then goto Break end
+			player.Position = effectPos + effect.Velocity:Normalized():Resized(25)
+			break
+			::Break::
 		end
 	end
-	
+
 	mod:TargetDoorManager(effect, player, 25)
 	
 	local markedTarget = player:GetMarkedTarget()

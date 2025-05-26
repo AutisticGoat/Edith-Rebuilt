@@ -1,6 +1,7 @@
 local mod = EdithRebuilt
 local enums = mod.Enums
 local trinket = enums.TrinketType
+local data = mod.CustomDataWrapper.getData
 local BurntSalt = {}
 
 ---@param tear EntityTear
@@ -13,28 +14,25 @@ function BurntSalt:SaltTearShoot(tear)
     local rng = player:GetTrinketRNG(trinket.TRINKET_BURNT_SALT)
 
     if rng:RandomFloat() > 0.5 then return end
-    local tearData = mod.GetData(tear)
+    local tearData = data(tear)
+    tearData.BurntSaltTear = true
     mod.ForceSaltTear(tear, true)
     tear.CollisionDamage = tear.CollisionDamage * 1.2
-    tearData.BurntSaltTear = true
 end
 mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, BurntSalt.SaltTearShoot)
 
----@param entity Entity
----@param amount number
+---@param npc EntityNPC
 ---@param source EntityRef
-function BurntSalt:OnKill(entity, amount, _, source)
-    local ent = source.Entity
+function BurntSalt:OnKill(npc, source)
+    if source.Type == 0 then return end
 
-    if not ent then return end
-    local tear = ent:ToTear()
+    local player = mod.GetPlayerFromRef(source)
+    local tear = source.Entity:ToTear()
 
-    if not tear then return end
-    local player = mod:GetPlayerFromTear(tear)
+    if not player or not tear then return end 
+    if not player:HasTrinket(trinket.TRINKET_BURNT_SALT) then return end
 
-    if not player then return end
-    if entity.HitPoints > amount then return end
-    local tearData = mod.GetData(tear)
+    local tearData = data(tear)
 
     if not tearData.BurntSaltTear then return end 
     local rng = player:GetTrinketRNG(trinket.TRINKET_BURNT_SALT)
@@ -47,7 +45,7 @@ function BurntSalt:OnKill(entity, amount, _, source)
             EntityType.ENTITY_TEAR,
             0,
             0,
-            ent.Position,
+            npc.Position,
             RandomVector():Resized(player.ShotSpeed * 10),
             player
         ):ToTear() 
@@ -56,4 +54,4 @@ function BurntSalt:OnKill(entity, amount, _, source)
         mod.ForceSaltTear(burntSaltTear, true)
     end
 end
-mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, BurntSalt.OnKill)
+mod:AddCallback(PRE_NPC_KILL.ID, BurntSalt.OnKill)

@@ -5,13 +5,14 @@ local misc = enums.Misc
 local items = enums.CollectibleType
 local utils = enums.Utils
 local ChunkOfBasalt = {}
+local data = mod.CustomDataWrapper.getData
 
 ---@param player EntityPlayer
 function ChunkOfBasalt:TriggerBasaltDash(player)
     if not player:HasCollectible(items.COLLECTIBLE_CHUNK_OF_BASALT) then return end
     
     
-    local playerData = mod.GetData(player)
+    local playerData = data(player)
 
     playerData.BasaltCount = playerData.BasaltCount or 60
 
@@ -38,7 +39,7 @@ mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, ChunkOfBasalt.TriggerBasaltD
 ---@param player EntityPlayer
 function ChunkOfBasalt:Timer(player)
     if not player:HasCollectible(items.COLLECTIBLE_CHUNK_OF_BASALT) then return end
-    local playerData = mod.GetData(player)
+    local playerData = data(player)
 
     if playerData.IsBasaltDassh then return end
     playerData.BasaltCount = math.max(playerData.BasaltCount - 1, 0)
@@ -54,10 +55,11 @@ mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, ChunkOfBasalt.Timer)
 ---@return boolean?
 function ChunkOfBasalt:OnCollidingWithEnemy(player, collider)
     if not player:HasCollectible(items.COLLECTIBLE_CHUNK_OF_BASALT) then return end
-    local playerData = mod.GetData(player)
+    local playerData = data(player)
     if not playerData.IsBasaltDassh then return end
     
     local damageFormula = player.Damage * (player.Velocity:Length() / 4)
+    local rng = player:GetCollectibleRNG(items.COLLECTIBLE_CHUNK_OF_BASALT)
 
     collider:TakeDamage(damageFormula, 0, EntityRef(player), 0)
 
@@ -65,7 +67,7 @@ function ChunkOfBasalt:OnCollidingWithEnemy(player, collider)
     mod.TriggerPush(player, collider, 10, 1, false)
 
     if collider.HitPoints > damageFormula then return end
-    for i = 1, math.random(5, 8) do
+    for _ = 1, rng:RandomInt(5, 8) do
         local tear = Isaac.Spawn(EntityType.ENTITY_TEAR, 0, 0, collider.Position, RandomVector():Resized(15),  player):ToTear()
 
         if not tear then return end
@@ -78,7 +80,7 @@ end
 mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_COLLISION, ChunkOfBasalt.OnCollidingWithEnemy)
 
 function ChunkOfBasalt:DenyDamage(player)
-    local playerData = mod.GetData(player)
+    local playerData = data(player)
 
     if playerData.IsBasaltDassh then 
         playerData.IsBasaltDassh = false

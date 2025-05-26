@@ -1,6 +1,7 @@
 local mod = EdithRebuilt
 local enums = mod.Enums
 local items = enums.CollectibleType
+local data = mod.CustomDataWrapper.getData
 local SaltHeart = {}
 
 ---@param entity Entity
@@ -13,7 +14,7 @@ function SaltHeart:GettingDamage(entity, amount, flags, source)
     if not player:HasCollectible(items.COLLECTIBLE_SALT_HEART) then return end
     if TSIL.Players.IsDamageToPlayerFatal(player, amount, source) then return end
 
-    local playerData = mod.GetData(player)
+    local playerData = data(player)
     local rng = player:GetCollectibleRNG(items.COLLECTIBLE_SALT_HEART)
 
     playerData.SaltHeartDDFlag = playerData.SaltHeartDDFlag or false
@@ -45,7 +46,7 @@ mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, SaltHeart.GettingDamage)
 function SaltHeart:SpawnSaltCreep(player)
     if not player:HasCollectible(items.COLLECTIBLE_SALT_HEART) then return end
 
-    local playerData = mod.GetData(player)
+    local playerData = data(player)
     
     if playerData.SaltHeartSpawnSaltTimer == nil or playerData.SaltHeartSpawnSaltTimer <= 0 then return end
     playerData.SaltHeartSpawnSaltTimer = math.max(playerData.SaltHeartSpawnSaltTimer - 1, 0) 

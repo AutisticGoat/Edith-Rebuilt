@@ -14,7 +14,7 @@ local arrowPath = "gfx/effects/TaintedEdithArrow/effect_000_tainted_edith"
 local funcs = {
 	IsEdith = mod.IsEdith,
 	SetVector = mod.SetVector,
-	GetData = mod.GetData,
+	GetData = mod.CustomDataWrapper.getData,
 	MenuData = saveManager.GetSettingsSave,
 	RGBCycle = mod.RGBCycle,
 	Switch = mod.When,
@@ -55,7 +55,7 @@ function Arrow:RenderTaintedEdithArrow(effect)
 	local RGBmode = tEdithdata.RGBMode
 	local RGBspeed = tEdithdata.RGBSpeed
 
-	local playerData = mod.GetData(player)
+	local playerData = funcs.GetData(player)
 	local HopVec = playerData.HopVector
 	local color = misc.HSVStartColor
 

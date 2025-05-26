@@ -9,8 +9,10 @@ local sounds = enums.SoundEffect
 local tables = enums.Tables
 local jumpFlags = tables.JumpFlags
 local BurntHood = {}
+
+
 local funcs = {
-    GetData = mod.GetData,
+    GetData = mod.CustomDataWrapper.getData,
     FeedbackMan = mod.LandFeedbackManager
 }
 

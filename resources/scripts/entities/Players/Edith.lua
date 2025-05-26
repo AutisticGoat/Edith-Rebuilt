@@ -26,12 +26,13 @@ local funcs = {
 	KeyStompPress = mod.IsKeyStompPressed,
 	EdithDash = mod.EdithDash,
 	GetTarget = mod.GetEdithTarget,
-	GetData = mod.GetData,
+	GetData = mod.CustomDataWrapper.getData,
 	SpawnTarget = mod.SpawnEdithTarget,
 	FeedbackMan = mod.LandFeedbackManager,
 	EdithWeapons = mod.ManageEdithWeapons,
 	DashBehavior = mod.DashItemBehavior,
 	CustomDrop = mod.CustomDropBehavior,
+	Round = TSIL.Utils.Math.Round,
 }
 
 ---@param player EntityPlayer
@@ -44,13 +45,10 @@ end
 ---@param velocidad number
 ---@return integer
 local function calcularCooldown(velocidad)
-    local cooldown = 20
+	local base = 18
+	local sub = -10
+	local cooldown = base + (velocidad - 1) * sub
 
-    if velocidad <= 1 then
-        cooldown = 40 + (velocidad - 0) * (30 - 40) / (1 - 0)
-	elseif velocidad > 1 and velocidad < 2 then
-        cooldown = 30 + (velocidad - 1) * (20 - 30) / (2 - 1)
-    end
 	return math.ceil(cooldown)
 end
 
@@ -59,6 +57,9 @@ function Edith:EdithInit(player)
 	if not funcs.IsEdith(player, false) then return end
 	mod.SetNewANM2(player, "gfx/EdithAnim.anm2")
 	mod.ForceCharacterCostume(player, players.PLAYER_EDITH, costumes.ID_EDITH_SCARF)
+
+	local playerData = funcs.GetData(player)
+	playerData.EdithJumpTimer = 20
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, Edith.EdithInit)
 
@@ -99,6 +100,8 @@ local CooldownSounds = {
 function Edith:EdithJumpHandler(player)
 	if not funcs.IsEdith(player, false) then return end
 
+	-- print(calcularCooldown(player.MoveSpeed))
+
 	local room = game:GetRoom()
 	local playerData = funcs.GetData(player)
 	local isMoving = funcs.TargetMov(player)
@@ -109,23 +112,9 @@ function Edith:EdithJumpHandler(player)
 	local isJumping = jumpData.Jumping
  
 	playerData.isJumping = playerData.isJumping or false
-
-	-- print(playerData.isJumping)
-
 	playerData.ExtraJumps = playerData.ExtraJumps or 0
-	playerData.EdithJumpTimer = playerData.EdithJumpTimer or 20
 
-	if player:IsDead() then return end
-
-	playerData.EdithJumpTimer = math.max(playerData.EdithJumpTimer - 1, 0)
-
-	if playerData.EdithJumpTimer == 1 and player.FrameCount > 0 then
-		player:SetColor(misc.JumpReadyColor, 5, 100, true, false)
-		local saveManager = EdithRebuilt.SaveManager
-		local EdithSave = saveManager.GetSettingsSave().EdithData
-		local sound = EdithSave.CooldownSound or 1
-		sfx:Play(funcs.Switch(sound, CooldownSounds), 2)
-	end
+	if player:IsDead() then funcs.RemoveTarget(player) return end
 
 	if player.FrameCount > 0 and (isMoving or isKeyStompPressed or (hasMarked and isShooting)) then
 		funcs.SpawnTarget(player)
@@ -138,8 +127,9 @@ function Edith:EdithJumpHandler(player)
 	local target = funcs.GetTarget(player)
 	if not target then return end
 
-	if isMoving then
+	local targetSprite = target:GetSprite()
 
+	if isMoving then
 		local MovementForce = {
 			up = Input.GetActionValue(ButtonAction.ACTION_UP, player.ControllerIndex),
 			down = Input.GetActionValue(ButtonAction.ACTION_DOWN, player.ControllerIndex),
@@ -153,25 +143,25 @@ function Edith:EdithJumpHandler(player)
 			left = Input.IsActionPressed(ButtonAction.ACTION_LEFT, player.ControllerIndex),
 			right = Input.IsActionPressed(ButtonAction.ACTION_RIGHT, player.ControllerIndex)
 		}
-		local CharSpeed = player.MoveSpeed + 2
-		local InverseX = room:IsMirrorWorld() and -1 or 1
 
+		local InverseX = room:IsMirrorWorld() and -1 or 1
 		local VectorX = ((input.left and -1 * MovementForce.left) or (input.right and 1 * MovementForce.right) or 0) * InverseX
 		local VectorY = ((input.up and -1 * MovementForce.up) or (input.down and 1 * MovementForce.down) or 0)
-
-		local resizer = math.max(CharSpeed, 1)
 		local NormalMovement = Vector(VectorX, VectorY):Normalized()
-		local targetVel = target.Velocity
+		local friction = targetSprite:IsPlaying("Blink") and 0.5 or 0.775
 
-		target.Velocity = (targetVel + (NormalMovement * resizer))
-		target:MultiplyFriction(0.9)
+		target.Velocity = (target.Velocity + (NormalMovement:Resized(3.5)))
+		target:MultiplyFriction(friction)
+	else
+		target:MultiplyFriction(0.8)
 	end
+
+	-- mod:TargetDoorManager(target, player, 25)
 
 	if isKeyStompPressed and not isJumping then
 		local multiShot = player:GetMultiShotParams(WeaponType.WEAPON_TEARS)
 		local multTears = multiShot:GetNumTears()
 		setEdithJumps(player, multTears)
-		
 	end
 
 	if playerData.EdithJumpTimer == 0 and playerData.ExtraJumps > 0 and not isJumping then
@@ -179,17 +169,16 @@ function Edith:EdithJumpHandler(player)
 		playerData.isJumping = true
 	end
 
-	target.Velocity = (isKeyStompPressed and target.Velocity * 0.6) or target.Velocity
-
 	local distance = funcs.TargetDis(player)
 	local direction = funcs.TargetDir(player)
 	local angle = funcs.VecToAng(direction)
-
 	local isClose = distance <= 5
 	local isShooting = mod:IsPlayerShooting(player)
 	local isStomping = funcs.KeyStompPress(player)
 	local faceDirection = funcs.Switch(angle, tables.DegreesToDirection, Direction.DOWN)
 	local dir = isClose and Direction.DOWN or faceDirection
+
+	mod:TargetDoorManager(target, player, 25)
 
 	if isJumping or (not isShooting) or (isStomping) then
 		player:SetHeadDirection(dir, 1, true)
@@ -214,18 +203,19 @@ local entityTypes = {
 local function isNearTrapdoor(player)
 	local room = game:GetRoom()
 	local gridSize = room:GetGridSize()
+	local playerPos = player.Position
 
 	for i = 1, gridSize do
 		local gent = room:GetGridEntity(i)
 
 		if not gent then goto Break end
 		local GentType = gent:GetType()
-		local isValidGentType = mod.When(GentType, entityTypes, false)
+		local isValidGentType = funcs.Switch(GentType, entityTypes, false)
 
 		if GentType == GridEntityType.GRID_GRAVITY then return true end
-		if isValidGentType then
-			local distance = (player.Position - gent.Position):Length()
-			return distance <= 20
+		if not isValidGentType then
+			local distance = (playerPos - gent.Position):Length()
+			return (distance <= 20) 	
 		end
 		::Break::
 	end
@@ -240,6 +230,7 @@ function Edith:EdithLanding(player, _, pitfall)
 
 	if not edithTarget then return end
 	playerData.ExtraJumps = math.max(playerData.ExtraJumps - 1, 0)
+
 	if pitfall then
 		funcs.RemoveTarget(player)
 		return
@@ -274,11 +265,11 @@ function Edith:EdithLanding(player, _, pitfall)
 	local multiShot = player:GetMultiShotParams(WeaponType.WEAPON_TEARS)
 	local tearCount = multiShot:GetNumTears()
 
-	local multishotMult = TSIL.Utils.Math.Round(mod.exp(tearCount, 1, 0.68), 2)
+	local multishotMult = funcs.Round(mod.exp(tearCount, 1, 0.68), 2)
 	local birthrightMult = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and 1.2 or 1
 	local bloodClotMult = player:HasCollectible(CollectibleType.COLLECTIBLE_BLOOD_CLOT) and 1.1 or 1
 	local RawFormula = ((((damageBase + (DamageStat * tearsMult)) * multishotMult) * birthrightMult) * bloodClotMult) * flightMult.Damage
-	local damageFormula = TSIL.Utils.Math.Round(RawFormula, 2)
+	local damageFormula = funcs.Round(RawFormula, 2)
 	local stompDamage = IsDefensiveStomp and 0 or math.max(damageFormula, 1)
 
 	mod:EdithStomp(player, radius, stompDamage, knockbackFormula, true)
@@ -288,22 +279,22 @@ function Edith:EdithLanding(player, _, pitfall)
 	player:MultiplyFriction(0.05)
 
 	if IsDefensiveStomp then
-		playerData.EdithJumpTimer = calcularCooldown(player.MoveSpeed) - 10
+		playerData.EdithJumpTimer = math.max(calcularCooldown(player.MoveSpeed) - 5, 10)
 	else
 		local hasEpicFetus = player:HasCollectible(CollectibleType.COLLECTIBLE_EPIC_FETUS)
 
 		if playerData.ExtraJumps > 0 then
-			playerData.EdithJumpTimer = math.floor((hasEpicFetus and 30 or 5) * (calcularCooldown(player.MoveSpeed) / 30))
+			playerData.EdithJumpTimer = math.floor((hasEpicFetus and 30 or 5) * (calcularCooldown(player.MoveSpeed) / 20))
 		else
 			playerData.EdithJumpTimer = calcularCooldown(player.MoveSpeed)
 		end
 	end
 
-	player:SetMinDamageCooldown(20)
+	player:SetMinDamageCooldown(40)
 
 	if not funcs.KeyStompPress(player) and not funcs.TargetMov(player) then
 		if distance <= 5 and distance >= 60 then
-			player.Position = playerData.EdithTarget.Position
+			player.Position = edithTarget.Position
 		end
 		if playerData.ExtraJumps <= 0 then
 			funcs.RemoveTarget(player)
@@ -321,7 +312,7 @@ function Edith:EdithLanding(player, _, pitfall)
 		game:BombExplosionEffects(player.Position, 100, player.TearFlags, misc.ColorDefault, player, 1, false, false, 0)
 		playerData.BombStomp = false
 	end
-	-------- Bomb Stomp  end --------`
+	-------- Bomb Stomp  end --------
 	
 	playerData.IsDefensiveStomp = false
 	playerData.isJumping = false
@@ -331,33 +322,34 @@ mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, Edith.EdithLanding, JumpParams.Ed
 ---@param player EntityPlayer
 function Edith:EdithJumpLibStuff(player)
 	if not funcs.IsEdith(player, false) then return end
-	if RoomTransition:GetTransitionMode() == 2 then return end
 	local playerData = funcs.GetData(player)
-	if playerData.isJumping == true then
-	if not funcs.GetTarget(player) then return end
+	playerData.EdithJumpTimer = playerData.EdithJumpTimer or 20
+	playerData.EdithJumpTimer = math.max(playerData.EdithJumpTimer - 1, 0)
 
-		local iskeystomp = funcs.KeyStompPress(player)
-		local direction = funcs.TargetDir(player)
-		local distance = funcs.TargetDis(player)
-		local div = (iskeystomp and player.CanFly) and 70 or 50
-		local isMovingTarget = funcs.TargetMov(player)
-		local data = JumpLib:GetData(player)
+	-- print(player.FrameCount)
 
-		funcs.EdithDash(player, direction, distance, div)
-
-		if not JumpLib:IsFalling(player) then return end
-		if not (player.CanFly and ((isMovingTarget and distance <= 50) or distance <= 5)) then return end
-
-		if data.Fallspeed < 7 then
-			sfx:Play(SoundEffect.SOUND_SHELLGAME)
-			JumpLib:SetSpeed(player, 10 + (data.Height / 10))
-		end
+	if playerData.EdithJumpTimer == 1 and player.FrameCount > 20 then
+		player:SetColor(misc.JumpReadyColor, 5, 100, true, false)
+		local saveManager = EdithRebuilt.SaveManager
+		local EdithSave = saveManager.GetSettingsSave().EdithData
+		local sound = EdithSave.CooldownSound or 1
+		sfx:Play(funcs.Switch(sound, CooldownSounds), 2)
 	end
+
+	if not funcs.GetTarget(player) then return end
+	if not playerData.isJumping == true then return end
+	
+	local iskeystomp = funcs.KeyStompPress(player)
+	local direction = funcs.TargetDir(player)
+	local distance = funcs.TargetDis(player)
+	local div = (iskeystomp and player.CanFly) and 70 or 50
+
+	funcs.EdithDash(player, direction, distance, div)
+	
 end
 mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, Edith.EdithJumpLibStuff)
 
-local contador = 0
-
+local defensiveColor = Color(0.2, 0.2, 0.2)
 ---@param player EntityPlayer
 ---@param data JumpConfig
 function Edith:EdithBomb(player, data)
@@ -367,11 +359,31 @@ function Edith:EdithBomb(player, data)
 	if funcs.KeyStompPress(player) then
 		if jumpinternalData.UpdateFrame == 9 then
 			playerData.IsDefensiveStomp = true
-			jumpinternalData.StaticHeightIncrease = jumpinternalData.StaticHeightIncrease * 0.65
-			jumpinternalData.StaticJumpSpeed = 1.5
+			player:SetColor(defensiveColor, 10, 100, true, false)
+			sfx:Play(SoundEffect.SOUND_BIRD_FLAP, 1, 0, false, 1.3)
+			local HeightMult = player.CanFly and 0.8 or 0.65
+			local JumpSpeed = player.CanFly and 1.2 or 1.5
+			jumpinternalData.StaticHeightIncrease = jumpinternalData.StaticHeightIncrease * HeightMult
+			jumpinternalData.StaticJumpSpeed = JumpSpeed
 		end
 	end
 	
+	local distance = funcs.TargetDis(player)
+	local isMovingTarget = funcs.TargetMov(player)
+	local data = JumpLib:GetData(player)
+
+	if playerData.IsDefensiveStomp then return end
+	if not (player.CanFly and ((isMovingTarget and distance <= 50) or distance <= 5)) then return end
+	
+	local FrictionMult = isMovingTarget and 1 or 0.2
+
+	player:MultiplyFriction(FrictionMult)
+
+	if data.Fallspeed < 8.5 and JumpLib:IsFalling(player)then
+		sfx:Play(SoundEffect.SOUND_SHELLGAME)
+		JumpLib:SetSpeed(player, 10 + (data.Height / 10))
+	end
+
 	if player:GetNumBombs() <= 0 and not player:HasGoldenBomb() then return end
 	if not Input.IsActionTriggered(ButtonAction.ACTION_BOMB, player.ControllerIndex) then return end
 	if funcs.KeyStompPress(player) then return end
@@ -397,24 +409,22 @@ mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, Edith.EdithOnNewRoom)
 ---@param damage number
 ---@param source EntityRef
 ---@return boolean?
-function Edith:DamageStuff(_, damage, _, source, _)
+function Edith:DamageStuff(_, damage, _, source)
 	if source.Type == 0 then return end
+
 	local ent = source.Entity
-	local player = ent:ToPlayer()
 	local familiar = ent:ToFamiliar()
+	local player = ent:ToPlayer() or familiar and familiar.Player
 
-	if familiar then
-		local famPlayer = familiar.Player
-		if famPlayer and funcs.IsEdith(famPlayer, false) and funcs.KeyStompPress(famPlayer) then
-			return false
-		end
-	end
+	if not player then return end
+	if not funcs.IsEdith(player, false) then return end
 
-	if player and funcs.IsEdith(player, false) and funcs.KeyStompPress(player) then
-		if player:HasCollectible(CollectibleType.COLLECTIBLE_MOMS_HEELS) and damage == 12 then
-			return false
-		end
-	end
+	local HasHeels = player:HasCollectible(CollectibleType.COLLECTIBLE_MOMS_HEELS)
+
+	if not JumpLib:GetData(player).Jumping then return end  
+	if not (familiar or (HasHeels and damage == 12)) then return end
+
+	return false
 end
 mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Edith.DamageStuff)
 

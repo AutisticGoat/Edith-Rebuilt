@@ -48,6 +48,7 @@ local SoundPick = {
 	[4] = sounds.SOUND_VINE_BOOM,
 }
 
+local data = mod.CustomDataWrapper.getData
 local damageBase = 13.5
 ---@param player EntityPlayer
 ---@param data JumpData
@@ -55,7 +56,7 @@ function SoulOfEdith:ParryJump(player, data)
 	local DamageStat = player.Damage 
 	local rawFormula = ((damageBase + DamageStat) / 1.5) 
 	local playerPos = player.Position
-    local playerData = mod.GetData(player)
+    local playerData = data(player)
 
 	local capsule = Capsule(player.Position, Vector.One, 0, 50)
 	local ImpreciseParryEnts = Isaac.FindInCapsule(capsule, EntityPartition.ENEMY)

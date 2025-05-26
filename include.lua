@@ -2,13 +2,19 @@ local scriptsPath = "resources/scripts/"
 local col = "collectibles/"
 local ent = "entities/"
 local stmpSyn = "stompSynergies/"
+local parrySyn = "parrySynergies/"
 
 local includeFiles = {
 	-- Cosas necesarias
 	"definitions",
+	"savedata",
+	"Birthcake",
+	"StageAPI",
+	"prenpckillcallback",
 	"functions/functions",
 	"functions/unlock_functions",
 	"ImGui",
+	
 	"EdithKotryHudHelper",
 	"lhsx",
 	
@@ -61,6 +67,8 @@ local includeFiles = {
 	stmpSyn .. "SpiritSword",
 	stmpSyn .. "EpicFetus",
 		
+	parrySyn .. "Brimstone",
+
 	"RNG",
 }
 
