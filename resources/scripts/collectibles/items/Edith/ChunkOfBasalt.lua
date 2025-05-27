@@ -11,7 +11,6 @@ local data = mod.CustomDataWrapper.getData
 function ChunkOfBasalt:TriggerBasaltDash(player)
     if not player:HasCollectible(items.COLLECTIBLE_CHUNK_OF_BASALT) then return end
     
-    
     local playerData = data(player)
 
     playerData.BasaltCount = playerData.BasaltCount or 60
@@ -25,7 +24,6 @@ function ChunkOfBasalt:TriggerBasaltDash(player)
     end
 
     if not mod:IsKeyStompTriggered(player) then return end
-    
     if playerData.IsBasaltDassh then return end
 
     if playerData.BasaltCount > 0 then return end

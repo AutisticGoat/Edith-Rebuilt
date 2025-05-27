@@ -4,7 +4,6 @@ local funcs = {
 	GetData = mod.CustomDataWrapper.getData,
 	ShockwaveSprite = mod.ShockwaveSprite,
 	SpawnBlackPowder = mod.SpawnBlackPowder,
-	RandomNumber = mod.RandomNumber,
 }
 
 return funcs

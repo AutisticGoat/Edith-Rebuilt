@@ -20,11 +20,8 @@ function FOTU:OnFatefulUse(_, rng, player, flag)
         ent:AddBurn(EntityRef(player), 83, Hascarbattery and 3 or 1.5)
         ent:AddBrimstoneMark(EntityRef(player), Hascarbattery and 180 or 90)
 
-        local entPos = ent.Position
-
-        if playerPos:Distance(entPos) > 50 then goto Break end
-        local newVel = ((playerPos - entPos) * -1):Resized(20)
-        ent:AddKnockback(EntityRef(player), newVel, 5,false)
+        if playerPos:Distance(ent.Position) > 50 then goto Break end
+        mod.TriggerPush(ent, player, 20, 5, false)
         ::Break::
     end
 

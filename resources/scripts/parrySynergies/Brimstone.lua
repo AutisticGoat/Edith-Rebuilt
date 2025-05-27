@@ -15,7 +15,6 @@ function Brim:BrimParry(player, ent)
 		laser:SetMaxDistance(player.TearRange / 5)
 		laser:AddTearFlags(player.TearFlags)
 		brimData.ParryBrimstone = true
-        -- brimData.Ent = ent
 	end
 end
 mod:AddCallback(mod.Enums.Callbacks.PERFECT_PARRY_KILL, Brim.BrimParry)

@@ -109,6 +109,7 @@ function Edith:EdithJumpHandler(player)
 	local hasMarked = player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED)
 	local isShooting = mod:IsPlayerShooting(player)
 	local jumpData = JumpLib:GetData(player)
+	local isPitfall = JumpLib:IsPitfalling(player)
 	local isJumping = jumpData.Jumping
  
 	playerData.isJumping = playerData.isJumping or false
@@ -116,7 +117,7 @@ function Edith:EdithJumpHandler(player)
 
 	if player:IsDead() then funcs.RemoveTarget(player) return end
 
-	if player.FrameCount > 0 and (isMoving or isKeyStompPressed or (hasMarked and isShooting)) then
+	if player.FrameCount > 0 and (isMoving or isKeyStompPressed or (hasMarked and isShooting)) and not isPitfall then
 		funcs.SpawnTarget(player)
 	end
 
@@ -233,6 +234,7 @@ function Edith:EdithLanding(player, _, pitfall)
 
 	if pitfall then
 		funcs.RemoveTarget(player)
+		playerData.isJumping = false
 		return
 	end
 

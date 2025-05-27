@@ -310,8 +310,6 @@ EdithRebuilt.Enums = {
 	},
 	Misc = {
 		TearPath = "gfx/tears/",
-		ObscureDiv = 155/255,
-		Obscurecolor = Color(155/255, 155/255, 155/255),
 		HeadAdjustVec = Vector.Zero,
 		TargetPath = "gfx/effects/EdithTarget/effect_000_edith_target",
 		TargetLineColor = Color(1, 1, 1),

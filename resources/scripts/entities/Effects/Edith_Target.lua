@@ -126,8 +126,6 @@ function Target:EdithTargetSprite(effect)
 		color = Color.Default
 	end
 
-	-- print(color)
-
 	effect:SetColor(color, -1, 100, false, false)
 	effectSprite:ReplaceSpritesheet(0, misc.TargetPath .. tables.TargetSuffix[targetDesign] .. ".png", true)
 		
@@ -155,8 +153,13 @@ function Target:EdithTargetSprite(effect)
 	end
 
 	if isObscure then
-		targetlineColor = targetlineColor * misc.Obscurecolor
+		local div = 155/255
+		local tableColor = funcs.Switch(targetDesign, tables.ColorValues, {1, 1, 1})
+
+		targetlineColor:SetColorize(tableColor.R * div, tableColor.G * div, tableColor.B * div, 1)
 	end
+
+	-- print(targetlineColor)
 	funcs.DrawLine(player.Position, effect.Position, targetlineColor) 
 end
 mod:AddCallback(ModCallbacks.MC_PRE_EFFECT_RENDER, Target.EdithTargetSprite, effect.EFFECT_EDITH_TARGET)

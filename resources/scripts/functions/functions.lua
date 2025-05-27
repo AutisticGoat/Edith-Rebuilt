@@ -347,6 +347,7 @@ end
 ---@param player EntityPlayer
 ---@param jumpData JumpData
 function EdithRebuilt.CustomDropBehavior(player, jumpData)
+	if not mod.IsEdith(player, false) then return end
 	local playerData = data(player)
 	local height = jumpData.Height
 	local isJumping = jumpData.Jumping
@@ -868,6 +869,7 @@ function EdithRebuilt.SpawnEdithTarget(player, tainted)
 		player
 	):ToEffect()
 	target.DepthOffset = -100
+	target.SortingLayer = SortingLayer.SORTING_NORMAL
 	
 	if tainted then
 		playerData.TaintedEdithTarget = target
@@ -883,7 +885,7 @@ end
 function EdithRebuilt.GetEdithTarget(player, tainted)
 	tainted = tainted or false
 	local playerData = data(player)
-	local target = (tainted and playerData.TaintedEdithTarget) or playerData.EdithTarget
+	local target = tainted and playerData.TaintedEdithTarget or playerData.EdithTarget
 
 	return target
 end

@@ -9,7 +9,6 @@ local includeFiles = {
 	"definitions",
 	"savedata",
 	"Birthcake",
-	"StageAPI",
 	"prenpckillcallback",
 	"functions/functions",
 	"functions/unlock_functions",
