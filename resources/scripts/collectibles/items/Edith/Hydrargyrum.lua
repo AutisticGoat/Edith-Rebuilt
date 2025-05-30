@@ -13,8 +13,7 @@ function Hydrargyrum:GettingDamage(entity, amount, flags, source)
 
     local player = mod.GetPlayerFromRef(source)
     
-    if not player then return end
-    if not player:HasCollectible(items.COLLECTIBLE_HYDRARGYRUM) then return end
+    if not (player and player:HasCollectible(items.COLLECTIBLE_HYDRARGYRUM)) then return end
     if not (entity:IsActiveEnemy() and entity:IsVulnerableEnemy()) then return end
 
     local entData = data(entity)

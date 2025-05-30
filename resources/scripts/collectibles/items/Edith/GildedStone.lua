@@ -7,8 +7,7 @@ local GildedStone = {}
 ---@param tear EntityTear
 function GildedStone:ShootingRockTears(tear)
 	local player = mod:GetPlayerFromTear(tear) 
-	if not player then return end
-	if not player:HasCollectible(items.COLLECTIBLE_GILDED_STONE) then return end
+	if not (player and player:HasCollectible(items.COLLECTIBLE_GILDED_STONE)) then return end
 
 	local rng = player:GetCollectibleRNG(items.COLLECTIBLE_GILDED_STONE)
 	local coins = player:GetNumCoins() 

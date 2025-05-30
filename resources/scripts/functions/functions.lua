@@ -122,6 +122,16 @@ function EdithRebuilt:IsKeyStompTriggered(player)
 	return k_stomp
 end
 
+---@param player EntityPlayer
+---@return boolean
+function EdithRebuilt.IsDefensiveStomp(player)
+	if not mod.IsEdith(player, false) then return false end
+
+	local playerData = mod.CustomDataWrapper.getData(player)
+
+	return playerData.IsDefensiveStomp 
+end
+
 ---Helper tears stat manager function
 ---@param firedelay number
 ---@param val number
@@ -401,6 +411,39 @@ function EdithRebuilt.DashItemBehavior(player)
 	mod.EdithDash(player, direction, distance, 50)
 	player:UseActiveItem(activeItem)
 	player:SetActiveCharge(usedCharge, ActiveSlot.SLOT_PRIMARY)
+end
+
+---@param player EntityPlayer
+function EdithRebuilt.FallBehavior(player)
+	local distance = mod.GetEdithTargetDirection(player)
+	local isMovingTarget = mod.IsEdithTargetMoving(player)
+	local data = JumpLib:GetData(player)
+	local playerData = mod.CustomDataWrapper.getData(player)
+
+	if playerData.IsDefensiveStomp then return end
+	if not (player.CanFly and ((isMovingTarget and distance <= 50) or distance <= 5)) then return end
+	
+	local FrictionMult = isMovingTarget and 1 or 0.2
+
+	player:MultiplyFriction(FrictionMult)
+
+	if data.Fallspeed < 8.5 and JumpLib:IsFalling(player)then
+		sfx:Play(SoundEffect.SOUND_SHELLGAME)
+		JumpLib:SetSpeed(player, 10 + (data.Height / 10))
+	end
+end
+
+---@param player EntityPlayer
+---@param data JumpConfig
+function EdithRebuilt.BombFall(player, data)
+	local playerData = mod.CustomDataWrapper.getData(player)
+	
+	if player:GetNumBombs() <= 0 and not player:HasGoldenBomb() then return end
+	if not Input.IsActionTriggered(ButtonAction.ACTION_BOMB, player.ControllerIndex) then return end
+	if playerData.IsDefensiveStomp then return end
+	
+	playerData.BombStomp = true
+	JumpLib:SetSpeed(player, 10 + (data.Height / 10))
 end
 
 local backdropColors = tables.BackdropColors

@@ -18,8 +18,7 @@ mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, MoltenCore.MoltenCoreStats, Cach
 function MoltenCore:OnFiringTears(tear)
 	local player = mod:GetPlayerFromTear(tear)
 
-	if not player then return end
-	if not player:HasCollectible(items.COLLECTIBLE_MOLTEN_CORE) then return end
+	if not (player and player:HasCollectible(items.COLLECTIBLE_MOLTEN_CORE)) then return end
 
 	local tearData = data(tear)
 
@@ -41,8 +40,7 @@ function MoltenCore:KillingSalEnemy(entity, amount, _, source)
 	if not Ent or Ent.Type == 0 then return end
 	local player = Ent:ToPlayer() or mod:GetPlayerFromTear(Ent)
 
-	if not player then return end
-	if not player:HasCollectible(items.COLLECTIBLE_MOLTEN_CORE) then return end
+	if not (player and player:HasCollectible(items.COLLECTIBLE_MOLTEN_CORE)) then return end
 	if not (entity:IsActiveEnemy() and entity:IsVulnerableEnemy()) then return end
 
 	entity:AddBurn(source, 120, 1)

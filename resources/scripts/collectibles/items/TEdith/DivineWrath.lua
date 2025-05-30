@@ -15,7 +15,6 @@ local function ShootSaltyBabyTear(player, rng, minTears, maxTears)
     local baseMultiplier = -70 / baseRange
     local halfBaseHeight = baseHeight * 1.2
     local tearCount = rng:RandomInt(minTears, maxTears)
-    local hasBFFS = player:HasCollectible(CollectibleType.COLLECTIBLE_BFFS)
 
     for _ = 1, tearCount do
         local tear = Isaac.Spawn(EntityType.ENTITY_TEAR, TearVariant.ROCK, 0, player.Position, RandomVector():Resized(10), player):ToTear()
@@ -23,26 +22,20 @@ local function ShootSaltyBabyTear(player, rng, minTears, maxTears)
         if not tear then return end
 
         tear.Velocity = tear.Velocity * rng:RandomInt(2, 6) / 10
-        tear.FallingAcceleration = rng:RandomInt(70, 160) / 100
+        tear.FallingAcceleration = (rng:RandomInt(70, 160) / 100) * 1.2
         local fallSpeedVar = rng:RandomInt(180, 220) / 100
-        tear.FallingSpeed = baseMultiplier * (fallSpeedVar)
+        tear.FallingSpeed = (baseMultiplier * (fallSpeedVar)) 
         tear.Height = halfBaseHeight
         tear.Scale = 1
         tear.CollisionDamage = tear.CollisionDamage * rng:RandomInt(8, 12) / 10
-        if hasBFFS then
-            tear.CollisionDamage = tear.CollisionDamage * 1.25
-        end
         tear:AddTearFlags(TearFlags.TEAR_BURN)
         tear.Color = Color(1, 0.2, 0, 1)
     end
 end
 
----@param rng any
----@param player any
----@param flags any
----@param slot any
----@param data any
-function DivineWrath:OnUse(_, rng, player, flags, slot, data)
+---@param rng RNG
+---@param player EntityPlayer
+function DivineWrath:OnUse(_, rng, player)
     ShootSaltyBabyTear(player, rng, 8, 12)
     local shockwaveParams = {
 		Duration = 6,

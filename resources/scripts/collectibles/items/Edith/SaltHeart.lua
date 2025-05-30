@@ -10,8 +10,7 @@ local SaltHeart = {}
 ---@param source EntityRef
 function SaltHeart:GettingDamage(entity, amount, flags, source)
     local player = entity:ToPlayer()
-    if not player then return end
-    if not player:HasCollectible(items.COLLECTIBLE_SALT_HEART) then return end
+    if not (player and player:HasCollectible(items.COLLECTIBLE_SALT_HEART)) then return end
     if TSIL.Players.IsDamageToPlayerFatal(player, amount, source) then return end
 
     local playerData = data(player)

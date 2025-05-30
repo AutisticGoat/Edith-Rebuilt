@@ -34,12 +34,12 @@ function SoulOfEdith.InitEdithJump(player)
 end
 
 function SoulOfEdith:OnUse(_, player)
-    if JumpLib:GetData(player).Jumping then return end
+    -- if JumpLib:GetData(player).Jumping then return false end
     SoulOfEdith.InitEdithJump(player)
 
     sfx:Play(sounds.SOUND_SOUL_OF_EDITH)
 end
-mod:AddCallback(ModCallbacks.MC_USE_CARD, SoulOfEdith.OnUse, card.CARD_SOUL_EDITH)
+mod:AddCallback(ModCallbacks.MC_PRE_USE_CARD, SoulOfEdith.OnUse, card.CARD_SOUL_EDITH)
 
 local SoundPick = {
 	[1] = SoundEffect.SOUND_STONE_IMPACT, ---@type SoundEffect
@@ -51,13 +51,11 @@ local SoundPick = {
 local data = mod.CustomDataWrapper.getData
 local damageBase = 13.5
 ---@param player EntityPlayer
----@param data JumpData
-function SoulOfEdith:ParryJump(player, data)
+function SoulOfEdith:ParryJump(player)
 	local DamageStat = player.Damage 
 	local rawFormula = ((damageBase + DamageStat) / 1.5) 
 	local playerPos = player.Position
     local playerData = data(player)
-
 	local capsule = Capsule(player.Position, Vector.One, 0, 50)
 	local ImpreciseParryEnts = Isaac.FindInCapsule(capsule, EntityPartition.ENEMY)
 
@@ -68,20 +66,22 @@ function SoulOfEdith:ParryJump(player, data)
 		ent:TakeDamage(rawFormula, 0, EntityRef(player), 0)
 		ent:AddKnockback(EntityRef(player), newVelocity, 5, true)
 	end
-
-    
     
     playerData.IsSoulOfEdithJump = true
 	mod.LandFeedbackManager(player, SoundPick, Color(1, 1, 1, 0))
     playerData.IsSoulOfEdithJump = false
 
-    local fallingTearsCount = rng:RandomInt(20, 30)
+    local fallingTearsCount = rng:RandomInt(25, 40)
 
     for _ = 1, fallingTearsCount do 
         local tear = Isaac.Spawn(EntityType.ENTITY_TEAR, TearVariant.ROCK, 0, Isaac.GetRandomPosition(), Vector.Zero, player):ToTear()
-        tear.Height = -600
-        tear.FallingSpeed = 2 * rng:RandomInt(600, 1800) / 1000
-        tear.FallingAcceleration = 2 * rng:RandomInt(600, 1800) / 1000
+		if not tear then return end
+
+		tear.CollisionDamage = tear.CollisionDamage * 1.2
+        tear.Height = -600 * (rng:RandomInt(90, 110) / 100)
+        tear.FallingSpeed = 4 * rng:RandomInt(600, 1800) / 1000
+        tear.FallingAcceleration = 2.5 * rng:RandomInt(600, 1800) / 1000
+		tear:AddTearFlags(TearFlags.TEAR_SPECTRAL)
     end
 end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, SoulOfEdith.ParryJump, {

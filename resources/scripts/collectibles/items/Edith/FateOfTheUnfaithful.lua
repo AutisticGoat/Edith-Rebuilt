@@ -36,7 +36,7 @@ mod:AddCallback(ModCallbacks.MC_USE_ITEM, FOTU.OnFatefulUse, items.COLLECTIBLE_F
 function FOTU:FateCache(player, flags)
     local effects = player:GetEffects()
     local FateEffect = effects:GetCollectibleEffect(items.COLLECTIBLE_FATE_OF_THE_UNFAITHFUL)
-    if FateEffect == nil then return end
+    if not FateEffect then return end
     local Hascarbattery = player:HasCollectible(CollectibleType.COLLECTIBLE_CAR_BATTERY) 
     player.Damage = player.Damage * (Hascarbattery and 2 or 1.75)
 end

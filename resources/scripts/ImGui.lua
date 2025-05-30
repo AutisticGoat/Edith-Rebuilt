@@ -65,9 +65,7 @@ local function ResetSaveData(isTainted)
 		EdithData.CooldownSound = 1
 	end
 
-	for k, v in pairs(EdithData) do
-		print(k, v)
-	end
+	mod:UpdateImGuiData()
 
 	RenderMenu = true
 end

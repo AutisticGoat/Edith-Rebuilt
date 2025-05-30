@@ -4,7 +4,7 @@ local EdithJump = require("resources.scripts.stompSynergies.JumpData")
 
 ---@param player EntityPlayer
 function mod:BrimStomp(player)
-	if funcs.KeyStompPressed(player) then return end
+	if funcs.DefensiveStomp(player) then return end
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE) then return end
 
 	local totalRays = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and 6 or 4

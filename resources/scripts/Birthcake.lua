@@ -4,17 +4,18 @@ if not BirthcakeRebaked then return end
 local mod = EdithRebuilt
 local enums = mod.Enums
 local players = enums.PlayerType
-local EdithSpritePath = "gfx/items/trinkets/EdithRebuilt_Edith_Birthcake.png"
-local TEdithSpritePath = "gfx/items/trinkets/EdithRebuilt_T_Edith_Birthcake.png"
+local path = "gfx/items/trinkets/EdithRebuilt_"
+local EdithSuffix = "Edith_Birthcake.png"
+local TEdithSuffix = "T_Edith_Birthcake.png"
 
 local Info = {
     [players.PLAYER_EDITH] = { 
         Description = "Brittle petrification",
-        SpriteInfo = {SpritePath = EdithSpritePath, PickupSpritePath = EdithSpritePath}
+        SpriteInfo = {SpritePath = path .. EdithSuffix , PickupSpritePath = path .. EdithSuffix}
     },
     [players.PLAYER_EDITH_B] = {
         Description = "Stronger parry",
-        SpriteInfo = {SpritePath = TEdithSpritePath, PickupSpritePath = TEdithSpritePath}
+        SpriteInfo = {SpritePath = path .. TEdithSuffix, PickupSpritePath = path .. TEdithSuffix}
     }
 }
 

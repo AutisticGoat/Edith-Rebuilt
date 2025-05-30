@@ -22,15 +22,15 @@ function Sal:KillingSalEnemy(entity, amount, _, source)
 	if entity.HitPoints >= amount then return end
 
 	local Ent = source.Entity
-	local player = Ent:ToPlayer() or mod:GetPlayerFromTear(Ent)
+	local player = mod.GetPlayerFromRef(source)
 	local tear = Ent:ToTear()
+
+	if not (player and player:HasCollectible(items.COLLECTIBLE_SAL)) then return end
 
 	if tear then
 		local entTearData = data(tear)
 		if entTearData.IsSalTear == true then return end
 	end
-
-	if not player then return end
 	
 	local rng = player:GetCollectibleRNG(items.COLLECTIBLE_SAL)
 	local randomTears = rng:RandomInt(4, 6)

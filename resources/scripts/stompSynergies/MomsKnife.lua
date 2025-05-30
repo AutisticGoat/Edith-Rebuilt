@@ -3,7 +3,7 @@ local funcs = require("resources.scripts.stompSynergies.Funcs")
 local EdithJump = require("resources.scripts.stompSynergies.JumpData")
 
 function mod:KnifeStomp(player)
-	if funcs.KeyStompPressed(player) then return end
+	if funcs.DefensiveStomp(player) then return end
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_MOMS_KNIFE) then return end		
 	
 	local knifeEntities = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and 8 or 4

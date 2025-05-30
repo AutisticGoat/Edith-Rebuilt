@@ -1,13 +1,12 @@
 local mod = EdithRebuilt
 local enums = mod.Enums
-local utils = enums.Utils
+local game = enums.Utils.Game
 local tables = enums.Tables
-local game = utils.Game
 local misc = enums.Misc
 local saveManager = mod.SaveManager
 local Hsx = mod.Hsx
 local effect = enums.EffectVariant
-local callbacks = enums.Callbacks
+local div = 155/255 
 local Target = {}
 
 local funcs = {
@@ -39,7 +38,6 @@ local teleportPoints = {
 function Target:EdithTargetLogic(effect)	
 	local player = effect.SpawnerEntity:ToPlayer()
 	if not player then return end
-
 	if player.ControlsEnabled == false then return end
 		
 	local playerPos = player.Position
@@ -84,6 +82,10 @@ local value = 0
 local function RGBFunction(color, step)
 	value = value + step
 
+	if value > 1 then value = 0 end
+
+	-- print(value)
+
 	color.R, color.G, color.B = funcs.RGBToHSV(color.R, color.G, color.B)
 	color.R = color.R + step
 	color.R, color.G, color.B = funcs.HSVToRGB(color.R, color.G, color.B)
@@ -92,6 +94,12 @@ end
 local currentDate = os.date("*t") -- converts the current date to a table
 local isTDOV = (currentDate.month == 3 and currentDate.day == 31)
 
+---@param Color1 Color
+---@param Color2 Color
+---@
+local function AreColorEquals(Color1, Color2)
+	return (Color1.R == Color2.R and Color1.G == Color2.G and Color1.B == Color2.B)
+end
 ---@param effect EntityEffect
 ---@return boolean?
 function Target:EdithTargetSprite(effect)
@@ -113,12 +121,17 @@ function Target:EdithTargetSprite(effect)
 	local targetLine = edithData.targetline
 	local effectColor = effect.Color
 	local effectSprite = effect:GetSprite()
+	local suffix = funcs.Switch(targetDesign, tables.TargetSuffix, "")
+	local path = misc.TargetPath .. suffix .. ".png"
+	local color = effectColor
 
-	local color = misc.HSVStartColor
+	-- print(RGBmode)
 
 	if targetDesign == 1 then
 		if RGBmode then
-			RGBFunction(color, RGBspeed)
+			RGBFunction(effectColor, RGBspeed)
+
+			-- print(color)
 		else
 			color:SetTint(targetColor.Red, targetColor.Green, targetColor.Blue, 1)
 		end
@@ -126,15 +139,17 @@ function Target:EdithTargetSprite(effect)
 		color = Color.Default
 	end
 
-	effect:SetColor(color, -1, 100, false, false)
-	effectSprite:ReplaceSpritesheet(0, misc.TargetPath .. tables.TargetSuffix[targetDesign] .. ".png", true)
-		
 	if isTDOV then
-		effectSprite:ReplaceSpritesheet(0, misc.TargetPath .. tables.TargetSuffix[2] .. ".png", true)
-		effect.Color = Color.Default
+		path = misc.TargetPath .. tables.TargetSuffix[2] .. ".png"
+		color = Color.Default
 	end
 
-	if targetLine ~= true then return end
+	-- print(misc.HSVStartColor)
+
+	effect:SetColor(color, -1, 100, false, false)
+	effectSprite:ReplaceSpritesheet(0, path, true)
+
+	if not targetLine then return end
 	local targetlineColor = misc.TargetLineColor
 	local animation = effectSprite:GetAnimation()
 	local frame = effectSprite:GetFrame()
@@ -147,19 +162,13 @@ function Target:EdithTargetSprite(effect)
 		targetlineColor:SetColorize(lineColor.R, lineColor.G, lineColor.B, 1)
 	end
 
-	if isTDOV then
-		local tableColor = tables.ColorValues[2]
-		targetlineColor:SetColorize(tableColor.R, tableColor.G, tableColor.B, 1)
-	end
-
 	if isObscure then
-		local div = 155/255
-		local tableColor = funcs.Switch(targetDesign, tables.ColorValues, {1, 1, 1})
-
-		targetlineColor:SetColorize(tableColor.R * div, tableColor.G * div, tableColor.B * div, 1)
+		local def = {R = color.R, G = color.G, B = color.B}
+		local func = targetDesign == 1 and targetlineColor.SetTint or targetlineColor.SetColorize
+		local tableColor = funcs.Switch(targetDesign, tables.ColorValues, def)
+		func(targetlineColor, tableColor.R * div, tableColor.G * div, tableColor.B * div, 1)
 	end
 
-	-- print(targetlineColor)
 	funcs.DrawLine(player.Position, effect.Position, targetlineColor) 
 end
 mod:AddCallback(ModCallbacks.MC_PRE_EFFECT_RENDER, Target.EdithTargetSprite, effect.EFFECT_EDITH_TARGET)

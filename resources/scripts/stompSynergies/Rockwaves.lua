@@ -6,7 +6,7 @@ local shockwaveSpace = 20
 
 ---@param player EntityPlayer
 function mod:RockStomp(player)
-	if funcs.KeyStompPressed(player) then return end
+	if funcs.DefensiveStomp(player) then return end
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_TERRA) then return end
 	
 	local birthright = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT)
