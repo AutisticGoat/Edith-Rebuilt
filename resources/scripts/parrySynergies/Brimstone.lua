@@ -1,13 +1,13 @@
 local mod = EdithRebuilt
 local Brim = {}
+local totalRays = 4
+local shootDegrees = 360 / totalRays
 
 ---@param player EntityPlayer
 ---@param ent Entity
 function Brim:BrimParry(player, ent)
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE) then return end
 
-    local totalRays = 4
-    local shootDegrees = 360 / totalRays
 	for	i = 1, totalRays do
 		local laser = player:FireDelayedBrimstone(shootDegrees * i, player)
 		local brimData = mod.CustomDataWrapper.getData(laser)

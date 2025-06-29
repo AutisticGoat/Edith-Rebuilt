@@ -155,34 +155,34 @@ function BurntHood:ParryJump(player, data)
 		game:MakeShockwave(playerPos, 0.035, 0.025, 2)
 	end
 
-	local lasers = Isaac.FindByType(EntityType.ENTITY_LASER) ---@type EntityLaser[]
+	-- local lasers = Isaac.FindByType(EntityType.ENTITY_LASER) ---@type EntityLaser[]
 
-	for _, laser in ipairs(lasers) do
-		local laserData = mod.GetData(laser)
-		local LaserCapsule = Capsule(laser.Position, laserData.EndPoint, laser.Size)
-		local DebugShape = DebugRenderer.Get(1, true)    
-		DebugShape:Capsule(LaserCapsule)
+	-- for _, laser in ipairs(lasers) do
+	-- 	local laserData = mod.GetData(laser)
+	-- 	local LaserCapsule = Capsule(laser.Position, laserData.EndPoint, laser.Size)
+	-- 	local DebugShape = DebugRenderer.Get(1, true)    
+	-- 	DebugShape:Capsule(LaserCapsule)
 
-		for _, player in ipairs(Isaac.FindInCapsule(LaserCapsule, EntityPartition.PLAYER)) do
-			local degree = mod.vectorToAngle((player.Position - laser.Position) * -1)
-			local divineShield = Isaac.Spawn(
-				EntityType.ENTITY_EFFECT,
-				EffectVariant.DIVINE_INTERVENTION,
-				0,
-				playerPos,
-				Vector.Zero,
-				player
-			):ToEffect()
+	-- 	for _, player in ipairs(Isaac.FindInCapsule(LaserCapsule, EntityPartition.PLAYER)) do
+	-- 		local degree = mod.vectorToAngle((player.Position - laser.Position) * -1)
+	-- 		local divineShield = Isaac.Spawn(
+	-- 			EntityType.ENTITY_EFFECT,
+	-- 			EffectVariant.DIVINE_INTERVENTION,
+	-- 			0,
+	-- 			playerPos,
+	-- 			Vector.Zero,
+	-- 			player
+	-- 		):ToEffect()
 
-			if not divineShield then return end	
+	-- 		if not divineShield then return end	
 
-			local shieldData = mod.GetData(divineShield)
-			shieldData.ParryShield = true 
-			shieldData.StaticPos = player.Position
-			divineShield.Rotation = degree
-			divineShield.Timeout = 1			
-		end
-	end
+	-- 		local shieldData = mod.GetData(divineShield)
+	-- 		shieldData.ParryShield = true 
+	-- 		shieldData.StaticPos = player.Position
+	-- 		divineShield.Rotation = degree
+	-- 		divineShield.Timeout = 1			
+	-- 	end
+	-- end
 
 	funcs.FeedbackMan(player, parryJumpSounds, Color(1, 1, 1, 0), isenemy)
 end

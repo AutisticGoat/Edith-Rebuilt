@@ -2,7 +2,7 @@ local mod = EdithRebuilt
 local enums = mod.Enums
 local trinkets = enums.TrinketType
 local Geode = {}
-local baseDestroyChance = 0.35
+local baseDestroyChance = 0.25
 local spawnChance = 0.025
 local baseRunes = 3
 local NonDestroyFlags = DamageFlag.DAMAGE_INVINCIBLE | DamageFlag.DAMAGE_NO_PENALTIES | DamageFlag.DAMAGE_CURSED_DOOR
@@ -19,10 +19,9 @@ function Geode:SpawnOnKill(npc, source)
 
 	local trinketMult = player:GetTrinketMultiplier(trinkets.TRINKET_GEODE)
 	local rng = player:GetTrinketRNG(trinkets.TRINKET_GEODE)
-	local spawnRuneRoll = rng:RandomFloat()
 	local KillSpawnChance = spawnChance * mod.exp(trinketMult, 1, 1.75)
 
-	if spawnRuneRoll > KillSpawnChance then return end
+	if not mod.RandomBoolean(rng, KillSpawnChance) then return end
 	local ChosenRune = mod.GetRandomRune(rng)
 
 	Isaac.Spawn(
@@ -44,11 +43,10 @@ function Geode:DestroyGeode(player, _, flags)
 
 	local rng = player:GetTrinketRNG(trinkets.TRINKET_GEODE)
 	local trinketMult = player:GetTrinketMultiplier(trinkets.TRINKET_GEODE)
-	local breakGeodeRoll = rng:RandomFloat()
 	local totalRune = baseRunes + (trinketMult - 1)
 	local spawnDegree = 360 / totalRune
 	
-	if breakGeodeRoll > baseDestroyChance then return end
+	if not mod.RandomBoolean(rng, baseDestroyChance) then return end
 	player:TryRemoveTrinket(trinkets.TRINKET_GEODE)
 
 	for i = 1, totalRune do

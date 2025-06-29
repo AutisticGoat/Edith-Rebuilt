@@ -1,9 +1,9 @@
 ---@diagnostic disable: missing-fields
--- Check out everything here: https://github.com/maya-bee/IsaacSaveManager
+-- Check out everything here: https://github.com/catinsurance/IsaacSaveManager/
 
 local game = Game()
 local SaveManager = {}
-SaveManager.VERSION = 2.2
+SaveManager.VERSION = "2.2.1"
 SaveManager.Utility = {}
 
 SaveManager.Debug = false
@@ -1262,6 +1262,7 @@ local function tryRemoveLeftoverData()
 			if key ~= "GLOBAL"
 				and not specialData
 				and not availableIndexes[key]
+				and not string.find(key, "GRID_")
 			then
 				SaveManager.Utility.DebugLog("Leftover", isRoom and "room" or "temp", "data removed for", key)
 				tab[key] = nil
@@ -1975,5 +1976,4 @@ SaveManager.MenuProvider = MenuProvider
 
 --#endregion
 
-EdithRebuilt.SaveManager = SaveManager 
-return EdithRebuilt.SaveManager
+return SaveManager

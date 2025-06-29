@@ -1,8 +1,10 @@
----@diagnostic disable-next-line: lowercase-global
 EdithRebuilt = RegisterMod("Edith: Rebuilt", 1)
 local mod = EdithRebuilt
 
-include("resources/scripts/save_manager").Init(mod)
+EdithRebuilt.CustomDataWrapper = require("resources.scripts.EdithRebuiltsavedata")
+EdithRebuilt.CustomDataWrapper.init(EdithRebuilt)
+EdithRebuilt.SaveManager = require("resources.scripts.EdithRebuiltSaveManager")
+EdithRebuilt.SaveManager.Init(mod)
 
 local myFolder = "resources.scripts.EdithKotryLibraryOfIsaac"
 local LOCAL_TSIL = include(myFolder .. ".TSIL")
@@ -14,8 +16,6 @@ mod.JumpLib.Init(mod)
 include("include")
 
 local tables = mod.Enums.Tables
-
--- some shared functions between edith and tainted Edith, the behave almost the same 
 
 function mod:OverrideTaintedInputs(entity, input, action)
     if not entity then return end
@@ -47,12 +47,16 @@ function mod:SetEdithStats(player, cacheFlag)
 end
 mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, mod.SetEdithStats)
 
----comment
 ---@param player EntityPlayer
 ---@param flags DamageFlag
 ---@return boolean?
 function mod:PlayerDamageManager(player, _, flags)
+    local game = mod.Enums.Utils.Game
+    local room = game:GetRoom()
+    local roomType = room:GetType()
+
     if not mod:IsAnyEdith(player) then return end
-	if mod.HasBitFlags(flags, DamageFlag.DAMAGE_ACID) or mod.HasBitFlags(flags, DamageFlag.DAMAGE_SPIKES) then return false end
+
+	if mod.HasBitFlags(flags, DamageFlag.DAMAGE_ACID) or (roomType ~= RoomType.ROOM_SACRIFICE and mod.HasBitFlags(flags, DamageFlag.DAMAGE_SPIKES)) then return false end
 end
 mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG, mod.PlayerDamageManager)

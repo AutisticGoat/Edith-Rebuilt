@@ -50,6 +50,8 @@ EdithRebuilt.Enums = {
 	Callbacks = {
 		PERFECT_PARRY = "EdithRebuilt_PERFECT_PARRY", -- Called everytime a Perfect Parry is triggered (player: EntityPlayer, entity: Entity)
 		PERFECT_PARRY_KILL = "EdithRebuilt_PERFECT_PARRY_KILL", -- Called everytime an enemy is killed by a Perfect Parry is triggered (player: EntityPlayer, entity: Entity)
+		TARGET_SPRITE_CHANGE = "EdithRebuilt_TARGET_SPRITE_CHANGE", -- Called everytime Edith's Target changes its design	
+		ARROW_SPRITE_CHANGE = "EdithRebuilt_ARROW_SPRITE_CHANGE", -- Called everytime Tainted Edith's arrow changes its design	
 	},
 	SubTypes = {
 		SALT_CREEP = Isaac.GetEntitySubTypeByName("Salt Creep"),
@@ -72,6 +74,7 @@ EdithRebuilt.Enums = {
 		SOUND_KNIGHT = Isaac.GetSoundIdByName("Knight"),
 		SOUND_JACK_OF_CLUBS = Isaac.GetSoundIdByName("JackOfClubs"),
 		SOUND_SOUL_OF_EDITH = Isaac.GetSoundIdByName("SoulOfEdith"),
+		SOUND_BLOQUEO = Isaac.GetSoundIdByName("BLOQUEO"),
 	},
 	Achievements = {
 		-- Edith unlocks
@@ -181,16 +184,7 @@ EdithRebuilt.Enums = {
 			[TearVariant.CUPID_BLOOD] = true,
 			[TearVariant.PUPULA_BLOOD] = true,
 			[TearVariant.GODS_FLESH_BLOOD] = true,
-		},
-		TearShatterColor = {
-			[true] = {
-				[true] = {0.4, 0.125, 0.125},
-				[false] = {0.4, 0.4, 0.4}
-			},
-			[false] = {
-				[true] = {0.65, 0.1, 0.1},
-				[false] = {1, 1, 1}
-			}
+			[TearVariant.NAIL_BLOOD] = true,
 		},
 		BackdropColors = {
 			[BackdropType.CORPSE3] = Color(0.75, 0.2, 0.2),
@@ -212,6 +206,7 @@ EdithRebuilt.Enums = {
 			Card.RUNE_BLACK,
 		},
 		JumpTags = {
+			
 			EdithJump = edithJumpTag,
 			TEdithHop = tedithHopTag,
 			TEdithJump = tedithJumpTag,
@@ -304,6 +299,7 @@ EdithRebuilt.Enums = {
 				"Machine",
 				"Mechanic",
 				"Knight",
+				"Bloqueo",
 			}, 
 
 		}
@@ -324,8 +320,21 @@ EdithRebuilt.Enums = {
 		ChargeBarcenterVector = Vector(0, 10),
 		ChargeBarrightVector = Vector(8, 10),
 		PaprikaColor = Color(0.8, 0.2, 0),
-		ParryPartitions = EntityPartition.ENEMY | EntityPartition.BULLET,
+		ParryPartitions = EntityPartition.ENEMY | EntityPartition.BULLET | EntityPartition.TEAR,
 		NewProjectilFlags = ProjectileFlags.HIT_ENEMIES | ProjectileFlags.CANT_HIT_PLAYER,
 		NearEnemyDetectionDist = 150,
 	},
 }
+
+local mod = EdithRebuilt
+
+-- I'll think on a better place to change this function later
+---@param target EntityEffect
+local function OnAnyTargetInit(_, target)
+    if target.Variant == mod.Enums.EffectVariant.EFFECT_EDITH_TARGET then
+        Isaac.RunCallback(mod.Enums.Callbacks.TARGET_SPRITE_CHANGE, target)
+    elseif target.Variant == mod.Enums.EffectVariant.EFFECT_EDITH_B_TARGET then
+        Isaac.RunCallback(mod.Enums.Callbacks.ARROW_SPRITE_CHANGE, target)
+    end
+end
+mod:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, OnAnyTargetInit)

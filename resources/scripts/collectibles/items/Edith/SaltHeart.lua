@@ -51,7 +51,7 @@ function SaltHeart:SpawnSaltCreep(player)
     playerData.SaltHeartSpawnSaltTimer = math.max(playerData.SaltHeartSpawnSaltTimer - 1, 0) 
     if playerData.SaltHeartSpawnSaltTimer % 5 ~= 0 then return end
     
-    mod:SpawnSaltCreep(player, player.Position, 2, 5, 2, "SaltHeart")
+    mod:SpawnSaltCreep(player, player.Position, 2, 5, 2, 3, "SaltHeart", false, true)
 end
 mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, SaltHeart.SpawnSaltCreep)
 

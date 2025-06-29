@@ -29,9 +29,7 @@ function mod:UsePepperGrinder(_, RNG, player)
     color:SetTint(subColor, subColor, subColor, 1)
     PepperCloud.Color = color
 
-
-	sfx:Play(mod.Enums.SoundEffect.SOUND_PEPPER_GRINDER, 10, 0, false, SoundPitch, 0)
-		
+	sfx:Play(mod.Enums.SoundEffect.SOUND_PEPPER_GRINDER, 10, 0, false, SoundPitch, 0)		
 	return true
 end
 mod:AddCallback(ModCallbacks.MC_USE_ITEM, mod.UsePepperGrinder, mod.Enums.CollectibleType.COLLECTIBLE_PEPPERGRINDER)

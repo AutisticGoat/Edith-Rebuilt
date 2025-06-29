@@ -10,7 +10,7 @@ function mod:RockStomp(player)
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_TERRA) then return end
 	
 	local birthright = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT)
-	local shockwaveDamage = (birthright and player.Damage * 1.4 or player.Damage) * 0.5
+	local shockwaveDamage = (birthright and player.Damage * 1.4 or player.Damage) / 2
 	local shockwaveRings = birthright and 2 or 1
 	local shockwaveParams = {
 		Duration = 6,

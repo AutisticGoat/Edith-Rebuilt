@@ -51,16 +51,13 @@ function Target:EdithTargetLogic(effect)
 	end
 	
 	local cameraPos = interpolateVector2D(playerPos, effectPos, 0.6)
-	local Camera = room:GetCamera()
-	Camera:SetFocusPosition(cameraPos)
+	room:GetCamera():SetFocusPosition(cameraPos)
 	
 	if room:GetType() == RoomType.ROOM_DUNGEON then
 		for _, v in ipairs(teleportPoints) do
 			local DungeonVector = Vector(v.X, v.Y)
-			if (effectPos - DungeonVector):Length() > 20 then goto Break end
+			if (effectPos - DungeonVector):Length() > 20 then break end
 			player.Position = effectPos + effect.Velocity:Normalized():Resized(25)
-			break
-			::Break::
 		end
 	end
 
@@ -84,8 +81,6 @@ local function RGBFunction(color, step)
 
 	if value > 1 then value = 0 end
 
-	-- print(value)
-
 	color.R, color.G, color.B = funcs.RGBToHSV(color.R, color.G, color.B)
 	color.R = color.R + step
 	color.R, color.G, color.B = funcs.HSVToRGB(color.R, color.G, color.B)
@@ -94,12 +89,7 @@ end
 local currentDate = os.date("*t") -- converts the current date to a table
 local isTDOV = (currentDate.month == 3 and currentDate.day == 31)
 
----@param Color1 Color
----@param Color2 Color
----@
-local function AreColorEquals(Color1, Color2)
-	return (Color1.R == Color2.R and Color1.G == Color2.G and Color1.B == Color2.B)
-end
+local HSVStartColor = Color(1, 0, 0)
 ---@param effect EntityEffect
 ---@return boolean?
 function Target:EdithTargetSprite(effect)
@@ -117,37 +107,28 @@ function Target:EdithTargetSprite(effect)
 	local targetColor = edithData.TargetColor
 	local RGBmode = edithData.RGBMode
 	local RGBspeed = edithData.RGBSpeed
-	local targetDesign = edithData.targetdesign
 	local targetLine = edithData.targetline
 	local effectColor = effect.Color
 	local effectSprite = effect:GetSprite()
-	local suffix = funcs.Switch(targetDesign, tables.TargetSuffix, "")
-	local path = misc.TargetPath .. suffix .. ".png"
+	local targetDesign = edithData.targetdesign
 	local color = effectColor
-
-	-- print(RGBmode)
 
 	if targetDesign == 1 then
 		if RGBmode then
-			RGBFunction(effectColor, RGBspeed)
-
-			-- print(color)
+			RGBFunction(HSVStartColor, RGBspeed)
+			effect:SetColor(HSVStartColor, -1, 100, false, false)
 		else
 			color:SetTint(targetColor.Red, targetColor.Green, targetColor.Blue, 1)
+			effect:SetColor(color, -1, 100, false, false)
 		end
 	else
 		color = Color.Default
+		effect:SetColor(color, -1, 100, false, false)
 	end
 
 	if isTDOV then
-		path = misc.TargetPath .. tables.TargetSuffix[2] .. ".png"
 		color = Color.Default
 	end
-
-	-- print(misc.HSVStartColor)
-
-	effect:SetColor(color, -1, 100, false, false)
-	effectSprite:ReplaceSpritesheet(0, path, true)
 
 	if not targetLine then return end
 	local targetlineColor = misc.TargetLineColor
@@ -162,13 +143,22 @@ function Target:EdithTargetSprite(effect)
 		targetlineColor:SetColorize(lineColor.R, lineColor.G, lineColor.B, 1)
 	end
 
-	if isObscure then
-		local def = {R = color.R, G = color.G, B = color.B}
-		local func = targetDesign == 1 and targetlineColor.SetTint or targetlineColor.SetColorize
-		local tableColor = funcs.Switch(targetDesign, tables.ColorValues, def)
-		func(targetlineColor, tableColor.R * div, tableColor.G * div, tableColor.B * div, 1)
-	end
-
-	funcs.DrawLine(player.Position, effect.Position, targetlineColor) 
+	funcs.DrawLine(player.Position, effect.Position, targetlineColor, isObscure) 
 end
 mod:AddCallback(ModCallbacks.MC_PRE_EFFECT_RENDER, Target.EdithTargetSprite, effect.EFFECT_EDITH_TARGET)
+
+---@param effect EntityEffect
+function mod:Mierda(effect)
+	if not saveManager:IsLoaded() then return end
+	local saveData = funcs.MenuData()
+
+	if not saveData then return end
+	local edithData = saveData.EdithData
+	local effectSprite = effect:GetSprite()
+	local targetDesign = edithData.targetdesign
+	local suffix = funcs.Switch(targetDesign, tables.TargetSuffix, "")
+	local path = misc.TargetPath .. suffix .. ".png"
+	
+	effectSprite:ReplaceSpritesheet(0, path, true)
+end
+mod:AddCallback(enums.Callbacks.TARGET_SPRITE_CHANGE, mod.Mierda)

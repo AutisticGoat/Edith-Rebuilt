@@ -6,14 +6,16 @@ local parrySyn = "parrySynergies/"
 
 local includeFiles = {
 	-- Cosas necesarias
+		-- 
 	"definitions",
-	"savedata",
+	"EID",
+	-- "savedata",
 	"Birthcake",
 	"prenpckillcallback",
 	"functions/functions",
 	"functions/unlock_functions",
 	"ImGui",
-	
+	"EID",
 	"EdithKotryHudHelper",
 	"lhsx",
 	
@@ -65,6 +67,7 @@ local includeFiles = {
 	stmpSyn .. "Rockwaves",
 	stmpSyn .. "SpiritSword",
 	stmpSyn .. "EpicFetus",
+	stmpSyn .. "StatusEffects",
 		
 	parrySyn .. "Brimstone",
 

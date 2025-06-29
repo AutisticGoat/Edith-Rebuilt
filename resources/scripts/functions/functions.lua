@@ -10,8 +10,8 @@ local jumpTags = tables.JumpTags
 local jumpFlags = tables.JumpFlags
 local misc = enums.Misc
 local players = enums.PlayerType
-
 local data = mod.CustomDataWrapper.getData
+local saveManager = mod.SaveManager
 
 local MortisBackdrop = {
 	MORGUE = 3,
@@ -127,9 +127,7 @@ end
 function EdithRebuilt.IsDefensiveStomp(player)
 	if not mod.IsEdith(player, false) then return false end
 
-	local playerData = mod.CustomDataWrapper.getData(player)
-
-	return playerData.IsDefensiveStomp 
+	return data(player).IsDefensiveStomp 
 end
 
 ---Helper tears stat manager function
@@ -161,46 +159,23 @@ function EdithRebuilt.GetPlayerRange(player)
 	return player.TearRange / 40
 end
 
----Converts a vector to an angle
----@param vector Vector
----@return integer
-function EdithRebuilt.vectorToAngle(vector)
-	local x, y = vector.X, vector.Y
-
-	if x == 0 then
-		return y > 0 and 90 or y < 0 and 270 or 0
-	end
-
-	local angle = math.deg(math.atan(y / x))
-	if x < 0 then
-		angle = angle + 180
-	elseif y < 0 then
-		angle = angle + 360
-	end
-
-	return math.floor((angle + 45) / 90) * 90
-end
-
----
----@param color Color
----@param red number
----@param green number
----@param blue number
+---Helper function to directly change `entity`'s color
+---@param entity Entity
+---@param red? number
+---@param green? number
+---@param blue? number
 ---@param alpha? number
----@param redOff? number
----@param greenOff? number
----@param blueOff? number
-function EdithRebuilt:ChangeColor(color, red, green, blue, alpha, redOff, greenOff, blueOff)
-	local newcolor = color
-	color.R = red or newcolor.R
-	color.G = green or newcolor.G
-	color.B = blue or newcolor.B
-	color.A = alpha or newcolor.A
-	color.RO = redOff or newcolor.RO
-	color.GO = greenOff or newcolor.GO
-	color.BO = blueOff or newcolor.BO
+function EdithRebuilt:ChangeColor(entity, red, green, blue, alpha)
+	local color = entity.Color
 	
-	color = newcolor
+	local Red = red or color.R
+	local Green = green or color.G
+	local Blue = blue or color.B
+	local Alpha = alpha or color.A
+
+	color:SetTint(Red, Green, Blue, Alpha)
+
+	entity.Color = color
 end
 
 ---Helper grid destroyer function
@@ -229,15 +204,15 @@ local ANGLE_SEPARATION = 360 / MAX_POINTS
 
 LINE_SPRITE:SetFrame("Dead", 0)
 
----@param entity Entity
+---@param pos Vector
 ---@param AreaSize number
 ---@param AreaColor Color
-function EdithRebuilt.RenderAreaOfEffect(entity, AreaSize, AreaColor) -- Took from Melee lib, tweaked a little bit
+function EdithRebuilt.RenderAreaOfEffect(pos, AreaSize, AreaColor) -- Took from Melee lib, tweaked a little bit
 	local room = game:GetRoom()
 
 	if room:GetRenderMode() == RenderMode.RENDER_WATER_REFLECT then return end
 
-    local hitboxPosition = entity.Position
+    local hitboxPosition = pos
     local renderPosition = Isaac.WorldToScreen(hitboxPosition) - game.ScreenShakeOffset
     local hitboxSize = AreaSize
     local offset = Isaac.WorldToScreen(hitboxPosition + Vector(0, hitboxSize)) - renderPosition + Vector(0, 1)
@@ -295,6 +270,34 @@ function EdithRebuilt.stopTEdithHops(player, cooldown, useQuitJump, resetChrg)
 	player:SetMinDamageCooldown(cooldown)
 end
 
+---Returns a chance based boolean
+---@param rng? RNG -- if `nil`, the function will use Mod's `RNG` object instead
+---@param chance? number if `nil`, default chance will be 0.5 (50%)
+function EdithRebuilt.RandomBoolean(rng, chance)
+	rng = rng or utils.RNG
+	chance = chance or 0.5
+
+	return rng:RandomFloat() <= chance
+end
+
+---Helper function for a better management of random floats, allowing to use min and max values, like `math.random()`
+---@param rng? RNG if `nil`, the function will use Mod's `RNG` object instead
+---@param min number
+---@param max? number if `nil`, returned number will be one between 0 and `min`
+function EdithRebuilt.RandomFloat(rng, min, max)
+	rng = rng or utils.RNG
+
+	if not max then
+		max = min
+		min = 0
+	end
+
+	min = min * 1000
+	max = max * 1000
+
+	return rng:RandomInt(min, max) / 1000
+end
+
 ---Manages Edith's Target and Tainted Edith's arrow behavior when going trough doors
 ---@param effect EntityEffect
 ---@param player EntityPlayer
@@ -306,24 +309,32 @@ function EdithRebuilt:TargetDoorManager(effect, player, triggerDistance)
 	local roomName = level:GetCurrentRoomDesc().Data.Name
 	local isTainted = mod.IsEdith(player, true) or false
 	local MirrorRoomCheck = roomName == "Mirror Room" and player:HasInstantDeathCurse()
+	local playerHasPhoto = (player:HasCollectible(CollectibleType.COLLECTIBLE_POLAROID) or player:HasCollectible(CollectibleType.COLLECTIBLE_NEGATIVE))
 
 	for i = 0, 7 do
 		local door = room:GetDoor(i)
 		if not door then goto Break end
 		local sprite = door:GetSprite()
-		local MausoleumRoomCheck = string.find(sprite:GetLayer(0):GetSpritesheetPath(), "mausoleum") ~= nil
+		local doorSpritePath = sprite:GetLayer(0):GetSpritesheetPath()
+		local MausoleumRoomCheck = string.find(doorSpritePath, "mausoleum") ~= nil
+		local StrangeDoorCheck = string.find(doorSpritePath, "mausoleum_alt") ~= nil
+		local ShouldMoveToStrangeDoorPos = StrangeDoorCheck and sprite:WasEventTriggered("FX")
 		local doorPos = room:GetDoorSlotPosition(i)
-		if not (doorPos and effectPos:Distance(doorPos) <= triggerDistance) then 			
+
+		if not (doorPos and effectPos:Distance(doorPos) <= triggerDistance) then 	
 			if player.Color.A < 1 then
-				mod:ChangeColor(player.Color, 1, 1, 1, 1)
+				mod:ChangeColor(player, _, _, _, 1)
 			end
 			goto Break 
 		end
-		if door:IsOpen() or MirrorRoomCheck then
-			mod:ChangeColor(player.Color, 1, 1, 1, 0)
+
+		if door:IsOpen() or MirrorRoomCheck or ShouldMoveToStrangeDoorPos then
+
 			player.Position = doorPos
 			mod.RemoveEdithTarget(player, isTainted)
-			
+		elseif StrangeDoorCheck then
+			if not playerHasPhoto then goto Break end
+			door:TryUnlock(player)
 		elseif MausoleumRoomCheck then
 			if not sprite:IsPlaying("KeyOpen") then
 				sprite:Play("KeyOpen")
@@ -333,7 +344,7 @@ function EdithRebuilt:TargetDoorManager(effect, player, triggerDistance)
 				door:TryUnlock(player, true)
 			end
 		else
-			mod:ChangeColor(player.Color, 1, 1, 1, 1)
+			mod:ChangeColor(player, 1, 1, 1, 1)
 			door:TryUnlock(player)
 		end
 		::Break::
@@ -385,7 +396,7 @@ function EdithRebuilt.DashItemBehavior(player)
 	if not edithTarget then return end
 	local effects = player:GetEffects()
 	local hasMarsEffect = effects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_MARS)
-	local direction = mod.GetEdithTargetDirection(player)
+	local direction = mod.GetEdithTargetDirection(player, false)
 	local distance = mod.GetEdithTargetDistance(player)
 
 	if hasMarsEffect then
@@ -415,7 +426,7 @@ end
 
 ---@param player EntityPlayer
 function EdithRebuilt.FallBehavior(player)
-	local distance = mod.GetEdithTargetDirection(player)
+	local distance = mod.GetEdithTargetDistance(player)
 	local isMovingTarget = mod.IsEdithTargetMoving(player)
 	local data = JumpLib:GetData(player)
 	local playerData = mod.CustomDataWrapper.getData(player)
@@ -435,21 +446,19 @@ end
 
 ---@param player EntityPlayer
 ---@param data JumpConfig
-function EdithRebuilt.BombFall(player, data)
-	local playerData = mod.CustomDataWrapper.getData(player)
-	
-	if player:GetNumBombs() <= 0 and not player:HasGoldenBomb() then return end
+function EdithRebuilt.BombFall(player, data)	
+	if mod.IsDefensiveStomp(player) then return end
 	if not Input.IsActionTriggered(ButtonAction.ACTION_BOMB, player.ControllerIndex) then return end
-	if playerData.IsDefensiveStomp then return end
-	
+	if player:GetNumBombs() <= 0 and not player:HasGoldenBomb() then return end
+
+	local playerData = mod.CustomDataWrapper.getData(player)
 	playerData.BombStomp = true
-	JumpLib:SetSpeed(player, 10 + (data.Height / 10))
+	JumpLib:SetSpeed(player, 8 + (data.Height / 10))
 end
 
 local backdropColors = tables.BackdropColors
 ---@param player EntityPlayer
 function EdithRebuilt.InitEdithJump(player)	
-	
 	local distance = mod.GetEdithTargetDistance(player)
 	local jumpSpeed = player.CanFly and 1.3 or 1.85
 	local soundeffect = player.CanFly and SoundEffect.SOUND_ANGEL_WING or SoundEffect.SOUND_SHELLGAME
@@ -483,11 +492,9 @@ function EdithRebuilt.InitEdithJump(player)
 	local switch = {
 		[EffectVariant.BIG_SPLASH] = function()
 			color = backdropColors[BackDrop] or Color(0.7, 0.75, 1)
-
 			if IsMortis then
-					color = Color(0, 0.8, 0.76, 1, 0, 0, 0)
-				end
-
+				color = Color(0, 0.8, 0.76, 1, 0, 0, 0)
+			end
 		end,
 		[EffectVariant.POOF02] = function()
 			color = backdropColors[BackDrop] or Color(1, 0, 0)
@@ -499,7 +506,6 @@ function EdithRebuilt.InitEdithJump(player)
 					[MortisBackdrop.FLESH] = Color(0, 0, 0, 1, 0.55, 0.5, 0.55),
 				}
 				local newcolor = mod.When(EdithRebuilt.GetMortisDrop(), Colors, Color.Default)
-
 				color = newcolor
 			end
 		end,
@@ -538,64 +544,30 @@ function EdithRebuilt.IsDogmaAppearCutscene()
 	return TVSprite:IsPlaying("Idle2") and Dogma ~= nil
 end
 
--- local bloodyColor = Color(148/255, 0, 0, 1)
-
 ---@param tear EntityTear
 local function tearCol(_, tear)
-	if not tear.Parent then return end
-
-	local player = tear.Parent:ToPlayer()
-	if not player or not mod:IsAnyEdith(player) then return end
-
 	local tearData = data(tear)
-	if not tearData.ShatterSprite then return end
-
-	local isBloody = string.find(tearData.ShatterSprite, "blood") ~= nil
-	local isBurnt = string.find(tearData.ShatterSprite, "burnt") ~= nil
-	local shatterColor = tables.TearShatterColor[isBurnt][isBloody]
-
-	local ShatterCol = Color()
-
-
-
-	-- local colorMult = (isBurnt and misc.BurnedSaltColor or Color.Default) 
-	-- local SeparateColorMult = colorMult 
-
-	ShatterCol = tear.Color
-
-	-- if isBloody then
-	-- 	colorMult.R = 148/255
-	-- end
-
-	-- print(ShatterCol * misc.BurntSaltColor)
-
-	-- for k, v in pairs(shatterColor) do
-
-	-- 	print(Color(v[1], v[2], v[3]))
-
-	-- end
+	if not tearData.IsEdithRebuiltSaltTear then return end
 
 	for _, ent in ipairs(Isaac.FindByType(EntityType.ENTITY_EFFECT)) do
-		if not (ent.Variant == 145 or ent.Variant == 35) then goto Break end
-		if tear.Position:Distance(ent.Position) > 15 then goto Break end
-		if ent.Variant == 35 then
-			-- if isBloody then
-				-- colorMult = SeparateColorMult * Color(148/255, 0, 0, 1)
+		local var = ent.Variant
+		local sprite = ent:GetSprite()
+		
+		if not (var == EffectVariant.ROCK_POOF or var == EffectVariant.TOOTH_PARTICLE) then goto Break end
+		if ent.Position:Distance(tear.Position) > 10 then goto Break end
 
-			-- end
-			ent.Color = ShatterCol
-			-- print(ent.Color)
-		elseif ent.Variant == 145 then
-			ent:GetSprite():ReplaceSpritesheet(0, misc.TearPath .. tearData.ShatterSprite .. ".png", true)
+		local Path = var == EffectVariant.ROCK_POOF and tearData.ShatterSprite or tearData.SaltGibsSprite
+
+		if var == EffectVariant.TOOTH_PARTICLE then
+			if ent.SpawnerEntity then goto Break end
+			ent.Color = tear.Color
 		end
-		-- ent.Color = tear.Color * colorMult
-			-- ent.Color:SetTint(shatterColor[1], shatterColor[2], shatterColor[3], 1)
-		-- print(ent.Variant, ent.Color)
-		-- EdithRebuilt:ChangeColor(ent.Color, shatterColor[1], shatterColor[2], shatterColor[3])
+
+		sprite:ReplaceSpritesheet(0, misc.TearPath .. Path .. ".png", true)
 		::Break::
 	end
 end
-EdithRebuilt:AddCallback(ModCallbacks.MC_POST_TEAR_DEATH, tearCol)
+mod:AddCallback(ModCallbacks.MC_POST_TEAR_DEATH, tearCol)
 
 ---@param tear EntityTear
 ---@param IsBlood boolean
@@ -607,18 +579,19 @@ local function doEdithTear(tear, IsBlood, isTainted)
 
 	local tearSizeMult = player:HasCollectible(CollectibleType.COLLECTIBLE_SOY_MILK) and 1 or 0.85
 	local tearData = data(tear)
+	local tearSprite = tear:GetSprite()
+	local path = (isTainted and (IsBlood and "burnt_blood_salt_tears" or "burnt_salt_tears") or (IsBlood and "blood_salt_tears" or "salt_tears"))
+	local newSprite = misc.TearPath .. path .. ".png"
 
 	tear.Scale = tear.Scale * tearSizeMult
 	tear:ChangeVariant(TearVariant.ROCK)
-	local tearSprite = tear:GetSprite()
-		
-	local path = (isTainted and (IsBlood and "burnt_blood_salt_tears" or "burnt_salt_tears") or (IsBlood and "blood_salt_tears" or "salt_tears"))
 	
 	tearData.ShatterSprite = (isTainted and (IsBlood and "burnt_blood_salt_shatter" or "burnt_salt_shatter") or (IsBlood and "blood_salt_shatter" or "salt_shatter"))
-				
-	local newSprite = misc.TearPath .. path .. ".png"
+	tearData.SaltGibsSprite = (isTainted and (IsBlood and "burnt_blood_salt_gibs" or "burnt_salt_gibs") or (IsBlood and "blood_salt_gibs" or "salt_gibs"))
+	
 	tearSprite:ReplaceSpritesheet(0, newSprite, true)
 	tear.Color = player.Color
+	tearData.IsEdithRebuiltSaltTear = true
 end
 
 ---Forces tears to look like salt tears. `tainted` argument sets tears for Tainted Edith
@@ -656,7 +629,7 @@ function EdithRebuilt:SpawnBlackPowder(parent, quantity, position, distance)
 			position + Vector(0, distance):Rotated(degrees * i), 
 			Vector.Zero, 
 			parent
-		):ToEffect()
+		)
 		if not blackPowder then return end
 		local powderData = data(blackPowder)
 		powderData.CustomSpawn = true
@@ -669,8 +642,9 @@ function EdithRebuilt:SpawnBlackPowder(parent, quantity, position, distance)
 		position, 
 		Vector.Zero, 
 		nil
-	):ToEffect()
+	) ---@type EntityEffect
 
+---@diagnostic disable-next-line: inject-field
 	Pentagram.Scale = distance + distance / 2	
 end
 
@@ -715,8 +689,15 @@ end
 ---@param damage number
 ---@param timeout number
 ---@param gibAmount integer
+---@param gibSpeed number
 ---@param spawnType string
-function EdithRebuilt:SpawnSaltCreep(parent, position, damage, timeout, gibAmount, spawnType)
+---@param inheritParentColor? boolean
+---@param inheritParentVel? boolean
+function EdithRebuilt:SpawnSaltCreep(parent, position, damage, timeout, gibAmount, gibSpeed, spawnType, inheritParentColor, inheritParentVel)
+	inheritParentColor = inheritParentColor or false
+	inheritParentVel = inheritParentVel or false
+	gibAmount = gibAmount or 0
+
 	local salt = Isaac.Spawn(
 		EntityType.ENTITY_EFFECT, 
 		EffectVariant.PLAYER_CREEP_RED, 
@@ -728,13 +709,17 @@ function EdithRebuilt:SpawnSaltCreep(parent, position, damage, timeout, gibAmoun
 	
 	if not salt then return end
 
+	local saltColor = inheritParentColor and parent.Color or Color.Default
+
 	salt.CollisionDamage = damage or 0
-	
+	salt.Color = saltColor
+
 	local timeOutSeconds = mod:SecondsToFrames(timeout) or 30
 	salt:SetTimeout(timeOutSeconds)
 	
-	if gibAmount and gibAmount > 0 then
-		mod:SpawnSaltGib(parent, gibAmount, Color.Default)
+	if gibAmount > 0 then
+		local gibColor = inheritParentColor and Color.Default or nil
+		mod:SpawnSaltGib(parent, gibAmount, gibSpeed, gibColor, inheritParentVel)
 	end
 	local saltData = data(salt)
 	saltData.SpawnType = spawnType
@@ -750,15 +735,15 @@ function EdithRebuilt.GetEdithTargetDistance(player)
 	return player.Position:Distance(target.Position)
 end
 
----Returns a normalized vector that represents direction regarding Edith and her Target
+---Returns a normalized vector that represents direction regarding Edith and her Target, set `tainted` to true to check for Tainted Edith's arrow instead
 ---@param player EntityPlayer
+---@param tainted boolean
 ---@return Vector
-function EdithRebuilt.GetEdithTargetDirection(player)
-	local playerData = data(player)
-	local target = playerData.EdithTarget ---@type EntityEffect
-	local dif = target.Position - player.Position
+function EdithRebuilt.GetEdithTargetDirection(player, tainted)
+	tainted = tainted or false
+	local target = mod.GetEdithTarget(player, tainted)
 
-	return dif:Normalized()
+	return (target.Position - player.Position):Normalized()
 end
 
 ---Spawns Pepper creep, used for Pepper Grinder
@@ -807,15 +792,6 @@ function EdithRebuilt.ForceCharacterCostume(player, playertype, costumePath)
 	end
 end
 
----Checks if a number is between other two numbers
----@param num number
----@param lower number
----@param upper number
----@return boolean
-function EdithRebuilt:IsBetweenNumber(num, lower, upper)
-	return (lower <= num and num <= upper) or (lower >= num and num >= upper)
-end
-
 ---Checks if player is shooting by checking if shoot inputs are being pressed
 ---@param player EntityPlayer
 ---@return boolean
@@ -835,17 +811,20 @@ local targetSprite = Sprite("gfx/edith rebuilt target.anm2", true)
 ---@param from Vector
 ---@param to Vector
 ---@param color Color
-function EdithRebuilt.drawLine(from, to, color)
+---@param isObscure boolean
+function EdithRebuilt.drawLine(from, to, color, isObscure)
+	isObscure = isObscure or false
 	local diffVector = to - from
 	local angle = diffVector:GetAngleDegrees()
-	local sectionCount = math.floor(diffVector:Length() / 16)
+	local sectionCount = math.floor(diffVector:Length() / 16) - 1
 	local direction = Vector.FromAngle(angle)
-
+	local frame = isObscure and 1 or 0
+	
+	targetSprite:SetFrame("Line", frame)
 	targetSprite.Color = color
 	targetSprite.Rotation = angle
-	targetSprite:SetFrame("Line", 0)
 
-	for i = 0, sectionCount - 1 do
+	for i = 0, sectionCount do
 		local currentPos = from + direction * (i * 16)
 		targetSprite:Render(Isaac.WorldToScreen(currentPos))
 	end
@@ -854,8 +833,10 @@ end
 ---Spawns Salt gibs (Used as a visual feedback effect for edith stomps and salt related items)
 ---@param parent Entity
 ---@param Number integer
+---@param speed number
 ---@param color? Color
-function EdithRebuilt:SpawnSaltGib(parent, Number, color)
+---@param inheritParentVel? boolean
+function EdithRebuilt:SpawnSaltGib(parent, Number, speed, color, inheritParentVel)
     local parentColor = parent.Color
 	local parentPos = parent.Position
     local finalColor = Color(1, 1, 1) or parent.Color 
@@ -878,11 +859,15 @@ function EdithRebuilt:SpawnSaltGib(parent, Number, color)
             EffectVariant.TOOTH_PARTICLE,
             0,
             parentPos,
-            RandomVector():Resized(3),
+            RandomVector():Resized(speed),
             parent
 		):ToEffect()
 
 		if not saltGib then return end
+
+		if inheritParentVel then
+			saltGib.Velocity = saltGib.Velocity + parent.Velocity
+		end
 
         saltGib.Color = finalColor
 		saltGib.Timeout = 5
@@ -1018,6 +1003,9 @@ function EdithRebuilt.GetTPS(p)
     return TSIL.Utils.Math.Round(30 / (p.MaxFireDelay + 1), 2)
 end
 
+---@param ent Entity
+---@param parent EntityPlayer
+---@param knockback number
 function EdithRebuilt.HandleEntityInteraction(ent, parent, knockback)
     local posDif = ent.Position - parent.Position
     local stompBehavior = {
@@ -1025,6 +1013,8 @@ function EdithRebuilt.HandleEntityInteraction(ent, parent, knockback)
             local tear = ent:ToTear()
             if not tear then return end
 			if mod.IsEdith(parent, true) then return end
+
+			-- print("aosojdpoasjdpos")
 
             tear:AddTearFlags(TearFlags.TEAR_QUADSPLIT)
             tear.CollisionDamage = tear.CollisionDamage * 2
@@ -1077,6 +1067,7 @@ function EdithRebuilt.HandleEntityInteraction(ent, parent, knockback)
         [EntityType.ENTITY_SLOT] = function()    
         end,
         [EntityType.ENTITY_SHOPKEEPER] = function()
+			if mod.IsEdith(parent, true) then return end
             ent:Kill()
         end,
     }
@@ -1098,6 +1089,15 @@ function EdithRebuilt.LandDamage(ent, dealEnt, damage, knockback)
 	mod.TriggerPush(ent, dealEnt, knockback, 5, false)
 end
 
+---
+---@param ent Entity
+function EdithRebuilt.AddExtraGore(ent)
+	ent:AddEntityFlags(EntityFlag.FLAG_EXTRA_GORE)
+	ent:MakeBloodPoof(ent.Position, nil, 0.5)
+	sfx:Play(SoundEffect.SOUND_DEATH_BURST_LARGE)
+	-- game:ShakeScreen(15)
+end
+
 ---Custom Edith stomp Behavior
 ---@param parent EntityPlayer
 ---@param radius number
@@ -1113,22 +1113,28 @@ function EdithRebuilt:EdithStomp(parent, radius, damage, knockback, breakGrid)
 		mod:DestroyGrid(parent, radius)
 	end
 
-	local data = EdithRebuilt.CustomDataWrapper.getData(parent)
+	if not saveManager:IsLoaded() then return end
+	local saveData = saveManager.GetSettingsSave()
+
+	if not saveData then return end
+	local edithData = saveData.EdithData
+
+	local isDefStomp = mod.IsDefensiveStomp(parent)
 
 	for _, ent in ipairs(Isaac.FindInCapsule(StompCapsule)) do
 		mod.HandleEntityInteraction(ent, parent, knockback)
 		if ent.Type == EntityType.ENTITY_STONEY then
-			local stoneyData = EdithRebuilt.CustomDataWrapper.getData(parent)
+			local stoneyData = data(parent)
 			
-			if not data.IsDefensiveStomp and stoneyData.IsFragile then
+			if not isDefStomp and stoneyData.IsFragile then
 				ent:Die()
 			end
 
-			stoneyData.IsFragile = data.IsDefensiveStomp
+			stoneyData.IsFragile = isDefStomp
 		end
 
 		if not (ent:IsActiveEnemy() and ent:IsVulnerableEnemy()) then goto Break end
-		if data.IsDefensiveStomp then
+		if isDefStomp then
 			ent:AddFreeze(EntityRef(parent), 150)
 			goto Break
 		end
@@ -1142,28 +1148,29 @@ function EdithRebuilt:EdithStomp(parent, radius, damage, knockback, breakGrid)
 		sfx:Play(SoundEffect.SOUND_MEATY_DEATHS)
 
 		if ent.HitPoints > damage then goto Break end
-		-- print(ent.Size)
-		ent:AddEntityFlags(EntityFlag.FLAG_EXTRA_GORE)
-		ent:MakeBloodPoof(ent.Position, nil, 0.5)
-		sfx:Play(SoundEffect.SOUND_DEATH_BURST_LARGE)
-		-- game:ShakeScreen(20)
 		
 		---@diagnostic disable-next-line: undefined-field
 		if BirthcakeRebaked and parent:HasTrinket(BirthcakeRebaked.Birthcake.ID) and FrozenEnt then
-			for i = 1, rng:RandomInt(3, 7) do
+			for _ = 1, rng:RandomInt(3, 7) do
 				parent:FireTear(parent.Position, RandomVector():Resized(15))
 			end
+		end
+
+		if edithData.EnableGore then
+			mod.AddExtraGore(ent)
 		end
 
 		::Break::
 	end
 end
 
----Helper function that returns `EntityPlayer?` from `EntityRef`
+---Helper function that returns `EntityPlayer` from `EntityRef`
 ---@param EntityRef EntityRef
 ---@return EntityPlayer?
 function EdithRebuilt.GetPlayerFromRef(EntityRef)
 	local ent = EntityRef.Entity
+
+	if not ent then return nil end
 	local familiar = ent:ToFamiliar()
 	local player = ent:ToPlayer() or mod:GetPlayerFromTear(ent) or familiar and familiar.Player 
 
@@ -1262,22 +1269,22 @@ function EdithRebuilt.LandFeedbackManager(player, soundTable, GibColor, IsParryL
 	local volume ---@type number
 	local ScreenShakeIntensity ---@type number
 	local gibAmount ---@type number
+	local gibSpeed = 2
 
 	local playerData = data(player)
 	local IsSoulOfEdith = playerData.IsSoulOfEdithJump 
 	local IsMortis = EdithRebuilt.IsLGMortis()
-	-- return tags["EdithRebuilt_TaintedEdithJump"] or false
 
 	if mod.IsEdith(player, false) or IsSoulOfEdith then
-		local isStomping = playerData.IsDefensiveStomp
+		local isStomping = mod.IsDefensiveStomp(player)
 		local EdithData = menuData.EdithData
-
+		local size = (IsSoulOfEdith and 0.8 or (isStomping and 0.6 or 0.7)) * player.SpriteScale.X
+		SizeX = size; SizeY = size
 		soundPick = EdithData.stompsound ---@type number
 		volume = (isStomping and 1.5 or 2) * ((EdithData.stompVolume / 100) ^ 2) ---@type number
-		SizeX = (IsSoulOfEdith and 0.8 or (isStomping and 0.6 or 0.7)) * player.SpriteScale.X
-		SizeY = (IsSoulOfEdith and 0.8 or (isStomping and 0.6 or 0.8)) * player.SpriteScale.X
 		ScreenShakeIntensity = isStomping and 6 or 10
-		gibAmount = not EdithData.DisableGibs and 10 or 0
+		gibAmount = EdithData.DisableGibs and 0 or 10
+		gibSpeed = isStomping and 2 or 3
 	else 
 		local TEdithData = menuData.TEdithData
 		SizeX = IsParryLand and 0.8 or 0.5
@@ -1310,9 +1317,6 @@ function EdithRebuilt.LandFeedbackManager(player, soundTable, GibColor, IsParryL
 
 	local defColor = Color(1, 1, 1)
 	local color = defColor
-
-	
-
 	local switch = {
 		[EffectVariant.BIG_SPLASH] = function()
 			color = mod.When(BackDrop, backColor, Color(0.7, 0.75, 1))
@@ -1321,7 +1325,6 @@ function EdithRebuilt.LandFeedbackManager(player, soundTable, GibColor, IsParryL
 			color = BackDrop == BackdropType.DROSS and defColor or backColor[BackDrop] 
 		end,
 	}
-	
 	
 	mod.WhenEval(Variant, switch)
 	color = color or defColor
@@ -1337,46 +1340,45 @@ function EdithRebuilt.LandFeedbackManager(player, soundTable, GibColor, IsParryL
 		color = newcolor
 	end
 
-	-- print(color)
-
-
+	stompGFX:GetSprite().PlaybackSpeed = 1.3
 	stompGFX.SpriteScale = Vector(SizeX, SizeY) * player.SpriteScale.X
 	stompGFX.Color = color
+
 	GibColor = GibColor or defColor
-	mod:SpawnSaltGib(player, gibAmount, GibColor)
+	if gibAmount > 0 then	
+		mod:SpawnSaltGib(player, gibAmount, gibSpeed, GibColor)
+	end
 end
 
 ---@param entity Entity
 ---@return EntityPlayer?
 function EdithRebuilt:GetPlayerFromTear(entity)
-	for i=1, 3 do
-		local check = nil
-		if i == 1 then
-			check = entity.Parent
-		elseif i == 2 then
-			check = entity.SpawnerEntity
-		end
-		if check then
-			if check.Type == EntityType.ENTITY_PLAYER then
-				return mod:GetPtrHashEntity(check):ToPlayer()
-			elseif check.Type == EntityType.ENTITY_FAMILIAR then
-				return check:ToFamiliar().Player:ToPlayer()
-			end
-		end
+	local check = entity.Parent or entity.SpawnerEntity
+
+	if not check then return end
+
+	local checkType = check.Type
+
+	if checkType == EntityType.ENTITY_PLAYER then
+		return mod:GetPtrHashEntity(check):ToPlayer()
+	elseif check.Type == EntityType.ENTITY_FAMILIAR then
+		return check:ToFamiliar().Player:ToPlayer()
 	end
+
 	return nil
 end
 
+---@param entity Entity|EntityRef
+---@return Entity?
 function EdithRebuilt:GetPtrHashEntity(entity)
-	if entity then
-		if entity.Entity then
-			entity = entity.Entity
-		end
-		for _, matchEntity in pairs(Isaac.FindByType(entity.Type, entity.Variant, entity.SubType, false, false)) do
-			if GetPtrHash(entity) == GetPtrHash(matchEntity) then
-				return matchEntity
-			end
+	if not entity then return end
+	entity = entity.Entity ~= nil and entity.Entity or entity
+
+	for _, matchEntity in pairs(Isaac.FindByType(entity.Type, entity.Variant, entity.SubType, false, false)) do
+		if GetPtrHash(entity) == GetPtrHash(matchEntity) then
+			return matchEntity
 		end
 	end
+	-- end
 	return nil
 end

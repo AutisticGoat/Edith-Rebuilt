@@ -29,24 +29,20 @@ local maxCreep = 5
 local saltDegrees = 360 / maxCreep
 
 ---@param entity Entity
----@param amount number
 ---@param source EntityRef
-function EdithsHood:KillingSalEnemy(entity, amount, _, source)
-	local Ent = source.Entity
-	if not Ent or Ent.Type == 0 then return end
-	local player = Ent:ToPlayer() or mod:GetPlayerFromTear(Ent)
+function EdithsHood:KillingSalEnemy(entity, source)
+	if not source.Entity or source.Type == 0 then return end
+	local player = mod.GetPlayerFromRef(source)
 	if not player then return end
 	if not player:HasCollectible(items.COLLECTIBLE_EDITHS_HOOD) then return end
 	if not (entity:IsActiveEnemy() and entity:IsVulnerableEnemy()) then return end
-	if entity.HitPoints > amount then return end
 
 	local rng = player:GetCollectibleRNG(items.COLLECTIBLE_EDITHS_HOOD)	
-	local randomSpawnChance = mod.RandomNumber(1, 5, rng)
 	
-	if randomSpawnChance ~= 1 then return end
+	if not mod.RandomBoolean(rng, 0.2) then return end
 
 	for i = 1, maxCreep do
-		mod:SpawnSaltCreep(player, entity.Position + Vector(0, 18):Rotated(saltDegrees*i), 1, 5, 1, "Hood")
+		mod:SpawnSaltCreep(player, entity.Position + Vector(0, 18):Rotated(saltDegrees*i), 1, 5, 1, 3, "Hood")
 	end
 end
-mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, EdithsHood.KillingSalEnemy)
+mod:AddCallback(PRE_NPC_KILL.ID, EdithsHood.KillingSalEnemy)

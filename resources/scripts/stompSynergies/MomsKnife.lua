@@ -19,11 +19,15 @@ function mod:KnifeStomp(player)
 end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, mod.KnifeStomp, EdithJump)
 
+---@param knife EntityKnife
 function mod:RemoveKnife(knife)
 	local knifeData = funcs.GetData(knife)
 	
 	if knifeData.StompKnife ~= true then return end
+	
+	print(knife.Charge)
 	if knife:IsFlying() then return end 
+	
 	knife:Remove()
 end
 mod:AddCallback(ModCallbacks.MC_POST_KNIFE_UPDATE, mod.RemoveKnife)

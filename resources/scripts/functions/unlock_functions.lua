@@ -9,78 +9,102 @@ local game = utils.Game
 local unlocks = {}
 
 local UnlockTable = {
-    [CompletionType.MOMS_HEART] = {
-        Unlock = achievements.ACHIEVEMENT_GEODE,
-        Difficulty = Difficulty.DIFFICULTY_HARD,
-        Trinket = trinkets.TRINKET_GEODE
+    Edith = {
+        [CompletionType.MOMS_HEART] = {
+            Unlock = achievements.ACHIEVEMENT_GEODE,
+            Difficulty = Difficulty.DIFFICULTY_HARD,
+            Trinket = trinkets.TRINKET_GEODE
+        },
+        [CompletionType.ISAAC] = {
+            Unlock = achievements.ACHIEVEMENT_SALT_SHAKER,
+            Difficulty = Difficulty.DIFFICULTY_HARD,
+            Item = items.COLLECTIBLE_SALTSHAKER,
+        },
+        [CompletionType.SATAN] = {
+            Unlock = achievements.ACHIEVEMENT_SULFURIC_FIRE,
+            Difficulty = Difficulty.DIFFICULTY_HARD,
+            Item = items.COLLECTIBLE_SULFURIC_FIRE,
+        },
+        [CompletionType.BOSS_RUSH] = {
+            Unlock = achievements.ACHIEVEMENT_RUMBLING_PEBBLE,
+            Difficulty = Difficulty.DIFFICULTY_HARD,
+            Trinket = trinkets.TRINKET_RUMBLING_PEBBLE
+        },
+        [CompletionType.BLUE_BABY] = {
+            Unlock = achievements.ACHIEVEMENT_PEPPER_GRINDER,
+            Difficulty = Difficulty.DIFFICULTY_HARD,
+            Item = items.COLLECTIBLE_PEPPERGRINDER
+        },
+        [CompletionType.LAMB] = {
+            Unlock = achievements.ACHIEVEMENT_FAITH_OF_THE_UNFAITHFUL,
+            Difficulty = Difficulty.DIFFICULTY_HARD,
+            Item = items.COLLECTIBLE_FATE_OF_THE_UNFAITHFUL
+        },
+        [CompletionType.MEGA_SATAN] = {
+            Unlock = achievements.ACHIEVEMENT_MOLTEN_CORE,
+            Difficulty = Difficulty.DIFFICULTY_HARD,
+            Item = items.COLLECTIBLE_MOLTEN_CORE,
+        },
+        [CompletionType.ULTRA_GREED] = {
+            Unlock = achievements.ACHIEVEMENT_HYDRARGYRUM,
+            Difficulty = Difficulty.DIFFICULTY_GREED,
+            Item = items.COLLECTIBLE_HYDRARGYRUM,
+        },
+        [CompletionType.HUSH] = {
+            Unlock = achievements.ACHIEVEMENT_SAL,
+            Difficulty = Difficulty.DIFFICULTY_HARD,
+            Item = items.COLLECTIBLE_SAL,
+        },
+        [CompletionType.ULTRA_GREEDIER] = {
+            Unlock = achievements.ACHIEVEMENT_GILDED_STONE,
+            Difficulty = Difficulty.DIFFICULTY_GREEDIER,
+            Item = items.COLLECTIBLE_GILDED_STONE,
+        },
+        [CompletionType.DELIRIUM] = {
+            Unlock = achievements.ACHIEVEMENT_CHUNK_OF_BASALT,
+            Difficulty = Difficulty.DIFFICULTY_HARD,
+            Item = items.COLLECTIBLE_CHUNK_OF_BASALT,
+        },
+        [CompletionType.MOTHER] = {
+            Unlock = achievements.ACHIEVEMENT_DIVINE_RETRIBUTION,
+            Difficulty = Difficulty.DIFFICULTY_HARD,
+            Item = items.COLLECTIBLE_DIVINE_RETRIBUTION,
+        },
+        [CompletionType.BEAST] = {
+            Unlock = achievements.ACHIEVEMENT_EDITHS_HOOD,
+            Difficulty = Difficulty.DIFFICULTY_HARD,
+            Item = items.COLLECTIBLE_EDITHS_HOOD,
+        },
     },
-    [CompletionType.ISAAC] = {
-        Unlock = achievements.ACHIEVEMENT_SALT_SHAKER,
-        Difficulty = Difficulty.DIFFICULTY_HARD,
-        Item = items.COLLECTIBLE_SALTSHAKER,
-    },
-    [CompletionType.SATAN] = {
-        Unlock = achievements.ACHIEVEMENT_SULFURIC_FIRE,
-        Difficulty = Difficulty.DIFFICULTY_HARD,
-        Item = items.COLLECTIBLE_SULFURIC_FIRE,
-    },
-    [CompletionType.BOSS_RUSH] = {
-        Unlock = achievements.ACHIEVEMENT_RUMBLING_PEBBLE,
-        Difficulty = Difficulty.DIFFICULTY_HARD,
-        Trinket = trinkets.TRINKET_RUMBLING_PEBBLE
-    },
-    [CompletionType.BLUE_BABY] = {
-        Unlock = achievements.ACHIEVEMENT_PEPPER_GRINDER,
-        Difficulty = Difficulty.DIFFICULTY_HARD,
-        Item = items.COLLECTIBLE_PEPPERGRINDER
-    },
-    [CompletionType.LAMB] = {
-        Unlock = achievements.ACHIEVEMENT_FAITH_OF_THE_UNFAITHFUL,
-        Difficulty = Difficulty.DIFFICULTY_HARD,
-        Item = items.COLLECTIBLE_FATE_OF_THE_UNFAITHFUL
-    },
-    [CompletionType.MEGA_SATAN] = {
-        Unlock = achievements.ACHIEVEMENT_MOLTEN_CORE,
-        Difficulty = Difficulty.DIFFICULTY_HARD,
-        Item = items.COLLECTIBLE_MOLTEN_CORE,
-    },
-    [CompletionType.ULTRA_GREED] = {
-        Unlock = achievements.ACHIEVEMENT_HYDRARGYRUM,
-        Difficulty = Difficulty.DIFFICULTY_GREED,
-        Item = items.COLLECTIBLE_HYDRARGYRUM,
-    },
-    [CompletionType.HUSH] = {
-        Unlock = achievements.ACHIEVEMENT_SAL,
-        Difficulty = Difficulty.DIFFICULTY_HARD,
-        Item = items.COLLECTIBLE_SAL,
-    },
-    [CompletionType.ULTRA_GREEDIER] = {
-        Unlock = achievements.ACHIEVEMENT_GILDED_STONE,
-        Difficulty = Difficulty.DIFFICULTY_GREEDIER,
-        Item = items.COLLECTIBLE_GILDED_STONE,
-    },
-    [CompletionType.DELIRIUM] = {
-        Unlock = achievements.ACHIEVEMENT_CHUNK_OF_BASALT,
-        Difficulty = Difficulty.DIFFICULTY_HARD,
-        Item = items.COLLECTIBLE_THE_BOOK_OF_LUKE,
-    },
-    [CompletionType.MOTHER] = {
-        Unlock = achievements.ACHIEVEMENT_DIVINE_RETRIBUTION,
-        Difficulty = Difficulty.DIFFICULTY_HARD,
-        Item = items.COLLECTIBLE_DIVINE_RETRIBUTION,
-    },
-    [CompletionType.BEAST] = {
-        Unlock = achievements.ACHIEVEMENT_EDITHS_HOOD,
-        Difficulty = Difficulty.DIFFICULTY_HARD,
-        Item = items.COLLECTIBLE_EDITHS_HOOD,
-    },
+    TEdith = {
+        [CompletionType.MEGA_SATAN] = {
+            Unlock = achievements.ACHIEVEMENT_SALT_ROCKS,
+            Difficulty = Difficulty.DIFFICULTY_HARD,
+            Card = enums.Card.CARD_SALT_ROCKS,
+        },
+        [CompletionType.MOTHER] = {
+            Unlock = achievements.ACHIEVEMENT_PAPRIKA,
+            Difficulty = Difficulty.DIFFICULTY_HARD,
+            Trinket = trinkets.TRINKET_PAPRIKA
+        },
+        [CompletionType.DELIRIUM] = {
+            Unlock = achievements.ACHIEVEMENT_BURNT_HOOD,
+            Difficulty = Difficulty.DIFFICULTY_HARD,
+            Item = items.COLLECTIBLE_BURNT_HOOD,
+        },
+        [CompletionType.BEAST] = {
+            Unlock = achievements.ACHIEVEMENT_DIVINE_WRATH,
+            Difficulty = Difficulty.DIFFICULTY_HARD,
+            Item = items.COLLECTIBLE_DIVINE_WRATH,
+        },
+    }
 }
 
 function mod:ThankYou()
     local pgd = Isaac.GetPersistentGameData()
     local isComplete = true
 
-    for k, v in pairs(achievements) do
+    for _, v in pairs(achievements) do
         if v == achievements.ACHIEVEMENT_THANK_YOU then goto Break end
         if not pgd:Unlocked(v) then
             isComplete = false
@@ -96,71 +120,31 @@ end
 function unlocks:CheckStartUnlocks()
     local pgd = Isaac.GetPersistentGameData()
 
-    for _, table in ipairs(UnlockTable) do
-        if pgd:Unlocked(table.Unlock) then goto Break end
-                
-        if table.Item then
-            game:GetItemPool():RemoveCollectible(table.Item)
+    for _, charTable in pairs(UnlockTable) do     
+        for _, tab in pairs(charTable) do
+            if tab.Item then
+                game:GetItemPool():RemoveCollectible(tab.Item)
+            end
+            if tab.Trinket then
+                game:GetItemPool():RemoveTrinket(tab.Trinket)
+            end
         end
-
-        if table.Trinket then
-            game:GetItemPool():RemoveTrinket(table.Trinket)
-        end
-
-        ::Break::
     end
 end
 mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, unlocks.CheckStartUnlocks)
 
 ---@param mark CompletionType
-function unlocks:OnTriggerCompletion(mark)
+---@param player PlayerType
+function unlocks:OnTriggerCompletion(mark, player)
     local pgd = Isaac.GetPersistentGameData()
-    local unlock = mod.When(mark, UnlockTable)
+    local tableRef = player == players.PLAYER_EDITH and UnlockTable.Edith or players.PLAYER_EDITH_B and UnlockTable.TEdith or nil
 
-    if not unlock then return end
+    if not tableRef then return end
+    local unlock = mod.When(mark, UnlockTable.Edith)
 
-    if game.Difficulty == Difficulty.DIFFICULTY_GREEDIER then
-        pgd:TryUnlock(achievements.ACHIEVEMENT_HYDRARGYRUM)
-        pgd:TryUnlock(achievements.ACHIEVEMENT_GILDED_STONE)
-    end
+    if not unlock then 
+        if not player == players.PLAYER_EDITH_B then return end
 
-    if game.Difficulty ~= unlock.Difficulty then return end
-    pgd:TryUnlock(unlock.Unlock)
-
-    if Isaac.AllMarksFilled(players.PLAYER_EDITH) ~= 2 then return end
-    pgd:TryUnlock(achievements.ACHIEVEMENT_SALT_HEART)
-
-    mod:ThankYou()
-end
-mod:AddCallback(ModCallbacks.MC_POST_COMPLETION_MARK_GET, unlocks.OnTriggerCompletion, players.PLAYER_EDITH)
-
-local TUnlock = {
-    [CompletionType.MEGA_SATAN] = {
-        Unlock = achievements.ACHIEVEMENT_SALT_ROCKS,
-        Difficulty = Difficulty.DIFFICULTY_HARD,
-        -- Item = items.COLLECTIBLE_EDITHS_HOOD,
-    },
-    [CompletionType.MOTHER] = {
-        Unlock = achievements.ACHIEVEMENT_PAPRIKA,
-        Difficulty = Difficulty.DIFFICULTY_HARD,
-        -- Item = items.COLLECTIBLE_EDITHS_HOOD,
-    },
-    [CompletionType.DELIRIUM] = {
-        Unlock = achievements.ACHIEVEMENT_BURNT_HOOD,
-        Difficulty = Difficulty.DIFFICULTY_HARD,
-        -- Item = items.COLLECTIBLE_EDITHS_HOOD,
-    },
-    [CompletionType.BEAST] = {
-        Unlock = achievements.ACHIEVEMENT_DIVINE_WRATH,
-        Difficulty = Difficulty.DIFFICULTY_HARD,
-        -- Item = items.COLLECTIBLE_EDITHS_HOOD,
-    },
-}
-function unlocks:TaintedEdithUnlocks(mark)
-    local unlock = mod.When(mark, TUnlock)
-    local pgd = Isaac.GetPersistentGameData()
-
-    if not unlock then
         if Isaac.AllTaintedCompletion(players.PLAYER_EDITH_B, TaintedMarksGroup.SOULSTONE) == 2 then
             pgd:TryUnlock(achievements.ACHIEVEMENT_SOUL_OF_EDITH)
         end
@@ -172,15 +156,27 @@ function unlocks:TaintedEdithUnlocks(mark)
         if game.Difficulty == Difficulty.DIFFICULTY_GREEDIER then
             pgd:TryUnlock(achievements.ACHIEVEMENT_JACK_OF_CLUBS)
         end
+
         return
     end
 
+    if players.PLAYER_EDITH then
+        if game.Difficulty == Difficulty.DIFFICULTY_GREEDIER then
+            pgd:TryUnlock(achievements.ACHIEVEMENT_HYDRARGYRUM)
+            pgd:TryUnlock(achievements.ACHIEVEMENT_GILDED_STONE)
+        end
+    end
+    
     if game.Difficulty ~= unlock.Difficulty then return end
-
     pgd:TryUnlock(unlock.Unlock)
+
+    if Isaac.AllMarksFilled(players.PLAYER_EDITH) == 2 then 
+        pgd:TryUnlock(achievements.ACHIEVEMENT_SALT_HEART)
+    end
+
     mod:ThankYou()
-end 
-mod:AddCallback(ModCallbacks.MC_POST_COMPLETION_MARK_GET, unlocks.TaintedEdithUnlocks)
+end
+mod:AddCallback(ModCallbacks.MC_POST_COMPLETION_MARK_GET, unlocks.OnTriggerCompletion)
 
 function mod:UnlockThankYou()
     mod:ThankYou()
@@ -190,7 +186,6 @@ mod:AddCallback(ModCallbacks.MC_POST_ACHIEVEMENT_UNLOCK, mod.UnlockThankYou)
 local taintedAchievement = {
     [players.PLAYER_EDITH] = {unlock = achievements.ACHIEVEMENT_TAINTED_EDITH, gfx = "gfx/characters/costumes/characterTaintedEdith.png"}
 }
-
 function mod:SlotUpdate(slot)
     local pgd = Isaac.GetPersistentGameData()
     if not slot:GetSprite():IsFinished("PayPrize") then return end

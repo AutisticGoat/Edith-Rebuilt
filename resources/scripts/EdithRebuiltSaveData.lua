@@ -49,6 +49,18 @@ function library.init(mod)
     modRef:AddPriorityCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, -200, script.playerUpdate, PlayerVariant.PLAYER)
     modRef:AddPriorityCallback(ModCallbacks.MC_POST_GLOWING_HOURGLASS_SAVE, -200, script.postGlowingHourglassSave)
     modRef:AddPriorityCallback(ModCallbacks.MC_PRE_GLOWING_HOURGLASS_LOAD, -200, script.preGlowingHourglassLoad)
+
+	modRef:AddPriorityCallback(ModCallbacks.MC_FAMILIAR_INIT, -200, script.resetTemporaryData)
+	modRef:AddPriorityCallback(ModCallbacks.MC_POST_NPC_INIT, -200, script.resetTemporaryData)
+	modRef:AddPriorityCallback(ModCallbacks.MC_POST_TEAR_INIT, -200, script.resetTemporaryData)
+	modRef:AddPriorityCallback(ModCallbacks.MC_POST_BOMB_INIT, -200, script.resetTemporaryData)
+	modRef:AddPriorityCallback(ModCallbacks.MC_POST_SLOT_INIT, -200, script.resetTemporaryData)
+	modRef:AddPriorityCallback(ModCallbacks.MC_POST_LASER_INIT, -200, script.resetTemporaryData)
+	modRef:AddPriorityCallback(ModCallbacks.MC_POST_KNIFE_INIT, -200, script.resetTemporaryData)
+	modRef:AddPriorityCallback(ModCallbacks.MC_POST_PLAYER_INIT, -200, script.resetTemporaryData)
+	modRef:AddPriorityCallback(ModCallbacks.MC_POST_PICKUP_INIT, -200, script.resetTemporaryData)
+	modRef:AddPriorityCallback(ModCallbacks.MC_POST_EFFECT_INIT, -200, script.resetTemporaryData)
+	modRef:AddPriorityCallback(ModCallbacks.MC_POST_PROJECTILE_INIT, -200, script.resetTemporaryData)
 end
 
 --- Returns a Persistent Player data table that will only
@@ -87,6 +99,10 @@ function library.getPlayerData(player, trueData)
 				TWIN = true,
 				PLAYER_INDEX = index - 1,
 			}
+		end
+
+		if playerType == PlayerType.PLAYER_THESOUL_B then
+			PERSISTENT_PLAYER_DATA[index].IGNORE = true
 		end
 		
 		PERSISTENT_PLAYER_DATA[index].PLAYER_TYPE = playerType
@@ -176,8 +192,12 @@ function script:onLevelSave()
 end
 
 function script:onExitSave()
-	TEMPORARY_DATA = {}
     saveModData()
+end
+
+function script:resetTemporaryData(entity)
+	local hash = tostring(GetPtrHash(entity))
+	TEMPORARY_DATA[hash] = nil
 end
 
 function script:loadSaveData(slot, loaded, rawslot)
@@ -230,6 +250,7 @@ function script:playerUpdate(player)
 			data.PLAYER_TYPE = playerType
 		end
 	elseif not data.IGNORE
+	and not realData.IGNORE
 	and data.PLAYER_TYPE ~= playerType
 	then
 		data.PLAYER_TYPE = playerType

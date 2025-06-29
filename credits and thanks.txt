@@ -22,6 +22,15 @@
 - Sr Kalaka: Edith Sprite
 - Yuls: Tainted Edith sprite base
 
+(Testers)
+- ottostrasse
+- Jozin191
+- Tibu
+- SethoJunk
+- Noirsight
+- Sylvy_owo
+- .radiox
+
 (Team members)
 - gigamouse: finished Tainted Edith sprite, items sprites
 - Pattowolfx220: Testing, First Tainted Edith sprite, items sprites

@@ -17,10 +17,9 @@ function DivineRetribution:OnDRUse(_, rng, player, flags)
     local remainingHits = TSIL.Players.GetPlayerNumHitsRemaining(player)
 
     if (mod:isChap4() and remainingHits == 2) or remainingHits == 1 then return end
-    local BlessChance = rng:RandomInt(2)
 
-    if BlessChance == 0 then
-        sfx:Play(SoundEffect.SOUND_THUMBS_DOWN, 1, 0, false, 1, 0)
+    if mod.RandomBoolean(rng) then
+        sfx:Play(SoundEffect.SOUND_THUMBS_DOWN)
         Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.CRACK_THE_SKY, 1, player.Position, Vector.Zero, nil)
     else
         local enemiesCount = mod.GetEnemies()
@@ -29,10 +28,10 @@ function DivineRetribution:OnDRUse(_, rng, player, flags)
 
         player:AddSoulHearts(1)
 
-        sfx:Play(SoundEffect.SOUND_SUPERHOLY, 1, 0, false, 1, 0)
+        sfx:Play(SoundEffect.SOUND_SUPERHOLY)
         for _, enemies in pairs(enemiesCount) do
             Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.CRACK_THE_SKY, 10, enemies.Position, Vector.Zero, nil)
-            enemies:TakeDamage(Hascarbattery and 40 or 20, DamageFlag.DAMAGE_LASER | DamageFlag.DAMAGE_NO_PENALTIES, EntityRef(player), 0)
+            enemies:TakeDamage(Hascarbattery and 50 or 25, DamageFlag.DAMAGE_LASER, EntityRef(player), 0)
         end
     end
     game:ShakeScreen(10)

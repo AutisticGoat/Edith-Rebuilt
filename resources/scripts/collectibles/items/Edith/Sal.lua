@@ -9,7 +9,12 @@ function Sal:SalSpawnSaltCreep(player)
 	if not player:HasCollectible(items.COLLECTIBLE_SAL) then return end
 	if player.FrameCount % 15 ~= 0 then return end
 
-	mod:SpawnSaltCreep(player, player.Position, 0, 3, 2, "Sal")
+	local rng = player:GetCollectibleRNG(items.COLLECTIBLE_SAL)
+	local randomGib = {
+		amount = rng:RandomInt(2, 5),
+		speed = rng:RandomInt(100, 250) / 100
+	}
+	mod:SpawnSaltCreep(player, player.Position, 0, 3, randomGib.amount, randomGib.speed, "Sal", true, true)
 end
 mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, Sal.SalSpawnSaltCreep)
 
@@ -23,11 +28,12 @@ function Sal:KillingSalEnemy(entity, amount, _, source)
 
 	local Ent = source.Entity
 	local player = mod.GetPlayerFromRef(source)
-	local tear = Ent:ToTear()
+		
+	if not player then return end
+	if not player:HasCollectible(items.COLLECTIBLE_SAL) then return end
 
-	if not (player and player:HasCollectible(items.COLLECTIBLE_SAL)) then return end
-
-	if tear then
+	if Ent then
+		local tear = Ent:ToTear()
 		local entTearData = data(tear)
 		if entTearData.IsSalTear == true then return end
 	end

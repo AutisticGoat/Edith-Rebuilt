@@ -6,14 +6,12 @@ local GildedStone = {}
 
 ---@param tear EntityTear
 function GildedStone:ShootingRockTears(tear)
-	local player = mod:GetPlayerFromTear(tear) 
-	if not (player and player:HasCollectible(items.COLLECTIBLE_GILDED_STONE)) then return end
-
+	local player = mod:GetPlayerFromTear(tear)
+	if not player then return end
+	if not player:HasCollectible(items.COLLECTIBLE_GILDED_STONE) then return end
 	local rng = player:GetCollectibleRNG(items.COLLECTIBLE_GILDED_STONE)
-	local coins = player:GetNumCoins() 
-	local RockTearRoll = rng:RandomFloat() * 100
 	
-	if RockTearRoll > coins then return end
+	if not mod.RandomBoolean(rng, player:GetNumCoins()  / 100) then return end
 	local tearDamageChange = rng:RandomInt(500, 2500) / 100
 	tear.CollisionDamage = tear.CollisionDamage * tearDamageChange
 	tear:AddTearFlags(TearFlags.TEAR_ROCK)
@@ -63,13 +61,12 @@ function GildedStone:OnDestroyingRockReward(rock)
 		rng = player:GetCollectibleRNG(items.COLLECTIBLE_GILDED_STONE)
 		CoinCount = player:GetNumCoins()
 	end
-	local GeneralSpawnFormula = (CoinCount / 2) + (math.min(collectiveLuck, 1) - 1)
-	local GeneralSpawnRoll = rng:RandomFloat() * 100
+	local GeneralSpawnFormula = ((CoinCount / 2) + (math.min(collectiveLuck, 1) - 1)) / 100
 
-	if GeneralSpawnRoll > GeneralSpawnFormula then return end
+	if not mod.RandomBoolean(rng, GeneralSpawnFormula) then return end
 
 	local reward = getRandomReward(rng)
-	local vel = reward.Variant == 20 and RandomVector():Resized(3) or Vector.Zero
+	local vel = reward.Variant == 20 and rng:RandomVector():Resized(3) or Vector.Zero
 
 	Isaac.Spawn(EntityType.ENTITY_PICKUP, reward.Variant, reward.SubType, rock.Position, vel, nil)
 end

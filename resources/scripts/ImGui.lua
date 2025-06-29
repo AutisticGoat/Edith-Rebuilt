@@ -1,7 +1,9 @@
 local mod = EdithRebuilt
 local enums = mod.Enums
 local tables = enums.Tables
+local variants = enums.EffectVariant
 local ImGuiTables = tables.ImGuiTables
+local callbacks = enums.Callbacks
 local RenderMenu = true
 
 if not ImGui.ElementExists("edithRebuilt") then
@@ -52,11 +54,13 @@ local function ResetSaveData(isTainted)
 		TEdithData.taintedStompVolume = 100
 		TEdithData.TaintedParrySound = 1
 		TEdithData.RGBMode = false
+		TEdithData.EnableGore = false
 		TEdithData.RGBSpeed = 0.005
 	else
 		EdithData.TargetColor = {Red = 1, Green = 1, Blue = 1}
 		EdithData.stompsound = 1
 		EdithData.stompVolume = 100
+		EdithData.EnableGore = false
 		EdithData.targetdesign = 1
 		EdithData.DisableGibs = false
 		EdithData.RGBMode = false
@@ -77,6 +81,7 @@ local OptionsIDs = {
 	"DisableGibs", 
 	"SetRGB", 
 	"SetRGBSpeed", 
+	"EnableGore",
 	"TargetLine", 
 	"arrowDesign", 
 	"hopSound", 
@@ -123,6 +128,7 @@ function mod:UpdateImGuiData()
 	ImGui.UpdateData("JumpCooldownSound", ImGuiData.Value, (EdithData.CooldownSound - 1) or 0)
 	ImGui.UpdateData("DisableGibs", ImGuiData.Value, EdithData.DisableGibs or false)
 	ImGui.UpdateData("SetRGB", ImGuiData.Value, EdithData.RGBMode or false)
+	ImGui.UpdateData("EnableGore", ImGuiData.Value, EdithData.EnableGore or false)
 	ImGui.UpdateData("SetRGBSpeed", ImGuiData.Value, EdithData.RGBSpeed or 0.005)
 	ImGui.UpdateData("TargetLine", ImGuiData.Value, EdithData.targetline or false)
 	ImGui.UpdateData("arrowDesign", ImGuiData.Value, (TEdithData.ArrowDesign - 1) or 0)
@@ -130,6 +136,7 @@ function mod:UpdateImGuiData()
 	ImGui.UpdateData("parrySound", ImGuiData.Value, (TEdithData.TaintedParrySound - 1) or 0)
 	ImGui.UpdateData("TaintedDisableGibs", ImGuiData.Value, TEdithData.DisableGibs or false)
 	ImGui.UpdateData("TaintedSetRGB", ImGuiData.Value, TEdithData.RGBMode or false)
+	ImGui.UpdateData("TaintedEnableGore", ImGuiData.Value, TEdithData.EnableGore or false)
 	ImGui.UpdateData("TaintedSetRGBSpeed", ImGuiData.Value, TEdithData.RGBSpeed or 0.005)
 	ImGui.UpdateData("StompTaintedVolume", ImGuiData.Value, TEdithData.taintedStompVolume or 100)
 	ImGui.UpdateData("ScreenShake", ImGuiData.Value, miscData.shakescreen or false)
@@ -167,8 +174,14 @@ local function OptionsUpdate()
 	ImGui.AddCombobox("EdithSetting", "TargetDesign", "Set Target Design", 
 		function(index)
 			EdithData.targetdesign = index + 1
+			for _, target in pairs(Isaac.FindByType(EntityType.ENTITY_EFFECT, variants.EFFECT_EDITH_TARGET)) do
+				Isaac.RunCallback(callbacks.TARGET_SPRITE_CHANGE, target)
+			end
 		end, 
 	ImGuiTables.TargetDesign, 0, false)
+	ImGui.AddCheckbox("EdithSetting", "EnableGore", "Enable stomp kill extra gore", function(check)
+		EdithData.EnableGore = check
+	end, false)
 	ImGui.AddCheckbox("EdithSetting", "DisableGibs", "Disable salt gibs", function(check)
 		EdithData.DisableGibs = check
 	end, false)
@@ -233,8 +246,14 @@ local function OptionsUpdate()
 	ImGui.AddCombobox("TaintedEdithSetting", "arrowDesign", "Set Arrow Design", 		
 		function(index)
 			TEdithData.ArrowDesign = index + 1
+			for _, arrow in pairs(Isaac.FindByType(EntityType.ENTITY_EFFECT, variants.EFFECT_EDITH_B_TARGET)) do
+				Isaac.RunCallback(callbacks.ARROW_SPRITE_CHANGE, arrow)
+			end
 		end,
 	ImGuiTables.ArrowDesign, 0)
+	ImGui.AddCheckbox("TaintedEdithSetting", "TaintedEnableGore", "Enable parry kill extra gore", function(check)
+		TEdithData.EnableGore = check
+	end, false)
 	ImGui.AddCheckbox("TaintedEdithSetting", "TaintedDisableGibs", "Disable salt gibs", function(check)
 		TEdithData.DisableGibs = check
 	end, false)
@@ -280,7 +299,7 @@ local function OptionsUpdate()
 
 	ImGui.AddText("creditsWindow", 
 	[[
-		(Used resources and utilities)
+		Used resources and utilities:
 		- Library of Isaac (ThiccoCatto)
 		- JumpLib (Kerkel)
 		- Pre NPC kill callback (Kerkel)
@@ -296,7 +315,7 @@ local function OptionsUpdate()
 		- Hollow Knight parry sound effect (Team Cherry) 
 		- Iconoclasts parry sound effect (Joakim Sandberg (Konjak))
 
-		(Colaborators)
+		Colaborators:
 		- JJ: Inspiration to start this project
 		- D!Edith team: Inspiration to resume this project
 		- Skulldier: Sal concept
@@ -304,7 +323,16 @@ local function OptionsUpdate()
 		- Sr Kalaka: Edith Sprite
 		- Yuls: Tainted Edith sprite base
 
-		(Team members)
+		Testers:
+		- ottostrasse
+		- Jozin191
+		- Tibu
+		- SethoJunk
+		- Noirsight
+		- Sylvy_owo
+		- .radiox
+
+		Team members:
 		- gigamouse: finished Tainted Edith sprite, items sprites
 		- Pattowolfx220: Testing, First Tainted Edith sprite, items sprites
 		- Kotry: Project leader, coder, unlock sheets sprite
@@ -338,6 +366,7 @@ local function InitSaveData()
 	EdithData.TargetColor = EdithData.TargetColor or {Red = 1, Green = 1, Blue = 1}
 	EdithData.stompsound = EdithData.stompsound or 1
 	EdithData.stompVolume = EdithData.stompVolume or 100
+	EdithData.EnableGore = EdithData.EnableGore or false
 	EdithData.CooldownSound = EdithData.CooldownSound or 1
 	EdithData.targetdesign = EdithData.targetdesign or 1
 	EdithData.DisableGibs = EdithData.DisableGibs or false
@@ -352,6 +381,7 @@ local function InitSaveData()
 	TEdithData.TaintedParrySound = TEdithData.TaintedParrySound or 1
 	TEdithData.RGBMode = TEdithData.RGBMode or false
 	TEdithData.RGBSpeed = TEdithData.RGBSpeed or 0.5
+	TEdithData.EnableGore = TEdithData.EnableGore or false
 
 	miscData.shakescreen = miscData.shakescreen or true
 

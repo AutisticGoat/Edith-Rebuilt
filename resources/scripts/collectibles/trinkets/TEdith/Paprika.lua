@@ -13,11 +13,7 @@ function Paprika:OnKilling(entity, source, _, amount)
 
     if not player then return end
     if not player:HasTrinket(trinket.TRINKET_PAPRIKA) then return end
-
-    local rng = player:GetTrinketRNG(TrinketType.TRINKET_PAPER_CLIP)
-    local explodeRoll = rng:RandomInt(1, 100)
-
-    if explodeRoll > 50 then return end
+    if not mod.RandomBoolean(player:GetTrinketRNG(trinket.TRINKET_PAPRIKA)) then return end
 
     local Paprikacloud = Isaac.Spawn(
         EntityType.ENTITY_EFFECT,
@@ -28,16 +24,15 @@ function Paprika:OnKilling(entity, source, _, amount)
         nil
     )
 
-    local color = Paprikacloud.Color
-    color:SetTint(0.8, 0.2, 0, 1)
-    Paprikacloud.Color = color
+    local paprikaMult = player:GetTrinketMultiplier(trinket.TRINKET_PAPRIKA)
+    local DamageAdder = (0.05 * paprikaMult) - 0.05
 
-    local capsule = Capsule(entity.Position, Vector.One, 0, 40)
+    mod:ChangeColor(Paprikacloud, 0.8, 0.2, 0, 1)
 
-    for _, CapsuleEnt in ipairs(Isaac.FindInCapsule(capsule, EntityPartition.ENEMY)) do
-        CapsuleEnt:TakeDamage(amount * 0.25, 0, source, 0)
+    for _, CapsuleEnt in ipairs(Isaac.FindInCapsule(Capsule(entity.Position, Vector.One, 0, 40), EntityPartition.ENEMY)) do
+        CapsuleEnt:TakeDamage(amount * (0.25 * DamageAdder), 0, source, 0)
         CapsuleEnt:AddBurn(source, 60, amount * 0.2)
-        mod.TriggerPush(CapsuleEnt, player, 20, 3, false)
+        mod.TriggerPush(CapsuleEnt, entity, 20, 3, false)
     end
 end
 mod:AddCallback(PRE_NPC_KILL.ID, Paprika.OnKilling)

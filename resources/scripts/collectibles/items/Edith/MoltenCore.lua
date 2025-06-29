@@ -23,10 +23,7 @@ function MoltenCore:OnFiringTears(tear)
 	local tearData = data(tear)
 
 	tear:ChangeVariant(TearVariant.FIRE_MIND)
-	local color = tear.Color
-	color:SetTint(0.8, 0.5, 0.4, 1)
-	tear.Color = color
-
+	mod:ChangeColor(tear, 0.8, 0.5, 0.4)
 	tearData.MoltenCoreTear = true
 end
 

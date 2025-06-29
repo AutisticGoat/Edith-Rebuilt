@@ -2,12 +2,11 @@ local mod = EdithRebuilt
 local enums = mod.Enums
 local items = enums.CollectibleType
 local SulfuricFire = {}
-local RangeUse = 80
 
 ---@param player EntityPlayer
 ---@return boolean
 function SulfuricFire:UseSulfuricFire(_, _, player)
-	for _, enemy in pairs(Isaac.FindInRadius(player.Position, RangeUse, EntityPartition.ENEMY)) do
+	for _, enemy in pairs(Isaac.FindInRadius(player.Position, 80, EntityPartition.ENEMY)) do
 		local Flame = Isaac.Spawn(
 			EntityType.ENTITY_EFFECT,
 			EffectVariant.FIRE_JET,
@@ -15,18 +14,13 @@ function SulfuricFire:UseSulfuricFire(_, _, player)
 			enemy.Position,
 			Vector.Zero,
 			player
-		)
-		
-		local enemyMaxHP = enemy.MaxHitPoints
-		local damageFormula = player.Damage + (enemyMaxHP * 0.175)
-		local enemyHP = enemy.HitPoints
-		
-		Flame.CollisionDamage = player.Damage + damageFormula
+		)		
+		Flame.CollisionDamage = player.Damage + (enemy.MaxHitPoints * 0.175)
 		enemy:AddBrimstoneMark(EntityRef(player), 150)
 		
-		if enemyHP <= Flame.CollisionDamage then
-			player:FireBrimstoneBall(enemy.Position, Vector.Zero)
-		end
+		if enemy.HitPoints > Flame.CollisionDamage then goto Continue end
+		player:FireBrimstoneBall(enemy.Position, Vector.Zero)
+		::Continue:: 
 	end
 	return true
 end

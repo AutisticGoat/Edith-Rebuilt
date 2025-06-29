@@ -50,4 +50,7 @@
 	<sound name="SoulOfEdith">
 		<sample weight="1" path="SoulOfEdith.wav" />
 	</sound>
+	<sound name="BLOQUEO">
+		<sample weight="1" path="BLOQUEO.wav" />
+	</sound>
 </sounds>
