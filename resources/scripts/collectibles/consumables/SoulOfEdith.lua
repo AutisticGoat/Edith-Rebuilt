@@ -6,6 +6,8 @@ local utils = enums.Utils
 local sfx = utils.SFX
 local rng = utils.RNG
 local jumpFlags = enums.Tables.JumpFlags
+local data = mod.CustomDataWrapper.getData
+local damageBase = 13.5
 local SoulOfEdith = {}
 
 function SoulOfEdith.InitEdithJump(player)
@@ -34,7 +36,6 @@ function SoulOfEdith.InitEdithJump(player)
 end
 
 function SoulOfEdith:OnUse(_, player)
-    -- if JumpLib:GetData(player).Jumping then return false end
     SoulOfEdith.InitEdithJump(player)
 
     sfx:Play(sounds.SOUND_SOUL_OF_EDITH)
@@ -48,42 +49,29 @@ local SoundPick = {
 	[4] = sounds.SOUND_VINE_BOOM,
 }
 
-local data = mod.CustomDataWrapper.getData
-local damageBase = 13.5
 ---@param player EntityPlayer
 function SoulOfEdith:ParryJump(player)
-	local DamageStat = player.Damage 
-	local rawFormula = ((damageBase + DamageStat) / 1.5) 
-	local playerPos = player.Position
+	local rawFormula = ((damageBase + player.Damage) / 1.5) 
     local playerData = data(player)
-	local capsule = Capsule(player.Position, Vector.One, 0, 50)
-	local ImpreciseParryEnts = Isaac.FindInCapsule(capsule, EntityPartition.ENEMY)
 
-	for _, ent in pairs(ImpreciseParryEnts) do
-		local entPos = ent.Position
-		local newVelocity = ((playerPos - entPos) * -1):Resized(20)
-
+	for _, ent in pairs(Isaac.FindInCapsule(Capsule(player.Position, Vector.One, 0, 50), EntityPartition.ENEMY)) do
 		ent:TakeDamage(rawFormula, 0, EntityRef(player), 0)
-		ent:AddKnockback(EntityRef(player), newVelocity, 5, true)
+		mod.TriggerPush(ent, player, 20, 3, true)
 	end
     
     playerData.IsSoulOfEdithJump = true
 	mod.LandFeedbackManager(player, SoundPick, Color(1, 1, 1, 0))
     playerData.IsSoulOfEdithJump = false
 
-    local fallingTearsCount = rng:RandomInt(25, 40)
-
-    for _ = 1, fallingTearsCount do 
-        local tear = Isaac.Spawn(EntityType.ENTITY_TEAR, TearVariant.ROCK, 0, Isaac.GetRandomPosition(), Vector.Zero, player):ToTear()
+	local tear 
+    for _ = 1, rng:RandomInt(25, 40) do 
+        tear = Isaac.Spawn(EntityType.ENTITY_TEAR, TearVariant.ROCK, 0, Isaac.GetRandomPosition(), Vector.Zero, player):ToTear()
 		if not tear then return end
-
 		tear.CollisionDamage = tear.CollisionDamage * 1.2
-        tear.Height = -600 * (rng:RandomInt(90, 110) / 100)
-        tear.FallingSpeed = 4 * rng:RandomInt(600, 1800) / 1000
-        tear.FallingAcceleration = 2.5 * rng:RandomInt(600, 1800) / 1000
+        tear.Height = -600 * mod.RandomFloat(rng, 0.9, 1.1)
+		tear.FallingSpeed = 4 * mod.RandomFloat(rng, 0.6, 1.8)
+        tear.FallingAcceleration = 2.5 * mod.RandomFloat(rng, 0.6, 1.8)
 		tear:AddTearFlags(TearFlags.TEAR_SPECTRAL)
     end
 end
-mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, SoulOfEdith.ParryJump, {
-    tag = "SoulOfEdithJump"
-})
+mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, SoulOfEdith.ParryJump, { tag = "SoulOfEdithJump" })

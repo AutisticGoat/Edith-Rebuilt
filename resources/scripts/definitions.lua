@@ -50,8 +50,7 @@ EdithRebuilt.Enums = {
 	Callbacks = {
 		PERFECT_PARRY = "EdithRebuilt_PERFECT_PARRY", -- Called everytime a Perfect Parry is triggered (player: EntityPlayer, entity: Entity)
 		PERFECT_PARRY_KILL = "EdithRebuilt_PERFECT_PARRY_KILL", -- Called everytime an enemy is killed by a Perfect Parry is triggered (player: EntityPlayer, entity: Entity)
-		TARGET_SPRITE_CHANGE = "EdithRebuilt_TARGET_SPRITE_CHANGE", -- Called everytime Edith's Target changes its design	
-		ARROW_SPRITE_CHANGE = "EdithRebuilt_ARROW_SPRITE_CHANGE", -- Called everytime Tainted Edith's arrow changes its design	
+		TARGET_SPRITE_CHANGE = "EdithRebuilt_TARGET_SPRITE_CHANGE", -- Called everytime Edith's Targetv(or Tainted Edith's arrow) changes its design		
 	},
 	SubTypes = {
 		SALT_CREEP = Isaac.GetEntitySubTypeByName("Salt Creep"),
@@ -119,7 +118,6 @@ EdithRebuilt.Enums = {
 			[ButtonAction.ACTION_RIGHT] = 0,
 			[ButtonAction.ACTION_UP] = 0,
 			[ButtonAction.ACTION_DOWN] = 0,
-			-- [ButtonAction.ACTION_DROP] = false,
 		},
 		OverrideWeapons = {
 			[WeaponType.WEAPON_BRIMSTONE] = true,
@@ -129,20 +127,6 @@ EdithRebuilt.Enums = {
 			[WeaponType.WEAPON_ROCKETS] = true,
 			[WeaponType.WEAPON_TECH_X] = true,
 			[WeaponType.WEAPON_SPIRIT_SWORD] = true
-		},
-		DegreesToDirection = {
-			[0] = Direction.RIGHT,
-			[90] = Direction.DOWN,
-			[180] = Direction.LEFT,
-			[270] = Direction.UP,
-			[360] = Direction.RIGHT,
-		},
-		DirectionToVector = {
-			[Direction.NO_DIRECTION] = Vector.Zero,
-			[Direction.RIGHT] = Vector(1, 0),
-			[Direction.DOWN] = Vector(0, 1),
-			[Direction.LEFT] = Vector(-1, 0),
-			[Direction.UP] = Vector(0, -1)
 		},
 		ArrowSuffix = {
 			[1] = "_arrow",
@@ -206,7 +190,6 @@ EdithRebuilt.Enums = {
 			Card.RUNE_BLACK,
 		},
 		JumpTags = {
-			
 			EdithJump = edithJumpTag,
 			TEdithHop = tedithHopTag,
 			TEdithJump = tedithJumpTag,
@@ -220,12 +203,6 @@ EdithRebuilt.Enums = {
 			[CollectibleType.COLLECTIBLE_SUPLEX] = true,
 			[CollectibleType.COLLECTIBLE_PONY] = true,
 			[CollectibleType.COLLECTIBLE_WHITE_PONY] = true,
-		},
-		HeadAxis = {
-			[Direction.LEFT] = "Hor",
-			[Direction.RIGHT] = "Hor",
-			[Direction.UP] = "Ver",
-			[Direction.DOWN] = "Ver",
 		},
 		JumpParams = {
 			EdithJump = {
@@ -272,10 +249,6 @@ EdithRebuilt.Enums = {
 				"Fart Reverb",
 				"Vine Boom"
 			}, 	
-			ShakerSlot = {
-				"Primary",
-				"Pocket"
-			},
 			ArrowDesign = {
 				"Arrow", 
 				"Arrow (pointy)", 
@@ -301,16 +274,27 @@ EdithRebuilt.Enums = {
 				"Knight",
 				"Bloqueo",
 			}, 
-
-		}
+		},
+		BlacklistedPickupVariants = { -- Pickups blacklisted from use on `Entity:ForceCollide()`
+			[PickupVariant.PICKUP_PILL] = true,
+			[PickupVariant.PICKUP_TAROTCARD] = true,
+			[PickupVariant.PICKUP_TRINKET] = true,
+			[PickupVariant.PICKUP_COLLECTIBLE] = true,
+			[PickupVariant.PICKUP_BROKEN_SHOVEL] = true,
+		},
+		PhysicsFamiliar = {
+			[FamiliarVariant.SAMSONS_CHAINS] = true,
+			[FamiliarVariant.PUNCHING_BAG] = true,
+			[FamiliarVariant.CUBE_BABY] = true,
+		},
 	},
 	Misc = {
 		TearPath = "gfx/tears/",
 		HeadAdjustVec = Vector.Zero,
 		TargetPath = "gfx/effects/EdithTarget/effect_000_edith_target",
+		ArrowPath = "gfx/effects/TaintedEdithArrow/effect_000_tainted_edith",
 		TargetLineColor = Color(1, 1, 1),
 		SaltShakerDist = Vector(0, 60),
-		HSVStartColor = Color(1, 0, 0),
 		ColorDefault = Color(1, 1, 1, 1),
 		JumpReadyColor = Color(1, 1, 1, 1, 0.5, 0.5, 0.5),
 		PerfectParryRadius = 12,
@@ -325,16 +309,3 @@ EdithRebuilt.Enums = {
 		NearEnemyDetectionDist = 150,
 	},
 }
-
-local mod = EdithRebuilt
-
--- I'll think on a better place to change this function later
----@param target EntityEffect
-local function OnAnyTargetInit(_, target)
-    if target.Variant == mod.Enums.EffectVariant.EFFECT_EDITH_TARGET then
-        Isaac.RunCallback(mod.Enums.Callbacks.TARGET_SPRITE_CHANGE, target)
-    elseif target.Variant == mod.Enums.EffectVariant.EFFECT_EDITH_B_TARGET then
-        Isaac.RunCallback(mod.Enums.Callbacks.ARROW_SPRITE_CHANGE, target)
-    end
-end
-mod:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, OnAnyTargetInit)

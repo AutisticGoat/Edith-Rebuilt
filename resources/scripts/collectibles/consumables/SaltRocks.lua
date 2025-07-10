@@ -1,17 +1,14 @@
 local mod = EdithRebuilt
 local enums = mod.Enums
 local card = enums.Card
-local utils = enums.Utils
-local rng = utils.RNG
 local SaltRocks = {}
 local getData = mod.CustomDataWrapper.getData
 
 ---@param player EntityPlayer
 function SaltRocks:OnSaltRockUse(_, player)
     for _, enemy in pairs(mod.GetEnemies()) do
-        local enemyData = getData(enemy)
-        enemyData.Salted = true
         enemy:AddSlowing(EntityRef(player), 10000, 0.7, Color(1, 1, 1, 1, 0.2, 0.2, 0.2))
+        getData(enemy).Salted = true
     end
 end
 mod:AddCallback(ModCallbacks.MC_USE_CARD, SaltRocks.OnSaltRockUse, card.CARD_SALT_ROCKS)
@@ -33,9 +30,9 @@ function SaltRocks:OnSaltedEnemiesUpdate(NPC)
     if not enemyData.Salted then return end
     if not IsInAttackState then enemyData.CancelRoll = nil return end
         
-    enemyData.CancelRoll = enemyData.CancelRoll or rng:RandomFloat()
+    enemyData.CancelRoll = enemyData.CancelRoll or mod.RandomBoolean()
 
-    if enemyData.CancelRoll > 0.5 then return end
+    if not enemyData.CancelRoll then return end
     for _, proj in ipairs(Projectiles) do
         if GetPtrHash(proj.SpawnerEntity) ~= GetPtrHash(NPC) then goto Break end
         proj.Visible = false
@@ -53,12 +50,10 @@ local flag = false
 ---@param source EntityRef
 ---@param Cooldown integer
 function SaltRocks:OnSaltedEnemyTakingDamage(entity, amount, flags, source, Cooldown)    
-    local enemyData = getData(entity)
-
-    if not enemyData.Salted then return end
+    if not getData(entity).Salted then return end
     if not amount == (amount * 1.2) then return end
-
     if flag == true then return end
+
     flag = true
     entity:TakeDamage(amount * 1.2, flags, source, Cooldown)
     flag = false

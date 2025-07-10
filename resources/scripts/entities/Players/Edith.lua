@@ -43,12 +43,8 @@ end
 
 ---@param velocidad number
 ---@return integer
-local function calcularCooldown(velocidad)
-	local base = 18
-	local sub = -10
-	local cooldown = base + (velocidad - 1) * sub
-
-	return math.ceil(cooldown)
+local function GetStompCooldown(velocidad)
+	return math.ceil(18 + (velocidad - 1) * -10)
 end
 
 ---@param player EntityPlayer
@@ -72,7 +68,6 @@ function Edith:ColorCooldown(player, intensity, duration)
 	local Blue = off.B + (intensity + ((col.B + tint.B) * 0.2))
 		
 	pcolor:SetOffset(Red, Green, Blue)
-
 	player:SetColor(pcolor, duration, 100, true, false)
 end
 
@@ -81,12 +76,7 @@ function Edith:EdithInit(player)
 	if not funcs.IsEdith(player, false) then return end
 	mod.SetNewANM2(player, "gfx/EdithAnim.anm2")
 	mod.ForceCharacterCostume(player, players.PLAYER_EDITH, costumes.ID_EDITH_SCARF)
-
-
-	-- player:AddCollectible(CollectibleType.COLLECTIBLE_STRAW_MAN)
-
-	local playerData = funcs.GetData(player)
-	playerData.EdithJumpTimer = 20
+	funcs.GetData(player).EdithJumpTimer = 20
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, Edith.EdithInit)
 
@@ -101,8 +91,7 @@ function Edith:EdithSaltTears(tear)
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED) then return end
 	local target = funcs.GetTarget(player)
 	if not target then return end
-	local shotSpeed = player.ShotSpeed * 10
-	tear.Velocity = funcs.VelTarget(tear, target, shotSpeed)
+	tear.Velocity = funcs.VelTarget(tear, target, player.ShotSpeed * 10)
 end
 mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, Edith.EdithSaltTears)
 
@@ -163,10 +152,9 @@ function Edith:EdithJumpHandler(player)
 
 		local VectorX = ((input.left > 0.5 and -input.left) or (input.right > 0.5 and input.right) or 0) * (room:IsMirrorWorld() and -1 or 1)
 		local VectorY = ((input.up > 0.5 and -input.up) or (input.down > 0.5 and input.down) or 0)
-		local NormalMovement = Vector(VectorX, VectorY):Normalized()
 		local friction = target:GetSprite():IsPlaying("Blink") and 0.5 or 0.775
 
-		target.Velocity = (target.Velocity + (NormalMovement:Resized(3.5)))
+		target.Velocity = target.Velocity + Vector(VectorX, VectorY):Normalized():Resized(3.5)
 		target:MultiplyFriction(friction)
 	else
 		target:MultiplyFriction(0.8)
@@ -181,16 +169,12 @@ function Edith:EdithJumpHandler(player)
 		playerData.isJumping = true
 	end
 	
-	local isClose = funcs.TargetDis(player) <= 5
-	local isShooting = mod:IsPlayerShooting(player)
 	local isStomping = funcs.KeyStompPress(player)
-	local dir = isClose and Direction.DOWN or TSIL.Vector.VectorToDirection(funcs.TargetDir(player, false))
+	local dir = funcs.TargetDis(player) <= 5 and Direction.DOWN or TSIL.Vector.VectorToDirection(funcs.TargetDir(player, false))
 	
 	if isJumping or (not isShooting) or (isStomping) then
 		player:SetHeadDirection(dir, 1, true)
 	end
-
-	mod:TargetDoorManager(target, player, 25)
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, Edith.EdithJumpHandler)
 
@@ -212,18 +196,20 @@ local function isNearTrapdoor(player)
 	local room = game:GetRoom()
 	local gridSize = room:GetGridSize()
 	local playerPos = player.Position
+	local gent
+	local isValidGentType
+	local GentType
 
 	for i = 1, gridSize do
-		local gent = room:GetGridEntity(i)
+		gent = room:GetGridEntity(i)
 
 		if not gent then goto Break end
-		local GentType = gent:GetType()
-		local isValidGentType = funcs.Switch(GentType, entityTypes, false)
+		GentType = gent:GetType()
+		isValidGentType = funcs.Switch(GentType, entityTypes, false)
 
 		if GentType == GridEntityType.GRID_GRAVITY then return true end
 		if not isValidGentType then
-			local distance = (playerPos - gent.Position):Length()
-			return (distance <= 20)
+			return playerPos:Distance(gent.Position) <= 20
 		end
 		::Break::
 	end
@@ -233,21 +219,9 @@ end
 ---@param player EntityPlayer
 function Edith:OnStartingJump(player)
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_LUMP_OF_COAL) then return end
-
-	local playerData = funcs.GetData(player)
-	local TileDistance = funcs.TargetDis(player) / 40
-	playerData.CoalBonus = mod.RandomFloat(nil, 0.5, 0.6) * TileDistance
+	funcs.GetData(player).CoalBonus = mod.RandomFloat(nil, 0.5, 0.6) * funcs.TargetDis(player) / 40
 end
 mod:AddCallback(JumpLib.Callbacks.POST_ENTITY_JUMP, Edith.OnStartingJump, JumpParams.EdithJump)
-
-function Edith:ObscureEdith(player)
-	if not player:HasCollectible(CollectibleType.COLLECTIBLE_LUMP_OF_COAL) then return end
-	if not funcs.GetTarget(player) then return end
-	local distance = funcs.TargetDis(player) / 40
-
-	Edith:ColorCooldown(player, -(distance * 0.04) - 0.2, 1)
-end
-mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, Edith.ObscureEdith)
 
 ---@param player EntityPlayer
 ---@param pitfall boolean
@@ -271,9 +245,8 @@ function Edith:EdithLanding(player, _, pitfall)
 	local IsDefensiveStomp = playerData.IsDefensiveStomp
 	local CanFly = player.CanFly
 	local distance = funcs.TargetDis(player)
-	local stage = level:GetStage()
-	local tears = funcs.GetTPS(player)
-	local level = math.ceil(stage / 2)
+	local tearsMult = funcs.GetTPS(player) / 2.73
+	local level = math.ceil(level:GetStage() / 2)
 
 	local flightMult = {
 		Damage = CanFly == true and 1.5 or 1,
@@ -284,8 +257,6 @@ function Edith:EdithLanding(player, _, pitfall)
 	local tearRange = player.TearRange / 40
 	local radius = math.min((24 + (tearRange - 9) * 2) * flightMult.Radius, 80)
 	local knockbackFormula = math.min(50, (7.7 + player.Damage ^ 1.2) * flightMult.Knockback) * player.ShotSpeed
-
-	local tearsMult = tears / 2.73
 
 	local coalBonus = playerData.CoalBonus or 0
 	local damageBase = 10 + (5.25 * (level - 1))
@@ -300,9 +271,8 @@ function Edith:EdithLanding(player, _, pitfall)
 
 	mod:EdithStomp(player, radius, stompDamage, knockbackFormula, true)
 
-	local targetSprte = playerData.EdithTarget:GetSprite()
-	local Cooldown = calcularCooldown(player.MoveSpeed)
-	targetSprte:Play("Idle")
+	local Cooldown = GetStompCooldown(player.MoveSpeed)
+	edithTarget:GetSprite():Play("Idle")
 	player:MultiplyFriction(0.05)
 
 	if IsDefensiveStomp then
@@ -347,7 +317,7 @@ end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, Edith.EdithLanding, JumpParams.EdithJump)
 
 ---@param player EntityPlayer
-function Edith:EdithJumpLibStuff(player)
+function Edith:EdithPEffectUpdate(player)
 	if not funcs.IsEdith(player, false) then return end
 	local playerData = funcs.GetData(player)
 	playerData.EdithJumpTimer = playerData.EdithJumpTimer or 20
@@ -370,8 +340,13 @@ function Edith:EdithJumpLibStuff(player)
 	local div = (iskeystomp and player.CanFly) and 70 or 50
 
 	funcs.EdithDash(player, direction, distance, div)
+
+	if not player:HasCollectible(CollectibleType.COLLECTIBLE_LUMP_OF_COAL) then return end
+	if not funcs.GetTarget(player) then return end
+
+	Edith:ColorCooldown(player, -((distance / 40) * 0.04) - 0.2, 1)
 end
-mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, Edith.EdithJumpLibStuff)
+mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, Edith.EdithPEffectUpdate)
 
 ---@param player EntityPlayer
 ---@param data JumpConfig
@@ -440,8 +415,7 @@ local RemoveTargetItems = {
 ---@param ID CollectibleType
 ---@param player EntityPlayer
 function Edith:OnEsauJrUse(ID, _, player)
-	local shouldRemoveItem = funcs.Switch(ID, RemoveTargetItems, false)
-	if not shouldRemoveItem then return end
+	if not funcs.Switch(ID, RemoveTargetItems, false) then return end
 	funcs.RemoveTarget(player)
 end
 mod:AddCallback(ModCallbacks.MC_PRE_USE_ITEM, Edith.OnEsauJrUse)

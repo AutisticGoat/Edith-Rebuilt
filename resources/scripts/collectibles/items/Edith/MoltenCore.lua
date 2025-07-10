@@ -11,20 +11,18 @@ function MoltenCore:MoltenCoreStats(player)
 	if MoltenCoreCount < 1 then return end
 	player.Damage = player.Damage + (0.8 * MoltenCoreCount)
 end
-
 mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, MoltenCore.MoltenCoreStats, CacheFlag.CACHE_DAMAGE)
 
 ---@param tear EntityTear
 function MoltenCore:OnFiringTears(tear)
 	local player = mod:GetPlayerFromTear(tear)
 
-	if not (player and player:HasCollectible(items.COLLECTIBLE_MOLTEN_CORE)) then return end
-
-	local tearData = data(tear)
+	if not player then return end 
+	if not player:HasCollectible(items.COLLECTIBLE_MOLTEN_CORE) then return end
 
 	tear:ChangeVariant(TearVariant.FIRE_MIND)
 	mod:ChangeColor(tear, 0.8, 0.5, 0.4)
-	tearData.MoltenCoreTear = true
+	data(tear).MoltenCoreTear = true
 end
 
 mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, MoltenCore.OnFiringTears)
@@ -35,9 +33,10 @@ mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, MoltenCore.OnFiringTears)
 function MoltenCore:KillingSalEnemy(entity, amount, _, source)
 	local Ent = source.Entity
 	if not Ent or Ent.Type == 0 then return end
-	local player = Ent:ToPlayer() or mod:GetPlayerFromTear(Ent)
+	local player = mod.GetPlayerFromRef(source)
 
-	if not (player and player:HasCollectible(items.COLLECTIBLE_MOLTEN_CORE)) then return end
+	if not player then return end
+	if not player:HasCollectible(items.COLLECTIBLE_MOLTEN_CORE) then return end
 	if not (entity:IsActiveEnemy() and entity:IsVulnerableEnemy()) then return end
 
 	entity:AddBurn(source, 120, 1)
@@ -45,8 +44,9 @@ function MoltenCore:KillingSalEnemy(entity, amount, _, source)
 	if entity.HitPoints > amount then return end
 
 	local nearEnemies = Isaac.FindInRadius(entity.Position, 60, EntityPartition.ENEMY)
+	local Jet
 	for _, enemies in pairs(nearEnemies) do
-		local Jet = Isaac.Spawn(
+		Jet = Isaac.Spawn(
 			EntityType.ENTITY_EFFECT,
 			EffectVariant.FIRE_JET,
 			0,

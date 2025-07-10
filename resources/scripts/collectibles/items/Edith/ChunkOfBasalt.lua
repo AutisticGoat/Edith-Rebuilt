@@ -44,7 +44,7 @@ function ChunkOfBasalt:Timer(player)
 
     if playerData.BasaltCount ~= 1 then return end
     utils.SFX:Play(SoundEffect.SOUND_STONE_IMPACT)
-    player:SetColor(misc.BurnedSaltColor, 5, -1, true, false)
+    player:SetColor(Color(0.3, 0.3, 0.3), 5, -1, true, false)
 end
 mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, ChunkOfBasalt.Timer)
 

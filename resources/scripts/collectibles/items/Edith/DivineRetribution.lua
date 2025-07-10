@@ -11,8 +11,7 @@ local DivineRetribution = {}
 ---@param flags UseFlag
 ---@return boolean?
 function DivineRetribution:OnDRUse(_, rng, player, flags)
-    local CarBatteryUse = (flags == flags | UseFlag.USE_CARBATTERY)
-    if CarBatteryUse then return end
+    if  (flags == flags | UseFlag.USE_CARBATTERY) then return end
 
     local remainingHits = TSIL.Players.GetPlayerNumHitsRemaining(player)
 
@@ -34,7 +33,7 @@ function DivineRetribution:OnDRUse(_, rng, player, flags)
             enemies:TakeDamage(Hascarbattery and 50 or 25, DamageFlag.DAMAGE_LASER, EntityRef(player), 0)
         end
     end
-    game:ShakeScreen(10)
+    game:ShakeScreen(15)
     return true
 end
 mod:AddCallback(ModCallbacks.MC_USE_ITEM, DivineRetribution.OnDRUse, items.COLLECTIBLE_DIVINE_RETRIBUTION)

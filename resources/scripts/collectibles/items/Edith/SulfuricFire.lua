@@ -6,8 +6,9 @@ local SulfuricFire = {}
 ---@param player EntityPlayer
 ---@return boolean
 function SulfuricFire:UseSulfuricFire(_, _, player)
+	local Flame
 	for _, enemy in pairs(Isaac.FindInRadius(player.Position, 80, EntityPartition.ENEMY)) do
-		local Flame = Isaac.Spawn(
+		Flame = Isaac.Spawn(
 			EntityType.ENTITY_EFFECT,
 			EffectVariant.FIRE_JET,
 			0,

@@ -16,47 +16,46 @@ mod.JumpLib.Init(mod)
 include("include")
 
 local tables = mod.Enums.Tables
+local utils = mod.Enums.Utils
 
-function mod:OverrideTaintedInputs(entity, input, action)
+mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, function()
+	utils.RNG:SetSeed(utils.Game:GetSeeds():GetStartSeed())
+end)
+
+---@param entity Entity
+---@param input InputHook
+---@param action ButtonAction|KeySubType
+---@return integer|boolean?
+mod:AddCallback(ModCallbacks.MC_INPUT_ACTION, function (_, entity, input, action)
     if not entity then return end
     local player = entity:ToPlayer()
     
     if not player then return end
     if not mod:IsAnyEdith(player) then return end
-    if input ~= 2 then return end
+    if input ~= InputHook.GET_ACTION_VALUE then return end
     
     return tables.OverrideActions[action]
-end
-mod:AddCallback(ModCallbacks.MC_INPUT_ACTION, mod.OverrideTaintedInputs)
+end)
 
 ---@param player EntityPlayer
 ---@param cacheFlag CacheFlag
-function mod:SetEdithStats(player, cacheFlag)
+mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(_, player, cacheFlag)
     if not mod:IsAnyEdith(player) then return end
-
-    local cacheActions = {
-        [CacheFlag.CACHE_DAMAGE] = function()
-            player.Damage = player.Damage * 1.5
-        end,
-        [CacheFlag.CACHE_RANGE] = function()
-            player.TearRange = mod.rangeUp(player.TearRange, 2.5)
-        end,
-    }
-        
-    mod.WhenEval(cacheFlag, cacheActions)
-end
-mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, mod.SetEdithStats)
+    if cacheFlag == CacheFlag.CACHE_DAMAGE then
+        player.Damage = player.Damage * 1.5
+    elseif cacheFlag == CacheFlag.CACHE_RANGE then
+        player.TearRange = mod.rangeUp(player.TearRange, 2.5)
+    end
+end)
 
 ---@param player EntityPlayer
 ---@param flags DamageFlag
 ---@return boolean?
 function mod:PlayerDamageManager(player, _, flags)
     local game = mod.Enums.Utils.Game
-    local room = game:GetRoom()
-    local roomType = room:GetType()
+    local roomType = game:GetRoom():GetType()
 
     if not mod:IsAnyEdith(player) then return end
-
 	if mod.HasBitFlags(flags, DamageFlag.DAMAGE_ACID) or (roomType ~= RoomType.ROOM_SACRIFICE and mod.HasBitFlags(flags, DamageFlag.DAMAGE_SPIKES)) then return false end
 end
 mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG, mod.PlayerDamageManager)

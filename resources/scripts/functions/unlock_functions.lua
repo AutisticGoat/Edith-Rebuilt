@@ -6,8 +6,9 @@ local utils = enums.Utils
 local items = enums.CollectibleType
 local trinkets = enums.TrinketType
 local game = utils.Game
+local level = utils.Level
 local unlocks = {}
-
+local data = mod.CustomDataWrapper.getData
 local UnlockTable = {
     Edith = {
         [CompletionType.MOMS_HEART] = {
@@ -117,17 +118,18 @@ function mod:ThankYou()
     pgd:TryUnlock(achievements.ACHIEVEMENT_THANK_YOU)
 end
 
+local pool = game:GetItemPool()
 function unlocks:CheckStartUnlocks()
-    local pgd = Isaac.GetPersistentGameData()
-
     for _, charTable in pairs(UnlockTable) do     
         for _, tab in pairs(charTable) do
+            if Isaac.GetPersistentGameData():Unlocked(tab.Unlock) then goto continue end
             if tab.Item then
-                game:GetItemPool():RemoveCollectible(tab.Item)
+                pool:RemoveCollectible(tab.Item)
             end
             if tab.Trinket then
-                game:GetItemPool():RemoveTrinket(tab.Trinket)
+                pool:RemoveTrinket(tab.Trinket)
             end
+            ::continue::
         end
     end
 end
@@ -160,7 +162,7 @@ function unlocks:OnTriggerCompletion(mark, player)
         return
     end
 
-    if players.PLAYER_EDITH then
+    if player == players.PLAYER_EDITH then
         if game.Difficulty == Difficulty.DIFFICULTY_GREEDIER then
             pgd:TryUnlock(achievements.ACHIEVEMENT_HYDRARGYRUM)
             pgd:TryUnlock(achievements.ACHIEVEMENT_GILDED_STONE)
@@ -178,27 +180,20 @@ function unlocks:OnTriggerCompletion(mark, player)
 end
 mod:AddCallback(ModCallbacks.MC_POST_COMPLETION_MARK_GET, unlocks.OnTriggerCompletion)
 
-function mod:UnlockThankYou()
-    mod:ThankYou()
-end
-mod:AddCallback(ModCallbacks.MC_POST_ACHIEVEMENT_UNLOCK, mod.UnlockThankYou)
+mod:AddCallback(ModCallbacks.MC_POST_ACHIEVEMENT_UNLOCK, mod.ThankYou)
 
 local taintedAchievement = {
     [players.PLAYER_EDITH] = {unlock = achievements.ACHIEVEMENT_TAINTED_EDITH, gfx = "gfx/characters/costumes/characterTaintedEdith.png"}
 }
 function mod:SlotUpdate(slot)
-    local pgd = Isaac.GetPersistentGameData()
     if not slot:GetSprite():IsFinished("PayPrize") then return end
     local d = slot:GetData().Tainted
     if not d then return end
-    pgd:TryUnlock(d.unlock)
-    mod:ThankYou()
+    Isaac.GetPersistentGameData():TryUnlock(d.unlock)
 end
 mod:AddCallback(ModCallbacks.MC_POST_SLOT_UPDATE, mod.SlotUpdate, 14)
 
 function mod:HiddenCloset()
-    local pgd = Isaac.GetPersistentGameData()
-    local level = game:GetLevel()
     if level:GetStage() ~= LevelStage.STAGE8 then return end
     if level:GetCurrentRoomDesc().SafeGridIndex ~= 94 then return end
     if game:AchievementUnlocksDisallowed() then return end
@@ -207,7 +202,7 @@ function mod:HiddenCloset()
     local d = taintedAchievement[p]
     
     if not d then return end
-    if pgd:Unlocked(d.unlock) then return end
+    if Isaac.GetPersistentGameData():Unlocked(d.unlock) then return end
 
     if game:GetRoom():IsFirstVisit() then
         for _, k in ipairs(Isaac.FindByType(17)) do

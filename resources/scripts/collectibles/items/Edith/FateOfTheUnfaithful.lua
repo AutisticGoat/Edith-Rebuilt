@@ -12,11 +12,9 @@ local FOTU = {}
 function FOTU:OnFatefulUse(_, rng, player, flag)
     if flag & UseFlag.USE_CARBATTERY == UseFlag.USE_CARBATTERY then return end
     local Hascarbattery = player:HasCollectible(CollectibleType.COLLECTIBLE_CAR_BATTERY) 
-    local roomEnt = Isaac.GetRoomEntities()
     local playerPos = player.Position
 
-    for _, ent in ipairs(roomEnt) do
-        if not (ent:IsVulnerableEnemy() and ent:IsActiveEnemy()) then goto Break end
+    for _, ent in ipairs(mod.GetEnemies()) do
         ent:AddBurn(EntityRef(player), 83, Hascarbattery and 3 or 1.5)
         ent:AddBrimstoneMark(EntityRef(player), Hascarbattery and 180 or 90)
 
@@ -32,11 +30,8 @@ end
 mod:AddCallback(ModCallbacks.MC_USE_ITEM, FOTU.OnFatefulUse, items.COLLECTIBLE_FATE_OF_THE_UNFAITHFUL)
 
 ---@param player EntityPlayer
----@param flags CacheFlag
-function FOTU:FateCache(player, flags)
-    local effects = player:GetEffects()
-    local FateEffect = effects:GetCollectibleEffect(items.COLLECTIBLE_FATE_OF_THE_UNFAITHFUL)
-    if not FateEffect then return end
+function FOTU:FateCache(player)
+    if not player:GetEffects():GetCollectibleEffect(items.COLLECTIBLE_FATE_OF_THE_UNFAITHFUL) then return end
     local Hascarbattery = player:HasCollectible(CollectibleType.COLLECTIBLE_CAR_BATTERY) 
     player.Damage = player.Damage * (Hascarbattery and 2 or 1.75)
 end

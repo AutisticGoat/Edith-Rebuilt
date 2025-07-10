@@ -8,11 +8,11 @@ local JackOfClubs = {}
 ---@param player EntityPlayer
 function JackOfClubs:myFunction2(_, player)
     local rng = player:GetCardRNG(card.CARD_JACK_OF_CLUBS)
+    local enemyPos
     for _, enemy in pairs(mod.GetEnemies()) do
-        local explosionRoll = rng:RandomFloat()
-        local enemyPos = enemy.Position
+        enemyPos = enemy.Position
 
-        if explosionRoll > 0.4 then goto Break end
+        if not mod.RandomBoolean(rng, 0.4) then goto Break end
         game:BombExplosionEffects(
             enemyPos,
             100,
@@ -25,9 +25,7 @@ function JackOfClubs:myFunction2(_, player)
             0
         )
 
-        local SpawnBombRoll = rng:RandomFloat()
-
-        if SpawnBombRoll > 0.5 then goto Break end
+        if not mod.RandomBoolean(rng) then goto Break end
         Isaac.Spawn(
             EntityType.ENTITY_PICKUP,
             PickupVariant.PICKUP_BOMB,

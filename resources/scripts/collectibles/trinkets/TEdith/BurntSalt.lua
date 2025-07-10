@@ -10,10 +10,9 @@ function BurntSalt:SaltTearShoot(tear)
 
     if not player then return end
     if not player:HasTrinket(trinket.TRINKET_BURNT_SALT) then return end
-    if not mod.RandomBoolean(player:GetTrinketRNG(trinket.TRINKET_BURNT_SALT)) then return end
-    local tearData = data(tear)
-    tearData.BurntSaltTear = true
+    if not mod.RandomBoolean(player:GetTrinketRNG(trinket.TRINKET_BURNT_SALT)) then return end 
     mod.ForceSaltTear(tear, true)
+    data(tear).BurntSaltTear = true
     tear.CollisionDamage = tear.CollisionDamage * 1.2
 end
 mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, BurntSalt.SaltTearShoot)
@@ -28,24 +27,24 @@ function BurntSalt:OnKill(npc, source)
 
     if not player or not tear then return end 
     if not player:HasTrinket(trinket.TRINKET_BURNT_SALT) then return end
+    if not data(tear).BurntSaltTear then return end 
 
-    local tearData = data(tear)
-
-    if not tearData.BurntSaltTear then return end 
     local rng = player:GetTrinketRNG(trinket.TRINKET_BURNT_SALT)
 
     if mod.RandomBoolean(rng) then return end
 
+    local burntSaltTear
     for _ = 1, rng:RandomInt(4, 7) do
-        local burntSaltTear = Isaac.Spawn(
+        burntSaltTear = Isaac.Spawn(
             EntityType.ENTITY_TEAR,
             0,
             0,
             npc.Position,
             rng:RandomVector():Resized(player.ShotSpeed * 10),
             player
-        ) --[[@as EntityTear]]
-
+        ):ToTear()  
+        
+        if not burntSaltTear then return end
         mod.ForceSaltTear(burntSaltTear, true)
     end
 end

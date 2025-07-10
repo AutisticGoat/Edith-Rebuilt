@@ -14,21 +14,21 @@ local baseHeight = -23.45
 local function ShootFireRockTear(player, rng, minTears, maxTears)
     local baseMultiplier = -70 / baseRange
     local halfBaseHeight = baseHeight * 3
-    local tearCount = rng:RandomInt(minTears, maxTears)
+	local tear
+	local fallSpeedVar
 
-    for _ = 1, tearCount do
-        local tear = Isaac.Spawn(EntityType.ENTITY_TEAR, TearVariant.ROCK, 0, player.Position, RandomVector():Resized(20), player):ToTear()
+    for _ = 1, rng:RandomInt(minTears, maxTears) do
+        tear = Isaac.Spawn(EntityType.ENTITY_TEAR, TearVariant.ROCK, 0, player.Position, RandomVector():Resized(20), player):ToTear()
 
         if not tear then return end
 
+        fallSpeedVar = mod.RandomFloat(rng, 1.8, 2.2)
+
 		tear.Visible = false
 		tear.Height = halfBaseHeight
-
         tear.Velocity = tear.Velocity * mod.RandomFloat(rng, 0.2, 0.6)
         tear.FallingAcceleration = (mod.RandomFloat(rng, 0.7, 1.6)) * 3
-        local fallSpeedVar = mod.RandomFloat(rng, 1.8, 2.2) --rng:RandomInt(180, 220) / 100
         tear.FallingSpeed = (baseMultiplier * (fallSpeedVar)) 
-        
         tear.CollisionDamage = tear.CollisionDamage * rng:RandomInt(8, 12) / 10
 		tear.Scale = tear.CollisionDamage/3.5
         tear:AddTearFlags(TearFlags.TEAR_BURN)
@@ -41,7 +41,7 @@ end
 ---@param rng RNG
 ---@param player EntityPlayer
 function DivineWrath:OnUse(_, rng, player)
-    ShootSaltyBabyTear(player, rng, 8, 12)
+    ShootFireRockTear(player, rng, 8, 12)
     local shockwaveParams = {
 		Duration = 6,
 		Size = 1,

@@ -8,24 +8,20 @@ function mod:KnifeStomp(player)
 	
 	local knifeEntities = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and 8 or 4
 	local degrees = 360/knifeEntities
-			
+	local knife		
+
 	for i = 1, knifeEntities do
-		local knife = player:FireKnife(player, degrees * i, true, 0, 0)
-		local knifeData = funcs.GetData(knife)
+		knife = player:FireKnife(player, degrees * i, true, 0, 0)
 		
-		knifeData.StompKnife = true			
+		funcs.GetData(knife).StompKnife = true			
 		knife:Shoot(1, player.TearRange / 3)
 	end
 end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, mod.KnifeStomp, EdithJump)
 
 ---@param knife EntityKnife
-function mod:RemoveKnife(knife)
-	local knifeData = funcs.GetData(knife)
-	
-	if knifeData.StompKnife ~= true then return end
-	
-	print(knife.Charge)
+function mod:RemoveKnife(knife)	
+	if funcs.GetData(knife).StompKnife ~= true then return end
 	if knife:IsFlying() then return end 
 	
 	knife:Remove()

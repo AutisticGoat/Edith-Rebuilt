@@ -2,9 +2,6 @@ local mod = EdithRebuilt
 local enums = mod.Enums
 local trinkets = enums.TrinketType
 local Geode = {}
-local baseDestroyChance = 0.25
-local spawnChance = 0.025
-local baseRunes = 3
 local NonDestroyFlags = DamageFlag.DAMAGE_INVINCIBLE | DamageFlag.DAMAGE_NO_PENALTIES | DamageFlag.DAMAGE_CURSED_DOOR
 
 ---@param npc EntityNPC
@@ -17,17 +14,14 @@ function Geode:SpawnOnKill(npc, source)
 	if not player then return end
 	if not player:HasTrinket(trinkets.TRINKET_GEODE) then return end
 
-	local trinketMult = player:GetTrinketMultiplier(trinkets.TRINKET_GEODE)
 	local rng = player:GetTrinketRNG(trinkets.TRINKET_GEODE)
-	local KillSpawnChance = spawnChance * mod.exp(trinketMult, 1, 1.75)
 
-	if not mod.RandomBoolean(rng, KillSpawnChance) then return end
-	local ChosenRune = mod.GetRandomRune(rng)
+	if not mod.RandomBoolean(rng, 0.025 * mod.exp(player:GetTrinketMultiplier(trinkets.TRINKET_GEODE), 1, 1.75)) then return end
 
 	Isaac.Spawn(
 		EntityType.ENTITY_PICKUP,
 		PickupVariant.PICKUP_TAROTCARD,
-		ChosenRune,
+		mod.GetRandomRune(rng),
 		npc.Position,
 		Vector.Zero,
 		player
@@ -43,18 +37,17 @@ function Geode:DestroyGeode(player, _, flags)
 
 	local rng = player:GetTrinketRNG(trinkets.TRINKET_GEODE)
 	local trinketMult = player:GetTrinketMultiplier(trinkets.TRINKET_GEODE)
-	local totalRune = baseRunes + (trinketMult - 1)
-	local spawnDegree = 360 / totalRune
+	local totalRunes = 3 + (trinketMult - 1)
+	local spawnDegree = 360 / totalRunes
 	
-	if not mod.RandomBoolean(rng, baseDestroyChance) then return end
+	if not mod.RandomBoolean(rng, 0.25) then return end
 	player:TryRemoveTrinket(trinkets.TRINKET_GEODE)
 
-	for i = 1, totalRune do
-		local randomRune = mod.GetRandomRune(rng)		
+	for i = 1, totalRunes do
 		Isaac.Spawn(
 			EntityType.ENTITY_PICKUP,
 			PickupVariant.PICKUP_TAROTCARD,
-			randomRune,
+			mod.GetRandomRune(rng),
 			player.Position,
 			Vector.One:Rotated(spawnDegree * i) * 1.3,
 			player

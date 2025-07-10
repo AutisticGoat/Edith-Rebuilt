@@ -3,17 +3,16 @@ local col = "collectibles/"
 local ent = "entities/"
 local stmpSyn = "stompSynergies/"
 local parrySyn = "parrySynergies/"
+local funcs = "functions/"
 
 local includeFiles = {
 	-- Cosas necesarias
-		-- 
 	"definitions",
 	"EID",
-	-- "savedata",
 	"Birthcake",
 	"prenpckillcallback",
-	"functions/functions",
-	"functions/unlock_functions",
+	funcs .. "functions",
+	funcs .. "unlock_functions",
 	"ImGui",
 	"EID",
 	"EdithKotryHudHelper",
@@ -48,10 +47,8 @@ local includeFiles = {
 	col .. "consumables/SoulOfEdith",
 
 	-- Entidades
-	ent .. "Effects/SaltCreep",
-	ent .. "Effects/PepperCreep",
-	ent .. "Effects/Edith_Target",
-	ent .. "Effects/Edith_Target_B",
+	ent .. "Effects/Creeps",
+	ent .. "Effects/Targets",
 	-- Entidades fin
 	
 	-- Personajes
@@ -70,8 +67,6 @@ local includeFiles = {
 	stmpSyn .. "StatusEffects",
 		
 	parrySyn .. "Brimstone",
-
-	"RNG",
 }
 
 for _, v in ipairs(includeFiles) do

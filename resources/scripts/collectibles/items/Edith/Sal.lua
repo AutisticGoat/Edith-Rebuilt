@@ -12,7 +12,7 @@ function Sal:SalSpawnSaltCreep(player)
 	local rng = player:GetCollectibleRNG(items.COLLECTIBLE_SAL)
 	local randomGib = {
 		amount = rng:RandomInt(2, 5),
-		speed = rng:RandomInt(100, 250) / 100
+		speed = mod.RandomFloat(rng, 1, 2.5) 
 	}
 	mod:SpawnSaltCreep(player, player.Position, 0, 3, randomGib.amount, randomGib.speed, "Sal", true, true)
 end
@@ -39,18 +39,16 @@ function Sal:KillingSalEnemy(entity, amount, _, source)
 	end
 	
 	local rng = player:GetCollectibleRNG(items.COLLECTIBLE_SAL)
-	local randomTears = rng:RandomInt(4, 6)
-	
-	for _ = 1, randomTears do
-		local tears = Isaac.Spawn(EntityType.ENTITY_TEAR, 0, 0, entity.Position, RandomVector() * (player.ShotSpeed * 10), player):ToTear()
+	local tears
+
+	for _ = 1, rng:RandomInt(4, 6) do
+		tears = Isaac.Spawn(EntityType.ENTITY_TEAR, 0, 0, entity.Position, RandomVector() * (player.ShotSpeed * 10), player):ToTear()
 
 		if not tears then return end
-
-		local tearData = data(tears)
 		
 		mod.ForceSaltTear(tears)
 		tears:AddTearFlags(TearFlags.TEAR_PIERCING)
-		tearData.IsSalTear = true
+		data(tears).IsSalTear = true
 	end
 end
 mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Sal.KillingSalEnemy)

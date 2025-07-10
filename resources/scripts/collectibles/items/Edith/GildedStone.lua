@@ -12,10 +12,9 @@ function GildedStone:ShootingRockTears(tear)
 	local rng = player:GetCollectibleRNG(items.COLLECTIBLE_GILDED_STONE)
 	
 	if not mod.RandomBoolean(rng, player:GetNumCoins()  / 100) then return end
-	local tearDamageChange = rng:RandomInt(500, 2500) / 100
-	tear.CollisionDamage = tear.CollisionDamage * tearDamageChange
 	tear:AddTearFlags(TearFlags.TEAR_ROCK)
 	tear:ChangeVariant(TearVariant.ROCK)
+	tear.CollisionDamage = tear.CollisionDamage * mod.RandomFloat(rng, 0.5, 2.5)
 end
 mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, GildedStone.ShootingRockTears)
 
@@ -58,8 +57,8 @@ function GildedStone:OnDestroyingRockReward(rock)
 
 	for _, player in ipairs(plyMan.GetPlayers()) do
 		collectiveLuck = collectiveLuck + player.Luck
-		rng = player:GetCollectibleRNG(items.COLLECTIBLE_GILDED_STONE)
 		CoinCount = player:GetNumCoins()
+		rng = player:GetCollectibleRNG(items.COLLECTIBLE_GILDED_STONE)
 	end
 	local GeneralSpawnFormula = ((CoinCount / 2) + (math.min(collectiveLuck, 1) - 1)) / 100
 

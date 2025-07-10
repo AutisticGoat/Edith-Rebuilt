@@ -247,7 +247,7 @@ local function OptionsUpdate()
 		function(index)
 			TEdithData.ArrowDesign = index + 1
 			for _, arrow in pairs(Isaac.FindByType(EntityType.ENTITY_EFFECT, variants.EFFECT_EDITH_B_TARGET)) do
-				Isaac.RunCallback(callbacks.ARROW_SPRITE_CHANGE, arrow)
+				Isaac.RunCallback(callbacks.TARGET_SPRITE_CHANGE, arrow)
 			end
 		end,
 	ImGuiTables.ArrowDesign, 0)

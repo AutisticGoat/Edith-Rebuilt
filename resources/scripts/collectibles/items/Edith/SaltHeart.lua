@@ -14,7 +14,6 @@ function SaltHeart:GettingDamage(entity, amount, flags, source)
     if TSIL.Players.IsDamageToPlayerFatal(player, amount, source) then return end
 
     local playerData = data(player)
-    local rng = player:GetCollectibleRNG(items.COLLECTIBLE_SALT_HEART)
 
     playerData.SaltHeartDDFlag = playerData.SaltHeartDDFlag or false
     playerData.SaltHeartSpawnSaltTimer = 90
@@ -29,9 +28,7 @@ function SaltHeart:GettingDamage(entity, amount, flags, source)
         playerData.SaltHeartDDFlag = false
     end, 1, 1, false)
 
-    local randSaltTears = rng:RandomInt(4, 6)
-
-    for _ = 1, randSaltTears do
+    for _ = 1, player:GetCollectibleRNG(items.COLLECTIBLE_SALT_HEART):RandomInt(4, 6) do
         local tears = player:FireTear(entity.Position, RandomVector() * (player.ShotSpeed * 10), false, false, false, player, 1)
 		
 		mod.ForceSaltTear(tears)
@@ -40,7 +37,6 @@ function SaltHeart:GettingDamage(entity, amount, flags, source)
 end
 mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, SaltHeart.GettingDamage)
 
----comment
 ---@param player EntityPlayer
 function SaltHeart:SpawnSaltCreep(player)
     if not player:HasCollectible(items.COLLECTIBLE_SALT_HEART) then return end
@@ -55,11 +51,9 @@ function SaltHeart:SpawnSaltCreep(player)
 end
 mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, SaltHeart.SpawnSaltCreep)
 
----comment
 ---@param player EntityPlayer
 function SaltHeart:Stats(player)
     if not player:HasCollectible(items.COLLECTIBLE_SALT_HEART) then return end
-    local SHAmount = player:GetCollectibleNum(items.COLLECTIBLE_SALT_HEART)
-    player.Damage = (player.Damage + ((0.5 * SHAmount) - 1)) * 1.75
+    player.Damage = (player.Damage + ((0.5 * player:GetCollectibleNum(items.COLLECTIBLE_SALT_HEART)) - 1)) * 1.75
 end
 mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, SaltHeart.Stats, CacheFlag.CACHE_DAMAGE)

@@ -189,12 +189,3 @@ for kind, Desc in pairs(Descs) do
         end
     end
 end
-
-local buff = XMLData.GetModById(0)
-
-for k, v in pairs(buff) do
-    print(k, v)
-end
-
-EID:addCollectible(357, "{{Timer}} Duplicates all your familiars for the room#{{Collectible113}} Grants a Demon Baby for the room if Isaac has no familiars", "Box of Friends", "en")
-

@@ -16,7 +16,6 @@ mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, EdithsHood.ShootSaltTears)
 
 function EdithsHood:Stats(player, flags)
 	if not player:HasCollectible(items.COLLECTIBLE_EDITHS_HOOD) then return end
-
 	if flags == CacheFlag.CACHE_DAMAGE then
 		player.Damage = player.Damage * 1.35
 	elseif flags == CacheFlag.CACHE_FIREDELAY then
@@ -36,10 +35,7 @@ function EdithsHood:KillingSalEnemy(entity, source)
 	if not player then return end
 	if not player:HasCollectible(items.COLLECTIBLE_EDITHS_HOOD) then return end
 	if not (entity:IsActiveEnemy() and entity:IsVulnerableEnemy()) then return end
-
-	local rng = player:GetCollectibleRNG(items.COLLECTIBLE_EDITHS_HOOD)	
-	
-	if not mod.RandomBoolean(rng, 0.2) then return end
+	if not mod.RandomBoolean(player:GetCollectibleRNG(items.COLLECTIBLE_EDITHS_HOOD), 0.2) then return end
 
 	for i = 1, maxCreep do
 		mod:SpawnSaltCreep(player, entity.Position + Vector(0, 18):Rotated(saltDegrees*i), 1, 5, 1, 3, "Hood")

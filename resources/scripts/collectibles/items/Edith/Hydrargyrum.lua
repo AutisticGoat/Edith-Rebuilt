@@ -10,11 +10,10 @@ local data = mod.CustomDataWrapper.getData
 ---@param source EntityRef
 function Hydrargyrum:GettingDamage(entity, amount, flags, source)
     if source.Type == 0 then return end
-
     local player = mod.GetPlayerFromRef(source)
     
     if not (player and player:HasCollectible(items.COLLECTIBLE_HYDRARGYRUM)) then return end
-    if not (entity:IsActiveEnemy() and entity:IsVulnerableEnemy()) then return end
+    if not mod.IsEnemy(entity) then return end
 
     local entData = data(entity)
 
@@ -43,7 +42,6 @@ function Hydrargyrum:OnNPCUpdate(npc)
     if entData.MercuryTimer % 15 ~= 0 or entData.MercuryTimer == 0 then return end
 
     local player = entData.Player ---@type EntityPlayer
-
     if not player then return end
 
     local randTear = Isaac.Spawn(
@@ -54,7 +52,6 @@ function Hydrargyrum:OnNPCUpdate(npc)
         RandomVector():Resized(player.ShotSpeed * 10),
         player
     ):ToTear()
-
 
     if not randTear then return end
     randTear.CollisionDamage = randTear.CollisionDamage * 0.1

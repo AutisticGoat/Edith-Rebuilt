@@ -9,8 +9,6 @@ local sounds = enums.SoundEffect
 local tables = enums.Tables
 local jumpFlags = tables.JumpFlags
 local BurntHood = {}
-
-
 local funcs = {
     GetData = mod.CustomDataWrapper.getData,
     FeedbackMan = mod.LandFeedbackManager
@@ -23,8 +21,9 @@ function BurntHood:InitTaintedEdithJump(player)
 	local jumpSpeed = 2.5
 	local isChap4 = mod:isChap4()
 	local BackDrop = room:GetBackdropType()
-	local variant = room:HasWater() and EffectVariant.BIG_SPLASH or (isChap4 and EffectVariant.POOF02 or EffectVariant.POOF01)
-	local subType = room:HasWater() and 1 or (isChap4 and 66 or 1)
+	local hasWater = room:HasWater()
+	local variant = hasWater and EffectVariant.BIG_SPLASH or (isChap4 and EffectVariant.POOF02 or EffectVariant.POOF01)
+	local subType = hasWater and 1 or (isChap4 and 66 or 1)
 	
 	sfx:Play(SoundEffect.SOUND_SHELLGAME)
 	
@@ -37,9 +36,7 @@ function BurntHood:InitTaintedEdithJump(player)
 		player
 	)
 
-	local var = DustCloud.Variant
 	local color = Color(1, 1, 1)
-
 	local switch = {
 		[EffectVariant.BIG_SPLASH] = function()
 			color = backdropColors[BackDrop] or Color(0.7, 0.75, 1)
@@ -48,20 +45,17 @@ function BurntHood:InitTaintedEdithJump(player)
 			color = backdropColors[BackDrop] or Color(1, 0, 0)
 		end,
 		[EffectVariant.POOF01] = function()
-			if room:HasWater() then
+			if hasWater then
 				color = backdropColors[BackDrop]
 			end
 		end
 	}
-	switch[var]()
-
-	local dustSprite = DustCloud:GetSprite()
-
-	dustSprite.PlaybackSpeed = room:HasWater() and 1.3 or 2	
+	switch[variant]()
 
 	DustCloud.SpriteScale = DustCloud.SpriteScale * player.SpriteScale.X
 	DustCloud.DepthOffset = -100
 	DustCloud:SetColor(color, -1, 100, false, false)
+	DustCloud:GetSprite().PlaybackSpeed = hasWater and 1.3 or 2	
 
 	local config = {
 		Height = jumpHeight,
@@ -93,48 +87,35 @@ mod:AddCallback(ModCallbacks.MC_USE_ITEM, BurntHood.OnUse,items.COLLECTIBLE_BURN
 
 local damageBase = 13.5
 ---@param player EntityPlayer
----@param data JumpData
-function BurntHood:ParryJump(player, data)
-	local DamageStat = player.Damage 
-	local rawFormula = ((damageBase + DamageStat) / 1.5) 
+function BurntHood:ParryJump(player)
+	local rawFormula = ((damageBase + player.Damage ) / 1.5) 
 	local isenemy = false
 	local playerPos = player.Position
-	local playerData = funcs.GetData(player)
-
 	local capsule = Capsule(player.Position, Vector.One, 0, misc.PerfectParryRadius)
 	local capsuleTwo = Capsule(player.Position, Vector.One, 0, misc.ImpreciseParryRadius)	
+	local proj
+	local spawner
+	local targetPos
+	local newVelocity
 
-	local ImpreciseParryEnts = Isaac.FindInCapsule(capsuleTwo, misc.ParryPartitions)
-	local PerfectParryEnts = Isaac.FindInCapsule(capsule, misc.ParryPartitions)
-	local hasBirthright = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT)
-
-	for _, ent in pairs(ImpreciseParryEnts) do
-		local entPos = ent.Position
-		local newVelocity = ((playerPos - entPos) * -1):Resized(20)
-
-		if ent:IsActiveEnemy() and ent:IsVulnerableEnemy() then
+	for _, ent in pairs(Isaac.FindInCapsule(capsuleTwo, misc.ParryPartitions)) do
+		if mod.IsEnemy(ent) then
 			ent:AddConfusion(EntityRef(player), 90, false)
 		end
-
-		ent:AddKnockback(EntityRef(player), newVelocity, 5, true)
+		mod.TriggerPush(ent, player, 20, 5, true)
 	end
 
-	for _, ent in pairs(PerfectParryEnts) do
-		local proj = ent:ToProjectile()
-
+	for _, ent in pairs(Isaac.FindInCapsule(capsule, misc.ParryPartitions)) do
+		proj = ent:ToProjectile()
 		if proj then
-			local spawner = proj.Parent or proj.SpawnerEntity
-			local targetPos = spawner and spawner.Position or proj.Position
-			local newVelocity = ((playerPos - targetPos) * -1):Resized(25)
+			spawner = proj.Parent or proj.SpawnerEntity
+			targetPos = spawner and spawner.Position or proj.Position
+			newVelocity = ((playerPos - targetPos) * -1):Resized(25)
 
 			proj.FallingAccel = -0.1
 			proj.FallingSpeed = 0
 			proj.Height = -23
 			proj:AddProjectileFlags(misc.NewProjectilFlags)
-
-			if hasBirthright then
-				proj:AddProjectileFlags(ProjectileFlags.FIRE_SPAWN)
-			end
 
 			ent:AddKnockback(EntityRef(player), newVelocity, 5, true)
 		else
@@ -149,40 +130,11 @@ function BurntHood:ParryJump(player, data)
 		player:SetMinDamageCooldown(20)
 	end
 
-	playerData.ParryCounter = isenemy and 10 or 20
+	funcs.GetData(player).ParryCounter = isenemy and 10 or 20
 
 	if isenemy == true then
 		game:MakeShockwave(playerPos, 0.035, 0.025, 2)
 	end
-
-	-- local lasers = Isaac.FindByType(EntityType.ENTITY_LASER) ---@type EntityLaser[]
-
-	-- for _, laser in ipairs(lasers) do
-	-- 	local laserData = mod.GetData(laser)
-	-- 	local LaserCapsule = Capsule(laser.Position, laserData.EndPoint, laser.Size)
-	-- 	local DebugShape = DebugRenderer.Get(1, true)    
-	-- 	DebugShape:Capsule(LaserCapsule)
-
-	-- 	for _, player in ipairs(Isaac.FindInCapsule(LaserCapsule, EntityPartition.PLAYER)) do
-	-- 		local degree = mod.vectorToAngle((player.Position - laser.Position) * -1)
-	-- 		local divineShield = Isaac.Spawn(
-	-- 			EntityType.ENTITY_EFFECT,
-	-- 			EffectVariant.DIVINE_INTERVENTION,
-	-- 			0,
-	-- 			playerPos,
-	-- 			Vector.Zero,
-	-- 			player
-	-- 		):ToEffect()
-
-	-- 		if not divineShield then return end	
-
-	-- 		local shieldData = mod.GetData(divineShield)
-	-- 		shieldData.ParryShield = true 
-	-- 		shieldData.StaticPos = player.Position
-	-- 		divineShield.Rotation = degree
-	-- 		divineShield.Timeout = 1			
-	-- 	end
-	-- end
 
 	funcs.FeedbackMan(player, parryJumpSounds, Color(1, 1, 1, 0), isenemy)
 end
