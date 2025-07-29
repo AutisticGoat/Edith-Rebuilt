@@ -51,7 +51,7 @@ end
 ---@param player EntityPlayer
 local function EdithTargetManagement(effect, player)
 	if effect.Variant ~= Vars.EFFECT_EDITH_TARGET then return end
-		
+
 	local playerPos = player.Position
 	local effectPos = effect.Position
 	local playerData = funcs.GetData(player)
@@ -60,9 +60,9 @@ local function EdithTargetManagement(effect, player)
 	if mod.IsKeyStompPressed(player) or playerData.ExtraJumps > 0 and playerData.EdithJumpTimer == 0 then
 		effect:GetSprite():Play("Blink")
 	end
-	 
+
 	room:GetCamera():SetFocusPosition(interpolateVector2D(playerPos, effectPos, 0.6))
-	
+
 	if room:GetType() == RoomType.ROOM_DUNGEON then
 		for _, v in pairs(teleportPoints) do
 			if (effectPos - v):Length() > 20 then break end
@@ -163,7 +163,7 @@ mod:AddCallback(ModCallbacks.MC_PRE_EFFECT_RENDER, function(_, effect)
 	local isTarget = effect.Variant == Vars.EFFECT_EDITH_TARGET
 	local data = isTarget and saveData.EdithData or saveData.TEdithData
 	local func = isTarget and EdithTargetRender or TaintedEdithArrowRender
-	
+
 	func(effect, player, data)
 end)
 
@@ -171,7 +171,7 @@ end)
 function mod:Mierda(effect)
 	if not saveManager:IsLoaded() then return end
 	local saveData = funcs.MenuData()
-	
+
 	if not saveData then return end
 	local isTarget = effect.Variant == Vars.EFFECT_EDITH_TARGET
 	local MenuSprite = isTarget and saveData.EdithData.targetdesign or saveData.TEdithData.ArrowDesign

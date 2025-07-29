@@ -128,7 +128,7 @@
 		gfx="collectibles_Burnt_Hood.png"
 		quality="2"
 		chargetype="timed"
-		maxcharges="90"
+		maxcharges="180"
 	/>	
 	<trinket 
 		name="Paprika"

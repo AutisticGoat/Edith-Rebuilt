@@ -34,7 +34,7 @@ function EdithsHood:KillingSalEnemy(entity, source)
 	local player = mod.GetPlayerFromRef(source)
 	if not player then return end
 	if not player:HasCollectible(items.COLLECTIBLE_EDITHS_HOOD) then return end
-	if not (entity:IsActiveEnemy() and entity:IsVulnerableEnemy()) then return end
+	if not mod.IsEnemy(entity) then return end
 	if not mod.RandomBoolean(player:GetCollectibleRNG(items.COLLECTIBLE_EDITHS_HOOD), 0.2) then return end
 
 	for i = 1, maxCreep do

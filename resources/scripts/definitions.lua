@@ -287,6 +287,19 @@ EdithRebuilt.Enums = {
 			[FamiliarVariant.PUNCHING_BAG] = true,
 			[FamiliarVariant.CUBE_BABY] = true,
 		},
+		CooldownSounds = {
+			[1] = SoundEffect.SOUND_STONE_IMPACT,
+			[2] = SoundEffect.SOUND_BEEP
+		},
+		RemoveTargetItems = {
+			[CollectibleType.COLLECTIBLE_ESAU_JR] = true,
+			[CollectibleType.COLLECTIBLE_CLICKER] = true,
+		},
+		DisableLandFeedbackGrids = {
+			[GridEntityType.GRID_TRAPDOOR] = true,
+			[GridEntityType.GRID_STAIRS] = true,
+			[GridEntityType.GRID_GRAVITY] = true,
+		},
 	},
 	Misc = {
 		TearPath = "gfx/tears/",

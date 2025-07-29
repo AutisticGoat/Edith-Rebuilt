@@ -8,7 +8,6 @@ local data = mod.CustomDataWrapper.getData
 ---@param ent Entity
 function Brim:BrimParry(player, ent)
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE) then return end
-
 	local laser
 	for	i = 1, totalRays do
 		laser = player:FireDelayedBrimstone(shootDegrees * i, player)

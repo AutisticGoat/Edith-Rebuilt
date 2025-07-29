@@ -6,20 +6,17 @@ EdithRebuilt.CustomDataWrapper.init(EdithRebuilt)
 EdithRebuilt.SaveManager = require("resources.scripts.EdithRebuiltSaveManager")
 EdithRebuilt.SaveManager.Init(mod)
 
-local myFolder = "resources.scripts.EdithKotryLibraryOfIsaac"
-local LOCAL_TSIL = include(myFolder .. ".TSIL")
-LOCAL_TSIL.Init(myFolder)
-
-mod.JumpLib = include("resources/scripts/EdithKotryJumpLib")
-mod.JumpLib.Init(mod)
-
+include("resources/scripts/EdithKotryJumpLib").Init(mod)
 include("include")
 
-local tables = mod.Enums.Tables
-local utils = mod.Enums.Utils
+local enums = mod.Enums
+local tables = enums.Tables
+local utils = enums.Utils
+local game = utils.Game
+local costumes = enums.NullItemID
 
 mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, function()
-	utils.RNG:SetSeed(utils.Game:GetSeeds():GetStartSeed())
+	utils.RNG:SetSeed(game:GetSeeds():GetStartSeed())
 end)
 
 ---@param entity Entity
@@ -29,11 +26,11 @@ end)
 mod:AddCallback(ModCallbacks.MC_INPUT_ACTION, function (_, entity, input, action)
     if not entity then return end
     local player = entity:ToPlayer()
-    
+
     if not player then return end
     if not mod:IsAnyEdith(player) then return end
     if input ~= InputHook.GET_ACTION_VALUE then return end
-    
+
     return tables.OverrideActions[action]
 end)
 
@@ -48,11 +45,32 @@ mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(_, player, cacheFlag)
     end
 end)
 
+local whiteListCostumes = {
+	[CollectibleType.COLLECTIBLE_MEGA_MUSH] = true,
+	[CollectibleType.COLLECTIBLE_BOOK_OF_SHADOWS] = true,
+    [CollectibleType.COLLECTIBLE_PONY] = true,
+    [CollectibleType.COLLECTIBLE_WHITE_PONY] = true,
+    [CollectibleType.COLLECTIBLE_GODHEAD] = true,
+	[costumes.ID_EDITH_SCARF] = true,
+	[costumes.ID_EDITH_B_SCARF] = true,
+}
+
+---@param itemconfig ItemConfigItem
+---@param player EntityPlayer
+---@return boolean?
+mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_ADD_COSTUME, function(_, itemconfig, player)
+    if not mod:IsAnyEdith(player) then return end
+    local ID = itemconfig.Costume.ID
+    local shouldOverride = mod.When(ID, whiteListCostumes, false)
+
+    if shouldOverride then return end
+    return true
+end)
+
 ---@param player EntityPlayer
 ---@param flags DamageFlag
 ---@return boolean?
 function mod:PlayerDamageManager(player, _, flags)
-    local game = mod.Enums.Utils.Game
     local roomType = game:GetRoom():GetType()
 
     if not mod:IsAnyEdith(player) then return end

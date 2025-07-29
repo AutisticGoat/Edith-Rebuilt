@@ -25,13 +25,17 @@ function mod:SwordStomp(player)
     knife.Visible = false
 
     -- Crear un efecto de poof
-    local effect = TSIL.EntitySpecific.SpawnEffect(
+    local effect = Isaac.Spawn(
+        EntityType.ENTITY_EFFECT,
         EffectVariant.POOF01,
         0,
-        player.Position
-    )
+        player.Position,
+        Vector.Zero,
+        nil
+    ):ToEffect()
 
-    -- Configurar el efecto
+    if not effect then return end
+
     effect:FollowParent(player)
     local effectSprite = effect:GetSprite()
     effectSprite:Load("gfx/008.010_spirit sword.anm2", true)

@@ -7,7 +7,6 @@ local players = enums.PlayerType
 local path = "gfx/items/trinkets/EdithRebuilt_"
 local EdithSuffix = "Edith_Birthcake.png"
 local TEdithSuffix = "T_Edith_Birthcake.png"
-
 local Info = {
     [players.PLAYER_EDITH] = { 
         Description = "Brittle petrification",

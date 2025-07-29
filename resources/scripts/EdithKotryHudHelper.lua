@@ -1,9 +1,10 @@
----@diagnostic disable: undefined-global, missing-parameter
+---@diagnostic disable: undefined-global
 local Mod = EdithRebuilt
 local emptyShaderName = "HudHelperEmptyShader"
 
-local VERSION = 1.12 -- (v1.1.2) do not modify
+local VERSION = 1.14 -- (v1.1.4) do not modify
 local game = Game()
+local itemConfig = Isaac.GetItemConfig()
 
 -- debug
 local FORCE_VERSION_UPDATE = false
@@ -259,6 +260,7 @@ local function InitFunctions()
 
 	HudHelper.Priority = {
 		VANILLA = -1,
+		MOD_PATCH = -0.999,
 		HIGHEST = 0,
 		HIGH = 10,
 		NORMAL = 20,
@@ -326,9 +328,10 @@ local function InitFunctions()
 	---@param player EntityPlayer
 	---@param ignoreMod? boolean
 	function HudHelper.Utils.GetEffectiveMaxHealth(player, ignoreMod)
+		---@diagnostic disable-next-line: undefined-global
 		if NoHealthCapModEnabled and not ignoreMod then
-			return NoHealthCapRedMax + NoHealthCapSoulHearts + (NoHealthCapBoneHearts * 2) +
-				(NoHealthCapBrokenHearts * 2)
+			---@diagnostic disable-next-line: undefined-global
+			return NoHealthCapRedMax + NoHealthCapSoulHearts + (NoHealthCapBoneHearts * 2) + (NoHealthCapBrokenHearts * 2)
 		end
 		return player:GetEffectiveMaxHearts() + player:GetSoulHearts() +
 			(player:GetBrokenHearts() * 2)
@@ -633,7 +636,7 @@ local function InitFunctions()
 		PlayerType.PLAYER_BETHANY,
 		PlayerType.PLAYER_BETHANY_B
 	}
-	---@param specificResource "Coins" | "Bombs" | "Keys"
+	---@param specificResource? "Coins" | "Bombs" | "Keys"
 	function HudHelper.GetResourcesOffset(specificResource)
 		local hasBB = HudHelper.Utils.AnyoneIsPlayerType(PlayerType.PLAYER_BLUEBABY_B)
 		local offset = 0
@@ -738,13 +741,11 @@ local function InitFunctions()
 	---@param itemID CollectibleType
 	---@param slot ActiveSlot
 	function HudHelper.ShouldActiveBeDisplayed(player, itemID, slot)
-		local config = Isaac.GetItemConfig()
-
 		return not HudHelper.ShouldHideHUD()
 			and not player:IsCoopGhost()
 			and itemID ~= CollectibleType.COLLECTIBLE_NULL
 			and player:HasCollectible(itemID, true)
-			and config:GetCollectible(itemID).Type == ItemType.ITEM_ACTIVE
+			and itemConfig:GetCollectible(itemID).Type == ItemType.ITEM_ACTIVE
 			and player:GetActiveItem(slot) == itemID
 			and (slot <= ActiveSlot.SLOT_SECONDARY --Fine to display if you simply have the item
 				or (player:GetCard(0) == 0 --Otherwise, assumed to be in first slot if no cards or pills are there.
@@ -1222,20 +1223,20 @@ local function InitFunctions()
 		end
 		if isGolden then
 			if renderShadow then
-				shadowSprite.Color = Color(0,0,0,alpha * 0.25)
+				shadowSprite.Color = Color(0, 0, 0, alpha * 0.25)
 				shadowSprite.Scale = Vector(scale, scale)
-				shadowSprite:Render(pos + (Vector(2,2) * scale))
+				shadowSprite:Render(pos + (Vector(2, 2) * scale))
 			end
-			goldenHUDSprite.Color = Color(1,1,1,alpha)
+			goldenHUDSprite.Color = Color(1, 1, 1, alpha)
 			goldenHUDSprite.Scale = Vector(scale, scale)
 			goldenHUDSprite:Render(pos)
 		else
 			if renderShadow then
-				shadowSprite.Color = Color(0,0,0,alpha * 0.25)
+				shadowSprite.Color = Color(0, 0, 0, alpha * 0.25)
 				shadowSprite.Scale = Vector(scale, scale)
-				shadowSprite:Render(pos + (Vector(2,2) * scale))
+				shadowSprite:Render(pos + (Vector(2, 2) * scale))
 			end
-			hudSprite.Color = Color(1,1,1,alpha)
+			hudSprite.Color = Color(1, 1, 1, alpha)
 			hudSprite.Scale = Vector(scale, scale)
 			hudSprite:Render(pos)
 		end
@@ -1293,14 +1294,14 @@ local function InitFunctions()
 	end
 
 	--- Removes all HUD elements with the given name.
-	---@param name string @The string you used when registering your HUD element.
+	---@param nameOrID string | integer @The string (or ItemID, if an ID-based elemment) you used when registering your HUD element. Passing a 0 or an empty string will unregister all elements of the specified type
 	---@param hudType HUDType
-	function HudHelper.UnregisterHUDElement(name, hudType)
+	function HudHelper.UnregisterHUDElement(nameOrID, hudType)
 		local hudElements = HudHelper.HUD_ELEMENTS[hudType]
 		if not hudElements then return end
 
 		for i = #hudElements, 1, -1 do
-			if hudElements[i].Name == name then
+			if (hudElements[i].ItemID or 0) == nameOrID or (hudElements[i].Name or "") == nameOrID then
 				table.remove(hudElements, i)
 			end
 		end
@@ -1631,6 +1632,14 @@ local function InitFunctions()
 		local scale = 1
 		local alpha = 1
 
+		if hudLayout == HudHelper.HUDLayout.P1 and not condensedCoopHUD then
+			pos = HudHelper.GetHUDPosition(4)
+		end
+		if i == 2 then
+			pos = pos + TWIN_COOP_OFFSET
+		end
+		pos = pos + HudHelper.GetPocketHUDOffset(player)
+
 		if hudLayout == HudHelper.HUDLayout.P1_MAIN_TWIN
 			or hudLayout == HudHelper.HUDLayout.P1_OTHER_TWIN
 			or hudLayout == HudHelper.HUDLayout.TWIN_COOP
@@ -1662,7 +1671,7 @@ local function InitFunctions()
 		elseif isPill and player:GetPill(0) == hud.ItemID then
 			hud.OnRender(player, playerHUDIndex, hudLayout, pos, alpha, scale)
 			HudHelper.LastAppliedHUD[HudHelper.HUDType.PILL_ID][playerHUDIndex] = hud
-		else
+		elseif not isCard and not isPill then
 			hud.OnRender(player, playerHUDIndex, hudLayout, pos, alpha, scale)
 			HudHelper.LastAppliedHUD[HudHelper.HUDType.POCKET][playerHUDIndex] = hud
 		end
@@ -1782,7 +1791,7 @@ local function InitFunctions()
 				local collectiblesHistory = player:GetHistory():GetCollectiblesHistory()
 				for i = #collectiblesHistory, 1, -1 do
 					local historyItem = collectiblesHistory[i]
-					if historyItem:IsTrinket() or Mod.ItemConfig:GetCollectible(historyItem:GetItemID()).Type ~= ItemType.ITEM_ACTIVE then
+					if historyItem:IsTrinket() or itemConfig:GetCollectible(historyItem:GetItemID()).Type ~= ItemType.ITEM_ACTIVE then
 						posIndex = posIndex + 1
 					end
 					if posIndex > maxInventory then return end
@@ -1857,13 +1866,6 @@ local function InitFunctions()
 								end
 							elseif hudType == HudHelper.HUDType.POCKET then
 								---@cast hud HUDInfo_Pocket
-								if hudLayout == HudHelper.HUDLayout.P1 and not condensedCoopHUD then
-									pos = HudHelper.GetHUDPosition(4)
-								end
-								if i == 2 then
-									pos = pos + TWIN_COOP_OFFSET
-								end
-								pos = pos + HudHelper.GetPocketHUDOffset(player)
 								renderPocketItemHUDs(player, playerHUDIndex, hudLayout, pos, hud, i)
 							elseif hudType == HudHelper.HUDType.TRINKET then
 								---@cast hud HUDInfo_Trinket
@@ -1973,7 +1975,7 @@ local function InitFunctions()
 		if EID then
 			--EID support. Adds a custom position modifier to work with other HUD elements registered under HudHelper
 			--If any elements are active, gets rid of EID's own position modifiers as HudHelper already accounts for them
-			--If none are active, resets the modifier
+			--If none are active, removes the modifier
 			HudHelper.RegisterHUDElement({
 				Name = "Reset EID",
 				Priority = HudHelper.Priority.EID,
@@ -1981,15 +1983,15 @@ local function InitFunctions()
 				YPadding = 0,
 				Condition = function(player, playerHUDIndex)
 					return game:GetFrameCount() > 0
-						and EID.player
-						and EID.player.FrameCount > 0
 						and playerHUDIndex == 1
-						and not HudHelper.LastAppliedHUD[HudHelper.HUDType.EXTRA][1]
+						and (not HudHelper.LastAppliedHUD[HudHelper.HUDType.EXTRA][1]
+							or HudHelper.LastAppliedHUD[HudHelper.HUDType.EXTRA][1].Name == "EID"
+							or HudHelper.LastAppliedHUD[HudHelper.HUDType.EXTRA][1].Priority == HudHelper.Priority.VANILLA
+						)
 						and EID.PositionModifiers["HudHelper"]
-						and EID.PositionModifiers["HudHelper"].Y ~= 0
 				end,
 				OnRender = function()
-					EID:addTextPosModifier("HudHelper", Vector.Zero)
+					EID:removeTextPosModifier("HudHelper")
 				end
 			}, HudHelper.HUDType.EXTRA)
 
@@ -1999,12 +2001,11 @@ local function InitFunctions()
 				XPadding = 0,
 				YPadding = 0,
 				Condition = function(player, playerHUDIndex)
-					return game:GetFrameCount() > 0
-						and EID.player
-						and EID.player.FrameCount > 0
+					return EID.isDisplaying
 						and playerHUDIndex == 1
 						and HudHelper.LastAppliedHUD[HudHelper.HUDType.EXTRA][1]
 						and HudHelper.LastAppliedHUD[HudHelper.HUDType.EXTRA][1].Name ~= "Reset EID"
+						and HudHelper.LastAppliedHUD[HudHelper.HUDType.EXTRA][1].Priority ~= HudHelper.Priority.VANILLA
 				end,
 				OnRender = function(_, _, _, position)
 					local posYModifier = 0
@@ -2030,6 +2031,45 @@ local function InitFunctions()
 				end
 			}, HudHelper.HUDType.EXTRA)
 		end
+
+		if REVEL then
+			HudHelper.RegisterHUDElement({
+				Name = "Revelations Vanity",
+				Priority = HudHelper.Priority.MOD_PATCH,
+				XPadding = 0,
+				YPadding = 6,
+				Condition = function (player, playerHUDIndex, hudLayout)
+						return REVEL.ShouldRenderHudElements()
+							and REVEL.GetShrineVanity() > 0
+							and playerHUDIndex == 1
+					end,
+				OnRender = function ()
+					if EID.PositionModifiers["rev-pact-vanity"] then
+						EID:removeTextPosModifier("rev-pact-vanity")
+					end
+				end
+			}, HudHelper.HUDType.EXTRA)
+		end
+
+		if Martha then
+			HudHelper.RegisterHUDElement({
+				Name = "Martha Hope",
+				Priority = HudHelper.Priority.MOD_PATCH,
+				XPadding = 0,
+				YPadding = 6,
+				Condition = function (player, playerHUDIndex, hudLayout)
+						return player:GetPlayerType() == Isaac.GetPlayerTypeByName("Martha", false)
+							and playerHUDIndex == 1
+					end,
+				OnRender = function ()
+				end
+			}, HudHelper.HUDType.EXTRA)
+		end
+	end
+
+	function HudHelper.ReloadPatches()
+		HudHelper.LoadedPatches = false
+		postModsLoaded()
 	end
 
 	local function AddPriorityCallback(callback, priority, func, arg)
@@ -2104,6 +2144,7 @@ local function InitFunctions()
 
 			local rows = HudHelper.Utils.GetCurrentMaxHeartRows(player)
 
+			---@diagnostic disable-next-line: undefined-global
 			if not (NoHealthCapModEnabled or CustomHealthAPI) then
 				rows = min(48 / heartPerRow, rows) --Hearts literally stop rendering after 4 rows legitimately
 			end

@@ -13,7 +13,7 @@ function BurntSalt:SaltTearShoot(tear)
     if not mod.RandomBoolean(player:GetTrinketRNG(trinket.TRINKET_BURNT_SALT)) then return end 
     mod.ForceSaltTear(tear, true)
     data(tear).BurntSaltTear = true
-    tear.CollisionDamage = tear.CollisionDamage * 1.2
+    tear.CollisionDamage = tear.CollisionDamage * 1.25
 end
 mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, BurntSalt.SaltTearShoot)
 

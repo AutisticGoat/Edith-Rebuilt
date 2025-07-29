@@ -34,15 +34,17 @@ function Sal:KillingSalEnemy(entity, amount, _, source)
 
 	if Ent then
 		local tear = Ent:ToTear()
-		local entTearData = data(tear)
-		if entTearData.IsSalTear == true then return end
+		if tear then
+			local entTearData = data(tear)
+			if entTearData.IsSalTear == true then return end
+		end
 	end
-	
+
 	local rng = player:GetCollectibleRNG(items.COLLECTIBLE_SAL)
 	local tears
 
 	for _ = 1, rng:RandomInt(4, 6) do
-		tears = Isaac.Spawn(EntityType.ENTITY_TEAR, 0, 0, entity.Position, RandomVector() * (player.ShotSpeed * 10), player):ToTear()
+		tears = Isaac.Spawn(EntityType.ENTITY_TEAR, 0, 0, entity.Position, rng:RandomVector() * (player.ShotSpeed * 10), player):ToTear()
 
 		if not tears then return end
 		

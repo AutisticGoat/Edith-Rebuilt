@@ -12,25 +12,23 @@ local DivineRetribution = {}
 ---@return boolean?
 function DivineRetribution:OnDRUse(_, rng, player, flags)
     if  (flags == flags | UseFlag.USE_CARBATTERY) then return end
-
-    local remainingHits = TSIL.Players.GetPlayerNumHitsRemaining(player)
-
-    if (mod:isChap4() and remainingHits == 2) or remainingHits == 1 then return end
+    local IsJudasWithBirthright = mod.IsJudasWithBirthright(player)
 
     if mod.RandomBoolean(rng) then
         sfx:Play(SoundEffect.SOUND_THUMBS_DOWN)
         Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.CRACK_THE_SKY, 1, player.Position, Vector.Zero, nil)
     else
-        local enemiesCount = mod.GetEnemies()
-        if #enemiesCount <= 0 then return end
+        local roomEnemies = mod.GetEnemies()
+        if #roomEnemies <= 0 then return end
         local Hascarbattery = player:HasCollectible(CollectibleType.COLLECTIBLE_CAR_BATTERY)
-
-        player:AddSoulHearts(1)
+        local damage = (Hascarbattery and 50 or 25) * (IsJudasWithBirthright and 1.5 or 1)
+        local healFunc = IsJudasWithBirthright and player.AddBlackHearts or player.AddSoulHearts
+        healFunc(player, 1)
 
         sfx:Play(SoundEffect.SOUND_SUPERHOLY)
-        for _, enemies in pairs(enemiesCount) do
+        for _, enemies in pairs(roomEnemies) do
             Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.CRACK_THE_SKY, 10, enemies.Position, Vector.Zero, nil)
-            enemies:TakeDamage(Hascarbattery and 50 or 25, DamageFlag.DAMAGE_LASER, EntityRef(player), 0)
+            enemies:TakeDamage(damage, DamageFlag.DAMAGE_LASER, EntityRef(player), 0)
         end
     end
     game:ShakeScreen(15)

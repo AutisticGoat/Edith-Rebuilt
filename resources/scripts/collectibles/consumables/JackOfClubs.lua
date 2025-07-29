@@ -24,7 +24,6 @@ function JackOfClubs:myFunction2(_, player)
             false,
             0
         )
-
         if not mod.RandomBoolean(rng) then goto Break end
         Isaac.Spawn(
             EntityType.ENTITY_PICKUP,

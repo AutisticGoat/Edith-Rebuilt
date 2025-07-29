@@ -72,6 +72,16 @@ function SoulOfEdith:ParryJump(player)
 		tear.FallingSpeed = 4 * mod.RandomFloat(rng, 0.6, 1.8)
         tear.FallingAcceleration = 2.5 * mod.RandomFloat(rng, 0.6, 1.8)
 		tear:AddTearFlags(TearFlags.TEAR_SPECTRAL)
+		mod.ForceSaltTear(tear, false)
+		data(tear).IsSoulOfEdithTear = true
     end
 end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, SoulOfEdith.ParryJump, { tag = "SoulOfEdithJump" })
+
+---@param tear EntityTear
+function mod:OnTearDeath(tear)
+	-- if not data(tear).IsSoulOfEdithTear then return end
+
+	-- mod:SpawnSaltCreep(tear, tear.Position, 2, 3, 5, 5, "SoulOfEdith")
+end
+mod:AddCallback(ModCallbacks.MC_POST_TEAR_DEATH, mod.OnTearDeath)

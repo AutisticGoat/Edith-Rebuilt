@@ -173,19 +173,16 @@ local Descs = {
     }
 }
 
+local targetFunc = {
+    ["Items"] = EID.addCollectible,
+    ["Trinkets"] = EID.addTrinket,
+    ["Cards"] = EID.addCard,
+}
+
 for kind, Desc in pairs(Descs) do
-    local targetFunc = {
-        ["Items"] = EID.addCollectible,
-        ["Trinkets"] = EID.addTrinket,
-        ["Cards"] = EID.addCard,
-    }
-
-    local func = targetFunc[kind]
-
     for id, lang in pairs(Desc) do
         for lang, info in pairs(lang) do
-            ---@diagnostic disable-next-line: param-type-mismatch
-            func(EID, id, info.Desc, info.Name, lang)
+            targetFunc[kind](EID, id, info.Desc, info.Name, lang)
         end
     end
 end

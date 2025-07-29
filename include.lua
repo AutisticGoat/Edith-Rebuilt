@@ -11,6 +11,7 @@ local includeFiles = {
 	"EID",
 	"Birthcake",
 	"prenpckillcallback",
+	"CustomShockwaveAPI",
 	funcs .. "functions",
 	funcs .. "unlock_functions",
 	"ImGui",
@@ -65,6 +66,7 @@ local includeFiles = {
 	stmpSyn .. "SpiritSword",
 	stmpSyn .. "EpicFetus",
 	stmpSyn .. "StatusEffects",
+	stmpSyn .. "GodHead",
 		
 	parrySyn .. "Brimstone",
 }

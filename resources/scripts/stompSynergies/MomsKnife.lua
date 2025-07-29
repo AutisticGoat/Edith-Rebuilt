@@ -2,6 +2,7 @@ local mod = EdithRebuilt
 local funcs = require("resources.scripts.stompSynergies.Funcs")
 local EdithJump = require("resources.scripts.stompSynergies.JumpData")
 
+---@param player EntityPlayer
 function mod:KnifeStomp(player)
 	if funcs.DefensiveStomp(player) then return end
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_MOMS_KNIFE) then return end		
@@ -12,9 +13,8 @@ function mod:KnifeStomp(player)
 
 	for i = 1, knifeEntities do
 		knife = player:FireKnife(player, degrees * i, true, 0, 0)
-		
-		funcs.GetData(knife).StompKnife = true			
 		knife:Shoot(1, player.TearRange / 3)
+		funcs.GetData(knife).StompKnife = true			
 	end
 end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, mod.KnifeStomp, EdithJump)

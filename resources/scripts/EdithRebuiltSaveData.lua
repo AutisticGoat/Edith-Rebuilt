@@ -141,6 +141,8 @@ end
 ---
 --- Acts as a localized version to avoid incompatibilities with
 --- other mods.
+---@param entity Entity
+---@return table
 function library.getData(entity)
 	local hash = GetPtrHash(entity)
 	TEMPORARY_DATA[hash] = TEMPORARY_DATA[hash] or {}
