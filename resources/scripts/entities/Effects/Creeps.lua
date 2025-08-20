@@ -56,7 +56,6 @@ local function PepperCreepUpdate(effect)
     for _, entity in pairs(mod.GetEnemies()) do
         if entity.Position:Distance(effectPos) > 20 then goto continue end
         mod.PepperEnemy(entity, player, 60)
-        print("aaaaaaaaaaaaaa")
         ::continue::
     end
 end

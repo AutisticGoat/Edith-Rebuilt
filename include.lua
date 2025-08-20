@@ -50,6 +50,7 @@ local includeFiles = {
 	-- Entidades
 	ent .. "Effects/Creeps",
 	ent .. "Effects/Targets",
+	ent .. "Effects/Trail",
 	-- Entidades fin
 	
 	-- Personajes
@@ -67,6 +68,7 @@ local includeFiles = {
 	stmpSyn .. "EpicFetus",
 	stmpSyn .. "StatusEffects",
 	stmpSyn .. "GodHead",
+	stmpSyn .. "Technology",
 		
 	parrySyn .. "Brimstone",
 }

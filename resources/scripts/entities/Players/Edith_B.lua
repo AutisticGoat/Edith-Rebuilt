@@ -85,6 +85,7 @@ function TEdith.GetHopDashCharge(player, checkBirthright)
 	if not playerData.ImpulseCharge then return 0 end
 	return playerData.ImpulseCharge + (checkBirthright and playerData.BirthrightCharge or 0)
 end
+
 ---Reset both Tainted Edith's Move charge and Birthright charge
 ---@param player EntityPlayer
 function TEdith.ResetHopDashCharge(player)
@@ -156,11 +157,11 @@ function mod:InitTaintedEdithHop(player)
 		Tags = jumpTags.TEdithHop,
 		Flags = jumpFlags.TEdithHop
 	}
-	JumpLib:Jump(player, config)
+	JumpLib:Jump(player, config) 
 end
 
 local function isTaintedEdithJump(player)
-	return JumpLib:GetData(player).Tags["edithRebuilt_EdithJump"] or false
+	return JumpLib:GetData(player).Tags["edithRebuilt_TaintedEdithJump"] or false
 end
 
 ---@param player EntityPlayer	
@@ -183,18 +184,29 @@ function mod:TaintedEdithUpdate(player)
 		player:SetColor(Color(1, 1, 1, 1, colorChange, colorBRChange, 0), 5, 100, true, false)
 	end
 
-	if playerData.ParryCounter > 0 then
+	if playerData.ParryCounter > 0  then
 		if isTaintedEdithJump(player) ~= true then
 			playerData.ParryCounter = playerData.ParryCounter - 1
 		end
 
-		if playerData.ParryCounter == 1 then
-			player:SetColor(Color(1, 1, 1, 1, 0.5), 5, 100, true, false)
+		if playerData.ParryCounter == 1 and player.FrameCount > 20 then
+			player:SetColor(Color(1, 1, 1, 1, 0.5 + colorChange), 5, 100, true, false)
+			
 			sfx:Play(SoundEffect.SOUND_STONE_IMPACT)
+			playerData.ParryReadyGlowCount = 0
 		end
 	end
 
-	playerData.HopVector = playerData.HopVector or Vector.Zero
+	playerData.ParryReadyGlowCount = (
+		not isTaintedEdithJump(player) and
+		not mod.GetEdithTarget(player, true) and
+		(playerData.ParryReadyGlowCount and playerData.ParryReadyGlowCount < 20 ) and 
+		funcs.Clamp(playerData.ParryReadyGlowCount + 1, 1, 20) or 0
+	)
+
+	if playerData.ParryReadyGlowCount == 20 then
+		player:SetColor(Color(1, 1, 1, 1, colorChange + 0.3, 0, 0), 5, 100, true, false)
+	end
 
 	if (player:CollidesWithGrid() and playerData.IsHoping == true) and not isJumping then
 		TEdith.StopTEdithHops(player, 20, true, not playerData.TaintedEdithTarget)
@@ -361,14 +373,16 @@ mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, mod.EdithHopLanding, jumpParams.T
 
 ---@param player EntityPlayer
 function TEdith:EdithParryJump(player)
+	if mod.GetEdithTarget(player, true) then 
+		TEdith.ResetHopDashCharge(player)
+	end
+
 	local perfectParry = mod.ParryLandManager(player, true)
 	local tableRef = perfectParry and parryJumpSounds or hopSounds
-	local parryAdd = perfectParry and 20 or -10
+	local parryAdd = perfectParry and 20 or -15
+
 	funcs.FeedbackMan(player, tableRef, misc.BurntSaltColor, perfectParry)
 	TEdith.AddHopDashCharge(player, parryAdd, 0.75)
-
-	if not mod.GetEdithTarget(player, true) then return end
-	TEdith.ResetHopDashCharge(player)
 end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, TEdith.EdithParryJump, jumpParams.TEdithJump)
 
@@ -382,25 +396,31 @@ function TEdith:TaintedEdithDamageManager(player, damage, flags)
 end
 mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG, TEdith.TaintedEdithDamageManager)
 
-function TEdith:HudBarRender(player)
-	if not funcs.IsEdith(player, true) then return end
+HudHelper.RegisterHUDElement({
+	Name = "KnifeChargeBar",
+	Priority = HudHelper.Priority.NORMAL,
+	Condition = function(player)
+		return funcs.IsEdith(player, true) and RoomTransition:GetTransitionMode() ~= 3
+	end,
+	XPadding = 0,
+	YPadding = 0,
+	OnRender = function(player)
+		local playerpos = game:GetRoom():WorldToScreenPosition(player.Position)
+		local playerData = funcs.GetData(player)
+		local dashCharge = playerData.ImpulseCharge 
+		local dashBRCharge = playerData.BirthrightCharge 
+		local offset = misc.ChargeBarcenterVector
 
-	local playerpos = game:GetRoom():WorldToScreenPosition(player.Position)
-	local playerData = funcs.GetData(player)
-	local dashCharge = playerData.ImpulseCharge 
-	local dashBRCharge = playerData.BirthrightCharge 
-	local offset = misc.ChargeBarcenterVector
+		if not dashCharge or not dashBRCharge then return end
 
-	if not dashCharge or not dashBRCharge then return end
+		playerData.ChargeBar = playerData.ChargeBar or Sprite("gfx/TEdithChargebar.anm2", true)
+		playerData.BRChargeBar = playerData.BRChargeBar or Sprite("gfx/TEdithBRChargebar.anm2", true)
+		
+		if player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and not playerData.BRChargeBar:IsFinished("Disappear") then
+			offset = misc.ChargeBarleftVector
+		end
 
-	playerData.ChargeBar = playerData.ChargeBar or Sprite("gfx/TEdithChargebar.anm2", true)
-	playerData.BRChargeBar = playerData.BRChargeBar or Sprite("gfx/TEdithBRChargebar.anm2", true)
-	
-	if player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and not playerData.BRChargeBar:IsFinished("Disappear") then
-		offset = misc.ChargeBarleftVector
+		HudHelper.RenderChargeBar(playerData.ChargeBar, dashCharge, 100, playerpos + offset)
+		HudHelper.RenderChargeBar(playerData.BRChargeBar, dashBRCharge, 100, playerpos + misc.ChargeBarrightVector)
 	end
-
-	HudHelper.RenderChargeBar(playerData.ChargeBar, dashCharge, 100, playerpos + offset)
-	HudHelper.RenderChargeBar(playerData.BRChargeBar, dashBRCharge, 100, playerpos + misc.ChargeBarrightVector)
-end
-mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_RENDER, TEdith.HudBarRender)
+}, HudHelper.HUDType.EXTRA)

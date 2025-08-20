@@ -50,7 +50,8 @@ EdithRebuilt.Enums = {
 	Callbacks = {
 		PERFECT_PARRY = "EdithRebuilt_PERFECT_PARRY", -- Called everytime a Perfect Parry is triggered (player: EntityPlayer, entity: Entity)
 		PERFECT_PARRY_KILL = "EdithRebuilt_PERFECT_PARRY_KILL", -- Called everytime an enemy is killed by a Perfect Parry is triggered (player: EntityPlayer, entity: Entity)
-		TARGET_SPRITE_CHANGE = "EdithRebuilt_TARGET_SPRITE_CHANGE", -- Called everytime Edith's Targetv(or Tainted Edith's arrow) changes its design		
+		TARGET_SPRITE_CHANGE = "EdithRebuilt_TARGET_SPRITE_CHANGE", -- Called everytime Edith's Target(or Tainted Edith's arrow) changes its design		
+		TRAIL_SPRITE_CHANGE = "EdithRebuilt_TRAIL_SPRITE_CHANGE", -- Called everytime Tainted Edith's trail sprite is changed	
 	},
 	SubTypes = {
 		SALT_CREEP = Isaac.GetEntitySubTypeByName("Salt Creep"),
@@ -136,7 +137,7 @@ EdithRebuilt.Enums = {
 			[5] = "_chevron_line",
 			[6] = "_chevron_full",
 			[7] = "_grudge",
-		},		
+		},
 		TargetSuffix = {
 			[1] = "",
 			[2] = "_trans",
@@ -147,7 +148,7 @@ EdithRebuilt.Enums = {
 			[7] = "_ace",
 			[8] = "_enby",
 			[9] = "_Venezuela",
-		},	
+		},
 		ColorValues = {
 			[2] = {R = 245/255, G = 169/255, B = 184/255},
 			[3] = {R = 1, G = 0, B = 1},
@@ -257,7 +258,21 @@ EdithRebuilt.Enums = {
 				"Chevron (line)", 
 				"Chevron (full)", 
 				"Grudge", 
-			}, 
+			},
+			TrailDesign = {
+				"Choose color",
+				"Trans",
+				"Rainbow",
+				"Lesbian",
+				"Bisexual",
+				"Gay",
+				"Ace",
+				"Enby",
+				"Pansexual",
+				"Straight",
+				"Commander Video",
+				"Italy",
+			},
 			HopSound = {
 				"Stone", 
 				"Yippee", 
@@ -300,12 +315,27 @@ EdithRebuilt.Enums = {
 			[GridEntityType.GRID_STAIRS] = true,
 			[GridEntityType.GRID_GRAVITY] = true,
 		},
+		TEdithTrailParams = {
+			[1] = { Suffix = "", Size = 2 },
+			[2] = { Suffix = "_trans", Size = 2 },
+			[3] = { Suffix = "_rainbow", Size = 2 },
+			[4] = { Suffix = "_lesbian", Size = 2 },
+			[5] = { Suffix = "_bi", Size = 1 },
+			[6] = { Suffix = "_gay", Size = 1 },
+			[7] = { Suffix = "_ace", Size = 1 },
+			[8] = { Suffix = "_enby", Size = 1 },
+			[9] = { Suffix = "_pan", Size = 1 },
+			[10] = { Suffix = "_straight", Size = 1 },
+			[11] = { Suffix = "_CommanderVideo", Size = 1 },
+			[12] = { Suffix = "_italy", Size = 1 },
+		}
 	},
 	Misc = {
 		TearPath = "gfx/tears/",
 		HeadAdjustVec = Vector.Zero,
 		TargetPath = "gfx/effects/EdithTarget/effect_000_edith_target",
 		ArrowPath = "gfx/effects/TaintedEdithArrow/effect_000_tainted_edith",
+		TrailPath = "gfx/effects/TaintedEdithTrail/trail",
 		TargetLineColor = Color(1, 1, 1),
 		SaltShakerDist = Vector(0, 60),
 		ColorDefault = Color(1, 1, 1, 1),
@@ -317,7 +347,7 @@ EdithRebuilt.Enums = {
 		ChargeBarcenterVector = Vector(0, 10),
 		ChargeBarrightVector = Vector(8, 10),
 		PaprikaColor = Color(0.8, 0.2, 0),
-		ParryPartitions = EntityPartition.ENEMY | EntityPartition.BULLET | EntityPartition.TEAR,
+		ParryPartitions = EntityPartition.ENEMY | EntityPartition.BULLET | EntityPartition.TEAR, --[[@as EntityPartition]]
 		NewProjectilFlags = ProjectileFlags.HIT_ENEMIES | ProjectileFlags.CANT_HIT_PLAYER,
 		NearEnemyDetectionDist = 150,
 	},

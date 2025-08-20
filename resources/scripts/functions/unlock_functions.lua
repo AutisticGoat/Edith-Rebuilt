@@ -8,7 +8,6 @@ local trinkets = enums.TrinketType
 local game = utils.Game
 local level = utils.Level
 local unlocks = {}
-local data = mod.CustomDataWrapper.getData
 local UnlockTable = {
     Edith = {
         [CompletionType.MOMS_HEART] = {

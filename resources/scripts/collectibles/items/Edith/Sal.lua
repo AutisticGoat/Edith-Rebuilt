@@ -34,9 +34,8 @@ function Sal:KillingSalEnemy(entity, amount, _, source)
 
 	if Ent then
 		local tear = Ent:ToTear()
-		if tear then
-			local entTearData = data(tear)
-			if entTearData.IsSalTear == true then return end
+		if tear and data(tear).IsSalTear then 
+			return 
 		end
 	end
 

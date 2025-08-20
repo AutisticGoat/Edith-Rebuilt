@@ -98,32 +98,22 @@ function Edith:EdithSaltTears(tear)
 end
 mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, Edith.EdithSaltTears)
 
-function Edith:EdithKnockbackTears(tear)
-	local player = mod:GetPlayerFromTear(tear)
-
-	if not player then return end
-	if not funcs.IsEdith(player, false) then return end
-	if tear.FrameCount ~= 1 then return end
-
-	tear.Mass = tear.Mass * 10
-end
-mod:AddCallback(ModCallbacks.MC_POST_TEAR_UPDATE, Edith.EdithKnockbackTears)
-
 ---comment
 ---@param player EntityPlayer
 function Edith:EdithJumpHandler(player)
 	if not funcs.IsEdith(player, false) then return end
-	if player:IsDead() then funcs.RemoveTarget(player) return end
-
+	
 	local playerData = funcs.GetData(player)
+	if player:IsDead() then funcs.RemoveTarget(player); playerData.isJumping = false return end
+
 	local isMoving = funcs.TargetMov(player)
 	local isKeyStompPressed = funcs.KeyStompPress(player)
 	local hasMarked = player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED)
 	local isShooting = mod:IsPlayerShooting(player)
 	local jumpData = JumpLib:GetData(player)
 	local isPitfall = JumpLib:IsPitfalling(player)
-	local isJumping = jumpData.Jumping
- 
+	local isJumping = jumpData.Jumping 
+
 	playerData.isJumping = playerData.isJumping or false
 	playerData.ExtraJumps = playerData.ExtraJumps or 0
 
@@ -269,6 +259,7 @@ function Edith:EdithLanding(player, _, pitfall)
 
 	player:SetMinDamageCooldown(25)
 
+
 	if not funcs.KeyStompPress(player) and not funcs.TargetMov(player) then
 		if distance <= 5 and distance >= 60 then
 			player.Position = edithTarget.Position
@@ -281,24 +272,33 @@ function Edith:EdithLanding(player, _, pitfall)
 
 	-------- Bomb Stomp --------
 	if playerData.BombStomp == true then
-		if player:GetNumBombs() > 0 and not player:HasGoldenBomb() then
+		if player:GetNumBombs() > 0 and not player:HasGoldenBomb() and not player:HasCollectible(CollectibleType.COLLECTIBLE_ROCKET_IN_A_JAR) then
 			player:AddBombs(-1)
 		end
 
-		game:BombExplosionEffects(player.Position, 100, player.TearFlags, misc.ColorDefault, player, 1, false, false, 0)
+		if not player:HasCollectible(CollectibleType.COLLECTIBLE_ROCKET_IN_A_JAR) then
+			game:BombExplosionEffects(player.Position, 100, player.TearFlags, misc.ColorDefault, player, 1, false, false, 0)
+		end
+
 		playerData.BombStomp = false
 	end
 	-------- Bomb Stomp  end --------
 	
 	playerData.IsDefensiveStomp = false
 	playerData.isJumping = false
+	playerData.RocketLaunch = false
 end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, Edith.EdithLanding, JumpParams.EdithJump)
 
 ---@param player EntityPlayer
 function Edith:EdithPEffectUpdate(player)
 	if not funcs.IsEdith(player, false) then return end
+
 	local playerData = funcs.GetData(player)
+
+	if playerData.RocketLaunch then
+		return
+	end
 
 	playerData.EdithJumpTimer = math.max(playerData.EdithJumpTimer - 1, 0)
 
@@ -306,6 +306,7 @@ function Edith:EdithPEffectUpdate(player)
 		Edith:ColorCooldown(player, 0.6, 5)
 		local EdithSave = saveManager.GetSettingsSave().EdithData
 		sfx:Play(funcs.Switch(EdithSave.CooldownSound or 1, tables.CooldownSounds), 2)
+		playerData.StompedEntities = nil
 	end
 
 	if not funcs.GetTarget(player) then return end
@@ -372,8 +373,8 @@ mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Edith.DamageStuff)
 
 ---@param ID CollectibleType
 ---@param player EntityPlayer
-function Edith:OnEsauJrUse(ID, _, player)
+function Edith:OnActiveItemRemoveTarget(ID, _, player)
 	if not funcs.Switch(ID, tables.RemoveTargetItems, false) then return end
 	funcs.RemoveTarget(player)
 end
-mod:AddCallback(ModCallbacks.MC_PRE_USE_ITEM, Edith.OnEsauJrUse)
+mod:AddCallback(ModCallbacks.MC_PRE_USE_ITEM, Edith.OnActiveItemRemoveTarget)

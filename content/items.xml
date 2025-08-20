@@ -8,6 +8,7 @@
 		quality="3" 
 		chargetype="timed"
 		maxcharges="420"
+		tags=""
 	/>
 	<active
 		id="2" 

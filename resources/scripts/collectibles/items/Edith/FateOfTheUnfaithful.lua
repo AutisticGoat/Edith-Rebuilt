@@ -10,7 +10,7 @@ local FOTU = {}
 ---@param flag UseFlag
 ---@return boolean?
 function FOTU:OnFatefulUse(_, rng, player, flag)
-    if flag & UseFlag.USE_CARBATTERY == UseFlag.USE_CARBATTERY then return end
+    if mod.HasBitFlags(flag, UseFlag.USE_CARBATTERY) then return end
     local Hascarbattery = player:HasCollectible(CollectibleType.COLLECTIBLE_CAR_BATTERY) 
     local playerPos = player.Position
 

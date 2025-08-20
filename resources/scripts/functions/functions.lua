@@ -1,4 +1,4 @@
----@diagnostic disable: undefined-global
+---@diagnostic disable: undefined-global, param-type-mismatch
 local mod = EdithRebuilt
 local enums = mod.Enums
 local effectVariant = enums.EffectVariant
@@ -20,9 +20,9 @@ local MortisBackdrop = {
 	MORGUE = 3
 }
 
----Checks if player is Edith. Boolean argument checks for Tainted Edith
+---Checks if player is Edith
 ---@param player EntityPlayer
----@param tainted boolean
+---@param tainted boolean set it to `true` to check if player is Tainted Edith
 ---@return boolean
 function EdithRebuilt.IsEdith(player, tainted)
 	return player:GetPlayerType() == (tainted and players.PLAYER_EDITH_B or players.PLAYER_EDITH)
@@ -306,7 +306,7 @@ end
 ---@param player EntityPlayer
 function EdithRebuilt.ManageEdithWeapons(player)
 	local weapon = player:GetWeapon(1)
-	
+
 	if not weapon then return end
 	if not mod.When(weapon:GetWeaponType(), tables.OverrideWeapons, false) then return end
 	local newWeapon = Isaac.CreateWeapon(WeaponType.WEAPON_TEARS, player)
@@ -321,7 +321,7 @@ function EdithRebuilt.CustomDropBehavior(player, jumpData)
 	if not mod.IsEdith(player, false) then return end
 	local playerData = data(player)
 	playerData.ShouldDrop = playerData.ShouldDrop or false
-	
+
 	if playerData.ShouldDrop == false then
 	---@diagnostic disable-next-line: undefined-field
 		player:SetActionHoldDrop(0)
@@ -342,11 +342,17 @@ function EdithRebuilt.DashItemBehavior(player)
 	if not edithTarget then return end
 	local effects = player:GetEffects()
 	local hasMarsEffect = effects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_MARS)
+	local hasAnyPonyEffect = effects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_PONY) or effects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_WHITE_PONY)
 	local direction = mod.GetEdithTargetDirection(player, false)
 	local distance = mod.GetEdithTargetDistance(player)
 
-	if hasMarsEffect then
+	if hasMarsEffect or hasAnyPonyEffect then
 		mod.EdithDash(player, direction, distance, 50)
+	end
+
+	if player.Velocity:Length() <= 3 then
+		effects:RemoveCollectibleEffect(CollectibleType.COLLECTIBLE_PONY, -1)
+		effects:RemoveCollectibleEffect(CollectibleType.COLLECTIBLE_WHITE_PONY, -1)
 	end
 
 	local primaryActiveSlot = player:GetActiveItemDesc(ActiveSlot.SLOT_PRIMARY)
@@ -377,7 +383,7 @@ function EdithRebuilt.FallBehavior(player)
 
 	if mod.IsDefensiveStomp(player) then return end
 	if not (player.CanFly and ((mod.IsEdithTargetMoving(player) and distance <= 50) or distance <= 5)) then return end
-	
+
 	player:MultiplyFriction(isMovingTarget and 1 or 0.2)
 
 	if not (jumpdata.Fallspeed < 8.5 and JumpLib:IsFalling(player)) then return end
@@ -393,8 +399,46 @@ function EdithRebuilt.BombFall(player, jumpdata)
 	if player:GetNumBombs() <= 0 and not player:HasGoldenBomb() then return end
 
 	data(player).BombStomp = true
+
+	if player:HasCollectible(CollectibleType.COLLECTIBLE_ROCKET_IN_A_JAR) and not data(player).RocketLaunch then 
+		local TargetAnglev = mod.GetEdithTargetDirection(player, false):GetAngleDegrees()
+		local bomb = Isaac.Spawn(EntityType.ENTITY_BOMB, BombVariant.BOMB_ROCKET, 0, player.Position, Vector.Zero, player):ToBomb() --[[@as EntityBomb]]
+		bomb:SetRocketAngle(TargetAnglev)
+		bomb:SetRocketSpeed(40)
+
+		if not player:HasGoldenBomb() then
+			player:AddBombs(-1)
+		end
+
+		JumpLib:Jump(player, {
+			Height = 10,
+			Speed = 1.5,
+			Tags = jumpTags.EdithJump,
+			Flags = jumpFlags.EdithJump,
+		})
+
+		sfx:Play(SoundEffect.SOUND_ROCKET_LAUNCH)
+		player.Velocity = -player.Velocity:Normalized():Resized(15)
+		data(player).RocketLaunch = true
+		data(bomb).IsEdithRocket = true
+		return
+	end
+
+	if data(player).RocketLaunch then return end
 	JumpLib:SetSpeed(player, 8 + (jumpdata.Height / 10))
 end
+
+---@param bomb EntityBomb
+function mod:BombUpdate(bomb)
+	if not data(bomb).IsEdithRocket then return end
+	local rocketHeight = JumpLib:GetData(bomb).Height
+
+	if rocketHeight <= 15 then
+		JumpLib:QuitJump(bomb)
+	end
+end
+mod:AddCallback(ModCallbacks.MC_POST_BOMB_RENDER, mod.BombUpdate)
+
 
 local backdropColors = tables.BackdropColors
 ---@param player EntityPlayer
@@ -585,6 +629,27 @@ function EdithRebuilt:SpawnBlackPowder(parent, quantity, position, distance)
 	Pentagram.Scale = distance + distance / 2	
 end
 
+---@param player EntityPlayer
+function EdithRebuilt.GetNearestEnemy(player)
+	local closestDistance = math.huge
+    local playerPos = player.Position
+	local room = game:GetRoom()
+	local closestEnemy, enemyPos, distanceToPlayer, checkline
+
+	for _, enemy in ipairs(mod.GetEnemies()) do
+		if enemy:HasEntityFlags(EntityFlag.FLAG_CHARM) then goto Break end
+		enemyPos = enemy.Position
+		distanceToPlayer = enemyPos:Distance(playerPos)
+		checkline = room:CheckLine(playerPos, enemyPos, LineCheckMode.PROJECTILE, 0, false, false)
+		if not checkline then goto Break end
+        if distanceToPlayer >= closestDistance then goto Break end
+        closestEnemy = enemy
+        closestDistance = distanceToPlayer
+        ::Break::
+	end
+    return closestEnemy
+end
+
 ---Expontential function
 ---@param number number
 ---@param coeffcient number
@@ -665,6 +730,7 @@ end
 ---@return number
 function EdithRebuilt.GetEdithTargetDistance(player)
 	local target = mod.GetEdithTarget(player, false)
+	if not target then return 0 end
 	return player.Position:Distance(target.Position)
 end
 
@@ -908,9 +974,7 @@ function EdithRebuilt.HandleEntityInteraction(ent, parent, knockback)
             if not tear then return end
 			if mod.IsEdith(parent, true) then return end
 
-			mod.TriggerPush(ent, parent, knockback * 1.5, 3, false)
-            tear:AddTearFlags(TearFlags.TEAR_QUADSPLIT)
-            tear.CollisionDamage = tear.CollisionDamage * 2
+			mod.BoostTear(tear, 25, 1.5)
         end,
         [EntityType.ENTITY_FIREPLACE] = function()
             if var == 4 then return end
@@ -987,9 +1051,12 @@ function EdithRebuilt:EdithStomp(parent, radius, damage, knockback, breakGrid)
 	local HasTerra = parent:HasCollectible(CollectibleType.COLLECTIBLE_TERRA)
 	local TerraRNG = parent:GetCollectibleRNG(CollectibleType.COLLECTIBLE_TERRA)
 	local TerraMult = HasTerra and mod.RandomFloat(TerraRNG, 0.5, 2) or 1	
+	local playerData = data(parent)
 	local FrozenMult, BCRRNG
 
-	for _, ent in ipairs(Isaac.FindInCapsule(Capsule(parent.Position, Vector.One, 0, radius))) do
+	playerData.StompedEntities = Isaac.FindInCapsule(Capsule(parent.Position, Vector.One, 0, radius))
+
+	for _, ent in ipairs(playerData.StompedEntities) do
 		mod.HandleEntityInteraction(ent, parent, knockback)
 
 		if ent.Type == EntityType.ENTITY_STONEY then
@@ -1037,6 +1104,19 @@ function EdithRebuilt.GetPlayerFromRef(EntityRef)
 	return ent:ToPlayer() or mod:GetPlayerFromTear(ent) or familiar and familiar.Player 
 end
 
+---@param player EntityPlayer
+---@return Entity[]
+function EdithRebuilt.GetStompedEnemies(player)
+	local enemyTable = {}
+    for _, ent in ipairs(data(player).StompedEntities) do
+        if not mod.IsEnemy(ent) then goto continue end
+        table.insert(enemyTable, ent)
+		::continue::
+    end
+    return enemyTable
+end
+
+
 ---Triggers a push to `pushed` from `pusher`
 ---@param pushed Entity
 ---@param pusher Entity
@@ -1057,7 +1137,7 @@ function EdithRebuilt.EdithDash(player, dir, dist, div)
 	player.Velocity = player.Velocity + dir * dist / div
 end
 
---- Helper function that returns a table containing all existing enemies
+--- Helper function that returns a table containing all existing enemies in room
 ---@return Entity[]
 function EdithRebuilt.GetEnemies()
     local enemyTable = {}
@@ -1252,6 +1332,25 @@ local function PerfectParryMisc(player, IsTaintedEdith, isenemy)
 	end
 end
 
+---Makes the tear to receive a boost, increasing its speed and damage
+---@param tear EntityTear	
+---@param speed number
+---@param dmgMult number
+function EdithRebuilt.BoostTear(tear, speed, dmgMult)
+	local player = mod:GetPlayerFromTear(tear) --[[@as EntityPlayer]]
+	local nearEnemy = mod.GetNearestEnemy(player)
+
+	if nearEnemy then
+		tear.Velocity = (nearEnemy.Position - tear.Position):Normalized()
+	end
+
+	tear.Velocity = tear.Velocity:Resized(speed)
+	tear:AddTearFlags(TearFlags.TEAR_KNOCKBACK)
+	tear.CollisionDamage = tear.CollisionDamage * dmgMult
+end
+
+
+
 ---Helper function used to manage Tainted Edith and Burnt Hood's parry-lands 
 ---@param player EntityPlayer
 ---@param IsTaintedEdith? boolean 
@@ -1272,13 +1371,18 @@ function EdithRebuilt.ParryLandManager(player, IsTaintedEdith)
 	local shouldTriggerFireJets = IsTaintedEdith and hasBirthright or mod.IsJudasWithBirthright(player)
 	local spawner, targetEnt, proj
 
+	if IsTaintedEdith then
+		local damageIncrease = 1 + (playerData.ImpulseCharge + playerData.BirthrightCharge) / 400
+		DamageFormula = DamageFormula * damageIncrease
+	end
+
 	for _, ent in pairs(Isaac.FindInCapsule(ImpreciseParryCapsule, misc.ParryPartitions)) do
-		if mod.IsEnemy(ent) then
-			ent:AddConfusion(EntityRef(player), 90, false)
-		end
-		if not ent:ToTear() then
-			mod.TriggerPush(ent, player, 20, 5, false)
-		end
+		if ent:ToTear() then goto continue end
+		mod.TriggerPush(ent, player, 20, 5, false)
+
+		if not mod.IsEnemy(ent) then goto continue end
+		ent:AddConfusion(EntityRef(player), 90, false)
+		::continue::
 	end
 
 	for _, ent in pairs(Isaac.FindInCapsule(PerfectParryCapsule, misc.ParryPartitions)) do
@@ -1287,7 +1391,7 @@ function EdithRebuilt.ParryLandManager(player, IsTaintedEdith)
 		 
 		if proj then
 			spawner = proj.Parent or proj.SpawnerEntity
-			targetEnt = spawner or proj
+			targetEnt = spawner or mod.GetNearestEnemy(player) or proj
 
 			proj.FallingAccel = -0.1
 			proj.FallingSpeed = 0
@@ -1315,8 +1419,7 @@ function EdithRebuilt.ParryLandManager(player, IsTaintedEdith)
 			end
 
 			if tear then
-				ent.Velocity = ent.Velocity:Resized(20)
-				tear:AddTearFlags(TearFlags.TEAR_KNOCKBACK | TearFlags.TEAR_QUADSPLIT)
+				mod.BoostTear(tear, 20, 1.5)
 			end
 
 			ent:TakeDamage(DamageFormula, 0, EntityRef(player), 0)

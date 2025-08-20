@@ -20,7 +20,7 @@ local DespawnSaltTypes = {
 ---@param flag UseFlag
 ---@return boolean?
 function SaltShaker:UseSaltShaker(_, rng, player, flag)	
-	if flag & UseFlag.USE_CARBATTERY == UseFlag.USE_CARBATTERY then return end
+	if mod.HasBitFlags(flag, UseFlag.USE_CARBATTERY) then return end
     local hasCarBattery = player:HasCollectible(CollectibleType.COLLECTIBLE_CAR_BATTERY) 
 	local playerPos = player.Position
 	local spawnType = mod.IsJudasWithBirthright(player) and "SaltShakerSpawnJudas" or "SaltShakerSpawn"

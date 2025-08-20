@@ -2,7 +2,9 @@ local mod = EdithRebuilt
 local enums = mod.Enums
 local items = enums.CollectibleType
 local data = mod.CustomDataWrapper.getData
+local invalidDamageFlags = DamageFlag.DAMAGE_SPIKES | DamageFlag.DAMAGE_INVINCIBLE | DamageFlag.DAMAGE_NO_MODIFIERS | DamageFlag.DAMAGE_NO_PENALTIES
 local SaltHeart = {}
+
 
 ---@param entity Entity
 ---@param amount number
@@ -11,22 +13,25 @@ local SaltHeart = {}
 function SaltHeart:GettingDamage(entity, amount, flags, source)
     local player = entity:ToPlayer()
     if not (player and player:HasCollectible(items.COLLECTIBLE_SALT_HEART)) then return end
+    if mod.HasBitFlags(flags, invalidDamageFlags) then return end
+    
     -- if TSIL.Players.IsDamageToPlayerFatal(player, amount, source) then return end
+
+    print(mod.HasBitFlags)
+
+    print(flags)
 
     local playerData = data(player)
 
     playerData.SaltHeartDDFlag = playerData.SaltHeartDDFlag or false
     playerData.SaltHeartSpawnSaltTimer = 90
 
-    if playerData.SaltHeartDDFlag == false then 
+    if not playerData.SaltHeartDDFlag then 
         playerData.SaltHeartDDFlag = true
         player:TakeDamage(amount * 2, flags, source, 0)
+        playerData.SaltHeartDDFlag = false
         return false
     end
-
-    Isaac.CreateTimer(function()
-        playerData.SaltHeartDDFlag = false
-    end, 1, 1, false)
 
     for _ = 1, player:GetCollectibleRNG(items.COLLECTIBLE_SALT_HEART):RandomInt(4, 6) do
         local tears = player:FireTear(entity.Position, RandomVector() * (player.ShotSpeed * 10), false, false, false, player, 1)
@@ -43,7 +48,7 @@ function SaltHeart:SpawnSaltCreep(player)
 
     local playerData = data(player)
     
-    if playerData.SaltHeartSpawnSaltTimer == nil or playerData.SaltHeartSpawnSaltTimer <= 0 then return end
+    if not playerData.SaltHeartSpawnSaltTimer or playerData.SaltHeartSpawnSaltTimer <= 0 then return end
     playerData.SaltHeartSpawnSaltTimer = math.max(playerData.SaltHeartSpawnSaltTimer - 1, 0) 
     if playerData.SaltHeartSpawnSaltTimer % 5 ~= 0 then return end
     

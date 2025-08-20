@@ -37,7 +37,7 @@ function MoltenCore:KillingSalEnemy(entity, amount, _, source)
 
 	if not player then return end
 	if not player:HasCollectible(items.COLLECTIBLE_MOLTEN_CORE) then return end
-	if not (entity:IsActiveEnemy() and entity:IsVulnerableEnemy()) then return end
+	if not mod.IsEnemy(entity) then return end
 
 	entity:AddBurn(source, 120, 1)
 

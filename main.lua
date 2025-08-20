@@ -51,6 +51,8 @@ local whiteListCostumes = {
     [CollectibleType.COLLECTIBLE_PONY] = true,
     [CollectibleType.COLLECTIBLE_WHITE_PONY] = true,
     [CollectibleType.COLLECTIBLE_GODHEAD] = true,
+    [CollectibleType.COLLECTIBLE_TRANSCENDENCE] = true,
+    [CollectibleType.COLLECTIBLE_FATE] = true,
 	[costumes.ID_EDITH_SCARF] = true,
 	[costumes.ID_EDITH_B_SCARF] = true,
 }
@@ -65,6 +67,16 @@ mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_ADD_COSTUME, function(_, itemconfig, 
 
     if shouldOverride then return end
     return true
+end)
+
+mod:AddCallback(ModCallbacks.MC_POST_TEAR_UPDATE, function(_, tear)
+    local player = mod:GetPlayerFromTear(tear)
+
+	if not player then return end
+	if not mod:IsAnyEdith(player) then return end
+	if tear.FrameCount ~= 1 then return end
+
+	tear.Mass = tear.Mass * 10
 end)
 
 ---@param player EntityPlayer

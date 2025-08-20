@@ -30,7 +30,6 @@ function PepperGrinder:UsePepperGrinder(_, RNG, player, flag)
 	local X = mod.RandomFloat(RNG, 0.8, 1)
 	local Y = mod.RandomFloat(RNG, 0.8, 1)
 
-
 	PepperCloud.SpriteScale = PepperCloud.SpriteScale * Vector(X, Y)
 
 	mod:ChangeColor(PepperCloud, 0.45, 0.45, 0.45)
