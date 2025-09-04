@@ -1,12 +1,12 @@
 EdithRebuilt = RegisterMod("Edith: Rebuilt", 1)
 local mod = EdithRebuilt
 
-EdithRebuilt.CustomDataWrapper = require("resources.scripts.EdithRebuiltsavedata")
-EdithRebuilt.CustomDataWrapper.init(EdithRebuilt)
-EdithRebuilt.SaveManager = require("resources.scripts.EdithRebuiltSaveManager")
+EdithRebuilt.CustomDataWrapper = require("resources.scripts.libs.EdithRebuiltSaveData")
+EdithRebuilt.CustomDataWrapper.init(mod)
+EdithRebuilt.SaveManager = require("resources.scripts.libs.EdithRebuiltSaveManager")
 EdithRebuilt.SaveManager.Init(mod)
 
-include("resources/scripts/EdithKotryJumpLib").Init(mod)
+include("resources.scripts.libs.EdithKotryJumpLib").Init(mod)
 include("include")
 
 local enums = mod.Enums

@@ -1,11 +1,14 @@
+local EdithPlayer = Isaac.GetPlayerTypeByName("Edith​​​", false)
+local EdithBPlayer = Isaac.GetPlayerTypeByName("Edith​​​", true)
 local edithJumpTag = "edithRebuilt_EdithJump"
 local tedithJumpTag = "edithRebuilt_TaintedEdithJump"
 local tedithHopTag = "edithRebuilt_TaintedEdithHop"
+local edithHoodJumpTag = "edithRebuilt_EdithsHoodJump"
 
 EdithRebuilt.Enums = {
 	PlayerType = {
-		PLAYER_EDITH = Isaac.GetPlayerTypeByName("Edith​​​", false),
-		PLAYER_EDITH_B = Isaac.GetPlayerTypeByName("Edith​​​", true),
+		PLAYER_EDITH = EdithPlayer,
+		PLAYER_EDITH_B = EdithBPlayer,
 	},
 	CollectibleType = {
 		-- Edith Items
@@ -93,8 +96,9 @@ EdithRebuilt.Enums = {
 		ACHIEVEMENT_EDITHS_HOOD = Isaac.GetAchievementIdByName("Ediths Hood"),
 		ACHIEVEMENT_HYDRARGYRUM = Isaac.GetAchievementIdByName("Hydrargyrum"),
 		ACHIEVEMENT_TAINTED_EDITH = Isaac.GetAchievementIdByName("The Punished"),
-
 		-- Edith unlocks end
+		
+		-- Tainted Edith unlocks
 		ACHIEVEMENT_SALT_ROCKS = Isaac.GetAchievementIdByName("Salt Rocks"),
 		ACHIEVEMENT_BURNT_SALT = Isaac.GetAchievementIdByName("Burnt Salt"),
 		ACHIEVEMENT_JACK_OF_CLUBS = Isaac.GetAchievementIdByName("Jack of Clubs"),
@@ -102,9 +106,8 @@ EdithRebuilt.Enums = {
 		ACHIEVEMENT_BURNT_HOOD = Isaac.GetAchievementIdByName("Burnt Hood"),
 		ACHIEVEMENT_SOUL_OF_EDITH = Isaac.GetAchievementIdByName("Soul of Edith"),
 		ACHIEVEMENT_DIVINE_WRATH = Isaac.GetAchievementIdByName("Divine Wrath"),
-		-- Tainted Edith unlocks
-
 		-- Tainted Edith unlocks end
+
 		ACHIEVEMENT_THANK_YOU = Isaac.GetAchievementIdByName("Thank You"),
 	},
 	Utils = {
@@ -112,6 +115,14 @@ EdithRebuilt.Enums = {
 		SFX = SFXManager(),
 		RNG = RNG(),
 		Level = Game():GetLevel(),
+	},
+	---@enum SaltTypes
+	SaltTypes = {
+		SALT_SHAKER = "SaltShaker",
+		SALT_SHAKER_JUDAS = "SaltShakerJudas",
+		SAL = "Sal",
+		SALT_HEART = "SaltHeart",
+		EDITHS_HOOD = "EdithsHood",
 	},
 	Tables = {
 		OverrideActions = {
@@ -149,7 +160,7 @@ EdithRebuilt.Enums = {
 			[8] = "_enby",
 			[9] = "_Venezuela",
 		},
-		ColorValues = {
+		TargetLineColorValues = {
 			[2] = {R = 245/255, G = 169/255, B = 184/255},
 			[3] = {R = 1, G = 0, B = 1},
 			[4] = {R = 1, G = 154/255, B = 86/255},
@@ -194,6 +205,7 @@ EdithRebuilt.Enums = {
 			EdithJump = edithJumpTag,
 			TEdithHop = tedithHopTag,
 			TEdithJump = tedithJumpTag,
+			EdithsHoodJump = edithHoodJumpTag,
 		},
 		JumpFlags = {
 			EdithJump = (JumpLib.Flags.DISABLE_SHOOTING_INPUT | JumpLib.Flags.DISABLE_LASER_FOLLOW | JumpLib.Flags.DISABLE_BOMB_INPUT),
@@ -209,17 +221,21 @@ EdithRebuilt.Enums = {
 			EdithJump = {
 				tag = edithJumpTag,
 				type = EntityType.ENTITY_PLAYER,
-				player = Isaac.GetPlayerTypeByName("Edith​​​", false),
+				player = EdithPlayer,
 			},
 			TEdithJump = {
 				tag = tedithJumpTag,
 				type = EntityType.ENTITY_PLAYER,
-				player = Isaac.GetPlayerTypeByName("Edith​​​", true),
+				player = EdithBPlayer,
 			},
 			TEdithHop = {
 				tag = tedithHopTag,
 				type = EntityType.ENTITY_PLAYER,
-				player = Isaac.GetPlayerTypeByName("Edith​​​", true),
+				player = EdithBPlayer,
+			},
+			EdithsHoodJump = {
+				tag = edithHoodJumpTag,
+				type = EntityType.ENTITY_PLAYER,
 			}
 		},
 		GridEntTypes = {
@@ -227,10 +243,15 @@ EdithRebuilt.Enums = {
 			[GridEntityType.GRID_STAIRS] = true,
 			[GridEntityType.GRID_GRAVITY] = true,
 		},
-		Chap4Stages = {
-			[LevelStage.STAGE4_1] = true,
-			[LevelStage.STAGE4_2] = true,
-			[LevelStage.STAGE4_3] = true,
+		Chap4Backdrops = {
+			[BackdropType.WOMB] = true,
+			[BackdropType.UTERO] = true,
+			[BackdropType.SCARRED_WOMB] = true,
+			[BackdropType.BLUE_WOMB] = true,
+			[BackdropType.CORPSE] = true,
+			[BackdropType.CORPSE2] = true,
+			[BackdropType.CORPSE3] = true,
+			[BackdropType.MORTIS] = true, --- Who knows
 		},
 		ImGuiTables = {
 			TargetDesign = {
@@ -303,8 +324,14 @@ EdithRebuilt.Enums = {
 			[FamiliarVariant.CUBE_BABY] = true,
 		},
 		CooldownSounds = {
-			[1] = SoundEffect.SOUND_STONE_IMPACT,
-			[2] = SoundEffect.SOUND_BEEP
+			[1] = {
+				SoundID = SoundEffect.SOUND_STONE_IMPACT,
+				Pitch = 1.2,
+			},
+			[2] = {
+				SoundID = SoundEffect.SOUND_BEEP,
+				Pitch = 0.8
+			} 
 		},
 		RemoveTargetItems = {
 			[CollectibleType.COLLECTIBLE_ESAU_JR] = true,
@@ -349,6 +376,5 @@ EdithRebuilt.Enums = {
 		PaprikaColor = Color(0.8, 0.2, 0),
 		ParryPartitions = EntityPartition.ENEMY | EntityPartition.BULLET | EntityPartition.TEAR, --[[@as EntityPartition]]
 		NewProjectilFlags = ProjectileFlags.HIT_ENEMIES | ProjectileFlags.CANT_HIT_PLAYER,
-		NearEnemyDetectionDist = 150,
 	},
 }

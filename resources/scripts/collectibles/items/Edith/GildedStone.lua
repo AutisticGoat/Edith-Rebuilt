@@ -14,7 +14,7 @@ function GildedStone:ShootingRockTears(tear)
 	if not mod.RandomBoolean(rng, player:GetNumCoins()  / 100) then return end
 	tear:AddTearFlags(TearFlags.TEAR_ROCK)
 	tear:ChangeVariant(TearVariant.ROCK)
-	tear.CollisionDamage = tear.CollisionDamage * mod.RandomFloat(rng, 0.5, 2.5)
+	tear.CollisionDamage = tear.CollisionDamage * mod.RandomFloat(rng, 0.5, 2)
 end
 mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, GildedStone.ShootingRockTears)
 
@@ -28,14 +28,9 @@ local RockRewards = {
 
 ---comment
 ---@param rng RNG
----@return table
+---@return table?
 local function getRandomReward(rng)
-    local totalWeight = 0
-    for weight in pairs(RockRewards) do
-        totalWeight = totalWeight + weight
-    end
-
-    local randomValue = rng:RandomFloat() * totalWeight
+    local randomValue = math.max(1, rng:RandomFloat() * 100)
     local cumulativeWeight = 0
 
     for weight, reward in pairs(RockRewards) do
@@ -43,8 +38,7 @@ local function getRandomReward(rng)
         if randomValue <= cumulativeWeight then
             return reward
         end
----@diagnostic disable-next-line: missing-return
-    end
+	end
 end
 
 ---@param rock GridEntityRock
@@ -64,7 +58,7 @@ function GildedStone:OnDestroyingRockReward(rock)
 
 	if not mod.RandomBoolean(rng, GeneralSpawnFormula) then return end
 
-	local reward = getRandomReward(rng)
+	local reward = getRandomReward(rng) ---@cast reward table
 	local vel = reward.Variant == 20 and rng:RandomVector():Resized(3) or Vector.Zero
 
 	Isaac.Spawn(EntityType.ENTITY_PICKUP, reward.Variant, reward.SubType, rock.Position, vel, nil)

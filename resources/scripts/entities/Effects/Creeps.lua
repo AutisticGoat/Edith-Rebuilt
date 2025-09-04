@@ -2,6 +2,7 @@ local mod = EdithRebuilt
 local enums = mod.Enums
 local subtype = enums.SubTypes
 local game = enums.Utils.Game
+local saltTypes = enums.SaltTypes
 local data = mod.CustomDataWrapper.getData
 
 ---@param effect EntityEffect
@@ -9,6 +10,19 @@ local function isModCreepEffect(effect)
     local subType = effect.SubType
     return subType == subtype.SALT_CREEP or subType == subtype.PEPPER_CREEP
 end
+
+local SaltShakerSalts = {
+    [saltTypes.SALT_SHAKER] = true,
+    [saltTypes.SALT_SHAKER_JUDAS] = true
+}
+
+local SaltedTimes = {
+    [saltTypes.EDITHS_HOOD] = 120,
+    [saltTypes.SAL] = 150,
+    [saltTypes.SALT_HEART] = 120,
+    [saltTypes.SALT_SHAKER] = 90,
+    [saltTypes.SALT_SHAKER_JUDAS] = 90,
+}
 
 ---@param effect EntityEffect 
 mod:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, function(_, effect)
@@ -21,26 +35,33 @@ local function SaltCreepUpdate(effect)
     if effect.SubType ~= subtype.SALT_CREEP then return end
     
     local effectData = data(effect)
-    local effectPos = effect.Position
-    local spawnType = effectData.SpawnType
-    local player = effect.SpawnerEntity:ToPlayer()
+    local spawnType = effectData.SpawnType ---@cast spawnType SaltTypes
+    local player = effect.SpawnerEntity:ToPlayer() 
+    local isSaltShakerSalt = mod.When(spawnType, SaltShakerSalts, false)
 
     if not player then return end
 
-    for _, entity in pairs(mod.GetEnemies()) do
-        local entPos = entity.Position
+    if isSaltShakerSalt then
+        effectData.SaltShakerCentralPos = data(player).SpawnCentralPosition --[[@as Vector]]
+        local pos = effectData.SaltShakerCentralPos
+        local capsule = Capsule(pos, Vector.One, 0, 70)
 
-        if entPos:Distance(effectPos) > 20 then goto continue end
-        entity:AddFreeze(EntityRef(effect), 90)
- 
-        if spawnType == "Sal" then
-            data(entity).SalFreeze = true
+        for _, entity in pairs(Isaac.FindInCapsule(capsule, EntityPartition.ENEMY)) do
+            mod.TriggerPushPos(effect, entity, entity.Position, pos, 6, 15, false)
         end
+    else
+        effectData.SaltShakerCentralPos = nil
+    end
 
-        if spawnType == "SaltShakerSpawnJudas" and game:GetFrameCount() % 15 == 0 then
-            mod.SpawnFireJet(player, entPos, 2, true, 1)
+
+    for _, entity in pairs(Isaac.FindInRadius(effect.Position, 20, EntityPartition.ENEMY)) do
+        mod.SetSalted(entity, SaltedTimes[spawnType], player)
+
+        data(entity).SaltType = spawnType
+
+        if spawnType == saltTypes.SALT_SHAKER_JUDAS and game:GetFrameCount() % 15 == 0 then
+            mod.SpawnFireJet(player, entity.Position, 2, true, 1)
         end
-        ::continue::
     end
 end
 
@@ -51,12 +72,9 @@ local function PepperCreepUpdate(effect)
     local player = effect.SpawnerEntity:ToPlayer()
 
     if not player then return end
-    local effectPos = effect.Position
 
-    for _, entity in pairs(mod.GetEnemies()) do
-        if entity.Position:Distance(effectPos) > 20 then goto continue end
-        mod.PepperEnemy(entity, player, 60)
-        ::continue::
+    for _, entity in pairs(Isaac.FindInRadius(effect.Position, 20, EntityPartition.ENEMY)) do
+        mod.SetPeppered(entity, 150, player)
     end
 end
 

@@ -125,26 +125,32 @@ function mod:UpdateImGuiData()
 
 	if not CheckIntegrity() then return end
 
-	ImGui.UpdateData("StompSound", ImGuiData.Value, (EdithData.stompsound - 1) or 0) 
-	ImGui.UpdateData("StompVolume", ImGuiData.Value, EdithData.stompVolume or 100) 
-	ImGui.UpdateData("TargetDesign", ImGuiData.Value, (EdithData.targetdesign - 1) or 0)
-	ImGui.UpdateData("JumpCooldownSound", ImGuiData.Value, (EdithData.CooldownSound - 1) or 0)
-	ImGui.UpdateData("DisableGibs", ImGuiData.Value, EdithData.DisableGibs or false)
-	ImGui.UpdateData("SetRGB", ImGuiData.Value, EdithData.RGBMode or false)
-	ImGui.UpdateData("EnableGore", ImGuiData.Value, EdithData.EnableGore or false)
-	ImGui.UpdateData("SetRGBSpeed", ImGuiData.Value, EdithData.RGBSpeed or 0.005)
-	ImGui.UpdateData("TargetLine", ImGuiData.Value, EdithData.targetline or false)
-	ImGui.UpdateData("arrowDesign", ImGuiData.Value, (TEdithData.ArrowDesign - 1) or 0)
-	ImGui.UpdateData("hopSound", ImGuiData.Value, (TEdithData.TaintedHopSound - 1) or 0)
-	ImGui.UpdateData("parrySound", ImGuiData.Value, (TEdithData.TaintedParrySound - 1) or 0)
-	ImGui.UpdateData("TaintedDisableGibs", ImGuiData.Value, TEdithData.DisableGibs or false)
-	ImGui.UpdateData("TaintedSetRGB", ImGuiData.Value, TEdithData.RGBMode or false)
-	ImGui.UpdateData("TaintedEnableGore", ImGuiData.Value, TEdithData.EnableGore or false)
-	ImGui.UpdateData("TaintedSetRGBSpeed", ImGuiData.Value, TEdithData.RGBSpeed or 0.005)
-	ImGui.UpdateData("StompTaintedVolume", ImGuiData.Value, TEdithData.taintedStompVolume or 100)
-	ImGui.UpdateData("taintedEnableTrail", ImGuiData.Value, TEdithData.EnableTrail or false)
-	ImGui.UpdateData("TaintedTrailDesign", ImGuiData.Value, (TEdithData.TrailDesign - 1) or 0)
-	ImGui.UpdateData("ScreenShake", ImGuiData.Value, miscData.shakescreen or false)
+	local data = {
+		["StompSound"] = (EdithData.stompsound - 1) or 0,
+		["StompVolume"] = EdithData.stompVolume or 100,
+		["TargetDesign"] = (EdithData.targetdesign - 1) or 0,
+		["JumpCooldownSound"] = (EdithData.CooldownSound - 1) or 0,
+		["DisableGibs"] = EdithData.DisableGibs or false,
+		["SetRGB"] = EdithData.RGBMode or false,
+		["EnableGore"] = EdithData.EnableGore or false,
+		["SetRGBSpeed"] = EdithData.RGBSpeed or 0.005,
+		["TargetLine"] = EdithData.targetline or false,
+		["arrowDesign"] = (TEdithData.ArrowDesign - 1) or 0,
+		["hopSound"] = (TEdithData.TaintedHopSound - 1) or 0,
+		["TaintedDisableGibs"] = TEdithData.DisableGibs or false,
+		["TaintedSetRGB"] = TEdithData.RGBMode or false,
+		["TaintedEnableGore"] = TEdithData.EnableGore or false,
+		["TaintedSetRGBSpeed"] = TEdithData.RGBSpeed or 0.005,
+		["StompTaintedVolume"] = TEdithData.taintedStompVolume or 100,
+		["taintedEnableTrail"] = TEdithData.EnableTrail or false,
+		["TaintedTrailDesign"] = (TEdithData.TaintedParrySound - 1) or 0,
+		["parrySound"] = (TEdithData.TaintedParrySound - 1) or 0,
+		["ScreenShake"] = miscData.shakescreen or false,
+	}
+
+	for option, newValue in pairs(data) do
+		ImGui.UpdateData(option, ImGuiData.Value, newValue)
+	end
 end
 
 local function OptionsUpdate()
@@ -255,7 +261,6 @@ local function OptionsUpdate()
 -- Edith configs end
 	
 -- Tainted Edith Configs
-
 	local arrowcolor = TEdithData.ArrowColor
 	local trailColor = TEdithData.TrailColor
 
@@ -375,6 +380,7 @@ local function OptionsUpdate()
 		- Pre NPC kill callback (Kerkel)
 		- Isaac Save Manager (Catinsurance, Benny)
 		- HudHelper (Benny, CatWizard)
+		- Status Effect Library (Benny)
 		- SaveData System (AgentCucco)
 		- lhsx (Ilya Kolbin (iskolbin))
 		- Salt Shaker Sound Effect (Joshua Hadley): 
@@ -421,9 +427,9 @@ end
 
 local function DestroyImGuiOptions()
 	for _, ID in ipairs(OptionsIDs) do
-		if ImGui.ElementExists(ID) then
-			ImGui.RemoveElement(ID)
-		end
+		if not ImGui.ElementExists(ID) then goto continue end 
+		ImGui.RemoveElement(ID)
+		::continue::
 	end
 end
 

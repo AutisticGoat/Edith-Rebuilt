@@ -11,7 +11,7 @@ local DivineRetribution = {}
 ---@param flags UseFlag
 ---@return boolean?
 function DivineRetribution:OnDRUse(_, rng, player, flags)
-    if  (flags == flags | UseFlag.USE_CARBATTERY) then return end
+    if mod.HasBitFlags(flags, UseFlag.USE_CARBATTERY) then return end
     local IsJudasWithBirthright = mod.IsJudasWithBirthright(player)
 
     if mod.RandomBoolean(rng) then
@@ -24,8 +24,9 @@ function DivineRetribution:OnDRUse(_, rng, player, flags)
         local damage = (Hascarbattery and 50 or 25) * (IsJudasWithBirthright and 1.5 or 1)
         local healFunc = IsJudasWithBirthright and player.AddBlackHearts or player.AddSoulHearts
         healFunc(player, 1)
+        local sound = IsJudasWithBirthright and SoundEffect.SOUND_UNHOLY or SoundEffect.SOUND_SUPERHOLY
 
-        sfx:Play(SoundEffect.SOUND_SUPERHOLY)
+        sfx:Play(sound)
         for _, enemies in pairs(roomEnemies) do
             Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.CRACK_THE_SKY, 10, enemies.Position, Vector.Zero, nil)
             enemies:TakeDamage(damage, DamageFlag.DAMAGE_LASER, EntityRef(player), 0)

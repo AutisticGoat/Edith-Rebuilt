@@ -6,7 +6,6 @@
 	</sound>
 	<sound name="Edith Stomp Water">
 		<sample weight="1" path="edithstomp_water_1.wav" />
-		<sample weight="1" path="edithstomp_water_2.wav" />
 	</sound>
 	<sound name="Water Splash">
 		<sample weight="1" path="water_splash.wav" />

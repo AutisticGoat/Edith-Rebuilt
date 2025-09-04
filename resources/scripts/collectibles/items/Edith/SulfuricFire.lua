@@ -18,10 +18,10 @@ function SulfuricFire:UseSulfuricFire(_, _, player)
 		)		
 		Flame.CollisionDamage = player.Damage + (enemy.MaxHitPoints * 0.175)
 		enemy:AddBrimstoneMark(EntityRef(player), 150)
-		
+
 		if enemy.HitPoints > Flame.CollisionDamage then goto Continue end
 		player:FireBrimstoneBall(enemy.Position, Vector.Zero)
-		::Continue:: 
+		::Continue::
 	end
 	return true
 end

@@ -226,7 +226,7 @@ end
 ---@param rng RNG
 ---@return integer
 function EdithRebuilt.GetRandomRune(rng)
-	return mod.When(rng:RandomInt(1, #tables.Runes), tables.Runes, 32)
+	return mod.When(rng:RandomInt(1, #tables.Runes), tables.Runes)
 end
 
 ---Returns a chance based boolean
@@ -392,39 +392,59 @@ function EdithRebuilt.FallBehavior(player)
 end
 
 ---@param player EntityPlayer
+---@param bomb? EntityBomb
+function EdithRebuilt.ExplosionRecoil(player, bomb)
+	JumpLib:Jump(player, {
+		Height = 10,
+		Speed = 1.5,
+		Tags = jumpTags.EdithJump,
+		Flags = jumpFlags.EdithJump,
+	})
+
+	local velTarget = (
+		bomb and (player.Position - bomb.Position) or 
+		-player.Velocity
+	):Normalized()
+
+	player.Velocity = velTarget:Resized(15)
+	data(player).RocketLaunch = true
+end
+
+---@param player EntityPlayer
 ---@param jumpdata JumpConfig
 function EdithRebuilt.BombFall(player, jumpdata)	
 	if mod.IsDefensiveStomp(player) then return end
 	if not Input.IsActionTriggered(ButtonAction.ACTION_BOMB, player.ControllerIndex) then return end
-	if player:GetNumBombs() <= 0 and not player:HasGoldenBomb() then return end
 
-	data(player).BombStomp = true
+	local HasDrFetus = player:HasCollectible(CollectibleType.COLLECTIBLE_DR_FETUS)
 
-	if player:HasCollectible(CollectibleType.COLLECTIBLE_ROCKET_IN_A_JAR) and not data(player).RocketLaunch then 
+	if not (HasDrFetus or player:GetNumBombs() > 0 or player:HasGoldenBomb()) then return end
+
+	local playerData = data(player) 
+
+	playerData.BombStomp = true
+
+	if player:HasCollectible(CollectibleType.COLLECTIBLE_ROCKET_IN_A_JAR) then 
 		local TargetAnglev = mod.GetEdithTargetDirection(player, false):GetAngleDegrees()
-		local bomb = Isaac.Spawn(EntityType.ENTITY_BOMB, BombVariant.BOMB_ROCKET, 0, player.Position, Vector.Zero, player):ToBomb() --[[@as EntityBomb]]
+		local bomb = Isaac.Spawn(EntityType.ENTITY_BOMB, BombVariant.BOMB_ROCKET, 0, player.Position, Vector.Zero, player):ToBomb() ---@cast bomb EntityBomb
 		bomb:SetRocketAngle(TargetAnglev)
 		bomb:SetRocketSpeed(40)
+		local ShouldKeepBomb = HasDrFetus or player:HasGoldenBomb()
 
-		if not player:HasGoldenBomb() then
+		if not ShouldKeepBomb then
 			player:AddBombs(-1)
 		end
 
-		JumpLib:Jump(player, {
-			Height = 10,
-			Speed = 1.5,
-			Tags = jumpTags.EdithJump,
-			Flags = jumpFlags.EdithJump,
-		})
-
 		sfx:Play(SoundEffect.SOUND_ROCKET_LAUNCH)
-		player.Velocity = -player.Velocity:Normalized():Resized(15)
-		data(player).RocketLaunch = true
+		
+		mod.ExplosionRecoil(player)
+
+		playerData.RocketLaunch = true
 		data(bomb).IsEdithRocket = true
 		return
 	end
 
-	if data(player).RocketLaunch then return end
+	if playerData.RocketLaunch then return end
 	JumpLib:SetSpeed(player, 8 + (jumpdata.Height / 10))
 end
 
@@ -439,7 +459,6 @@ function mod:BombUpdate(bomb)
 end
 mod:AddCallback(ModCallbacks.MC_POST_BOMB_RENDER, mod.BombUpdate)
 
-
 local backdropColors = tables.BackdropColors
 ---@param player EntityPlayer
 function EdithRebuilt.InitEdithJump(player)	
@@ -448,7 +467,7 @@ function EdithRebuilt.InitEdithJump(player)
 	local soundeffect = canFly and SoundEffect.SOUND_ANGEL_WING or SoundEffect.SOUND_SHELLGAME
 	local div = canFly and 25 or 15
 	local base = canFly and 15 or 13
-	local IsMortis = mod.IsLGMortis()
+	local IsMortis = mod.IsLJMortis()
 	local epicFetusMult = player:HasCollectible(CollectibleType.COLLECTIBLE_EPIC_FETUS) and 3 or 1
 	local jumpHeight = (base + (mod.GetEdithTargetDistance(player) / 40) / div) * epicFetusMult
 	local room = game:GetRoom()
@@ -576,9 +595,7 @@ end
 ---@param tear EntityTear
 ---@param tainted? boolean
 function EdithRebuilt.ForceSaltTear(tear, tainted)
-	tainted = tainted or false
-	local IsBloodTear = mod.When(tear.Variant, tables.BloodytearVariants, false) 
-	
+	local IsBloodTear = mod.When(tear.Variant, tables.BloodytearVariants, tainted or false) 	
 	doEdithTear(tear, IsBloodTear, tainted)
 end
 
@@ -623,9 +640,8 @@ function EdithRebuilt:SpawnBlackPowder(parent, quantity, position, distance)
 		position, 
 		Vector.Zero, 
 		nil
-	):ToEffect()
+	):ToEffect() ---@cast Pentagram EntityEffect
 
-	if not Pentagram then return end
 	Pentagram.Scale = distance + distance / 2	
 end
 
@@ -692,7 +708,7 @@ end
 ---@param timeout number
 ---@param gibAmount integer
 ---@param gibSpeed number
----@param spawnType string
+---@param spawnType SaltTypes
 ---@param inheritParentColor? boolean
 ---@param inheritParentVel? boolean
 ---@param color Color? Use this param to override salt's color
@@ -706,18 +722,15 @@ function EdithRebuilt:SpawnSaltCreep(parent, position, damage, timeout, gibAmoun
 		position, 
 		Vector.Zero,
 		parent
-	):ToEffect()
-	
-	if not salt then return end
+	):ToEffect() ---@cast salt EntityEffect
 
 	local saltColor = inheritParentColor and parent.Color or Color.Default
+	local timeOutSeconds = mod:SecondsToFrames(timeout) or 30
 
 	salt.CollisionDamage = damage or 0
 	salt.Color = color or saltColor
-
-	local timeOutSeconds = mod:SecondsToFrames(timeout) or 30
 	salt:SetTimeout(timeOutSeconds)
-	
+
 	if gibAmount > 0 then
 		local gibColor = color or (inheritParentColor and Color.Default or nil)
 		mod:SpawnSaltGib(parent, gibAmount, gibSpeed, gibColor, inheritParentVel)
@@ -753,12 +766,11 @@ function EdithRebuilt:SpawnPepperCreep(parent, position, damage, timeout)
 		EntityType.ENTITY_EFFECT, 
 		EffectVariant.PLAYER_CREEP_RED, 
 		enums.SubTypes.PEPPER_CREEP,
-		position, 
+		position,
 		Vector.Zero,
 		parent
-	):ToEffect()
-	
-	if not pepper then return end
+	):ToEffect() ---@cast pepper EntityEffect
+
 	pepper.CollisionDamage = damage or 0
 	pepper:SetTimeout(mod:SecondsToFrames(timeout) or 30)
 end
@@ -813,7 +825,7 @@ function EdithRebuilt.drawLine(from, to, color, isObscure)
 	local angle = diffVector:GetAngleDegrees()
 	local sectionCount = math.floor(diffVector:Length() / 16) - 1
 	local direction = Vector.FromAngle(angle)
-	
+
 	targetSprite:SetFrame("Line", isObscure and 1 or 0)
 	targetSprite.Color = color
 	targetSprite.Rotation = angle
@@ -857,16 +869,14 @@ function EdithRebuilt:SpawnSaltGib(parent, Number, speed, color, inheritParentVe
             parentPos,
             RandomVector():Resized(speed or 3),
             parent
-        ):ToEffect()
-
-        if not saltGib then return end
-
-        if inheritParentVel then
-            saltGib.Velocity = saltGib.Velocity + parent.Velocity
-        end
+        ):ToEffect() ---@cast saltGib EntityEffect
 
         saltGib.Color = finalColor
         saltGib.Timeout = 5
+
+		if inheritParentVel then
+            saltGib.Velocity = saltGib.Velocity + parent.Velocity
+        end
     end
 end
 
@@ -909,7 +919,7 @@ end
 
 ---Function to remove Edith's target
 ---@param player EntityPlayer
----@param tainted boolean?
+---@param tainted? boolean
 function EdithRebuilt.RemoveEdithTarget(player, tainted)
 	local target = mod.GetEdithTarget(player, tainted)
 
@@ -930,7 +940,7 @@ end
 
 ---Checks if player is in Last Judgement's Mortis 
 ---@return boolean
-function EdithRebuilt.IsLGMortis()
+function EdithRebuilt.IsLJMortis()
 	if not StageAPI then return false end
 	if not LastJudgement then return false end
 
@@ -943,17 +953,31 @@ end
 ---@param ent Entity
 ---@return boolean
 function EdithRebuilt.IsEnemy(ent)
-	return ent:IsActiveEnemy() and ent:IsVulnerableEnemy() 
+	return (ent:IsActiveEnemy() and ent:IsVulnerableEnemy()) or
+	(ent.Type == EntityType.ENTITY_GEMINI and ent.Variant == 12) -- this for blighted ovum little sperm like shit i hate it fuuuck
 end
+
+---Helper function to find out how large a bomb explosion is based on the damage inflicted.
+---@param damage number
+---@return number
+function EdithRebuilt.GetBombRadiusFromDamage(damage)
+    if damage > 175 then
+        return 105
+    elseif damage <= 140 then
+        return 75
+    else
+        return 90
+    end
+end
+
 
 ---Checks if are in Chapter 4 (Womb, Utero, Scarred Womb, Corpse)
 ---@return boolean
 function EdithRebuilt:isChap4()
-	local stage = level:GetStage()
-	local Chap4Stages = tables.Chap4Stages
+	local backdrop = game:GetRoom():GetBackdropType()
 	
-	if EdithRebuilt.IsLGMortis() then return true end
-	return mod.When(stage, Chap4Stages, false)
+	if EdithRebuilt.IsLJMortis() then return true end
+	return mod.When(backdrop, tables.Chap4Backdrops, false)
 end
 
 ---Returns player's tears stat as portrayed in game's stats HUD
@@ -989,9 +1013,7 @@ function EdithRebuilt.HandleEntityInteraction(ent, parent, knockback)
             mod.TriggerPush(ent, parent, knockback, 3, false)
         end,
         [EntityType.ENTITY_PICKUP] = function()
-            local pickup = ent:ToPickup()
-            
-            if not pickup then return end
+            local pickup = ent:ToPickup() ---@cast pickup EntityPickup
             local isFlavorTextPickup = mod.When(var, tables.BlacklistedPickupVariants, false)
             local IsLuckyPenny = var == PickupVariant.PICKUP_COIN and ent.SubType == CoinSubType.COIN_LUCKYPENNY
 
@@ -1047,17 +1069,23 @@ end
 ---@param knockback number
 ---@param breakGrid boolean
 function EdithRebuilt:EdithStomp(parent, radius, damage, knockback, breakGrid)
-	local isDefStomp = mod.IsDefensiveStomp(parent)
+	local isDefStomp = mod.IsDefensiveStomp(parent) or data(parent).HoodLand
 	local HasTerra = parent:HasCollectible(CollectibleType.COLLECTIBLE_TERRA)
 	local TerraRNG = parent:GetCollectibleRNG(CollectibleType.COLLECTIBLE_TERRA)
 	local TerraMult = HasTerra and mod.RandomFloat(TerraRNG, 0.5, 2) or 1	
 	local playerData = data(parent)
 	local FrozenMult, BCRRNG
+	local capsule = Capsule(parent.Position, Vector.One, 0, radius)
+	local SaltedTime = mod.Round(mod.Clamp(120 * (mod.GetTPS(parent) / 2.73), 60, 360))
+	local isSalted
 
-	playerData.StompedEntities = Isaac.FindInCapsule(Capsule(parent.Position, Vector.One, 0, radius))
+	playerData.StompedEntities = Isaac.FindInCapsule(capsule)
 
 	for _, ent in ipairs(playerData.StompedEntities) do
-		mod.HandleEntityInteraction(ent, parent, knockback)
+		isSalted = mod.IsSalted(ent)
+		local knockbackMult = isSalted and 1.5 or 1
+
+		mod.HandleEntityInteraction(ent, parent, knockback * knockbackMult)
 
 		if ent.Type == EntityType.ENTITY_STONEY then
 			ent:ToNPC().State = NpcState.STATE_SPECIAL
@@ -1066,11 +1094,14 @@ function EdithRebuilt:EdithStomp(parent, radius, damage, knockback, breakGrid)
 		if not mod.IsEnemy(ent) then goto Break end
 
 		if isDefStomp then
-			ent:AddFreeze(EntityRef(parent), 150)
+			EdithRebuilt.SetSalted(ent, SaltedTime, parent)
+			if data(parent).HoodLand then
+				data(ent).SaltType = enums.SaltTypes.EDITHS_HOOD
+			end
 			goto Break
 		end
 
-		FrozenMult = ent:HasEntityFlags(EntityFlag.FLAG_FREEZE) and 1.4 or 1 
+		FrozenMult = ent:HasEntityFlags(EntityFlag.FLAG_FREEZE) and 1.2 or 1 
 		damage = (damage * FrozenMult) * TerraMult
 
 		mod.LandDamage(ent, parent, damage, knockback)
@@ -1078,7 +1109,7 @@ function EdithRebuilt:EdithStomp(parent, radius, damage, knockback, breakGrid)
 
 		if ent.HitPoints > damage then goto Break end
 
-		if BirthcakeRebaked and parent:HasTrinket(BirthcakeRebaked.Birthcake.ID) and FrozenEnt then
+		if BirthcakeRebaked and parent:HasTrinket(BirthcakeRebaked.Birthcake.ID) and isSalted then
 			BCRRNG = parent:GetTrinketRNG(BirthcakeRebaked.Birthcake.ID)
 			for _ = 1, BCRRNG:RandomInt(3, 7) do
 				parent:FireTear(parent.Position, RandomVector():Resized(15))
@@ -1116,16 +1147,28 @@ function EdithRebuilt.GetStompedEnemies(player)
     return enemyTable
 end
 
-
 ---Triggers a push to `pushed` from `pusher`
 ---@param pushed Entity
 ---@param pusher Entity
 ---@param strength number
 ---@param duration integer
----@param impactDamage boolean
+---@param impactDamage? boolean
 function EdithRebuilt.TriggerPush(pushed, pusher, strength, duration, impactDamage)
 	local dir = ((pusher.Position - pushed.Position) * -1):Resized(strength)
-	pushed:AddKnockback(EntityRef(pusher), dir, duration, impactDamage)
+	pushed:AddKnockback(EntityRef(pusher), dir, duration, impactDamage or false)
+end
+
+---The same as `EdithRebuilt.TriggerPush` but this accepts a `Vector` for positions instead
+---@param pusher Entity
+---@param pushed Entity
+---@param pushedPos Vector
+---@param pusherPos Vector
+---@param strength number
+---@param duration integer
+---@param impactDamage? boolean
+function EdithRebuilt.TriggerPushPos(pusher, pushed, pushedPos, pusherPos, strength, duration, impactDamage)
+	local dir = ((pusherPos - pushedPos) * -1):Resized(strength)
+	pushed:AddKnockback(EntityRef(pusher), dir, duration, impactDamage or false)
 end
 
 ---Method used for Edith's dash behavior (Like A Pony/White Pony or Mars usage)
@@ -1172,7 +1215,7 @@ function EdithRebuilt:InitTaintedEdithParryJump(player, tag)
 		player.Position, 
 		Vector.Zero, 
 		player
-	)
+	) 
 
 	local color = DustCloud.Color
 	local switch = {
@@ -1222,13 +1265,11 @@ end
 
 ---@return integer
 function EdithRebuilt.GetMortisDrop()
-	if not EdithRebuilt.IsLGMortis() then return 0 end
+	if not EdithRebuilt.IsLJMortis() then return 0 end
 
-	local mod = LastJudgement
-
-	if mod.UsingMorgueisBackdrop then
+	if LastJudgement.UsingMorgueisBackdrop then
 		return MortisBackdrop.MORGUE
-	elseif mod.UsingMoistisBackdrop then 
+	elseif LastJudgement.UsingMoistisBackdrop then 
 		return MortisBackdrop.MOIST
 	else
 		return MortisBackdrop.FLESH
@@ -1236,9 +1277,7 @@ function EdithRebuilt.GetMortisDrop()
 end
 
 --- Rounds a number to the closest number of decimal places given.
---- 
---- Defaults to rounding to the nearest integer.
---- 
+--- Defaults to rounding to the nearest integer. 
 --- (from Library of Isaac)
 ---@param n number
 ---@param decimalPlaces integer? @Default: 0
@@ -1268,7 +1307,7 @@ end
 ---@param angleDegrees number
 ---@return Direction
 function EdithRebuilt.AngleToDirection(angleDegrees)
-    local normalizedDegrees = (angleDegrees % 360 + 360) % 360
+    local normalizedDegrees = angleDegrees % 360
     if normalizedDegrees < 45 or normalizedDegrees >= 315 then
         return Direction.RIGHT
     elseif normalizedDegrees < 135 then
@@ -1317,8 +1356,8 @@ function EdithRebuilt.SpawnFireJet(player, position, damage, useDefaultMult, sca
 end
 
 --- Misc function used to manage some perfect parry stuff (i made it to be able to return something in the main parry function sorry)
----@param IsTaintedEdith any
----@param isenemy any
+---@param IsTaintedEdith boolean
+---@param isenemy? boolean
 local function PerfectParryMisc(player, IsTaintedEdith, isenemy)
 	if not isenemy then return end
 	game:MakeShockwave(player.Position, 0.035, 0.025, 2)
@@ -1337,19 +1376,17 @@ end
 ---@param speed number
 ---@param dmgMult number
 function EdithRebuilt.BoostTear(tear, speed, dmgMult)
-	local player = mod:GetPlayerFromTear(tear) --[[@as EntityPlayer]]
+	local player = mod:GetPlayerFromTear(tear) ----@cast player EntityPlayer	
 	local nearEnemy = mod.GetNearestEnemy(player)
 
 	if nearEnemy then
 		tear.Velocity = (nearEnemy.Position - tear.Position):Normalized()
 	end
-
+	
+	tear.CollisionDamage = tear.CollisionDamage * dmgMult
 	tear.Velocity = tear.Velocity:Resized(speed)
 	tear:AddTearFlags(TearFlags.TEAR_KNOCKBACK)
-	tear.CollisionDamage = tear.CollisionDamage * dmgMult
 end
-
-
 
 ---Helper function used to manage Tainted Edith and Burnt Hood's parry-lands 
 ---@param player EntityPlayer
@@ -1451,6 +1488,13 @@ function EdithRebuilt.ParryLandManager(player, IsTaintedEdith)
 	return PerfectParry
 end
 
+---Function made to adjust landing volumes
+---@param Percent number
+---@return number
+local function GetVolume(Percent)
+	return (Percent / 100) ^ 2
+end
+
 ---Function for audiovisual feedback of Edith and Tainted Edith landings.
 ---@param player EntityPlayer
 ---@param soundTable table Takes a table with sound IDs.
@@ -1470,43 +1514,32 @@ function EdithRebuilt.LandFeedbackManager(player, soundTable, GibColor, IsParryL
 	local SubType = hasWater and 2 or (IsChap4 and 3 or 1)
 	local backColor = tables.BackdropColors
 	local soundPick ---@type number
-	local SizeX ---@type number
-	local SizeY ---@type number
+	local size
 	local volume ---@type number
 	local ScreenShakeIntensity ---@type number
-	local gibAmount ---@type number
+	local gibAmount = 0
 	local gibSpeed = 2
 	local IsSoulOfEdith = data(player).IsSoulOfEdithJump 
-	local IsMortis = EdithRebuilt.IsLGMortis()
+	local IsEdithsHood = data(player).HoodLand
+	local IsMortis = EdithRebuilt.IsLJMortis()
 
-	if mod.IsEdith(player, false) or IsSoulOfEdith then
-		local isDefensive = mod.IsDefensiveStomp(player)
+	if mod.IsEdith(player, false) or IsSoulOfEdith or IsEdithsHood then
+		local isRocketLaunchStomp = data(player).RocketLaunch
+		local isDefensive = mod.IsDefensiveStomp(player) or IsEdithsHood
 		local EdithData = menuData.EdithData
-		local size = (IsSoulOfEdith and 0.8 or (isDefensive and 0.6 or 0.7)) * player.SpriteScale.X
-		SizeX = size; SizeY = size
+		size = (IsSoulOfEdith and 0.8 or (isDefensive and 0.6 or 0.7)) * (isRocketLaunchStomp and 1.25 or 1)
 		soundPick = EdithData.stompsound ---@type number
-		volume = (isDefensive and 1.5 or 2) * ((EdithData.stompVolume / 100) ^ 2) ---@type number
-		ScreenShakeIntensity = isDefensive and 6 or 10
-		gibAmount = EdithData.DisableGibs and 0 or 10
+		volume = GetVolume(EdithData.stompVolume) * (isDefensive and 1.5 or 2)
+		ScreenShakeIntensity = isDefensive and 6 or (isRocketLaunchStomp and 14 or 10)
+		gibAmount = EdithData.DisableGibs and 0 or (isRocketLaunchStomp and 14 or 10)
 		gibSpeed = isDefensive and 2 or 3
 	else
 		local TEdithData = menuData.TEdithData
-		SizeX = IsParryLand and 0.8 or 0.5; SizeY = IsParryLand and 0.7 or 0.5
+		size = IsParryLand and 0.7 or 0.5
 		soundPick = IsParryLand and TEdithData.TaintedParrySound or TEdithData.TaintedHopSound ---@type number
-		volume = (IsParryLand and 1.5 or 1) * ((TEdithData.taintedStompVolume / 100) ^ 2) ---@type number
+		volume = GetVolume(TEdithData.taintedStompVolume) * (IsParryLand and 1.5 or 1)
 		ScreenShakeIntensity = IsParryLand and 6 or 3
 		gibAmount = not TEdithData.DisableGibs and (IsParryLand and 6 or 2) or 0
-	end
-
-	local sound = mod.When(soundPick, soundTable, 1)
-	sfx:Play(sound, volume, 0, false, 1, 0)
-
-	if IsChap4 then
-		sfx:Play(SoundEffect.SOUND_MEATY_DEATHS, volume - 0.5, 0, false, 1, 0)
-	end
-
-	if menuData.miscData.shakescreen then
-		game:ShakeScreen(ScreenShakeIntensity)
 	end
 
 	local stompGFX = Isaac.Spawn(
@@ -1519,9 +1552,12 @@ function EdithRebuilt.LandFeedbackManager(player, soundTable, GibColor, IsParryL
 	)
 
 	local rng = stompGFX:GetDropRNG()
-
-	SizeX = SizeX * mod.RandomFloat(rng, 0.8, 1)
-	SizeY = SizeY * mod.RandomFloat(rng, 0.8, 1)
+	local RandSize = { X = mod.RandomFloat(rng, 0.8, 1), Y = mod.RandomFloat(rng, 0.8, 1) }
+	local SizeX, SizeY = size * RandSize.X, size * RandSize.Y
+	
+	if menuData.miscData.shakescreen then
+		game:ShakeScreen(ScreenShakeIntensity)
+	end
 
 	local defColor = Color(1, 1, 1)
 	local color = defColor
@@ -1553,9 +1589,21 @@ function EdithRebuilt.LandFeedbackManager(player, soundTable, GibColor, IsParryL
 	stompGFX.Color = color
 
 	GibColor = GibColor or defColor
+
 	if gibAmount > 0 then	
 		mod:SpawnSaltGib(player, gibAmount, gibSpeed, GibColor)
 	end
+
+	local sound = mod.When(soundPick, soundTable, 1)
+	sfx:Play(sound, volume, 0, false, mod.RandomFloat(rng, 0.8, 1.2))
+
+	if IsChap4 then
+		sfx:Play(SoundEffect.SOUND_MEATY_DEATHS, volume - 0.5, 0, false, 1, 0)
+	end
+
+	if hasWater then
+		sfx:Play(enums.SoundEffect.SOUND_EDITH_STOMP_WATER, volume, 0, false)
+	end	
 end
 
 ---@param entity Entity

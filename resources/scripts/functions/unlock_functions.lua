@@ -7,6 +7,7 @@ local items = enums.CollectibleType
 local trinkets = enums.TrinketType
 local game = utils.Game
 local level = utils.Level
+local pool = game:GetItemPool()
 local unlocks = {}
 local UnlockTable = {
     Edith = {
@@ -116,8 +117,8 @@ function mod:ThankYou()
     if not isComplete then return end
     pgd:TryUnlock(achievements.ACHIEVEMENT_THANK_YOU)
 end
+mod:AddCallback(ModCallbacks.MC_POST_ACHIEVEMENT_UNLOCK, mod.ThankYou)
 
-local pool = game:GetItemPool()
 function unlocks:CheckStartUnlocks()
     for _, charTable in pairs(UnlockTable) do     
         for _, tab in pairs(charTable) do
@@ -178,8 +179,6 @@ function unlocks:OnTriggerCompletion(mark, player)
     mod:ThankYou()
 end
 mod:AddCallback(ModCallbacks.MC_POST_COMPLETION_MARK_GET, unlocks.OnTriggerCompletion)
-
-mod:AddCallback(ModCallbacks.MC_POST_ACHIEVEMENT_UNLOCK, mod.ThankYou)
 
 local taintedAchievement = {
     [players.PLAYER_EDITH] = {unlock = achievements.ACHIEVEMENT_TAINTED_EDITH, gfx = "gfx/characters/costumes/characterTaintedEdith.png"}

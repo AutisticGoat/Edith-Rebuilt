@@ -4,21 +4,28 @@ local ent = "entities/"
 local stmpSyn = "stompSynergies/"
 local parrySyn = "parrySynergies/"
 local funcs = "functions/"
+local compat = "compat/"
+local libs = "libs/"
+local misc = "misc/"
 
 local includeFiles = {
 	-- Cosas necesarias
 	"definitions",
-	"EID",
-	"Birthcake",
-	"prenpckillcallback",
-	"CustomShockwaveAPI",
+	compat .. "EID",
+	compat .. "Birthcake",
+	compat .. "RunicTablet",
+	libs .. "prenpckillcallback",
+	libs .. "CustomShockwaveAPI",
+	libs .. "lhsx",
+	libs .. "EdithKotryHudHelper",
+	libs .. "status_effect_library",
 	funcs .. "functions",
 	funcs .. "unlock_functions",
-	"ImGui",
-	"EID",
-	"EdithKotryHudHelper",
-	"lhsx",
-	
+	misc .. "ImGui",
+	misc .. "Salted",
+	misc .. "Peppered",
+	misc .. "HydrargyrumCurse",
+
 	-- Items
 	col .. "items/Edith/SaltShaker",
 	col .. "items/Edith/PepperGrinder",
@@ -42,7 +49,7 @@ local includeFiles = {
 	col .. "trinkets/TEdith/Paprika",
 	col .. "trinkets/TEdith/BurntSalt",
 	-- Trinkets fin
-	
+
 	col .. "consumables/JackOfClubs",
 	col .. "consumables/SaltRocks",
 	col .. "consumables/SoulOfEdith",
@@ -52,12 +59,12 @@ local includeFiles = {
 	ent .. "Effects/Targets",
 	ent .. "Effects/Trail",
 	-- Entidades fin
-	
+
 	-- Personajes
 	ent .. "Players/Edith",
 	ent .. "Players/Edith_B",
 	-- Personajes fin
-	
+
 	-- sinergias pisotones
 	stmpSyn .. "blackPowder",
 	stmpSyn .. "brimstone",
@@ -69,7 +76,7 @@ local includeFiles = {
 	stmpSyn .. "StatusEffects",
 	stmpSyn .. "GodHead",
 	stmpSyn .. "Technology",
-		
+
 	parrySyn .. "Brimstone",
 }
 

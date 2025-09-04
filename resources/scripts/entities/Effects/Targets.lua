@@ -112,7 +112,7 @@ local function EdithTargetRender(effect, player, saveData)
 	if not saveData.targetline then return end
 	local targetlineColor = misc.TargetLineColor
 	local isObscure = effectSprite:GetFrame() >= funcs.Switch(effectSprite:GetAnimation(), tables.FrameLimits, 0)	
-	local lineColor = funcs.Switch(targetDesign, tables.ColorValues, color)
+	local lineColor = funcs.Switch(targetDesign, tables.TargetLineColorValues, color)
 	targetlineColor:SetColorize(lineColor.R, lineColor.G, lineColor.B, 1)
 
 	funcs.DrawLine(player.Position, effect.Position, targetlineColor, isObscure) 
@@ -145,7 +145,7 @@ mod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, effect)
 	local player = effect.SpawnerEntity:ToPlayer()
 
     if not player then return end
-	mod:TargetDoorManager(effect, player, effect.Variant == Vars.EFFECT_EDITH_TARGET and 25 or 20)
+	mod:TargetDoorManager(effect, player, effect.Variant == Vars.EFFECT_EDITH_TARGET and 28 or 20)
     EdithTargetManagement(effect, player)
 end)
 

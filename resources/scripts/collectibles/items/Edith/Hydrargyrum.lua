@@ -33,28 +33,3 @@ function Hydrargyrum:GettingDamage(entity, amount, flags, source)
     entData.Player = player
 end
 mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Hydrargyrum.GettingDamage)
-
----@param npc EntityNPC
-function Hydrargyrum:OnNPCUpdate(npc)
-    local entData = data(npc)
-    if not entData.MercuryTimer then return end
-    entData.MercuryTimer = math.max(entData.MercuryTimer - 1, 0)
-    if entData.MercuryTimer % 15 ~= 0 or entData.MercuryTimer == 0 then return end
-
-    local player = entData.Player ---@type EntityPlayer
-    if not player then return end
-
-    local randTear = Isaac.Spawn(
-        EntityType.ENTITY_TEAR,
-        TearVariant.METALLIC,
-        0,
-        npc.Position,
-        RandomVector():Resized(player.ShotSpeed * 10),
-        player
-    ):ToTear()
-
-    if not randTear then return end
-    randTear.CollisionDamage = randTear.CollisionDamage * 0.1
-    randTear:AddTearFlags(TearFlags.TEAR_PIERCING)
-end
-mod:AddCallback(ModCallbacks.MC_NPC_UPDATE, Hydrargyrum.OnNPCUpdate)

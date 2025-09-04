@@ -7,7 +7,6 @@ function mod:SwordStomp(player)
 	if funcs.DefensiveStomp(player) then return end
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_SPIRIT_SWORD) then return end
 
-    -- Crear un nuevo cuchillo (espada espiritual)
     local knife = player:FireKnife(
         player,
         90,
@@ -32,9 +31,7 @@ function mod:SwordStomp(player)
         player.Position,
         Vector.Zero,
         nil
-    ):ToEffect()
-
-    if not effect then return end
+    ):ToEffect() ---@cast effect EntityEffect
 
     effect:FollowParent(player)
     local effectSprite = effect:GetSprite()

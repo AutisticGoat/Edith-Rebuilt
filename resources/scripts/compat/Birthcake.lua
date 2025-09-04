@@ -4,6 +4,7 @@ if not BirthcakeRebaked then return end
 local mod = EdithRebuilt
 local enums = mod.Enums
 local players = enums.PlayerType
+local birthCakeAPI = BirthcakeRebaked.API
 local path = "gfx/items/trinkets/EdithRebuilt_"
 local EdithSuffix = "Edith_Birthcake.png"
 local TEdithSuffix = "T_Edith_Birthcake.png"
@@ -19,6 +20,6 @@ local Info = {
 }
 
 for k, v in pairs(Info) do
-    BirthcakeRebaked.API:AddBirthcakePickupText(k, v.Description)
-    BirthcakeRebaked.API:AddBirthcakeSprite(k, v.SpriteInfo)
+    birthCakeAPI:AddBirthcakePickupText(k, v.Description)
+    birthCakeAPI:AddBirthcakeSprite(k, v.SpriteInfo)
 end

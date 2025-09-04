@@ -21,7 +21,8 @@ local funcs = {
 	log = mod.Log,
 	exp = mod.exp,
 	FeedbackMan = mod.LandFeedbackManager,
-	Clamp = mod.Clamp
+	Clamp = mod.Clamp,
+	EdithWeapons = mod.ManageEdithWeapons
 }
 
 local hopSounds = {
@@ -276,6 +277,9 @@ mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, mod.TaintedEdithUpdate)
 
 function mod:EdithPlayerUpdate(player)
 	if not funcs.IsEdith(player, true) then return end
+
+	funcs.EdithWeapons(player)
+
 	local playerData = funcs.GetData(player)
 	local IsJumping = JumpLib:GetData(player).Jumping
 	local arrow = mod.GetEdithTarget(player, true)
@@ -386,7 +390,7 @@ function TEdith:EdithParryJump(player)
 end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, TEdith.EdithParryJump, jumpParams.TEdithJump)
 
-function TEdith:TaintedEdithDamageManager(player, damage, flags)
+function TEdith:TaintedEdithDamageManager(player, _, flags)
 	local playerData = funcs.GetData(player)
 
 	if not funcs.IsEdith(player, true) then return end
@@ -397,7 +401,7 @@ end
 mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG, TEdith.TaintedEdithDamageManager)
 
 HudHelper.RegisterHUDElement({
-	Name = "KnifeChargeBar",
+	Name = "EdithRebuilt_TaintedEdithChargeBars",
 	Priority = HudHelper.Priority.NORMAL,
 	Condition = function(player)
 		return funcs.IsEdith(player, true) and RoomTransition:GetTransitionMode() ~= 3

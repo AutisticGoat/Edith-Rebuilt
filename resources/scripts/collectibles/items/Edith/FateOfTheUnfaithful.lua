@@ -24,7 +24,7 @@ function FOTU:OnFatefulUse(_, rng, player, flag)
     end
 
     game:ShakeScreen(10)
-    sfx:Play(SoundEffect.SOUND_FIREDEATH_HISS, 1, 0, false, rng:RandomInt(95,105)/100)
+    sfx:Play(SoundEffect.SOUND_FIREDEATH_HISS, 1, 0, false, mod.RandomFloat(rng, 0.95, 1.05))
     return true
 end
 mod:AddCallback(ModCallbacks.MC_USE_ITEM, FOTU.OnFatefulUse, items.COLLECTIBLE_FATE_OF_THE_UNFAITHFUL)
