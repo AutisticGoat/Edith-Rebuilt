@@ -28,8 +28,6 @@ end
 function Salted:OnSaltedUpdate(npc)
     if not mod.IsSalted(npc) then return end
     npc:MultiplyFriction(0.6)
-
-    -- if 
 end
 mod:AddCallback(ModCallbacks.MC_NPC_UPDATE, Salted.OnSaltedUpdate)
 

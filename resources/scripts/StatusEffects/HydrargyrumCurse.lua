@@ -24,11 +24,6 @@ function EdithRebuilt.SetIsHydrargyrumCurse(ent, dur, src)
     SEL:AddStatusEffect(ent, HydrargyrumFlag, dur, EntityRef(src), HydrargyrumCurseColor)
 end
 
--- local function OnInit(_, npc)
---     mod.SetIsHydrargyrumCurse(npc, -1, npc)
--- end
--- mod:AddCallback(ModCallbacks.MC_POST_NPC_INIT, OnInit)
-
 ---@param npc EntityNPC
 function HydrargyrumCurse:OnNPCUpdate(npc)
     local entData = data(npc)
@@ -53,13 +48,3 @@ function HydrargyrumCurse:OnNPCUpdate(npc)
     randTear:AddTearFlags(TearFlags.TEAR_PIERCING)
 end
 mod:AddCallback(ModCallbacks.MC_NPC_UPDATE, HydrargyrumCurse.OnNPCUpdate)
-
------@param npc EntityNPC
--- function Peppered:OnPepperedUpdate(npc)
---     if not mod.IsPeppered(npc) then return end
---     npc:MultiplyFriction(0.6)
-
---     if SEL:GetStatusEffectCountdown(npc, PepperedFlag) % 10 ~= 0 then return end
---     mod:SpawnPepperCreep(data(npc).Player, npc.Position, 0.5, 3)
--- end
--- mod:AddCallback(ModCallbacks.MC_NPC_UPDATE, Peppered.OnPepperedUpdate)

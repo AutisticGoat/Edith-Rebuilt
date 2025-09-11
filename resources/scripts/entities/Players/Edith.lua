@@ -79,6 +79,10 @@ mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, Edith.EdithSaltTears)
 function Edith:EdithJumpHandler(player)
 	if not mod.IsEdith(player, false) then return end
 	
+	-- print(player:HasEntityFlags(EntityFlag.FLAG_SLIPPERY_PHYSICS))
+	
+
+
 	local playerData = data(player)
 	if player:IsDead() then mod.RemoveEdithTarget(player); playerData.isJumping = false return end
 
@@ -276,6 +280,10 @@ mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, Edith.EdithLanding, JumpParams.Ed
 ---@param player EntityPlayer
 function Edith:EdithPEffectUpdate(player)
 	if not mod.IsEdith(player, false) then return end
+
+	if player:HasEntityFlags(EntityFlag.FLAG_SLIPPERY_PHYSICS) then
+		player:ClearEntityFlags(EntityFlag.FLAG_SLIPPERY_PHYSICS)
+	end
 
 	local playerData = data(player)
 

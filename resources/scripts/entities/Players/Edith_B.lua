@@ -128,7 +128,14 @@ function TEdith:TaintedEdithInit(player)
 	if not funcs.IsEdith(player, true) then return end
 	mod.SetNewANM2(player, "gfx/EdithTaintedAnim.anm2")
 	mod.ForceCharacterCostume(player, players.PLAYER_EDITH_B, enums.NullItemID.ID_EDITH_B_SCARF)
-	funcs.GetData(player).HopVector = Vector.Zero
+	
+	local playerData = funcs.GetData(player)
+
+	playerData.HopVector = Vector.Zero
+	playerData.MoveCharge = playerData.MoveCharge or 0
+	playerData.MoveBrCharge = playerData.MoveBrCharge or 0
+	playerData.ImpulseCharge = playerData.ImpulseCharge or 0
+	playerData.BirthrightCharge = playerData.BirthrightCharge or 0
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, TEdith.TaintedEdithInit)
 
@@ -185,7 +192,7 @@ function mod:TaintedEdithUpdate(player)
 		player:SetColor(Color(1, 1, 1, 1, colorChange, colorBRChange, 0), 5, 100, true, false)
 	end
 
-	if playerData.ParryCounter > 0  then
+	if playerData.ParryCounter > 0 then
 		if isTaintedEdithJump(player) ~= true then
 			playerData.ParryCounter = playerData.ParryCounter - 1
 		end
@@ -209,12 +216,8 @@ function mod:TaintedEdithUpdate(player)
 		player:SetColor(Color(1, 1, 1, 1, colorChange + 0.3, 0, 0), 5, 100, true, false)
 	end
 
-	if (player:CollidesWithGrid() and playerData.IsHoping == true) and not isJumping then
+	if (player:CollidesWithGrid() and playerData.IsHoping == true) and not isJumping or mod.IsDogmaAppearCutscene() then
 		TEdith.StopTEdithHops(player, 20, true, not playerData.TaintedEdithTarget)
-	end
-
-	if mod.IsDogmaAppearCutscene() then
-		TEdith.StopTEdithHops(player, 0, false, true)
 	end
 
 	if funcs.TargetMov(player) then
@@ -305,11 +308,6 @@ function mod:EdithPlayerUpdate(player)
 			mod:InitTaintedEdithParryJump(player, jumpTags.TEdithJump)
 		end
 	end
-	
-	playerData.MoveCharge = playerData.MoveCharge or 0
-	playerData.MoveBrCharge = playerData.MoveBrCharge or 0
-	playerData.ImpulseCharge = playerData.ImpulseCharge or 0
-	playerData.BirthrightCharge = playerData.BirthrightCharge or 0
 
 	if playerData.IsHoping == true then
 		TEdith.ResetHopDashCharge(player)
@@ -419,7 +417,7 @@ HudHelper.RegisterHUDElement({
 
 		playerData.ChargeBar = playerData.ChargeBar or Sprite("gfx/TEdithChargebar.anm2", true)
 		playerData.BRChargeBar = playerData.BRChargeBar or Sprite("gfx/TEdithBRChargebar.anm2", true)
-		
+
 		if player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and not playerData.BRChargeBar:IsFinished("Disappear") then
 			offset = misc.ChargeBarleftVector
 		end

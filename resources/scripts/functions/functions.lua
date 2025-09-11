@@ -190,7 +190,7 @@ function EdithRebuilt:DestroyGrid(entity, radius)
 		local grid = room:GetGridEntity(i)
 		if not grid then goto Break end  
 		if entity.Position:Distance(grid.Position) > radius then goto Break end
-		grid:Destroy()
+		grid:Destroy(false)
 		::Break::
 	end
 end
@@ -595,7 +595,7 @@ end
 ---@param tear EntityTear
 ---@param tainted? boolean
 function EdithRebuilt.ForceSaltTear(tear, tainted)
-	local IsBloodTear = mod.When(tear.Variant, tables.BloodytearVariants, tainted or false) 	
+	local IsBloodTear = mod.When(tear.Variant, tables.BloodytearVariants, false	)
 	doEdithTear(tear, IsBloodTear, tainted)
 end
 
@@ -1418,7 +1418,8 @@ function EdithRebuilt.ParryLandManager(player, IsTaintedEdith)
 		mod.TriggerPush(ent, player, 20, 5, false)
 
 		if not mod.IsEnemy(ent) then goto continue end
-		ent:AddConfusion(EntityRef(player), 90, false)
+		mod.SetCinder(ent, 120, player)
+		-- ent:AddConfusion(EntityRef(player), 90, false)
 		::continue::
 	end
 
@@ -1580,7 +1581,6 @@ function EdithRebuilt.LandFeedbackManager(player, soundTable, GibColor, IsParryL
 			[MortisBackdrop.FLESH] = Color(0, 0, 0, 1, 0.55, 0.5, 0.55),
 		}
 		local newcolor = mod.When(EdithRebuilt.GetMortisDrop(), Colors, Color.Default)
-
 		color = newcolor
 	end
 
