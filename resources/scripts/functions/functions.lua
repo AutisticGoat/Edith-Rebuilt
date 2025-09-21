@@ -6,6 +6,7 @@ local utils = enums.Utils
 local game = utils.Game
 local level = utils.Level
 local sfx = utils.SFX
+local ConfigDataTypes = enums.ConfigDataTypes
 local tables = enums.Tables
 local jumpTags = tables.JumpTags
 local jumpFlags = tables.JumpFlags
@@ -391,6 +392,22 @@ function EdithRebuilt.FallBehavior(player)
 	JumpLib:SetSpeed(player, 10 + (jumpdata.Height / 10))
 end
 
+---@param Type ConfigDataTypes
+function EdithRebuilt.GetConfigData(Type)
+	if not saveManager:IsLoaded() then return end
+	local config = saveManager:GetSettingsSave()
+
+	if not config then return end
+
+	local switch = {
+		[ConfigDataTypes.EDITH] = config.EdithData --[[@as EdithData]], 
+		[ConfigDataTypes.TEDITH] = config.TEdithData --[[@as TEdithData]], 
+		[ConfigDataTypes.MISC] = config.MiscData --[[@as MiscData]], 
+	}
+
+	return mod.When(Type, switch)
+end
+
 ---@param player EntityPlayer
 ---@param bomb? EntityBomb
 function EdithRebuilt.ExplosionRecoil(player, bomb)
@@ -581,6 +598,7 @@ local function doEdithTear(tear, IsBlood, isTainted)
 	local newSprite = misc.TearPath .. path .. ".png"
 
 	tear.Scale = tear.Scale * tearSizeMult
+
 	tear:ChangeVariant(TearVariant.ROCK)
 	
 	tearData.ShatterSprite = (isTainted and (IsBlood and "burnt_blood_salt_shatter" or "burnt_salt_shatter") or (IsBlood and "blood_salt_shatter" or "salt_shatter"))
@@ -1249,17 +1267,22 @@ function EdithRebuilt:InitTaintedEdithParryJump(player, tag)
 	data(player).IsParryJump = true
 end
 
+local CinderHopRNG = RNG()
+mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, function()
+	CinderHopRNG:SetSeed(game:GetSeeds():GetStartSeed())
+end)
+
 ---Tainted Edith parry land behavior
 ---@param parent EntityPlayer
 ---@param radius number
 ---@param damage number
 ---@param knockback number
 function EdithRebuilt:TaintedEdithHop(parent, radius, damage, knockback)
-	local mult
-	for _, ent in ipairs(Isaac.FindInCapsule(Capsule(parent.Position, Vector.One, 0, radius))) do
-		mult = ent:HasEntityFlags(EntityFlag.FLAG_CONFUSION) and 1.5 or 1
+	local capsule = Capsule(parent.Position, Vector.One, 0, radius)
+	
+	for _, ent in ipairs(Isaac.FindInCapsule(capsule)) do
 		mod.HandleEntityInteraction(ent, parent, knockback)
-		mod.LandDamage(ent, parent, damage * mult, knockback)
+		mod.LandDamage(ent, parent, damage, knockback)
 	end
 end
 
@@ -1388,15 +1411,43 @@ function EdithRebuilt.BoostTear(tear, speed, dmgMult)
 	tear:AddTearFlags(TearFlags.TEAR_KNOCKBACK)
 end
 
+---@param ent Entity
+---@param capsule1 Capsule
+---@param capsule2 Capsule
+local function IsEntInTwoCapsules(ent, capsule1, capsule2)
+	local Capsule1Ents = Isaac.FindInCapsule(capsule1)
+	local Capsule2Ents = Isaac.FindInCapsule(capsule2)
+	local PtrHashEnt = GetPtrHash(ent)
+	local IsInsideCapsule1, IsInsideCapsule2 = false, false
+
+	for _, Entity in ipairs(Capsule1Ents) do
+		if PtrHashEnt == GetPtrHash(Entity) then
+			IsInsideCapsule1 = true
+			break
+		end
+	end
+
+	for _, Entity in ipairs(Capsule2Ents) do
+		if PtrHashEnt == GetPtrHash(Entity) then
+			IsInsideCapsule2 = true
+			break
+		end
+	end
+
+	return IsInsideCapsule1 and IsInsideCapsule2
+end
+
 ---Helper function used to manage Tainted Edith and Burnt Hood's parry-lands 
 ---@param player EntityPlayer
 ---@param IsTaintedEdith? boolean 
 ---@return boolean PerfectParry Returns a boolean that tells if there was a perfect parry 
+---@return boolean EnemiesInImpreciseParry
 function EdithRebuilt.ParryLandManager(player, IsTaintedEdith)
 	local damageBase = 13.5
 	local DamageStat = player.Damage 
 	local rawFormula = (damageBase + DamageStat) / 1.5 
 	local PerfectParry = false
+	local EnemiesInImpreciseParry = false
 	local playerPos = player.Position
 	local playerData = data(player)
 	local ImpreciseParryCapsule = Capsule(player.Position, Vector.One, 0, misc.ImpreciseParryRadius)	
@@ -1413,13 +1464,18 @@ function EdithRebuilt.ParryLandManager(player, IsTaintedEdith)
 		DamageFormula = DamageFormula * damageIncrease
 	end
 
+	local tearsMult = (mod.GetTPS(player) / 2.73) 
+	local CinderTime = mod:SecondsToFrames((4 * tearsMult))
+
 	for _, ent in pairs(Isaac.FindInCapsule(ImpreciseParryCapsule, misc.ParryPartitions)) do
 		if ent:ToTear() then goto continue end
-		mod.TriggerPush(ent, player, 20, 5, false)
+		local pushMult = mod.IsCinder(ent) and 1.5 or 1
+		mod.TriggerPush(ent, player, 20 * pushMult, 5, false)
 
 		if not mod.IsEnemy(ent) then goto continue end
-		mod.SetCinder(ent, 120, player)
-		-- ent:AddConfusion(EntityRef(player), 90, false)
+		if IsEntInTwoCapsules(ent, ImpreciseParryCapsule, PerfectParryCapsule) then goto continue end		
+		mod.SetCinder(ent, CinderTime, player)
+		EnemiesInImpreciseParry = true
 		::continue::
 	end
 
@@ -1475,18 +1531,13 @@ function EdithRebuilt.ParryLandManager(player, IsTaintedEdith)
 		PerfectParry = true		
 	end
 
-	local cooldown = PerfectParry and 30 or 15
-
-	if cooldown then
-		player:SetMinDamageCooldown(cooldown)
-	end
-
+	player:SetMinDamageCooldown(PerfectParry and 30 or 15)
 	PerfectParryMisc(IsTaintedEdith, PerfectParry)
 
 	playerData.ParryCounter = IsTaintedEdith and (PerfectParry and (hasBirthcake and 8 or 10) or 15)
 	playerData.IsParryJump = false
 
-	return PerfectParry
+	return PerfectParry, EnemiesInImpreciseParry
 end
 
 ---Function made to adjust landing volumes
@@ -1514,33 +1565,34 @@ function EdithRebuilt.LandFeedbackManager(player, soundTable, GibColor, IsParryL
 	local Variant = hasWater and EffectVariant.BIG_SPLASH or EffectVariant.POOF02
 	local SubType = hasWater and 2 or (IsChap4 and 3 or 1)
 	local backColor = tables.BackdropColors
-	local soundPick ---@type number
+	local soundPick 
 	local size
-	local volume ---@type number
-	local ScreenShakeIntensity ---@type number
+	local volume 
+	local ScreenShakeIntensity
 	local gibAmount = 0
 	local gibSpeed = 2
 	local IsSoulOfEdith = data(player).IsSoulOfEdithJump 
 	local IsEdithsHood = data(player).HoodLand
 	local IsMortis = EdithRebuilt.IsLJMortis()
+	local isEdithJump = mod.IsEdith(player, false) or IsSoulOfEdith or IsEdithsHood
 
-	if mod.IsEdith(player, false) or IsSoulOfEdith or IsEdithsHood then
+	if isEdithJump then
 		local isRocketLaunchStomp = data(player).RocketLaunch
 		local isDefensive = mod.IsDefensiveStomp(player) or IsEdithsHood
-		local EdithData = menuData.EdithData
+		local EdithData = mod.GetConfigData(ConfigDataTypes.EDITH) ---@cast EdithData EdithData
 		size = (IsSoulOfEdith and 0.8 or (isDefensive and 0.6 or 0.7)) * (isRocketLaunchStomp and 1.25 or 1)
-		soundPick = EdithData.stompsound ---@type number
-		volume = GetVolume(EdithData.stompVolume) * (isDefensive and 1.5 or 2)
+		soundPick = EdithData.StompSound
+		volume = GetVolume(EdithData.StompVolume) * (isDefensive and 1.5 or 2)
 		ScreenShakeIntensity = isDefensive and 6 or (isRocketLaunchStomp and 14 or 10)
-		gibAmount = EdithData.DisableGibs and 0 or (isRocketLaunchStomp and 14 or 10)
+		gibAmount = EdithData.DisableSaltGibs and 0 or (isRocketLaunchStomp and 14 or 10)
 		gibSpeed = isDefensive and 2 or 3
 	else
-		local TEdithData = menuData.TEdithData
+		local TEdithData = mod.GetConfigData(ConfigDataTypes.TEDITH) ---@cast TEdithData TEdithData
 		size = IsParryLand and 0.7 or 0.5
-		soundPick = IsParryLand and TEdithData.TaintedParrySound or TEdithData.TaintedHopSound ---@type number
-		volume = GetVolume(TEdithData.taintedStompVolume) * (IsParryLand and 1.5 or 1)
+		soundPick = IsParryLand and TEdithData.ParrySound or TEdithData.HopSound 
+		volume = GetVolume(TEdithData.Volume) * (IsParryLand and 1.5 or 1)
 		ScreenShakeIntensity = IsParryLand and 6 or 3
-		gibAmount = not TEdithData.DisableGibs and (IsParryLand and 6 or 2) or 0
+		gibAmount = not TEdithData.DisableSaltGibs and (IsParryLand and 6 or 2) or 0
 	end
 
 	local stompGFX = Isaac.Spawn(
@@ -1556,7 +1608,7 @@ function EdithRebuilt.LandFeedbackManager(player, soundTable, GibColor, IsParryL
 	local RandSize = { X = mod.RandomFloat(rng, 0.8, 1), Y = mod.RandomFloat(rng, 0.8, 1) }
 	local SizeX, SizeY = size * RandSize.X, size * RandSize.Y
 	
-	if menuData.miscData.shakescreen then
+	if mod.GetConfigData(ConfigDataTypes.MISC).EnableShakescreen then
 		game:ShakeScreen(ScreenShakeIntensity)
 	end
 

@@ -139,16 +139,6 @@ function TEdith:TaintedEdithInit(player)
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, TEdith.TaintedEdithInit)
 
----@param tear EntityTear
-function TEdith:OnTaintedShootTears(tear)
-	local player = mod:GetPlayerFromTear(tear)
-	if not player then return end
-	if not funcs.IsEdith(player, true) then return end
-
-	mod.ForceSaltTear(tear, true)
-end
-mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, TEdith.OnTaintedShootTears)
-
 local JumpHeightParams = {
 	growth = 0.35, 
 	offset = 0.65, 
@@ -229,11 +219,10 @@ function mod:TaintedEdithUpdate(player)
 
 	if target then
 		local posDif = target.Position - player.Position
-		local posDifLenght = posDif:Length()	
+		local posDifLenght = posDif:Length()
 		local maxDist = 2.5
 		local targetframecount = target.FrameCount
-		local tearMult = funcs.GetTPS(player) / 2.73							
-		local chargeAdd = 8.25 * funcs.exp(tearMult, 1, 1.5)
+		local chargeAdd = 8.25 * funcs.exp(player.MoveSpeed, 1, 1.5)
 		playerData.HopVector = posDif:Normalized()
 
 		if targetframecount < 2 and playerData.IsHoping == true then
@@ -246,10 +235,8 @@ function mod:TaintedEdithUpdate(player)
 			target.Velocity = target.Velocity - (posDif:Normalized() * (posDifLenght / maxDist)) 
 		end
 
-		if targetframecount > 1 then
-			if not playerData.IsHoping and not isJumping then
-				TEdith.AddHopDashCharge(player, chargeAdd, 0.5)
-			end
+		if targetframecount > 1 and (not playerData.IsHoping and not isJumping) then
+			TEdith.AddHopDashCharge(player, chargeAdd, 0.5)
 		end
 	else
 		local isHopVecZero = HopVec.X == 0 and HopVec.Y == 0
@@ -337,10 +324,11 @@ mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, mod.EdithPlayerUpdate)
 
 function mod:OnNewRoom()
 	for _, player in ipairs(PlayerManager.GetPlayers()) do
-		if not funcs.IsEdith(player, true) then return end
+		if not funcs.IsEdith(player, true) then goto continue end
 		mod:ChangeColor(player, _, _, _, 1)
 		TEdith.StopTEdithHops(player, 0, true, true)
 		mod.RemoveEdithTarget(player, true)
+		::continue::
 	end
 end
 mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, mod.OnNewRoom)
@@ -356,7 +344,7 @@ function mod:EdithHopLanding(player)
 	local HopParams = {
 		Radius = math.min((30 + (tearRange - 9)), 35),
 		Knockback = Knockbackbase * funcs.exp(Charge / 100, 1, 1.5),
-		Damage = (((damageBase + player.Damage) / 1.75) * (Charge + BRCharge) / 100) * (Charge / 100) 
+		Damage = (((damageBase + player.Damage) / 3.5) * (Charge + BRCharge) / 100) * (Charge / 100) 
 	}
 
 	if BRCharge > 0 then
@@ -379,11 +367,13 @@ function TEdith:EdithParryJump(player)
 		TEdith.ResetHopDashCharge(player)
 	end
 
-	local perfectParry = mod.ParryLandManager(player, true)
+	local perfectParry, EnemiesInImpreciseParry = mod.ParryLandManager(player, true)
 	local tableRef = perfectParry and parryJumpSounds or hopSounds
-	local parryAdd = perfectParry and 20 or -15
+	local parryAdd = perfectParry and 20 or (not EnemiesInImpreciseParry and -15)
 
 	funcs.FeedbackMan(player, tableRef, misc.BurntSaltColor, perfectParry)
+
+	if not parryAdd then return end
 	TEdith.AddHopDashCharge(player, parryAdd, 0.75)
 end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, TEdith.EdithParryJump, jumpParams.TEdithJump)

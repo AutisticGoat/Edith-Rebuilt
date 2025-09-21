@@ -1,9 +1,9 @@
 <AnimatedActor>
-	<Info CreatedBy="robot" CreatedOn="28/10/2024 03:48:58 p. m." Version="276" Fps="30"/>
+	<Info CreatedBy="robot" CreatedOn="19/09/2025 06:55:50 p. m." Version="290" Fps="30"/>
 	<Content>
 		<Spritesheets>
 			<Spritesheet Path="characters\costumes\characterEdith.png" Id="0"/>
-			<Spritesheet Path="Characters/costumes/ghost.png" Id="1"/>
+			<Spritesheet Path="characters/costumes/ghost.png" Id="1"/>
 			<Spritesheet Path="characters\costumes\characterEdithHood.png" Id="2"/>
 		</Spritesheets>
 		<Layers>
@@ -44,7 +44,7 @@
 			<Event Name="Smash" Id="5"/>
 		</Events>
 	</Content>
-	<Animations DefaultAnimation="WalkDown">
+	<Animations DefaultAnimation="WalkRight">
 		<Animation Name="Pickup" FrameNum="42" Loop="false">
 			<RootAnimation>
 				<Frame XPosition="0" YPosition="0" XScale="100" YScale="100" Delay="42" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="false"/>
@@ -110,6 +110,44 @@
 			</NullAnimations>
 			<Triggers/>
 		</Animation>
+		<Animation Name="JumpStart" FrameNum="5" Loop="false">
+			<RootAnimation>
+				<Frame XPosition="0" YPosition="0" XScale="100" YScale="100" Delay="5" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="false"/>
+			</RootAnimation>
+			<LayerAnimations>
+				<LayerAnimation LayerId="0" Visible="true"/>
+				<LayerAnimation LayerId="1" Visible="true"/>
+				<LayerAnimation LayerId="2" Visible="true"/>
+				<LayerAnimation LayerId="3" Visible="true"/>
+				<LayerAnimation LayerId="4" Visible="true"/>
+				<LayerAnimation LayerId="5" Visible="true"/>
+				<LayerAnimation LayerId="6" Visible="true"/>
+				<LayerAnimation LayerId="7" Visible="true"/>
+				<LayerAnimation LayerId="8" Visible="true"/>
+				<LayerAnimation LayerId="9" Visible="true"/>
+				<LayerAnimation LayerId="10" Visible="true"/>
+				<LayerAnimation LayerId="11" Visible="true"/>
+				<LayerAnimation LayerId="12" Visible="true">
+					<Frame XPosition="0" YPosition="0" XPivot="32" YPivot="56" XCrop="0" YCrop="192" Width="64" Height="64" XScale="95" YScale="105" Delay="2" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="true"/>
+					<Frame XPosition="0" YPosition="0" XPivot="32" YPivot="56" XCrop="192" YCrop="128" Width="64" Height="64" XScale="110" YScale="90" Delay="1" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="true"/>
+					<Frame XPosition="0" YPosition="0" XPivot="32" YPivot="56" XCrop="192" YCrop="128" Width="64" Height="64" XScale="115" YScale="85" Delay="1" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="true"/>
+					<Frame XPosition="0" YPosition="0" XPivot="32" YPivot="56" XCrop="192" YCrop="128" Width="64" Height="64" XScale="120" YScale="80" Delay="1" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="true"/>
+				</LayerAnimation>
+				<LayerAnimation LayerId="13" Visible="true"/>
+				<LayerAnimation LayerId="14" Visible="true"/>
+			</LayerAnimations>
+			<NullAnimations>
+				<NullAnimation NullId="0" Visible="true"/>
+				<NullAnimation NullId="1" Visible="true"/>
+				<NullAnimation NullId="2" Visible="true"/>
+				<NullAnimation NullId="3" Visible="true"/>
+				<NullAnimation NullId="4" Visible="true"/>
+				<NullAnimation NullId="5" Visible="true"/>
+				<NullAnimation NullId="6" Visible="true"/>
+				<NullAnimation NullId="7" Visible="true"/>
+			</NullAnimations>
+			<Triggers/>
+		</Animation>
 		<Animation Name="Hit" FrameNum="8" Loop="false">
 			<RootAnimation>
 				<Frame XPosition="0" YPosition="0" XScale="100" YScale="100" Delay="8" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="false"/>
@@ -151,9 +189,7 @@
 				<NullAnimation NullId="7" Visible="true"/>
 				<NullAnimation NullId="8" Visible="true"/>
 			</NullAnimations>
-			<Triggers>
-				<Trigger EventId="0" AtFrame="1"/>
-			</Triggers>
+			<Triggers/>
 		</Animation>
 		<Animation Name="Appear" FrameNum="40" Loop="false">
 			<RootAnimation>
@@ -202,9 +238,7 @@
 				<NullAnimation NullId="7" Visible="true"/>
 				<NullAnimation NullId="8" Visible="true"/>
 			</NullAnimations>
-			<Triggers>
-				<Trigger EventId="0" AtFrame="22"/>
-			</Triggers>
+			<Triggers/>
 		</Animation>
 		<Animation Name="Death" FrameNum="57" Loop="false">
 			<RootAnimation>
@@ -293,10 +327,7 @@
 				<NullAnimation NullId="7" Visible="true"/>
 				<NullAnimation NullId="8" Visible="true"/>
 			</NullAnimations>
-			<Triggers>
-				<Trigger EventId="2" AtFrame="8"/>
-				<Trigger EventId="4" AtFrame="22"/>
-			</Triggers>
+			<Triggers/>
 		</Animation>
 		<Animation Name="Sad" FrameNum="27" Loop="false">
 			<RootAnimation>
@@ -939,6 +970,7 @@
 				<LayerAnimation LayerId="15" Visible="true"/>
 			</LayerAnimations>
 			<NullAnimations>
+				<NullAnimation NullId="0" Visible="true"/>
 				<NullAnimation NullId="1" Visible="true"/>
 				<NullAnimation NullId="2" Visible="true"/>
 				<NullAnimation NullId="3" Visible="true"/>
@@ -946,12 +978,9 @@
 				<NullAnimation NullId="5" Visible="true"/>
 				<NullAnimation NullId="6" Visible="true"/>
 				<NullAnimation NullId="7" Visible="true"/>
-				<NullAnimation NullId="0" Visible="true"/>
 				<NullAnimation NullId="8" Visible="true"/>
 			</NullAnimations>
-			<Triggers>
-				<Trigger EventId="1" AtFrame="8"/>
-			</Triggers>
+			<Triggers/>
 		</Animation>
 		<Animation Name="MinecartEnter" FrameNum="21" Loop="false">
 			<RootAnimation>
@@ -988,6 +1017,7 @@
 				<LayerAnimation LayerId="15" Visible="true"/>
 			</LayerAnimations>
 			<NullAnimations>
+				<NullAnimation NullId="0" Visible="true"/>
 				<NullAnimation NullId="1" Visible="true"/>
 				<NullAnimation NullId="2" Visible="true"/>
 				<NullAnimation NullId="3" Visible="true"/>
@@ -995,12 +1025,9 @@
 				<NullAnimation NullId="5" Visible="true"/>
 				<NullAnimation NullId="6" Visible="true"/>
 				<NullAnimation NullId="7" Visible="true"/>
-				<NullAnimation NullId="0" Visible="true"/>
 				<NullAnimation NullId="8" Visible="true"/>
 			</NullAnimations>
-			<Triggers>
-				<Trigger EventId="1" AtFrame="16"/>
-			</Triggers>
+			<Triggers/>
 		</Animation>
 		<Animation Name="Jump" FrameNum="20" Loop="false">
 			<RootAnimation>
@@ -1038,6 +1065,7 @@
 				<LayerAnimation LayerId="15" Visible="true"/>
 			</LayerAnimations>
 			<NullAnimations>
+				<NullAnimation NullId="0" Visible="true"/>
 				<NullAnimation NullId="1" Visible="true"/>
 				<NullAnimation NullId="2" Visible="true"/>
 				<NullAnimation NullId="3" Visible="true"/>
@@ -1045,7 +1073,6 @@
 				<NullAnimation NullId="5" Visible="true"/>
 				<NullAnimation NullId="6" Visible="true"/>
 				<NullAnimation NullId="7" Visible="true"/>
-				<NullAnimation NullId="0" Visible="true"/>
 				<NullAnimation NullId="8" Visible="true"/>
 			</NullAnimations>
 			<Triggers/>
@@ -1312,9 +1339,7 @@
 				<NullAnimation NullId="7" Visible="true"/>
 				<NullAnimation NullId="8" Visible="true"/>
 			</NullAnimations>
-			<Triggers>
-				<Trigger EventId="2" AtFrame="8"/>
-			</Triggers>
+			<Triggers/>
 		</Animation>
 		<Animation Name="FallIn" FrameNum="12" Loop="false">
 			<RootAnimation>
@@ -1357,9 +1382,7 @@
 				<NullAnimation NullId="7" Visible="true"/>
 				<NullAnimation NullId="8" Visible="true"/>
 			</NullAnimations>
-			<Triggers>
-				<Trigger EventId="1" AtFrame="10"/>
-			</Triggers>
+			<Triggers/>
 		</Animation>
 		<Animation Name="HoleDeath" FrameNum="35" Loop="false">
 			<RootAnimation>
@@ -1410,9 +1433,7 @@
 				<NullAnimation NullId="7" Visible="true"/>
 				<NullAnimation NullId="8" Visible="true"/>
 			</NullAnimations>
-			<Triggers>
-				<Trigger EventId="2" AtFrame="8"/>
-			</Triggers>
+			<Triggers/>
 		</Animation>
 		<Animation Name="JumpOut" FrameNum="15" Loop="false">
 			<RootAnimation>
@@ -1446,6 +1467,7 @@
 				<LayerAnimation LayerId="15" Visible="true"/>
 			</LayerAnimations>
 			<NullAnimations>
+				<NullAnimation NullId="0" Visible="true"/>
 				<NullAnimation NullId="1" Visible="true"/>
 				<NullAnimation NullId="2" Visible="true"/>
 				<NullAnimation NullId="3" Visible="true"/>
@@ -1453,7 +1475,6 @@
 				<NullAnimation NullId="5" Visible="true"/>
 				<NullAnimation NullId="6" Visible="true"/>
 				<NullAnimation NullId="7" Visible="true"/>
-				<NullAnimation NullId="0" Visible="true"/>
 				<NullAnimation NullId="8" Visible="true"/>
 			</NullAnimations>
 			<Triggers/>
@@ -1774,9 +1795,7 @@
 				<NullAnimation NullId="7" Visible="true"/>
 				<NullAnimation NullId="8" Visible="true"/>
 			</NullAnimations>
-			<Triggers>
-				<Trigger EventId="1" AtFrame="7"/>
-			</Triggers>
+			<Triggers/>
 		</Animation>
 		<Animation Name="LeapDown" FrameNum="33" Loop="false">
 			<RootAnimation>
@@ -1852,10 +1871,7 @@
 				<NullAnimation NullId="7" Visible="true"/>
 				<NullAnimation NullId="8" Visible="true"/>
 			</NullAnimations>
-			<Triggers>
-				<Trigger EventId="1" AtFrame="7"/>
-				<Trigger EventId="3" AtFrame="21"/>
-			</Triggers>
+			<Triggers/>
 		</Animation>
 		<Animation Name="DeathTeleport" FrameNum="21" Loop="false">
 			<RootAnimation>
@@ -1901,9 +1917,7 @@
 				<NullAnimation NullId="7" Visible="true"/>
 				<NullAnimation NullId="8" Visible="true"/>
 			</NullAnimations>
-			<Triggers>
-				<Trigger EventId="2" AtFrame="1"/>
-			</Triggers>
+			<Triggers/>
 		</Animation>
 	</Animations>
 </AnimatedActor>

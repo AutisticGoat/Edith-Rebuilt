@@ -65,6 +65,7 @@ local includeFiles = {
 	-- Personajes
 	ent .. "Players/Edith",
 	ent .. "Players/Edith_B",
+	ent .. "Players/SharedFuncs",
 	-- Personajes fin
 
 	-- sinergias pisotones

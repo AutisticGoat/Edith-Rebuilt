@@ -5,7 +5,6 @@ local data = mod.CustomDataWrapper.getData
 local saltTypes = enums.SaltTypes
 local invalidDamageFlags = DamageFlag.DAMAGE_SPIKES | DamageFlag.DAMAGE_INVINCIBLE | DamageFlag.DAMAGE_NO_MODIFIERS | DamageFlag.DAMAGE_NO_PENALTIES
 local SaltHeart = {}
-
 local SaltedFlag = StatusEffectLibrary.StatusFlag.EDITH_REBUILT_SALTED
 
 ---@param entity Entity

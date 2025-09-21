@@ -124,6 +124,12 @@ EdithRebuilt.Enums = {
 		SALT_HEART = "SaltHeart",
 		EDITHS_HOOD = "EdithsHood",
 	},
+	---@enum ConfigDataTypes
+	ConfigDataTypes = {
+		EDITH = "EdithData",
+		TEDITH = "TEdithData",
+		MISC = "MiscData",
+	},
 	Tables = {
 		OverrideActions = {
 			[ButtonAction.ACTION_LEFT] = 0,
@@ -159,6 +165,7 @@ EdithRebuilt.Enums = {
 			[7] = "_ace",
 			[8] = "_enby",
 			[9] = "_Venezuela",
+			[10] = "_Chile",
 		},
 		TargetLineColorValues = {
 			[2] = {R = 245/255, G = 169/255, B = 184/255},
@@ -169,6 +176,7 @@ EdithRebuilt.Enums = {
 			[7] = {R = 128/255, G = 0, B = 128/255},
 			[8] = {R = 154/255, G = 89/255, B = 207/255},
 			[9] = {R = 0, G = 36/255, B = 125/255},
+			[10] = {R = 213/255, G = 43/255, B = 30/255}
 		},
 		FrameLimits = {
 			["Idle"] = 12,
@@ -264,6 +272,7 @@ EdithRebuilt.Enums = {
 				"Ace",
 				"Enby",
 				"Venezuela",
+				"Chile",
 			},
 			StompSound = {
 				"Stone", 

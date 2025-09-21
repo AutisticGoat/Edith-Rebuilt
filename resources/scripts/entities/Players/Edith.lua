@@ -59,29 +59,9 @@ function Edith:EdithInit(player)
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, Edith.EdithInit)
 
-function Edith:EdithSaltTears(tear)
-	local player = mod:GetPlayerFromTear(tear)
-
-	if not player then return end
-	if not mod.IsEdith(player, false) then return end
-
-	mod.ForceSaltTear(tear)
-
-	if not player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED) then return end
-	local target = mod.GetEdithTarget(player)
-	if not target then return end
-	tear.Velocity = mod.ChangeVelToTarget(tear, target, player.ShotSpeed * 10)
-end
-mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, Edith.EdithSaltTears)
-
----comment
 ---@param player EntityPlayer
 function Edith:EdithJumpHandler(player)
 	if not mod.IsEdith(player, false) then return end
-	
-	-- print(player:HasEntityFlags(EntityFlag.FLAG_SLIPPERY_PHYSICS))
-	
-
 
 	local playerData = data(player)
 	if player:IsDead() then mod.RemoveEdithTarget(player); playerData.isJumping = false return end
@@ -281,10 +261,6 @@ mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, Edith.EdithLanding, JumpParams.Ed
 function Edith:EdithPEffectUpdate(player)
 	if not mod.IsEdith(player, false) then return end
 
-	if player:HasEntityFlags(EntityFlag.FLAG_SLIPPERY_PHYSICS) then
-		player:ClearEntityFlags(EntityFlag.FLAG_SLIPPERY_PHYSICS)
-	end
-
 	local playerData = data(player)
 
 	if playerData.RocketLaunch then return end
@@ -293,8 +269,8 @@ function Edith:EdithPEffectUpdate(player)
 
 	if playerData.EdithJumpTimer == 1 and player.FrameCount > 20 then
 		Edith:ColorCooldown(player, 0.6, 5)
-		local EdithSave = saveManager.GetSettingsSave().EdithData
-		local soundTab = tables.CooldownSounds[EdithSave.CooldownSound or 1]
+		local EdithSave = mod.GetConfigData("EdithData") ---@cast EdithSave EdithData
+		local soundTab = tables.CooldownSounds[EdithSave.JumpCooldownSound or 1]
 		local pitch = soundTab.Pitch == 1.2 and (soundTab.Pitch * mod.RandomFloat(player:GetDropRNG(), 1, 1.1)) or soundTab.Pitch
 		sfx:Play(soundTab.SoundID, 2, 0, false, pitch)
 		playerData.StompedEntities = nil

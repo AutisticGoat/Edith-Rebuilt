@@ -89,10 +89,10 @@ end)
 
 ---@param effect EntityEffect
 ---@param player EntityPlayer
----@param saveData table
+---@param saveData EdithData
 local function EdithTargetRender(effect, player, saveData)
 	local targetColor = saveData.TargetColor
-	local targetDesign = saveData.targetdesign
+	local targetDesign = saveData.TargetDesign
 	local effectSprite = effect:GetSprite()
 	local color = effect.Color
 	local IsRGB = saveData.RGBMode
@@ -109,7 +109,7 @@ local function EdithTargetRender(effect, player, saveData)
 	local newColor = not isTDOV and ((targetDesign == 1 and (IsRGB and RGBColors.Target or color) or defColor)) or defColor
 	effect:SetColor(newColor, -1, 100, false, false)
 
-	if not saveData.targetline then return end
+	if not saveData.TargetLine then return end
 	local targetlineColor = misc.TargetLineColor
 	local isObscure = effectSprite:GetFrame() >= funcs.Switch(effectSprite:GetAnimation(), tables.FrameLimits, 0)	
 	local lineColor = funcs.Switch(targetDesign, tables.TargetLineColorValues, color)
@@ -120,7 +120,7 @@ end
 
 ---@param effect EntityEffect
 ---@param player EntityPlayer
----@param saveData table
+---@param saveData TEdithData
 local function TaintedEdithArrowRender(effect, player, saveData)
 	local effectData = funcs.GetData(effect)
 	effectData.RGBState = effectData.RGBState or 0
@@ -161,9 +161,9 @@ mod:AddCallback(ModCallbacks.MC_PRE_EFFECT_RENDER, function(_, effect)
 
     if not player then return end
 	local isTarget = effect.Variant == Vars.EFFECT_EDITH_TARGET
-	local data = isTarget and saveData.EdithData or saveData.TEdithData
+	local data = isTarget and saveData.EdithData --[[@as EdithData]] or saveData.TEdithData --[[@as TEdithData]]
 	local func = isTarget and EdithTargetRender or TaintedEdithArrowRender
-
+	
 	func(effect, player, data)
 end)
 
@@ -174,9 +174,14 @@ function mod:Mierda(effect)
 
 	if not saveData then return end
 	local isTarget = effect.Variant == Vars.EFFECT_EDITH_TARGET
-	local MenuSprite = isTarget and saveData.EdithData.targetdesign or saveData.TEdithData.ArrowDesign
+
+	local tEdithData = EdithRebuilt.GetConfigData("TEdithData") 
+
+	local MenuSprite = isTarget and mod.GetConfigData("EdithData").TargetDesign or mod.GetConfigData("TEdithData").ArrowDesign
 	local TargetTable = isTarget and tables.TargetSuffix or tables.ArrowSuffix
 	local path = isTarget and misc.TargetPath or misc.ArrowPath
+	print(MenuSprite)
+	print(path .. TargetTable[MenuSprite] .. ".png")
 
 	effect:GetSprite():ReplaceSpritesheet(0, path .. TargetTable[MenuSprite] .. ".png", true)
 end

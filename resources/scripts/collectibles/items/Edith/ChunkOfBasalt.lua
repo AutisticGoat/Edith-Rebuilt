@@ -10,7 +10,6 @@ local data = mod.CustomDataWrapper.getData
 ---@param player EntityPlayer
 function ChunkOfBasalt:TriggerBasaltDash(player)
     if not player:HasCollectible(items.COLLECTIBLE_CHUNK_OF_BASALT) then return end
-    
     local playerData = data(player)
 
     playerData.BasaltCount = playerData.BasaltCount or 60
