@@ -140,6 +140,7 @@ mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, unlocks.CheckStartUnlocks)
 function unlocks:OnTriggerCompletion(mark, player)
     local pgd = Isaac.GetPersistentGameData()
     local tableRef = player == players.PLAYER_EDITH and UnlockTable.Edith or players.PLAYER_EDITH_B and UnlockTable.TEdith or nil
+    local difficulty = game.Difficulty
 
     if not tableRef then return end
     local unlock = mod.When(mark, UnlockTable.Edith)
@@ -155,21 +156,19 @@ function unlocks:OnTriggerCompletion(mark, player)
             pgd:TryUnlock(achievements.ACHIEVEMENT_BURNT_SALT)
         end
 
-        if game.Difficulty == Difficulty.DIFFICULTY_GREEDIER then
+        if difficulty == Difficulty.DIFFICULTY_GREEDIER then
             pgd:TryUnlock(achievements.ACHIEVEMENT_JACK_OF_CLUBS)
         end
 
         return
     end
 
-    if player == players.PLAYER_EDITH then
-        if game.Difficulty == Difficulty.DIFFICULTY_GREEDIER then
-            pgd:TryUnlock(achievements.ACHIEVEMENT_HYDRARGYRUM)
-            pgd:TryUnlock(achievements.ACHIEVEMENT_GILDED_STONE)
-        end
+    if player == players.PLAYER_EDITH and difficulty == Difficulty.DIFFICULTY_GREEDIER then
+        pgd:TryUnlock(achievements.ACHIEVEMENT_HYDRARGYRUM)
+        pgd:TryUnlock(achievements.ACHIEVEMENT_GILDED_STONE)
     end
     
-    if game.Difficulty ~= unlock.Difficulty then return end
+    if difficulty ~= unlock.Difficulty then return end
     pgd:TryUnlock(unlock.Unlock)
 
     if Isaac.AllMarksFilled(players.PLAYER_EDITH) == 2 then 

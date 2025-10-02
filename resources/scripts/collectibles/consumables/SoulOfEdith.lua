@@ -64,7 +64,7 @@ function SoulOfEdith:ParryJump(player)
     playerData.IsSoulOfEdithJump = false
 
 	local tear 
-    for _ = 1, rng:RandomInt(25, 40) do 
+    for _ = 1, rng:RandomInt(18, 36) do 
         tear = Isaac.Spawn(EntityType.ENTITY_TEAR, TearVariant.ROCK, 0, Isaac.GetRandomPosition(), Vector.Zero, player):ToTear()
 		if not tear then return end
 		tear.CollisionDamage = tear.CollisionDamage * 1.2
@@ -77,11 +77,3 @@ function SoulOfEdith:ParryJump(player)
     end
 end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, SoulOfEdith.ParryJump, { tag = "SoulOfEdithJump" })
-
----@param tear EntityTear
-function mod:OnTearDeath(tear)
-	-- if not data(tear).IsSoulOfEdithTear then return end
-
-	-- mod:SpawnSaltCreep(tear, tear.Position, 2, 3, 5, 5, "SoulOfEdith")
-end
-mod:AddCallback(ModCallbacks.MC_POST_TEAR_DEATH, mod.OnTearDeath)

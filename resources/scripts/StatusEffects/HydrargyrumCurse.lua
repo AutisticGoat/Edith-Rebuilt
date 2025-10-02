@@ -26,10 +26,12 @@ end
 
 ---@param npc EntityNPC
 function HydrargyrumCurse:OnNPCUpdate(npc)
+    if not mod.IsHydrargyrumCursed(npc) then return end
+    if SEL:GetStatusEffectCountdown(npc, HydrargyrumFlag) % 15 ~= 0 then return end
+
+    print(SEL:GetStatusEffectCountdown(npc, HydrargyrumFlag) % 15 == 0)
+
     local entData = data(npc)
-    if not entData.MercuryTimer then return end
-    entData.MercuryTimer = math.max(entData.MercuryTimer - 1, 0)
-    if entData.MercuryTimer % 15 ~= 0 or entData.MercuryTimer == 0 then return end
 
     local player = entData.Player ---@type EntityPlayer
     if not player then return end

@@ -61,6 +61,7 @@ function SaltHeart:OnSaltedDeath(npc, source)
     local player = mod.GetPlayerFromRef(source)
 
     if not player then return end
+    if not mod.IsSalted(npc) then return end
     if saltedType ~= saltTypes.SALT_HEART then return end
     if not mod.RandomBoolean(player:GetCollectibleRNG(items.COLLECTIBLE_SALT_HEART), 0.25) then return end
 

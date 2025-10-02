@@ -12,10 +12,6 @@ SEL.RegisterStatusEffect("EDITH_REBUILT_CINDER", HydrargyrumIcon)
 
 local CinderFlag = SEL.StatusFlag.EDITH_REBUILT_CINDER
 
---[[
-    
-]]
-
 ---@param ent Entity
 function EdithRebuilt.IsCinder(ent)
     return StatusEffectLibrary:HasStatusEffect(ent, CinderFlag)

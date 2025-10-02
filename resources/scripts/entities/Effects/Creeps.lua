@@ -47,12 +47,13 @@ local function SaltCreepUpdate(effect)
         local capsule = Capsule(pos, Vector.One, 0, 70)
 
         for _, entity in pairs(Isaac.FindInCapsule(capsule, EntityPartition.ENEMY)) do
+            if not mod.IsEnemy(entity) then goto continue end
             mod.TriggerPushPos(effect, entity, entity.Position, pos, 6, 15, false)
+            ::continue::
         end
     else
         effectData.SaltShakerCentralPos = nil
     end
-
 
     for _, entity in pairs(Isaac.FindInRadius(effect.Position, 20, EntityPartition.ENEMY)) do
         mod.SetSalted(entity, SaltedTimes[spawnType], player)

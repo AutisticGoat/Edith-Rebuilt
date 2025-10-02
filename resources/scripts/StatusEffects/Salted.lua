@@ -1,7 +1,6 @@
 local SEL = StatusEffectLibrary
 local mod = EdithRebuilt
 local Salted = {}
-local saltType = mod.Enums.SaltTypes
 local SaltedColor = Color(1, 1, 1, 1, 0.3, 0.3, 0.3)
 local data = mod.CustomDataWrapper.getData
 local SaltedIcon = Sprite("gfx/EdithRebuiltSalted.anm2", true)
@@ -51,6 +50,7 @@ mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Salted.OnSaltedEnemyTakingDamag
 
 ---@param proj EntityProjectile
 function Salted:OnSaltedProjInit(proj)
+    if not proj.SpawnerEntity then return end
     local npc = proj.SpawnerEntity:ToNPC()
 
     if not npc then return end
@@ -60,3 +60,7 @@ function Salted:OnSaltedProjInit(proj)
     proj:Kill()
 end
 mod:AddCallback(ModCallbacks.MC_POST_PROJECTILE_INIT, Salted.OnSaltedProjInit)
+
+mod:AddCallback(SEL.Callbacks.ID.PRE_REMOVE_ENTITY_STATUS_EFFECT, function(_, entity)
+    data(entity).SaltType = nil
+end, SaltedFlag)
