@@ -9,7 +9,6 @@ local RenderMenu = true
 local SaveManager = mod.SaveManager
 local data = mod.CustomDataWrapper.getData
 
-
 ---@class EdithData
 ---@field TargetDesign number
 ---@field TargetColor table

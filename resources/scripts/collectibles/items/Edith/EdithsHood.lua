@@ -34,9 +34,13 @@ local saltDegrees = 360 / maxCreep
 
 function EdithsHood:JumpCooldown(player)
 	if not player:HasCollectible(items.COLLECTIBLE_EDITHS_HOOD) then return end
+	if JumpLib:GetData(player).Jumping then return end
+
 	local playerData = data(player)
-	playerData.HoodJumpTimer = playerData.HoodJumpTimer or 90
+
 	playerData.HoodJumpTimer = mod.Clamp(playerData.HoodJumpTimer - 1, 0, 90)
+
+	print(playerData.HoodJumpTimer)
 
 	if playerData.HoodJumpTimer ~= 1 then return end
 	local EdithSave = mod.GetConfigData("EdithData") --[[@as EdithData]]
@@ -50,11 +54,14 @@ end
 mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, EdithsHood.JumpCooldown)
 
 function EdithsHood:TriggerJump(player)
+	local data = data(player)
+
 	if not player:HasCollectible(items.COLLECTIBLE_EDITHS_HOOD) then return end
-	if data(player).HoodJumpTimer ~= 0 then return end
+	if not data.HoodJumpTimer or data.HoodJumpTimer ~= 0 then return end
 	if not Input.IsActionTriggered(ButtonAction.ACTION_DROP, player.ControllerIndex) then return end
 	
-	data(player).HoodJumpTimer = 90
+	data.HoodJumpTimer = 90
+
 	EdithRebuilt.InitEdithJump(player, jumpTags.EdithsHoodJump)
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, EdithsHood.TriggerJump)
@@ -68,7 +75,7 @@ local SoundPick = {
 
 function EdithsHood:OnHoodJumpLand(player)
 	mod.LandFeedbackManager(player, SoundPick, Color.Default, false)
-	mod:EdithStomp(player, 30, (player.Damage * 2/3) * 3, 30, false)
+	mod:EdithStomp(player, 30, (player.Damage * 0.75) * 3, 30, false)
 	for i = 1, maxCreep do
 		mod:SpawnSaltCreep(player, player.Position + Vector(0, 30):Rotated(saltDegrees*i), 0.1, 5, 1, 3, saltTypes.EDITHS_HOOD)
 	end
