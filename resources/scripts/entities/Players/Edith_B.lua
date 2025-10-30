@@ -24,26 +24,6 @@ local funcs = {
 	EdithWeapons = mod.ManageEdithWeapons
 }
 
-local sounds = {
-	Hop = {
-		[1] = SoundEffect.SOUND_STONE_IMPACT,
-		[2] = sounds.SOUND_YIPPEE,
-		[3] = sounds.SOUND_SPRING,
-	},
-	Parry = {
-		[1] = SoundEffect.SOUND_ROCK_CRUMBLE,
-		[2] = sounds.SOUND_PIZZA_TAUNT,
-		[3] = sounds.SOUND_VINE_BOOM,
-		[4] = sounds.SOUND_FART_REVERB,
-		[5] = sounds.SOUND_SOLARIAN,
-		[6] = sounds.SOUND_MACHINE,
-		[7] = sounds.SOUND_MECHANIC,
-		[8] = sounds.SOUND_KNIGHT,
-		[9] = sounds.SOUND_BLOQUEO,
-		[10] = sounds.SOUND_NAUTRASH,
-	}
-}
-
 ---@generic growth, offset, curve
 ---@param const number
 ---@param var number
@@ -230,7 +210,7 @@ function mod:TaintedEdithUpdate(player)
 
 		if targetframecount < 2 and playerData.IsHoping == true then
 			TEdith.StopTEdithHops(player, 20, true, true)
-			funcs.FeedbackMan(player, sounds.Hop, misc.BurntSaltColor, false)
+			funcs.FeedbackMan(player, mod:GetLandSoundTable(true), misc.BurntSaltColor, false)
 		end
 
 		target.Velocity = playerData.movementVector:Resized(10)
@@ -261,7 +241,7 @@ function mod:TaintedEdithUpdate(player)
 			end
 		end
 	end
-	
+
 	if not funcs.TargetMov(player) and target then
 		mod.RemoveEdithTarget(player, true)
 	end
@@ -353,7 +333,7 @@ function mod:EdithHopLanding(player)
 	}
 
 	player:SpawnWaterImpactEffects(player.Position, Vector(1, 1), 1)	
-	funcs.FeedbackMan(player, sounds.Hop, misc.BurntSaltColor)
+	funcs.FeedbackMan(player, mod:GetLandSoundTable(true), misc.BurntSaltColor)
 	mod:TaintedEdithHop(player, HopParams.Radius, HopParams.Damage, HopParams.Knockback)
 	
 	if BRCharge <= 0 then return end
@@ -370,10 +350,9 @@ function TEdith:EdithParryJump(player)
 	end
 
 	local perfectParry, EnemiesInImpreciseParry = mod.ParryLandManager(player, true)
-	local tableRef = perfectParry and sounds.Parry or sounds.Hop
 	local parryAdd = perfectParry and 20 or (not EnemiesInImpreciseParry and -15)
 
-	funcs.FeedbackMan(player, tableRef, misc.BurntSaltColor, perfectParry)
+	funcs.FeedbackMan(player, mod:GetLandSoundTable(true, perfectParry), misc.BurntSaltColor, perfectParry)
 
 	if not parryAdd then return end
 	TEdith.AddHopDashCharge(player, parryAdd, 0.75)

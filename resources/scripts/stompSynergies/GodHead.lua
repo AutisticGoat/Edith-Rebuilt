@@ -9,12 +9,12 @@ function mod:GodHeadStomp(player)
 	
     local godTear = player:FireTear(player.Position, Vector.Zero)
     
-    godTear.Scale = 1.5
+    godTear.Scale = 1.5 * player.SpriteScale.X
+    godTear.CollisionDamage = 0
     godTear.Height = -10
-    godTear:AddTearFlags(TearFlags.TEAR_GLOW)
+    godTear:AddTearFlags(TearFlags.TEAR_GLOW | TearFlags.TEAR_SPECTRAL | TearFlags.TEAR_PIERCING)
 
     funcs.GetData(godTear).IsStompGodTear = true
-
     mod:ChangeColor(godTear, nil, nil, nil, 0)
 end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, mod.GodHeadStomp, EdithJump)

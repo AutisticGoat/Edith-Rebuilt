@@ -8,15 +8,16 @@ local tables = enums.Tables
 local Hsx = mod.Hsx
 local defColor = Color.Default
 local RGBColors = { Target = Color(1, 0, 0), Arrow = Color(1, 0, 0) }
+local data = mod.CustomDataWrapper.getData
 
-local funcs = {
-	GetData = mod.CustomDataWrapper.getData,
-	DrawLine = mod.drawLine,
-	MenuData = saveManager.GetSettingsSave,
-	Switch = mod.When,
-	HSVToRGB = Hsx.hsv2rgb,
-	RGBToHSV = Hsx.rgb2hsv,
-}
+-- local funcs = {
+-- 	GetData = 
+-- 	DrawLine = mod.drawLine,
+-- 	MenuData = saveManager.GetSettingsSave,
+-- 	Switch = mod.When,
+-- 	HSVToRGB = Hsx.hsv2rgb,
+-- 	RGBToHSV = Hsx.rgb2hsv,
+-- }
 
 local teleportPoints = {
 	Vector(110, 135),
@@ -42,9 +43,9 @@ local function RGBFunction(color, step, value)
 
 	if value > 1 then value = 0 end
 
-	color.R, color.G, color.B = funcs.RGBToHSV(color.R, color.G, color.B)
+	color.R, color.G, color.B = Hsx.rgb2hsv(color.R, color.G, color.B)
 	color.R = color.R + step
-	color.R, color.G, color.B = funcs.HSVToRGB(color.R, color.G, color.B)
+	color.R, color.G, color.B = Hsx.hsv2rgb(color.R, color.G, color.B)
 end
 
 ---@param effect EntityEffect
@@ -54,7 +55,7 @@ local function EdithTargetManagement(effect, player)
 
 	local playerPos = player.Position
 	local effectPos = effect.Position
-	local playerData = funcs.GetData(player)
+	local playerData = data(player)
 	local room = game:GetRoom()
 
 	if mod.IsKeyStompPressed(player) or playerData.ExtraJumps > 0 and playerData.EdithJumpTimer == 0 then
@@ -96,7 +97,7 @@ local function EdithTargetRender(effect, player, saveData)
 	local effectSprite = effect:GetSprite()
 	local color = effect.Color
 	local IsRGB = saveData.RGBMode
-	local effectData = funcs.GetData(effect)
+	local effectData = data(effect)
 
 	effectData.RGBState = effectData.RGBState or 0
 
@@ -111,23 +112,23 @@ local function EdithTargetRender(effect, player, saveData)
 
 	if not saveData.TargetLine then return end
 	local targetlineColor = misc.TargetLineColor
-	local isObscure = effectSprite:GetFrame() >= funcs.Switch(effectSprite:GetAnimation(), tables.FrameLimits, 0)	
-	local lineColor = funcs.Switch(targetDesign, tables.TargetLineColorValues, color)
+	local isObscure = effectSprite:GetFrame() >= mod.When(effectSprite:GetAnimation(), tables.FrameLimits, 0)	
+	local lineColor = mod.When(targetDesign, tables.TargetLineColorValues, color)
 	targetlineColor:SetColorize(lineColor.R, lineColor.G, lineColor.B, 1)
 
-	funcs.DrawLine(player.Position, effect.Position, targetlineColor, isObscure) 
+	mod.drawLine(player.Position, effect.Position, targetlineColor, isObscure) 
 end
 
 ---@param effect EntityEffect
 ---@param player EntityPlayer
 ---@param saveData TEdithData
 local function TaintedEdithArrowRender(effect, player, saveData)
-	local effectData = funcs.GetData(effect)
+	local effectData = data(effect)
 	effectData.RGBState = effectData.RGBState or 0
 	effect.Visible = effect.FrameCount > 1
 
 	if saveData.ArrowDesign ~= 7 then
-		effect:GetSprite().Rotation = funcs.GetData(player).HopVector:GetAngleDegrees() 
+		effect:GetSprite().Rotation = data(player).HopVector:GetAngleDegrees() 
 	end
 
 	if saveData.RGBMode then
@@ -153,15 +154,13 @@ end)
 mod:AddCallback(ModCallbacks.MC_PRE_EFFECT_RENDER, function(_, effect)
 	if game:GetRoom():GetRenderMode() == RenderMode.RENDER_WATER_REFLECT then return false end
 	if not IsAnyEdithTarget(effect) then return end
-	if not saveManager:IsLoaded() then return end
 
-	local saveData = funcs.MenuData()
-	if not saveData then return end
 	local player = effect.SpawnerEntity:ToPlayer()
 
     if not player then return end
 	local isTarget = effect.Variant == Vars.EFFECT_EDITH_TARGET
-	local data = isTarget and saveData.EdithData --[[@as EdithData]] or saveData.TEdithData --[[@as TEdithData]]
+	local dataType = isTarget and enums.ConfigDataTypes.EDITH or enums.ConfigDataTypes.TEDITH
+	local data = mod.GetConfigData(dataType) ---@cast data EdithData|TEdithData	
 	local func = isTarget and EdithTargetRender or TaintedEdithArrowRender
 	
 	func(effect, player, data)

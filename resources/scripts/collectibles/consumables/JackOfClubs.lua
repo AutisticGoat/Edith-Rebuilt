@@ -6,7 +6,7 @@ local game = utils.Game
 local JackOfClubs = {}
 
 ---@param player EntityPlayer
-function JackOfClubs:myFunction2(_, player)
+function JackOfClubs:OnJackOfClubsUse(_, player)
     local rng = player:GetCardRNG(card.CARD_JACK_OF_CLUBS)
     local enemyPos
     for _, enemy in pairs(mod.GetEnemies()) do
@@ -36,4 +36,4 @@ function JackOfClubs:myFunction2(_, player)
         ::Break::
     end
 end
-mod:AddCallback(ModCallbacks.MC_USE_CARD, JackOfClubs.myFunction2, card.CARD_JACK_OF_CLUBS)
+mod:AddCallback(ModCallbacks.MC_USE_CARD, JackOfClubs.OnJackOfClubsUse, card.CARD_JACK_OF_CLUBS)
