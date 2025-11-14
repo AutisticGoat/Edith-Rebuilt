@@ -1,31 +1,33 @@
 <achievements gfxroot="gfx/ui/achievements/">
-
     <!-- Edith unlocks -->
-    <achievement name="Salt Shaker" gfx="achivement_saltshaker.png" />
-    <achievement name="Pepper Grinder" gfx="achivement_peppergrinder.png" />
-    <achievement name="Sal" gfx="achivement_sal.png" />
-    <achievement name="Salt Heart" gfx="achivement_saltheart.png" />
-    <achievement name="Faith Of The Unfaithful" gfx="achivement_FaithOfTheUnfaithful.png" />
-    <achievement name="Geode" gfx="achivement_Geode.png" />
-    <achievement name="Gilded Stone" gfx="achivement_GildedStone.png" />
-    <achievement name="Molten Core" gfx="achivement_MoltenCore.png" />
-    <achievement name="Rumbling Pebble" gfx="achivement_RumblingPebble.png" />
-    <achievement name="Sulfuric Fire" gfx="achivement_SulfuricFire.png" />
-    <achievement name="Divine Retribution" gfx="achivement_DivineRetribution.png" />
-    <achievement name="Chunk of Basalt" gfx="achivement_ChunkOfBasalt.png" />
-    <achievement name="Ediths Hood" gfx="achivement_EdithsHood.png" />
-    <achievement name="Hydrargyrum" gfx="achivement_Hydrargyrum.png" />
-    <achievement name="The Punished" gfx="achivement_TaintedEdith.png" />
+    <achievement name="Salt Shaker" gfx="achievement_saltshaker.png" />
+    <achievement name="Pepper Grinder" gfx="achievement_peppergrinder.png" />
+    <achievement name="Sal" gfx="achievement_sal.png" />
+    <achievement name="Salt Heart" gfx="achievement_saltheart.png" />
+    <achievement name="Faith Of The Unfaithful" gfx="achievement_FaithOfTheUnfaithful.png" />
+    <achievement name="Geode" gfx="achievement_Geode.png" />
+    <achievement name="Gilded Stone" gfx="achievement_GildedStone.png" />
+    <achievement name="Molten Core" gfx="achievement_MoltenCore.png" />
+    <achievement name="Rumbling Pebble" gfx="achievement_RumblingPebble.png" />
+    <achievement name="Sulfuric Fire" gfx="achievement_SulfuricFire.png" />
+    <achievement name="Divine Retribution" gfx="achievement_DivineRetribution.png" />
+    <achievement name="Chunk of Basalt" gfx="achievement_ChunkOfBasalt.png" />
+    <achievement name="Ediths Hood" gfx="achievement_EdithsHood.png" />
+    <achievement name="Hydrargyrum" gfx="achievement_Hydrargyrum.png" />
+    <achievement name="The Punished" gfx="achievement_TaintedEdith.png" />
 
     <!-- Tainted Edith unlocks -->
     <achievement name="Salt Rocks" gfx="achievement_SaltRocks.png" />
     <achievement name="Burnt Salt" gfx="achievement_BurntSalt.png" />
     <achievement name="Jack of Clubs" gfx="achievement_JackOfClubs.png" />
     <achievement name="Paprika" gfx="achievement_Paprika.png" />
-    <achievement name="Burnt Hood" gfx="achivement_BurntHood.png" />
+    <achievement name="Burnt Hood" gfx="achievement_BurntHood.png" />
     <achievement name="Soul of Edith" gfx="achievement_SoulOfEdith.png" />
-    <achievement name="Divine Wrath" gfx="achivement_DivineWrath.png" />
+    <achievement name="Divine Wrath" gfx="achievement_DivineWrath.png" />
+
+    <!-- Challenges -->
+    <achievement name="Effigy" gfx="achievement_Effigy.png" />
 
     <!-- Thank you-->
-    <achievement name="Thank You" gfx="achivement_ThankYou.png" />
+    <achievement name="Thank You" gfx="achievement_ThankYou.png" />
 </achievements>

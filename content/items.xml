@@ -149,4 +149,13 @@
 		description="Burns to death" 
 		gfx="BurntSalt.png" 
 	/>
+
+	<!-- Challenges -->
+	<active
+		id="14"
+		name="Effigy"
+		description="A vestige of the past"
+		gfx="collectibles_Effigy.png"
+		maxcharges="4"
+	/>
 </items>
