@@ -54,7 +54,6 @@ local Prefixes = {
 	TabBar = MainPrefix .. "TabBar_",
 	Tab = MainPrefix .. "Tab_",
 	Separator = MainPrefix .. "Separator_",
-	ProgressBar = MainPrefix .. "ProgressBar_",
 	Edith = {
 		Visuals = MainPrefix .. "Edith_" .. "Visuals_",
 		Sounds = MainPrefix .. "Edith_" .. "Sounds_" ,
@@ -89,7 +88,6 @@ local Elements = {
 			Settings = Prefixes.TabBar .. "Settings",
 			Edith = Prefixes.TabBar .. "Edith",
 			TEdith = Prefixes.TabBar .. "Tainted_Edith",
-			Credits = Prefixes.TabBar .. "Credits"
 		},
 		Tabs = {
 			Edith = {
@@ -106,12 +104,6 @@ local Elements = {
 			},
 			Misc = {
 				Main = Prefixes.Tab .. "Misc_Main"
-			},
-			Credits = {
-				Resources = Prefixes.Tab .. "Resources",
-				Contributors = Prefixes.Tab .. "Contributors",
-				Testers = Prefixes.Tab .. "Testers",
-				Team = Prefixes.Tab .. "Team"
 			}
 		},
 		Separator = {
@@ -150,12 +142,7 @@ local Elements = {
 				Input = Prefixes.Separator .. "Misc_Input",
 				ResetData = Prefixes.Separator .. "Misc_ResetData",
 				Misc = Prefixes.Separator .. "Misc_Misc",
-			},
-		},
-		ProgressBar = {
-			Edith = Prefixes.ProgressBar .. "Edith",
-			TEdith = Prefixes.ProgressBar .. "TEdith",
-			General = Prefixes.ProgressBar .. "General"
+			}
 		}
 	},
 	Options = {
@@ -207,9 +194,6 @@ local Elements = {
 	}
 }
 
-local Menu = Elements.Menu
-local Options = Elements.Options
-
 if not ImGui.ElementExists("EdithRebuilt") then
 	if RenderMenu == false then return end
     ImGui.CreateMenu('EdithRebuilt', '\u{f11a} Edith: Rebuilt')
@@ -221,9 +205,9 @@ local function AddMenuElement(name, title)
 end
 
 local MenuElements = {
-    { name = Menu.SubMenu.Settings, title = "Settings" },
-    { name = Menu.SubMenu.Credits, title = "Credits" },
-    { name = Menu.SubMenu.Progress, title = "Progress" }
+    { name = Elements.Menu.SubMenu.Settings, title = "Settings" },
+    { name = Elements.Menu.SubMenu.Credits, title = "Credits" },
+    { name = Elements.Menu.SubMenu.Progress, title = "Progress" }
 }
 
 for _, Menu in ipairs(MenuElements) do
@@ -231,9 +215,9 @@ for _, Menu in ipairs(MenuElements) do
 end
 
 local windows = {
-    { name = Menu.Windows.Settings, title = "Settings" },
-    { name = Menu.Windows.Credits, title = "Credits" },
-	{ name = Menu.Windows.Progress, title = "Progress"},
+    { name = Elements.Menu.Windows.Settings, title = "Settings" },
+    { name = Elements.Menu.Windows.Credits, title = "Credits" },
+	{ name = Elements.Menu.Windows.Progress, title = "Progress"},
 }
 
 for _, window in ipairs(windows) do
@@ -242,9 +226,9 @@ for _, window in ipairs(windows) do
 end
 
 local links = {
-	{ window = Menu.Windows.Settings, menu = Menu.SubMenu.Settings },
-	{ window = Menu.Windows.Credits, menu = Menu.SubMenu.Credits },
-	{ window = Menu.Windows.Progress, menu = Menu.SubMenu.Progress },
+	{ window = Elements.Menu.Windows.Settings, menu = Elements.Menu.SubMenu.Settings },
+	{ window = Elements.Menu.Windows.Credits, menu = Elements.Menu.SubMenu.Credits },
+	{ window = Elements.Menu.Windows.Progress, menu = Elements.Menu.SubMenu.Progress },
 }
 
 for _, link in ipairs(links) do
@@ -374,7 +358,7 @@ function mod:UpdateImGuiData()
 		end
 
 		local arrowcolor = TEdithData.ArrowColor
-		local trailColor = TEdithData.TrailColor
+	local trailColor = TEdithData.TrailColor
 
 		ImGui.UpdateData(TEdithOptions.Visuals.ArrowColor, ImGuiData.ColorValues, 
 		{
@@ -389,12 +373,16 @@ function mod:UpdateImGuiData()
 			trailColor.Blue,
 		})
 	end
+	
 
+
+	
 	for option, newValue in pairs(data) do
 		ImGui.UpdateData(option, ImGuiData.Value, newValue)
 	end
 
 	local targetColor = EdithData.TargetColor
+	
 
 	ImGui.UpdateData(EdithOptions.Visuals.TargetColor, ImGuiData.ColorValues, 
 	{
@@ -643,9 +631,9 @@ local function AddTaintedEdithOptions()
 end
 
 local function AddMiscOptions()
-	local MiscTab = Menu.Tabs.Misc.Main
-	local MiscOptions = Options.Misc
-	local Separator = Menu.Separator.Misc
+	local MiscTab = Elements.Menu.Tabs.Misc.Main
+	local MiscOptions = Elements.Options.Misc
+	local Separator = Elements.Menu.Separator.Misc
 	local MiscData = SaveManager:GetSettingsSave().MiscData --[[@as MiscData]]
 
 	ImGui.AddElement(MiscTab, Separator.Input, ImGuiElement.SeparatorText, "Inputs")
@@ -674,86 +662,6 @@ local function AddMiscOptions()
 			MiscData.EnableShakescreen = check
 		end, 
 	false)
-end
-
-local function AddContributors()
-	ImGui.AddTabBar(Menu.Windows.Credits, Menu.TabBars.Credits)
-
-	ImGui.AddTab(Menu.TabBars.Credits, Menu.Tabs.Credits.Resources, "Resources")
-	ImGui.AddTab(Menu.TabBars.Credits, Menu.Tabs.Credits.Contributors, "Contributors")
-	ImGui.AddTab(Menu.TabBars.Credits, Menu.Tabs.Credits.Testers, "Testers")
-	ImGui.AddTab(Menu.TabBars.Credits, Menu.Tabs.Credits.Team, "Team")
-
-	-- ImGui.AddElement(, Elements.Menu.SubMenu.Credits, )
-
-	ImGui.AddText(Menu.Tabs.Credits.Resources, 
-	[[
-	Used resources and utilities:
-
-	- JumpLib (Kerkel)
-	- Custom Shockwave API (Brakedude)
-	- Pre NPC kill callback (Kerkel)
-	- Isaac Save Manager (Catinsurance, Benny)
-	- HudHelper (Benny, CatWizard)
-	- Status Effect Library (Benny)
-	- SaveData System (AgentCucco)
-	- lhsx (Ilya Kolbin (iskolbin))
-	- Salt Shaker Sound Effect (Joshua Hadley): 
-	- Edith water stomp sound effect (ArtNinja) 
-	- Nine Sols Perfect Parry sound effect (Red Candle Games) 
-	- Pizza Tower taunt sound effect (Tour De Pizza)
-	- Ultrakill parry sound effect (New Blood, Arsi "Hakita" Patala)
-	- Hollow Knight parry sound effect (Team Cherry) 
-	- Iconoclasts parry sound effect (Joakim Sandberg (Konjak))
-	]],
-	true)
-
-	ImGui.AddText(Menu.Tabs.Credits.Contributors, 
-	[[
-	Contributors: 
-
-	- JJ: Inspiration to start this project
-	- D!Edith team: Inspiration to resume this project
-	- Skulldier: Sal concept
-	- Marcy: Tainted Edith Birthright idea
-	- Sr Kalaka: Edith Sprite
-	- Yuls: Tainted Edith sprite base
-	]], 
-	true)
-
-	ImGui.AddText(Menu.Tabs.Credits.Testers, 
-	[[
-	Testers:
-
-	- ottostrasse
-	- Jozin191
-	- Tibu
-	- SethoJunk
-	- Noirsight
-	- Sylvy_owo
-	- .radiox
-	- Edith's No.1 Fan
-	]], 
-	true)
-
-	ImGui.AddText(Menu.Tabs.Credits.Team, 
-	[[
-	Team: 
-
-	- gigamouse: finished Tainted Edith sprite, items sprites
-	- Pattowolfx220: Testing, First Tainted Edith sprite, items sprites
-	- Kotry: Project leader, coder, unlock sheets sprite
-	]],
-	true)
-end	
-
-local function AddProgressBars()
-	ImGui.AddProgressBar(Menu.Windows.Progress, Menu.ProgressBar.General, "General unlocks progress", 0)
-	ImGui.AddProgressBar(Menu.Windows.Progress, Menu.ProgressBar.Edith, "Edith unlocks progress", 0)
-
-	if isTaintedEdithUnlocked() then
-		ImGui.AddProgressBar(Menu.Windows.Progress, Menu.ProgressBar.TEdith, "Tainted Edith unlocks progress", 0)
-	end
 end
 
 -- ---@param enabled boolean
@@ -785,12 +693,65 @@ local function OptionsUpdate()
 	if not saveData then return end
 	if mod:CheckImGuiIntegrity() then return end
 
+
+	-- ImGui.AddText(Elements.Menu.SubMenu.Credits., 
+	-- [[
+	-- 	Used resources and utilities:
+	-- 	- JumpLib (Kerkel)
+	-- 	- Custom Shockwave API (Brakedude)
+	-- 	- Pre NPC kill callback (Kerkel)
+	-- 	- Isaac Save Manager (Catinsurance, Benny)
+	-- 	- HudHelper (Benny, CatWizard)
+	-- 	- Status Effect Library (Benny)
+	-- 	- SaveData System (AgentCucco)
+	-- 	- lhsx (Ilya Kolbin (iskolbin))
+	-- 	- Salt Shaker Sound Effect (Joshua Hadley): 
+	-- 	- Edith water stomp sound effect (ArtNinja) 
+	-- 	- Nine Sols Perfect Parry sound effect (Red Candle Games) 
+	-- 	- Pizza Tower taunt sound effect (Tour De Pizza)
+	-- 	- Ultrakill parry sound effect (New Blood, Arsi "Hakita" Patala)
+	-- 	- Hollow Knight parry sound effect (Team Cherry) 
+	-- 	- Iconoclasts parry sound effect (Joakim Sandberg (Konjak))
+	-- ]],
+	-- true)
+
+	-- ImGui.AddText("CreditsColabTesters", 
+	-- [[
+	-- 	Colaborators:
+	-- 	- JJ: Inspiration to start this project
+	-- 	- D!Edith team: Inspiration to resume this project
+	-- 	- Skulldier: Sal concept
+	-- 	- Marcy: Tainted Edith Birthright idea
+	-- 	- Sr Kalaka: Edith Sprite
+	-- 	- Yuls: Tainted Edith sprite base
+
+	-- 	Testers:
+	-- 	- ottostrasse
+	-- 	- Jozin191
+	-- 	- Tibu
+	-- 	- SethoJunk
+	-- 	- Noirsight
+	-- 	- Sylvy_owo
+	-- 	- .radiox
+	-- ]], true, "creditsText")
+
+	-- ImGui.AddText("CreditsDevTeam", 
+	-- [[
+	-- 	Team members:
+	-- 	- gigamouse: finished Tainted Edith sprite, items sprites
+	-- 	- Pattowolfx220: Testing, First Tainted Edith sprite, items sprites
+	-- 	- Kotry: Project leader, coder, unlock sheets sprite
+	-- ]],
+	-- true)
+
+-- 	ImGui.AddProgressBar("progressWindow", "GeneralUnlockProgress", "General unlocks progress", 0)
+-- 	ImGui.AddProgressBar("progressWindow", "EdithUnlockProgress", "Edith unlocks progress", 0)
+-- 	ImGui.AddProgressBar("progressWindow", "TEdithUnlockProgress", "Tainted Edith unlocks progress", 0)
+
 	AddTabBars()
 	AddEdithOptions()
 	AddTaintedEdithOptions()
 	AddMiscOptions()
-	AddContributors()
-	AddProgressBars()
 	mod:UpdateImGuiData()
 	RenderMenu = false
 end
@@ -848,31 +809,17 @@ local function GetTEdithUnlockedAchs()
 	return count
 end
 
-local function CheckProgressBarIntegrity()
-	local boolean = true
-	
-	for _, ent in pairs(Menu.ProgressBar) do
-		if not ImGui.ElementExists(ent) then
-			boolean = false
-			break
-		end
-	end
-
-	return boolean
-end
-
 local function UpdateProgressBar()
-	if not CheckProgressBarIntegrity() then return end	
-
 	local totaledithUnlocks = GetEdithUnlockedAchs() / 15
 	local totaltedithUnlocks = GetTEdithUnlockedAchs() / 7
 	local totalgeneralUnlocks = (GetEdithUnlockedAchs() + GetTEdithUnlockedAchs() + (isTaintedEdithUnlocked() and 1 or 0)) / 23
 
-	ImGui.UpdateData(Menu.ProgressBar.Edith, ImGuiData.Value, totaledithUnlocks)
-	ImGui.UpdateData(Menu.ProgressBar.TEdith, ImGuiData.Value, totaltedithUnlocks)
-	ImGui.UpdateData(Menu.ProgressBar.General, ImGuiData.Value, totalgeneralUnlocks)
+	ImGui.UpdateData("EdithUnlockProgress", ImGuiData.Value, totaledithUnlocks)
+	ImGui.UpdateData("TEdithUnlockProgress", ImGuiData.Value, totaltedithUnlocks)
+	ImGui.UpdateData("GeneralUnlockProgress", ImGuiData.Value, totalgeneralUnlocks)
 end
-mod:AddCallback(ModCallbacks.MC_POST_RENDER, UpdateProgressBar)
+-- mod:AddCallback(ModCallbacks.MC_POST_RENDER, UpdateProgressBar)
+-- mod:AddCallback(ModCallbacks.MC_MAIN_MENU_RENDER, UpdateProgressBar)
 
 function mod:DestroyImGuiOptions()
 	for _, ID in pairs(elementTab) do

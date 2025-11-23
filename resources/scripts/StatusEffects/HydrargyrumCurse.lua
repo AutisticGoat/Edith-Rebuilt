@@ -10,6 +10,7 @@ SEL.RegisterStatusEffect("EDITH_REBUILT_HYDRARGYRUM_CURSE", HydrargyrumIcon)
 
 local HydrargyrumFlag = SEL.StatusFlag.EDITH_REBUILT_HYDRARGYRUM_CURSE
 
+---Returns a boolean depending if `ent` is salted
 ---@param ent Entity
 function EdithRebuilt.IsHydrargyrumCursed(ent)
     return StatusEffectLibrary:HasStatusEffect(ent, HydrargyrumFlag)
@@ -28,7 +29,10 @@ function HydrargyrumCurse:OnNPCUpdate(npc)
     if not mod.IsHydrargyrumCursed(npc) then return end
     if SEL:GetStatusEffectCountdown(npc, HydrargyrumFlag) % 15 ~= 0 then return end
 
+    print(SEL:GetStatusEffectCountdown(npc, HydrargyrumFlag) % 15 == 0)
+
     local entData = data(npc)
+
     local player = entData.Player ---@type EntityPlayer
     if not player then return end
 

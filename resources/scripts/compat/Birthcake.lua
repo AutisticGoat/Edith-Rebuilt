@@ -10,7 +10,7 @@ local EdithSuffix = "Edith_Birthcake.png"
 local TEdithSuffix = "T_Edith_Birthcake.png"
 local Info = {
     [players.PLAYER_EDITH] = { 
-        Description = "Saltier stomps",
+        Description = "Brittle petrification",
         SpriteInfo = {SpritePath = path .. EdithSuffix , PickupSpritePath = path .. EdithSuffix}
     },
     [players.PLAYER_EDITH_B] = {

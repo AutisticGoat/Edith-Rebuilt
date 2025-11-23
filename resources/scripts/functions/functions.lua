@@ -12,7 +12,6 @@ local jumpTags = tables.JumpTags
 local jumpFlags = tables.JumpFlags
 local misc = enums.Misc
 local players = enums.PlayerType
-local sounds = enums.SoundEffect
 local data = mod.CustomDataWrapper.getData
 local saveManager = mod.SaveManager
 
@@ -571,42 +570,6 @@ function EdithRebuilt.InitEdithJump(player, jumpTag)
 	}
 
 	JumpLib:Jump(player, config)
-end
-
-local LandSounds = {
-	Edith = {
-		[1] = SoundEffect.SOUND_STONE_IMPACT, 
-		[2] = sounds.SOUND_EDITH_STOMP,
-		[3] = sounds.SOUND_FART_REVERB,
-		[4] = sounds.SOUND_VINE_BOOM,
-	},
-	TEdith = {
-		Hop = {
-			[1] = SoundEffect.SOUND_STONE_IMPACT,
-			[2] = sounds.SOUND_YIPPEE,
-			[3] = sounds.SOUND_SPRING,
-		},
-		Parry = {
-			[1] = SoundEffect.SOUND_ROCK_CRUMBLE,
-			[2] = sounds.SOUND_PIZZA_TAUNT,
-			[3] = sounds.SOUND_VINE_BOOM,
-			[4] = sounds.SOUND_FART_REVERB,
-			[5] = sounds.SOUND_SOLARIAN,
-			[6] = sounds.SOUND_MACHINE,
-			[7] = sounds.SOUND_MECHANIC,
-			[8] = sounds.SOUND_KNIGHT,
-			[9] = sounds.SOUND_BLOQUEO,
-			[10] = sounds.SOUND_NAUTRASH,
-		}
-	}
-}
-
----@param tainted boolean
----@param isParryLand? boolean
----@return table
-function EdithRebuilt:GetLandSoundTable(tainted, isParryLand)
-	local TEdithSounds = LandSounds.TEdith
-	return tainted and (isParryLand and TEdithSounds.Parry or TEdithSounds.Hop) or LandSounds.Edith
 end
 
 ---Returns `true` if Dogma's appear cutscene is playing
@@ -1240,6 +1203,16 @@ function mod:Peffect(player)
 	player:EvaluateItems()	
 end
 mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, mod.Peffect)
+
+---@param player EntityPlayer
+---@param flag CacheFlag
+function mod:EvaluateCache(player, flag)
+	if flag ~= CacheFlag.CACHE_DAMAGE then return end
+	local damagemult = player:GetBoneHearts() * 0.75
+
+	player.Damage = player.Damage + damagemult
+end
+mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, mod.EvaluateCache)
 
 ---Triggers a push to `pushed` from `pusher`
 ---@param pushed Entity

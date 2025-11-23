@@ -104,6 +104,13 @@ function Edith:EdithJumpHandler(player)
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, Edith.EdithJumpHandler)
 
+local SoundPick = {
+	[1] = SoundEffect.SOUND_STONE_IMPACT, 
+	[2] = sounds.SOUND_EDITH_STOMP,
+	[3] = sounds.SOUND_FART_REVERB,
+	[4] = sounds.SOUND_VINE_BOOM,
+}
+
 ---@param player EntityPlayer
 ---@return boolean
 local function isNearTrapdoor(player)
@@ -153,7 +160,7 @@ function Edith:EdithLanding(player, _, pitfall)
 	end
 
 	if isNearTrapdoor(player) == false then
-		mod.LandFeedbackManager(player, mod:GetLandSoundTable(false), player.Color, false)
+		mod.LandFeedbackManager(player, SoundPick, player.Color, false)
 	end
 
 	local IsDefensiveStomp = mod.IsDefensiveStomp(player)
