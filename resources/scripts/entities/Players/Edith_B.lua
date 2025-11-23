@@ -40,7 +40,6 @@ local sounds = {
 		[7] = sounds.SOUND_MECHANIC,
 		[8] = sounds.SOUND_KNIGHT,
 		[9] = sounds.SOUND_BLOQUEO,
-		[10] = sounds.SOUND_NAUTRASH,
 	}
 }
 

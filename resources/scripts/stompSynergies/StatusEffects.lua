@@ -1,6 +1,8 @@
 local mod = EdithRebuilt
 local enums = mod.Enums
 local Callbacks = enums.Callbacks
+local funcs = require("resources.scripts.stompSynergies.Funcs")
+local EdithJump = require("resources.scripts.stompSynergies.JumpData")
 
 mod:AddCallback(Callbacks.OFFENSIVE_STOMP, function(_, player, entity)
     local tearEffects = {

@@ -1696,7 +1696,7 @@ function EdithRebuilt.LandFeedbackManager(player, soundTable, GibColor, IsParryL
 	end
 
 	local sound = mod.When(soundPick, soundTable, 1)
-	sfx:Play(sound, volume, 0, false)
+	sfx:Play(sound, volume, 0, false, mod.RandomFloat(rng, 0.8, 1.2))
 
 	if IsChap4 then
 		sfx:Play(SoundEffect.SOUND_MEATY_DEATHS, volume - 0.5, 0, false, 1, 0)

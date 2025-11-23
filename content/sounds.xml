@@ -52,7 +52,4 @@
 	<sound name="BLOQUEO">
 		<sample weight="1" path="BLOQUEO.wav" />
 	</sound>
-	<sound name="Nautrash">
-		<sample weight="1" path="Nautrash.wav" />
-	</sound>
 </sounds>
