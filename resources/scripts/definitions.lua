@@ -29,6 +29,8 @@ EdithRebuilt.Enums = {
 		--- Tainted Edith Items
 		COLLECTIBLE_BURNT_HOOD = Isaac.GetItemIdByName("Burnt Hood"),
 		COLLECTIBLE_DIVINE_WRATH = Isaac.GetItemIdByName("Divine Wrath"),
+
+		COLLECTIBLE_EFFIGY = Isaac.GetItemIdByName("Effigy")
 	},
 	TrinketType = {
 		TRINKET_GEODE = Isaac.GetTrinketIdByName("Geode"),
@@ -45,10 +47,14 @@ EdithRebuilt.Enums = {
 	NullItemID = {
 		ID_EDITH_SCARF = Isaac.GetCostumeIdByPath("gfx/characters/EdithHood.anm2"),
 		ID_EDITH_B_SCARF = Isaac.GetCostumeIdByPath("gfx/characters/EdithTaintedHood.anm2"),
+		ID_EDITH_VESTIGE_SCARF = Isaac.GetCostumeIdByPath("gfx/characters/EdithVestigeHood.anm2"),
 	},
 	EffectVariant = {
 		EFFECT_EDITH_TARGET = Isaac.GetEntityVariantByName("Edith Target"),
 		EFFECT_EDITH_B_TARGET = Isaac.GetEntityVariantByName("Edith Tainted Arrow"),
+	},
+	Challenge = {
+		CHALLENGE_VESTIGE = Isaac.GetChallengeIdByName("[Edith: Rebuilt] Vestige")
 	},
 	Callbacks = {
 		-- Called everytime a Perfect Parry is triggered (player: EntityPlayer, entity: Entity)
@@ -232,7 +238,7 @@ EdithRebuilt.Enums = {
 			EdithsHoodJump = edithHoodJumpTag,
 		},
 		JumpFlags = {
-			EdithJump = (JumpLib.Flags.DISABLE_SHOOTING_INPUT | JumpLib.Flags.DISABLE_LASER_FOLLOW | JumpLib.Flags.DISABLE_BOMB_INPUT),
+			EdithJump = (JumpLib.Flags.DISABLE_SHOOTING_INPUT | JumpLib.Flags.DISABLE_LASER_FOLLOW | JumpLib.Flags.DISABLE_BOMB_INPUT | JumpLib.Flags.FAMILIAR_FOLLOW_FOLLOWERS | JumpLib.Flags.FAMILIAR_FOLLOW_ORBITALS | JumpLib.Flags.FAMILIAR_FOLLOW_TEARCOPYING),
 			TEdithHop = (JumpLib.Flags.COLLISION_GRID | JumpLib.Flags.COLLISION_ENTITY | JumpLib.Flags.OVERWRITABLE | JumpLib.Flags.DISABLE_COOL_BOMBS | JumpLib.Flags.IGNORE_CONFIG_OVERRIDE | JumpLib.Flags.FAMILIAR_FOLLOW_ORBITALS | JumpLib.Flags.DAMAGE_CUSTOM),
 			TEdithJump = (JumpLib.Flags.COLLISION_GRID | JumpLib.Flags.OVERWRITABLE | JumpLib.Flags.DISABLE_COOL_BOMBS | JumpLib.Flags.IGNORE_CONFIG_OVERRIDE | JumpLib.Flags.FAMILIAR_FOLLOW_ORBITALS),
 		},

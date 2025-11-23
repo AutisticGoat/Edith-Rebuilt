@@ -15,15 +15,12 @@ function mod:SwordStomp(player)
         KnifeVariant.SPIRIT_SWORD
     )
 
-    -- Obtener datos del cuchillo
     local knifeData = funcs.GetData(knife)
     local knifeSprite = knife:GetSprite()
 
-    -- Configurar el cuchillo
     knifeSprite:Play("SpinDown", true)
     knife.Visible = false
 
-    -- Crear un efecto de poof
     local effect = Isaac.Spawn(
         EntityType.ENTITY_EFFECT,
         EffectVariant.POOF01,
