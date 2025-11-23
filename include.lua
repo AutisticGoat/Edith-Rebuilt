@@ -68,8 +68,6 @@ local includeFiles = {
 	ent .. "Players/SharedFuncs",
 	-- Personajes fin
 
-	"challenges/Vestige",
-
 	-- sinergias pisotones
 	stmpSyn .. "blackPowder",
 	stmpSyn .. "brimstone",
