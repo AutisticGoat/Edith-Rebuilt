@@ -1,5 +1,6 @@
 local mod = EdithRebuilt
 local enums = mod.Enums
+local sounds = enums.SoundEffect
 local misc = enums.Misc
 local players = enums.PlayerType
 local costumes = enums.NullItemID
@@ -11,10 +12,6 @@ local sfx = utils.SFX
 local JumpParams = tables.JumpParams
 local data = mod.CustomDataWrapper.getData
 local Edith = {}
-
---[[
-	Desbloqueada por morir por una fuente de fuego
-]]
 
 ---@param player EntityPlayer
 ---@param jumps integer
@@ -39,18 +36,8 @@ end
 function Edith:EdithInit(player)
 	if not mod.IsEdith(player, false) then return end
 	mod.SetNewANM2(player, "gfx/EdithAnim.anm2")
-	local isVestige = mod.IsVestigeChallenge()
-
-	local costume = isVestige and costumes.ID_EDITH_VESTIGE_SCARF or costumes.ID_EDITH_SCARF
-
-	mod.ForceCharacterCostume(player, players.PLAYER_EDITH, costume)
+	mod.ForceCharacterCostume(player, players.PLAYER_EDITH, costumes.ID_EDITH_SCARF)
 	data(player).EdithJumpTimer = 20
-
-	if isVestige then
-		for i = 0, 14 do
-			player:GetSprite():ReplaceSpritesheet(i, "gfx/characters/costumes/characterEdithVestige.png", true)
-		end
-	end
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, Edith.EdithInit)
 
@@ -68,12 +55,9 @@ function Edith:EdithJumpHandler(player)
 	local jumpData = JumpLib:GetData(player)
 	local isPitfall = JumpLib:IsPitfalling(player)
 	local isJumping = jumpData.Jumping 
-	local IsVestige = mod.IsVestigeChallenge() 
 
 	playerData.isJumping = playerData.isJumping or false
 	playerData.ExtraJumps = playerData.ExtraJumps or 0
-
-	-- print(JumpLib:IsFalling(player))
 
 	if player.FrameCount > 0 and (isMoving or isKeyStompPressed or (hasMarked and isShooting)) and not isPitfall then
 		mod.SpawnEdithTarget(player)
@@ -104,11 +88,11 @@ function Edith:EdithJumpHandler(player)
 
 	target:MultiplyFriction(friction or 0.8)
 
-	if isKeyStompPressed and not isJumping and not IsVestige then
+	if isKeyStompPressed and not isJumping then
 		setEdithJumps(player, GetNumTears(player))
 	end
 
-	if playerData.EdithJumpTimer == 0 and playerData.ExtraJumps > 0 and not isJumping and not IsVestige then
+	if playerData.EdithJumpTimer == 0 and playerData.ExtraJumps > 0 and not isJumping then
 		mod.InitEdithJump(player)
 		playerData.isJumping = true
 	end
@@ -172,8 +156,6 @@ function Edith:EdithLanding(player, _, pitfall)
 		mod.LandFeedbackManager(player, mod:GetLandSoundTable(false), player.Color, false)
 	end
 
-	player:PlayExtraAnimation("BigJumpFinish")
-
 	local IsDefensiveStomp = mod.IsDefensiveStomp(player)
 	local CanFly = player.CanFly
 	local flightMult = {
@@ -194,7 +176,7 @@ function Edith:EdithLanding(player, _, pitfall)
 	local bloodClotMult = player:HasCollectible(CollectibleType.COLLECTIBLE_BLOOD_CLOT) and 1.1 or 1
 	local RawFormula = (((((damageBase + (DamageStat)) * multishotMult) * birthrightMult) * bloodClotMult) * flightMult.Damage) + coalBonus
 	local damageFormula = math.max(mod.Round(RawFormula, 2), 1)
-	local stompDamage = (mod.IsVestigeChallenge() and 40 + player.Damage/2) or (IsDefensiveStomp and 0 or damageFormula)
+	local stompDamage = IsDefensiveStomp and 0 or damageFormula
 	local Cooldown = GetStompCooldown(player.MoveSpeed)
 
 	if playerData.RocketLaunch then
@@ -274,7 +256,6 @@ function Edith:EdithPEffectUpdate(player)
 		playerData.IsDefensiveStomp = false
 	end
 
-	if mod.IsVestigeChallenge() then return end
 	if not mod.GetEdithTarget(player) then return end
 	if not playerData.isJumping then return end
 
@@ -293,7 +274,6 @@ function Edith:EdithBomb(player, jumpdata)
 
 	if not mod.IsKeyStompPressed(player) then return end
 	if jumpinternalData.UpdateFrame ~= 9 then return end
-	if mod.IsVestigeChallenge() then return end
 
 	local CanFly = player.CanFly
 	local HeightMult = CanFly and 0.8 or 0.65

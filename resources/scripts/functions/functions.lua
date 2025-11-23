@@ -453,7 +453,6 @@ end
 ---@param player EntityPlayer
 ---@param jumpdata JumpConfig
 function EdithRebuilt.BombFall(player, jumpdata)	
-	if mod.IsVestigeChallenge() then return end
 	if mod.IsDefensiveStomp(player) then return end
 	if not Input.IsActionTriggered(ButtonAction.ACTION_BOMB, player.ControllerIndex) then return end
 
@@ -501,70 +500,6 @@ end
 mod:AddCallback(ModCallbacks.MC_POST_BOMB_RENDER, mod.BombUpdate)
 
 local backdropColors = tables.BackdropColors
-
----@param player EntityPlayer
-function EdithRebuilt.InitVestigeJump(player)
-	local jumpSpeed = 3.75 + (player.MoveSpeed - 1)
-	local jumpHeight = 40
-	local room = game:GetRoom()
-	local isChap4 = mod:isChap4()
-	local BackDrop = room:GetBackdropType()
-	local hasWater = room:HasWater()
-	local variant = hasWater and EffectVariant.BIG_SPLASH or (isChap4 and EffectVariant.POOF02 or EffectVariant.POOF01)
-	local subType = hasWater and 1 or (isChap4 and 66 or 1)
-	local DustCloud = Isaac.Spawn(
-		EntityType.ENTITY_EFFECT, 
-		variant, 
-		subType, 
-		player.Position, 
-		Vector.Zero, 
-		player
-	)
-
-	local color = Color(1, 1, 1)
-	local switch = {
-		[EffectVariant.BIG_SPLASH] = function()
-			color = backdropColors[BackDrop] or Color(0.7, 0.75, 1)
-			if IsMortis then
-				color = Color(0, 0.8, 0.76, 1, 0, 0, 0)
-			end
-		end,
-		[EffectVariant.POOF02] = function()
-			color = backdropColors[BackDrop] or Color(1, 0, 0)
-
-			if IsMortis then
-				local Colors = {
-					[MortisBackdrop.MORGUE] = Color(0, 0, 0, 1, 0.45, 0.5, 0.575),
-					[MortisBackdrop.MOIST] = Color(0, 0.8, 0.76, 1, 0, 0, 0),
-					[MortisBackdrop.FLESH] = Color(0, 0, 0, 1, 0.55, 0.5, 0.55),
-				}
-				local newcolor = mod.When(EdithRebuilt.GetMortisDrop(), Colors, Color.Default)
-				color = newcolor
-			end
-		end,
-		[EffectVariant.POOF01] = function()
-			if hasWater then
-				color = backdropColors[BackDrop]
-			end
-		end
-	}
-	mod.WhenEval(variant, switch)
-
-	DustCloud.SpriteScale = DustCloud.SpriteScale * player.SpriteScale.X
-	DustCloud.DepthOffset = -100
-	DustCloud:SetColor(color, -1, 100, false, false)
-	DustCloud:GetSprite().PlaybackSpeed = hasWater and 1.3 or 2	
-
-	local config = {
-		Height = jumpHeight,
-		Speed = jumpSpeed,
-		Tags = jumpTags.EdithJump,
-		Flags = jumpFlags.EdithJump,
-	}
-
-	JumpLib:Jump(player, config)
-end
-
 ---@param player EntityPlayer
 ---@param jumpTag? string
 function EdithRebuilt.InitEdithJump(player, jumpTag)	
@@ -1132,30 +1067,6 @@ function EdithRebuilt.GetTPS(p)
     return mod.Round(30 / (p.MaxFireDelay + 1), 2)
 end
 
-local KeyRequiredChests = {
-	[PickupVariant.PICKUP_LOCKEDCHEST] = true,
-	[PickupVariant.PICKUP_ETERNALCHEST] = true,
-	[PickupVariant.PICKUP_OLDCHEST] = true,
-	[PickupVariant.PICKUP_MEGACHEST] = true,
-}
-
----@param pickup EntityPickup
----@return boolean
-function IsKeyRequiredChest(pickup)
-	return mod.When(pickup.Variant, KeyRequiredChests, false)
-end
-
----@param player EntityPlayer
----@return unknown
-local function ShouldConsumeKeys(player)
-	return (player:GetNumKeys() > 0 and not player:HasGoldenKey())
-end
-
-function mod:PiUpdate(pickup)
-	print(pickup:GetSprite():GetAnimation())
-end
-mod:AddCallback(ModCallbacks.MC_POST_PICKUP_UPDATE, mod.PiUpdate)
-
 ---@param ent Entity
 ---@param parent EntityPlayer
 ---@param knockback number
@@ -1189,33 +1100,6 @@ function EdithRebuilt.HandleEntityInteraction(ent, parent, knockback)
             if isFlavorTextPickup or IsLuckyPenny then return end
 			parent:ForceCollide(pickup, true)
 
-			if not mod.IsEdith(parent, false) then return end
-
-			if IsKeyRequiredChest(pickup) then
-				if var == PickupVariant.PICKUP_MEGACHEST then
-					local rng = pickup:GetDropRNG()
-					local piData = data(pickup)
-
-					piData.OpenAttempts = 0
-					piData.OpenAttempts = piData.OpenAttempts + 1
-
-					local attempt = piData.OpenAttempts
-					local openRoll = rng:RandomInt(attempt, 7)
-
-					if openRoll == 7 then
-						pickup:TryOpenChest(parent)
-					else
-						pickup:GetSprite():Play("UseKey")
-					end
-				else
-					pickup:TryOpenChest(parent)
-				end
-
-				if ShouldConsumeKeys(parent) then
-					parent:AddKeys(-1)
-				end
-			end
-
             if not (var == PickupVariant.PICKUP_BOMBCHEST and mod.IsEdith(parent, false)) then return end
 			pickup:TryOpenChest(parent)
         end,
@@ -1224,6 +1108,7 @@ function EdithRebuilt.HandleEntityInteraction(ent, parent, knockback)
             ent:Kill()
         end,
     }
+
 	mod.WhenEval(ent.Type, stompBehavior)
 end
 
@@ -1324,10 +1209,6 @@ function EdithRebuilt:EdithStomp(parent, radius, damage, knockback, breakGrid)
 	if breakGrid then
 		mod:DestroyGrid(parent, radius)
 	end
-end
-
-function EdithRebuilt.IsVestigeChallenge()
-	return Isaac.GetChallenge() == enums.Challenge.CHALLENGE_VESTIGE
 end
 
 ---Helper function that returns `EntityPlayer` from `EntityRef`
@@ -1770,7 +1651,6 @@ function EdithRebuilt.LandFeedbackManager(player, soundTable, GibColor, IsParryL
 	local IsEdithsHood = data(player).HoodLand
 	local IsMortis = EdithRebuilt.IsLJMortis()
 	local isEdithJump = mod.IsEdith(player, false) or IsSoulOfEdith or IsEdithsHood
-	local isVestige = mod.IsVestigeChallenge()
 
 	if isEdithJump then
 		local isRocketLaunchStomp = data(player).RocketLaunch
@@ -1843,11 +1723,6 @@ function EdithRebuilt.LandFeedbackManager(player, soundTable, GibColor, IsParryL
 	end
 
 	local sound = mod.When(soundPick, soundTable, 1)
-
-	if isEdithJump and isVestige then
-		sound = enums.SoundEffect.SOUND_EDITH_STOMP
-	end
-
 	sfx:Play(sound, volume, 0, false)
 
 	if IsChap4 then
