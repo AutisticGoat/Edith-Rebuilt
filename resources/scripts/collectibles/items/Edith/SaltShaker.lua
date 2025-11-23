@@ -27,14 +27,14 @@ function SaltShaker:UseSaltShaker(_, rng, player, flag)
 	local spawnType = mod.IsJudasWithBirthright(player) and saltTypes.SALT_SHAKER_JUDAS or saltTypes.SALT_SHAKER
 	local color = spawnType == saltTypes.SALT_SHAKER_JUDAS and Color(1, 0.4, 0.15) or nil
 
-	for _, entity in ipairs(Isaac.FindByType(EntityType.ENTITY_EFFECT, EffectVariant.PLAYER_CREEP_RED, enums.SubTypes.SALT_CREEP)) do
+	for _, entity in ipairs(Isaac.FindByType(EntityType.ENTITY_EFFECT)) do
 		if not mod.When(data(entity).SpawnType, DespawnSaltTypes, false) then goto continue end
 		entity:ToEffect():SetTimeout(1)
 	    ::continue::
 	end
 
 	for i = 1, SaltQuantity do	
-		mod:SpawnSaltCreep(player, playerPos + misc.SaltShakerDist:Rotated(degree * i), 0, hasCarBattery and 12 or 6, 1, 4.5, spawnType, false, true, color)
+		mod:SpawnSaltCreep(player, playerPos + misc.SaltShakerDist:Rotated(degree * i), 0, hasCarBattery and 14 or 7, 1, 4.5, spawnType, false, true, color)
 	end
 
 	data(player).SpawnCentralPosition = player.Position
@@ -47,14 +47,15 @@ mod:AddCallback(ModCallbacks.MC_USE_ITEM, SaltShaker.UseSaltShaker, items.COLLEC
 ---@param npc EntityNPC
 ---@param source EntityRef
 function SaltShaker:OnSaltedDeath(npc, source)
-	if not mod.IsSalted(npc) then return end
+    local saltedType = data(npc).SaltType ---@cast saltedType SaltTypes
     local player = mod.GetPlayerFromRef(source)
+	local color = saltedType == saltTypes.SALT_SHAKER_JUDAS and Color(1, 0.4, 0.15) or nil
 
 	if not player then return end
-	local saltedType = data(npc).SaltType ---@cast saltedType SaltTypes
-	local color = saltedType == saltTypes.SALT_SHAKER_JUDAS and Color(1, 0.4, 0.15) or nil
+
 	local spawnType = mod.IsJudasWithBirthright(player) and saltTypes.SALT_SHAKER_JUDAS or saltTypes.SALT_SHAKER
 
+    if not player then return end
     if not mod.When(saltedType, DespawnSaltTypes, false) then return end
 
 	mod:SpawnSaltCreep(player, npc.Position, 0, 5, 1, 4.5, spawnType, false, true, color)

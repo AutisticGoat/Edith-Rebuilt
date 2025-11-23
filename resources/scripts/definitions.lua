@@ -51,25 +51,10 @@ EdithRebuilt.Enums = {
 		EFFECT_EDITH_B_TARGET = Isaac.GetEntityVariantByName("Edith Tainted Arrow"),
 	},
 	Callbacks = {
-		-- Called everytime a Perfect Parry is triggered (player: EntityPlayer, entity: Entity)
-		---* player `EntityPlayer`
-		---* entity `Entity`
-		PERFECT_PARRY = "EdithRebuilt_PERFECT_PARRY",
-
-		-- Called everytime an enemy is killed by a Perfect Parry is triggered
-		---* player `EntityPlayer`
-		---* entity `Entity`
-		PERFECT_PARRY_KILL = "EdithRebuilt_PERFECT_PARRY_KILL",
-
-		-- Called everytime Edith does an offensive stomp and damages at least `One Enemy
-		---* player `EntityPlayer`
-		---* entity `Entity`
-		OFFENSIVE_STOMP = "EdithRebuilt_OFFENSIVE_STOMP",
-
-		-- Called everytime Edith's Target (or Tainted Edith's arrow) changes its design		
-		TARGET_SPRITE_CHANGE = "EdithRebuilt_TARGET_SPRITE_CHANGE",
-		 -- Called everytime Tainted Edith's trail sprite is changed	
-		TRAIL_SPRITE_CHANGE = "EdithRebuilt_TRAIL_SPRITE_CHANGE",
+		PERFECT_PARRY = "EdithRebuilt_PERFECT_PARRY", -- Called everytime a Perfect Parry is triggered (player: EntityPlayer, entity: Entity)
+		PERFECT_PARRY_KILL = "EdithRebuilt_PERFECT_PARRY_KILL", -- Called everytime an enemy is killed by a Perfect Parry is triggered (player: EntityPlayer, entity: Entity)
+		TARGET_SPRITE_CHANGE = "EdithRebuilt_TARGET_SPRITE_CHANGE", -- Called everytime Edith's Target(or Tainted Edith's arrow) changes its design		
+		TRAIL_SPRITE_CHANGE = "EdithRebuilt_TRAIL_SPRITE_CHANGE", -- Called everytime Tainted Edith's trail sprite is changed	
 	},
 	SubTypes = {
 		SALT_CREEP = Isaac.GetEntitySubTypeByName("Salt Creep"),

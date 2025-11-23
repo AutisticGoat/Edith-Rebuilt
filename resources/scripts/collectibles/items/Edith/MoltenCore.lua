@@ -63,4 +63,5 @@ function MoltenCore:KillingSalEnemy(entity, amount, _, source)
 		end
 	end
 end
+
 mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, MoltenCore.KillingSalEnemy)

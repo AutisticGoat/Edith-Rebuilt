@@ -7,7 +7,7 @@
 		gfx="collectibles_SaltShaker.png"
 		quality="3" 
 		chargetype="timed"
-		maxcharges="360"
+		maxcharges="420"
 		tags=""
 	/>
 	<active

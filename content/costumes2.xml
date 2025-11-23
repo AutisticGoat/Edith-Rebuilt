@@ -1,4 +1,4 @@
 <costumes anm2root="gfx/characters/">
-    <costume id="1" anm2path="EdithHood.anm2" type="none" skinColor="0" overwriteColor="true" priority="99" forceBodyColor="true"/>
-    <costume id="2" anm2path="EdithTaintedHood.anm2" type="none" overwriteColor="true" priority="99" forceBodyColor="true"/>
+<costume id="1" anm2path="EdithHood.anm2" type="none" skinColor="0" overwriteColor="true" priority="99" forceBodyColor="true"/>
+<costume id="2" anm2path="EdithTaintedHood.anm2" type="none" overwriteColor="true" priority="99" forceBodyColor="true"/>
 </costumes>

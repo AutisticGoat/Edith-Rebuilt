@@ -29,10 +29,3 @@ function mod:RemoveKnife(tear)
     tear:Remove()
 end
 mod:AddCallback(ModCallbacks.MC_POST_TEAR_UPDATE, mod.RemoveKnife)
-
----@param player EntityPlayer
----@param ent Entity
-function mod:OnStatusEffectLand(player, ent)
-    print("Hola")
-end
-mod:AddCallback(mod.Enums.Callbacks.OFFENSIVE_STOMP, mod.OnStatusEffectLand, EdithJump)

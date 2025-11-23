@@ -10,6 +10,7 @@ local level = utils.Level
 local game = utils.Game 
 local sfx = utils.SFX
 local JumpParams = tables.JumpParams
+local saveManager = mod.SaveManager
 local data = mod.CustomDataWrapper.getData
 local Edith = {}
 
@@ -30,6 +31,23 @@ end
 ---@return integer
 local function GetNumTears(player)
 	return player:GetMultiShotParams(WeaponType.WEAPON_TEARS):GetNumTears()
+end
+
+---Helper function for Edith's cooldown color manager
+---@param player EntityPlayer
+---@param intensity number
+---@param duration integer
+function Edith:ColorCooldown(player, intensity, duration)
+	local pcolor = player.Color
+	local col = pcolor:GetColorize()
+	local tint = pcolor:GetTint()
+	local off = pcolor:GetOffset()
+	local Red = off.R + (intensity + ((col.R + tint.R) * 0.2))
+	local Green = off.G + (intensity + ((col.G + tint.G) * 0.2))
+	local Blue = off.B + (intensity + ((col.B + tint.B) * 0.2))
+		
+	pcolor:SetOffset(Red, Green, Blue)
+	player:SetColor(pcolor, duration, 100, true, false)
 end
 
 ---@param player EntityPlayer
@@ -135,9 +153,6 @@ end
 
 ---@param player EntityPlayer
 function Edith:OnStartingJump(player)
-	data(player).JumpStartPos = player.Position
-	data(player).JumpStartDist = mod.GetEdithTargetDistance(player)
-
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_LUMP_OF_COAL) then return end
 	local rng = player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_LUMP_OF_COAL)
 	data(player).CoalBonus = mod.RandomFloat(rng, 0.5, 0.6) * mod.GetEdithTargetDistance(player) / 40
@@ -179,7 +194,7 @@ function Edith:EdithLanding(player, _, pitfall)
 	local damageBase = 12 + (5.75 * (chapter - 1))
 	local DamageStat = playerDamage + ((playerDamage / 5.25) - 1)
 	local multishotMult = mod.Round(mod.exp(GetNumTears(player), 1, 0.68), 2)
-	local birthrightMult = mod.PlayerHasBirthright(player) and 1.2 or 1
+	local birthrightMult = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and 1.2 or 1
 	local bloodClotMult = player:HasCollectible(CollectibleType.COLLECTIBLE_BLOOD_CLOT) and 1.1 or 1
 	local RawFormula = (((((damageBase + (DamageStat)) * multishotMult) * birthrightMult) * bloodClotMult) * flightMult.Damage) + coalBonus
 	local damageFormula = math.max(mod.Round(RawFormula, 2), 1)
@@ -193,7 +208,6 @@ function Edith:EdithLanding(player, _, pitfall)
 
 	mod:EdithStomp(player, radius, stompDamage, knockbackFormula, true)
 	edithTarget:GetSprite():Play("Idle")
-
 	player:MultiplyFriction(0.05)
 
 	if IsDefensiveStomp then
@@ -254,7 +268,7 @@ function Edith:EdithPEffectUpdate(player)
 	playerData.EdithJumpTimer = math.max(playerData.EdithJumpTimer - 1, 0)
 
 	if playerData.EdithJumpTimer == 1 and player.FrameCount > 20 then
-		mod.SetColorCooldown(player, 0.6, 5)
+		Edith:ColorCooldown(player, 0.6, 5)
 		local EdithSave = mod.GetConfigData("EdithData") ---@cast EdithSave EdithData
 		local soundTab = tables.CooldownSounds[EdithSave.JumpCooldownSound or 1]
 		local pitch = soundTab.Pitch == 1.2 and (soundTab.Pitch * mod.RandomFloat(player:GetDropRNG(), 1, 1.1)) or soundTab.Pitch
@@ -287,7 +301,7 @@ function Edith:EdithBomb(player, jumpdata)
 	local JumpSpeed = CanFly and 1.2 or 1.5
 
 	data(player).IsDefensiveStomp = true
-	mod.SetColorCooldown(player, -0.8, 10)
+	Edith:ColorCooldown(player, -0.8, 10)
 	sfx:Play(SoundEffect.SOUND_STONE_IMPACT, 1, 0, false, 0.8)
 	
 	jumpinternalData.StaticHeightIncrease = jumpinternalData.StaticHeightIncrease * HeightMult

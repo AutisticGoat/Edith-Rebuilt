@@ -47,18 +47,12 @@ local whiteListCostumes = {
 ---@param player EntityPlayer
 ---@return boolean?
 mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_ADD_COSTUME, function(_, itemconfig, player)
-    -- print(itemconfig.Costume.ID)
+    if not mod:IsAnyEdith(player) then return end
+    local ID = itemconfig.Costume.ID
+    local shouldOverride = mod.When(ID, whiteListCostumes, false)
 
-    
-    if itemconfig.Costume.ID == 80 then
-        print("a[osjdaosjdoj]")
-        -- player:RemoveCostume(itemconfig)
-        -- player:AddNullCostume(CustomPactCostume)
-    end
-
-    -- if not mod:IsAnyEdith(player) then return end
-    -- if mod.When(itemconfig.Costume.ID, whiteListCostumes, false) then return end
-    -- return true
+    if shouldOverride then return end
+    return true
 end)
 
 mod:AddCallback(ModCallbacks.MC_POST_TEAR_UPDATE, function(_, tear)
@@ -88,12 +82,11 @@ mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, function(_, tear)
     if not mod:IsAnyEdith(player) then return end
 
     local isTainted = mod.IsEdith(player, true)
-    local target = mod.GetEdithTarget(player)
-
 	mod.ForceSaltTear(tear, isTainted)
 
     if isTainted then return end
-	if not player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED) then return end	
+	if not player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED) then return end
+	local target = mod.GetEdithTarget(player)
 	if not target then return end
 	tear.Velocity = mod.ChangeVelToTarget(tear, target, player.ShotSpeed * 10)
 end)

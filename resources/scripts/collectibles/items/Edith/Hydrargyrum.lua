@@ -4,30 +4,32 @@ local items = enums.CollectibleType
 local Hydrargyrum = {}
 local data = mod.CustomDataWrapper.getData
 
----@param ent Entity
+---@param entity Entity
+---@param amount number
+---@param flags DamageFlag
 ---@param source EntityRef
-function Hydrargyrum:ApplyHydrargyrumCurse(ent, _, _, source)
+function Hydrargyrum:GettingDamage(entity, amount, flags, source)
+    if source.Type == 0 then return end
     local player = mod.GetPlayerFromRef(source)
+    
+    if not (player and player:HasCollectible(items.COLLECTIBLE_HYDRARGYRUM)) then return end
+    if not mod.IsEnemy(entity) then return end
 
-    if not player then return end
-    if not player:HasCollectible(items.COLLECTIBLE_HYDRARGYRUM) then return end
+    local entData = data(entity)
 
-    mod.SetIsHydrargyrumCurse(ent, 120, player)
-    data(ent).Player = player
+    if entData.MercuryTimer and entity.HitPoints <= amount then
+        Isaac.Spawn(
+            EntityType.ENTITY_EFFECT,
+            EffectVariant.FIRE_JET,
+            0,
+            entity.Position,
+            Vector.Zero,
+            nil
+        )
+    end
+
+    if not (entData.MercuryTimer == 0 or entData.MercuryTimer == nil) then return end
+    entData.MercuryTimer = 120
+    entData.Player = player
 end
-mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Hydrargyrum.ApplyHydrargyrumCurse)
-
----@param npc EntityNPC
----@param source EntityRef
-function Hydrargyrum:KillingHydrargyrumCursedEnemy(npc, source)
-    if not mod.IsHydrargyrumCursed(npc) then return end
-    Isaac.Spawn(
-        EntityType.ENTITY_EFFECT,
-        EffectVariant.FIRE_JET,
-        0,
-        npc.Position,
-        Vector.Zero,
-        nil
-    )
-end
-mod:AddCallback(PRE_NPC_KILL.ID, Hydrargyrum.KillingHydrargyrumCursedEnemy)
+mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Hydrargyrum.GettingDamage)
