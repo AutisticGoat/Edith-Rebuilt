@@ -2,32 +2,29 @@ local mod = EdithRebuilt
 local enums = mod.Enums
 local Callbacks = enums.Callbacks
 
----@param player EntityPlayer
----@param entity Entity
 mod:AddCallback(Callbacks.OFFENSIVE_STOMP, function(_, player, entity)
-    local playerRef = EntityRef(player)
     local tearEffects = {
         [TearFlags.TEAR_SLOW] = function()
             local SlowColor = Color(0.5, 0.5, 0.5, 1)
-            entity:AddSlowing(playerRef, 90, 0.6, SlowColor)
+            entity:AddSlowing(EntityRef(player), 90, 0.6, SlowColor)
         end,
         [TearFlags.TEAR_POISON] = function()
-            entity:AddPoison(playerRef, 90, player.Damage)
+            entity:AddPoison(EntityRef(player), 90, player.Damage)
         end,
         [TearFlags.TEAR_FREEZE] = function()
-            entity:AddFreeze(playerRef, 90)
+            entity:AddFreeze(EntityRef(player), 90)
         end,
         [TearFlags.TEAR_CHARM] = function()
-            entity:AddCharmed(playerRef, 90)
+            entity:AddCharmed(EntityRef(player), 90)
         end,
         [TearFlags.TEAR_CONFUSION] = function()
-            entity:AddConfusion(playerRef, 90, false)
+            entity:AddConfusion(EntityRef(player), 90, false)
         end,
         [TearFlags.TEAR_FEAR] = function()
-            entity:AddFear(playerRef, 90)
+            entity:AddFear(EntityRef(player), 90)
         end,
         [TearFlags.TEAR_SHRINK] = function()
-            entity:AddShrink(playerRef, 90)
+            entity:AddShrink(EntityRef(player), 90)
         end,
         [TearFlags.TEAR_KNOCKBACK] = function()
             entity.Velocity = entity.Velocity * 1.025
@@ -36,17 +33,14 @@ mod:AddCallback(Callbacks.OFFENSIVE_STOMP, function(_, player, entity)
             entity:AddEntityFlags(EntityFlag.FLAG_ICE)
         end,
         [TearFlags.TEAR_MAGNETIZE] = function()
-            entity:AddKnockback(playerRef, entity.Position, 15, false)
+            entity:AddKnockback(EntityRef(player), entity.Position, 15, false)
         end,
         [TearFlags.TEAR_BAIT] = function()
-            entity:AddBaited(playerRef, 90)
+            entity:AddBaited(EntityRef(player), 90)
         end,
         [TearFlags.TEAR_BACKSTAB] = function()
-            entity:AddBleeding(playerRef, 150)
+            entity:AddBleeding(EntityRef(player), 150)
         end,
-        [TearFlags.TEAR_BURN] = function()
-            entity:AddBurn(playerRef, 120, player.Damage)
-        end
     }
 
     for flag, func in pairs(tearEffects) do

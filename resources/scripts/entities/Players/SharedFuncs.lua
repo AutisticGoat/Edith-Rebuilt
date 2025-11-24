@@ -27,8 +27,7 @@ mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(_, player, cacheFlag)
     if cacheFlag == CacheFlag.CACHE_DAMAGE then
         player.Damage = player.Damage * 1.5
     elseif cacheFlag == CacheFlag.CACHE_RANGE then
-        local Range = (mod.IsVestigeChallenge() and player:GetPlayerType() == enums.PlayerType.PLAYER_EDITH) and 4.25 or 2.5
-        player.TearRange = mod.rangeUp(player.TearRange, Range)
+        player.TearRange = mod.rangeUp(player.TearRange, 2.5)
     end
 end)
 
