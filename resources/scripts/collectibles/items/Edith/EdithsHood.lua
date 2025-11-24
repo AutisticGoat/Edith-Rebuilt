@@ -37,10 +37,8 @@ function EdithsHood:JumpCooldown(player)
 	if JumpLib:GetData(player).Jumping then return end
 
 	local playerData = data(player)
-
-	playerData.HoodJumpTimer = mod.Clamp(playerData.HoodJumpTimer - 1, 0, 90)
-
-	print(playerData.HoodJumpTimer)
+	playerData.HoodJumpTimer = playerData.HoodJumpTimer or 0
+	playerData.HoodJumpTimer = mod.Clamp(playerData.HoodJumpTimer - 1, 0, 90) or 0
 
 	if playerData.HoodJumpTimer ~= 1 then return end
 	local EdithSave = mod.GetConfigData("EdithData") --[[@as EdithData]]
@@ -66,15 +64,8 @@ function EdithsHood:TriggerJump(player)
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, EdithsHood.TriggerJump)
 
-local SoundPick = {
-	[1] = SoundEffect.SOUND_STONE_IMPACT, 
-	[2] = sounds.SOUND_EDITH_STOMP,
-	[3] = sounds.SOUND_FART_REVERB,
-	[4] = sounds.SOUND_VINE_BOOM,
-}
-
 function EdithsHood:OnHoodJumpLand(player)
-	mod.LandFeedbackManager(player, SoundPick, Color.Default, false)
+	mod.LandFeedbackManager(player, mod:GetLandSoundTable(false), Color.Default, false)
 	mod:EdithStomp(player, 30, (player.Damage * 0.75) * 3, 30, false)
 	for i = 1, maxCreep do
 		mod:SpawnSaltCreep(player, player.Position + Vector(0, 30):Rotated(saltDegrees*i), 0.1, 5, 1, 3, saltTypes.EDITHS_HOOD)

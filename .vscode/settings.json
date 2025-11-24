@@ -1,5 +1,6 @@
 {
     "files.associations": {
+        "*.embeddedhtml": "html",
         "*.anm2": "xml",
         ".anm2": "xml"
     },

@@ -17,9 +17,9 @@ local SaltShakerSalts = {
 }
 
 local SaltedTimes = {
-    [saltTypes.EDITHS_HOOD] = 120,
     [saltTypes.SAL] = 150,
     [saltTypes.SALT_HEART] = 120,
+    [saltTypes.EDITHS_HOOD] = 120,
     [saltTypes.SALT_SHAKER] = 90,
     [saltTypes.SALT_SHAKER_JUDAS] = 90,
 }
@@ -55,7 +55,7 @@ local function SaltCreepUpdate(effect)
         effectData.SaltShakerCentralPos = nil
     end
 
-    for _, entity in pairs(Isaac.FindInRadius(effect.Position, 20, EntityPartition.ENEMY)) do
+    for _, entity in pairs(Isaac.FindInRadius(effect.Position, 20 * effect.SpriteScale.X, EntityPartition.ENEMY)) do
         mod.SetSalted(entity, SaltedTimes[spawnType], player)
 
         data(entity).SaltType = spawnType
@@ -74,7 +74,7 @@ local function PepperCreepUpdate(effect)
 
     if not player then return end
 
-    for _, entity in pairs(Isaac.FindInRadius(effect.Position, 20, EntityPartition.ENEMY)) do
+    for _, entity in pairs(Isaac.FindInRadius(effect.Position, 20 * effect.SpriteScale.X, EntityPartition.ENEMY)) do
         mod.SetPeppered(entity, 150, player)
     end
 end
