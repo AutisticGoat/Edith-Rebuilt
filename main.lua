@@ -16,8 +16,3 @@ local game = utils.Game
 mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, function()
 	utils.RNG:SetSeed(game:GetSeeds():GetStartSeed())
 end)
-
--- mod:AddCallback(enums.Callbacks.OFFENSIVE_STOMP, function()
-
--- 	print("Offensive stomp!")
--- end)

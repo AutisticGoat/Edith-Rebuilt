@@ -93,6 +93,7 @@ EdithRebuilt.Enums = {
 		SOUND_JACK_OF_CLUBS = Isaac.GetSoundIdByName("JackOfClubs"),
 		SOUND_SOUL_OF_EDITH = Isaac.GetSoundIdByName("SoulOfEdith"),
 		SOUND_BLOQUEO = Isaac.GetSoundIdByName("BLOQUEO"),
+		SOUND_NAUTRASH = Isaac.GetSoundIdByName("Nautrash"),
 	},
 	Achievements = {
 		-- Edith unlocks
@@ -333,6 +334,7 @@ EdithRebuilt.Enums = {
 				"Mechanic",
 				"Knight",
 				"Bloqueo",
+				"Nautrash",
 			}, 
 		},
 		BlacklistedPickupVariants = { -- Pickups blacklisted from use on `Entity:ForceCollide()`
