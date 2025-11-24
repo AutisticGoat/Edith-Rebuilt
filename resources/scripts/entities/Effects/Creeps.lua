@@ -56,7 +56,12 @@ local function SaltCreepUpdate(effect)
     end
 
     for _, entity in pairs(Isaac.FindInRadius(effect.Position, 20 * effect.SpriteScale.X, EntityPartition.ENEMY)) do
-        mod.SetSalted(entity, SaltedTimes[spawnType], player)
+
+        if mod.IsVestigeChallenge() then
+            entity:AddFear(EntityRef(player), 120)
+        else
+            mod.SetSalted(entity, SaltedTimes[spawnType], player)
+        end
 
         data(entity).SaltType = spawnType
 
