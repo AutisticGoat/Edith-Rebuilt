@@ -5,9 +5,9 @@
 		name="Salt Shaker" 
 		description="Stops the evil nearby" 
 		gfx="collectibles_SaltShaker.png"
-		quality="2" 
+		quality="3" 
 		chargetype="timed"
-		maxcharges="360"
+		maxcharges="420"
 		tags=""
 	/>
 	<active
