@@ -76,3 +76,5 @@ function Vestige:OnPickupColl(player, collider)
 	sprite:SetFrame(11)
 end
 mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_COLLISION, Vestige.OnPickupColl)
+
+print("sadpjapsjdj")
