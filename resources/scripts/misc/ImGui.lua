@@ -779,6 +779,7 @@ end
 -- end
 
 local function OptionsUpdate()	
+	if not RenderMenu then return end
 	if not SaveManager.IsLoaded() then return end
 	local saveData = SaveManager.GetSettingsSave()
 
