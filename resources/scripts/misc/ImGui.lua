@@ -9,52 +9,61 @@ local RenderMenu = true
 local SaveManager = mod.SaveManager
 local data = mod.CustomDataWrapper.getData
 
-if not ImGui.ElementExists("edithRebuilt") then
-	if RenderMenu == false then return end
-    ImGui.CreateMenu('edithRebuilt', '\u{f11a} Edith: Rebuilt')
+
+---@class EdithData
+---@field TargetDesign number
+---@field TargetColor table
+---@field TargetLine boolean
+---@field RGBMode boolean
+---@field RGBSpeed number
+---@field EnableExtraGore boolean
+---@field DisableSaltGibs boolean
+---@field StompSound number
+---@field StompVolume number
+---@field JumpCooldownSound number
+---@field DropKey2Jump boolean
+---@field TrainingMode boolean
+---@field CustomStompDmgMult number
+
+---@class TEdithData
+---@field ArrowDesign number
+---@field ArrowColor table
+---@field EnableHopdashTrail boolean
+---@field TrailDesign number
+---@field TrailColor table
+---@field RGBMode boolean
+---@field RGBSpeed number
+---@field EnableExtraGore boolean
+---@field DisableSaltGibs boolean
+---@field HopSound number
+---@field ParrySound number
+---@field Volume number
+---@field ParryCooldownSound number
+
+---@class MiscData 
+---@field CustomActionKey Keyboard
+---@field EnableShakescreen boolean
+
+local function isTaintedEdithUnlocked()
+	return Isaac.GetPersistentGameData():Unlocked(achievements.ACHIEVEMENT_TAINTED_EDITH)
 end
-
-local function manageElement(nombre, titulo)
-	if RenderMenu == false and ImGui.ElementExists(nombre) then return end
-    ImGui.AddElement("edithRebuilt", nombre, ImGuiElement.MenuItem, "\u{f013} " .. titulo)
-end
-
-local elementos = {
-    { nombre = "edithSettings", titulo = "Settings" },
-    { nombre = "CreditsElement", titulo = "Credits" },
-    { nombre = "ProgressElement", titulo = "Progress" }
-}
-
-for _, elemento in ipairs(elementos) do
-    manageElement(elemento.nombre, elemento.titulo)
-end
-
-local ventanas = {
-    { nombre = "settingswindow", titulo = "Settings" },
-    { nombre = "creditsWindow", titulo = "Credits" },
-	{ nombre = "progressWindow", titulo = "Progress"},
-}
-
-for _, ventana in ipairs(ventanas) do
-	if RenderMenu == false and ImGui.ElementExists(ventana.nombre) then return end
-    ImGui.CreateWindow(ventana.nombre, ventana.titulo .. " \u{f118}\u{f5b3}\u{f118}")
-end
-
-ImGui.LinkWindowToElement("settingswindow", "edithSettings")
-ImGui.LinkWindowToElement("creditsWindow", "CreditsElement")
-ImGui.LinkWindowToElement("progressWindow", "ProgressElement")
 
 local MainPrefix = "EdithRebuilt_"
 local Prefixes = {
+	Menu = MainPrefix .. "Menu_",
+	Window = MainPrefix .. "Window_",
+	TabBar = MainPrefix .. "TabBar_",
+	Tab = MainPrefix .. "Tab_",
+	Separator = MainPrefix .. "Separator_",
 	Edith = {
 		Visuals = MainPrefix .. "Edith_" .. "Visuals_",
 		Sounds = MainPrefix .. "Edith_" .. "Sounds_" ,
 		Gameplay = MainPrefix .. "Edith_" .. "Gameplay_",
 	},
 	TEdith = {
-		Visuals = MainPrefix .. "TEdith_" .. "Visuals_",
-		Sounds = MainPrefix .. "TEdith_" .. "Sounds_",
-		Gameplay = MainPrefix .. "TEdith_" .. "Gameplay_",
+		Visuals = MainPrefix .. "Tainted_Edith_" .. "Visuals_",
+		Sounds = MainPrefix .. "Tainted_Edith_" .. "Sounds_",
+		Gameplay = MainPrefix .. "Tainted_Edith_" .. "Gameplay_",
 	},
 	Misc = {
 		Input = MainPrefix .. "Misc_" .. "Input_",
@@ -64,8 +73,81 @@ local Prefixes = {
 }
 
 local elementTab = {}
-local options = {
-	Edith = {
+local Elements = {
+	Menu = {
+		SubMenu = {
+			Settings = Prefixes.Menu .. "Settings",
+			Credits = Prefixes.Menu .. "Credits",
+			Progress = Prefixes.Menu .. "Progress",
+		},
+		Windows = {
+			Settings = Prefixes.Window .. "Settings",
+			Credits = Prefixes.Window .. "Credits",
+			Progress = Prefixes.Window .. "Progress",
+		},
+		TabBars = {
+			Settings = Prefixes.TabBar .. "Settings",
+			Edith = Prefixes.TabBar .. "Edith",
+			TEdith = Prefixes.TabBar .. "Tainted_Edith",
+		},
+		Tabs = {
+			Edith = {
+				Main = Prefixes.Tab .. "Edith_Main",
+				Visuals = Prefixes.Tab .. "Edith_Visuals",
+				Sounds = Prefixes.Tab .. "Edith_Sounds",
+				Gameplay = Prefixes.Tab .. "Edith_Gameplay"
+			},
+			TEdith = {
+				Main = Prefixes.Tab .. "Tainted_Edith_Main",
+				Visuals = Prefixes.Tab .. "Tainted_Edith_Visuals",
+				Sounds = Prefixes.Tab .. "Tainted_Edith_Sounds",
+				-- Gameplay = Prefixes.Tab .. "TaintedEdith_Gameplay"
+			},
+			Misc = {
+				Main = Prefixes.Tab .. "Misc_Main"
+			}
+		},
+		Separator = {
+			Edith = {
+				Visuals = {
+					Target = Prefixes.Separator .. "Edith_Visual_Target",
+					RGB = Prefixes.Separator .. "Edith_Visual_RGB",
+					Stomp = Prefixes.Separator .. "Edith_Visua_lStomp,"
+				},
+				Sounds = {
+					Stomp = Prefixes.Separator .. "Edith_Sounds_Stomp",
+					Cooldown = Prefixes.Separator .. "Edith_Sounds_Cooldown"
+				},
+				Gameplay = {
+					Inputs = Prefixes.Separator .. "Edith_Gameplay_Inputs",
+					Training = Prefixes.Separator .. "Edith_GameplayTraining"
+				}
+			},
+			TEdith = {
+				Visuals = {
+					Arrow = Prefixes.Separator .. "Tainted_Edith_Visual_Arrow",
+					Trail = Prefixes.Separator .. "Tainted_Edith_Visual_Trail",
+					RGB = Prefixes.Separator .. "Tainted_Edith_Visual_RGB",
+					HopParry = Prefixes.Separator .. "Tainted_Edith_Visual_HopParry,"
+				},
+				Sounds = {
+					HopParry = Prefixes.Separator .. "Tainted_Edith_Sounds_HopParry",
+					Cooldown = Prefixes.Separator .. "Tainted_Edith_Sounds_Cooldown"
+				},
+				-- Gameplay = {
+				-- 	Inputs = Prefixes.Separator .. "TEdith_Gameplay_Inputs",
+				-- 	Training = Prefixes.Separator .. "TEdith_GameplayTraining"
+				-- }
+			},
+			Misc = {
+				Input = Prefixes.Separator .. "Misc_Input",
+				ResetData = Prefixes.Separator .. "Misc_ResetData",
+				Misc = Prefixes.Separator .. "Misc_Misc",
+			}
+		}
+	},
+	Options = {
+		Edith = {
 		Visuals = {
 			TargetDesign = Prefixes.Edith.Visuals .. "TargetDesign",
 			TargetColor = Prefixes.Edith.Visuals .. "TargetColor",
@@ -100,49 +182,59 @@ local options = {
 		Sounds = {
 			SetHopSound = Prefixes.TEdith.Sounds .. "SetHopSound",
 			SetParrySound = Prefixes.TEdith.Sounds .. "SetParrySound",
-			SetVolume = Prefixes.TEdith.Sounds .. "SerVolume",
+			SetVolume = Prefixes.TEdith.Sounds .. "SetVolume",
+			SetParryCooldownSound = Prefixes.TEdith.Sounds .. "SetParryCooldownSound",
 		}
-	},
-	Misc = {
-		CustomActionKey = Prefixes.Misc.Input .. "CustomActionKey",
-		ResetEdithData = Prefixes.Misc.ResetData .. "ResetEdithData",
-		ResetTEdithData = Prefixes.Misc.ResetData .. "ResetTEdithData",
-		EnableShakescreen = Prefixes.Misc.Misc .. "EnableShakescreen",
+		},
+		Misc = {
+			CustomActionKey = Prefixes.Misc.Input .. "CustomActionKey",
+			ResetEdithData = Prefixes.Misc.ResetData .. "ResetEdithData",
+			ResetTEdithData = Prefixes.Misc.ResetData .. "ResetTaintedEdithData",
+			EnableShakescreen = Prefixes.Misc.Misc .. "EnableShakescreen",
+		}
 	}
 }
 
----@class EdithData
----@field TargetDesign number
----@field TargetColor table
----@field TargetLine boolean
----@field RGBMode boolean
----@field RGBSpeed number
----@field EnableExtraGore boolean
----@field DisableSaltGibs boolean
----@field StompSound number
----@field StompVolume number
----@field JumpCooldownSound number
----@field DropKey2Jump boolean
----@field TrainingMode boolean
----@field CustomStompDmgMult number
+if not ImGui.ElementExists("EdithRebuilt") then
+	if RenderMenu == false then return end
+    ImGui.CreateMenu('EdithRebuilt', '\u{f11a} Edith: Rebuilt')
+end
 
----@class TEdithData
----@field ArrowDesign number
----@field ArrowColor table
----@field EnableHopdashTrail boolean
----@field TrailDesign number
----@field TrailColor table
----@field RGBMode boolean
----@field RGBSpeed number
----@field EnableExtraGore boolean
----@field DisableSaltGibs boolean
----@field HopSound number
----@field ParrySound number
----@field Volume number
+local function AddMenuElement(name, title)
+	if RenderMenu == false and ImGui.ElementExists(name) then return end
+    ImGui.AddElement("EdithRebuilt", name, ImGuiElement.MenuItem, "\u{f013} " .. title)
+end
 
----@class MiscData 
----@field CustomActionKey Keyboard
----@field EnableShakescreen boolean
+local MenuElements = {
+    { name = Elements.Menu.SubMenu.Settings, title = "Settings" },
+    { name = Elements.Menu.SubMenu.Credits, title = "Credits" },
+    { name = Elements.Menu.SubMenu.Progress, title = "Progress" }
+}
+
+for _, Menu in ipairs(MenuElements) do
+    AddMenuElement(Menu.name, Menu.title)
+end
+
+local windows = {
+    { name = Elements.Menu.Windows.Settings, title = "Settings" },
+    { name = Elements.Menu.Windows.Credits, title = "Credits" },
+	{ name = Elements.Menu.Windows.Progress, title = "Progress"},
+}
+
+for _, window in ipairs(windows) do
+	if RenderMenu == false and ImGui.ElementExists(window.name) then return end
+    ImGui.CreateWindow(window.name, window.title)
+end
+
+local links = {
+	{ window = Elements.Menu.Windows.Settings, menu = Elements.Menu.SubMenu.Settings },
+	{ window = Elements.Menu.Windows.Credits, menu = Elements.Menu.SubMenu.Credits },
+	{ window = Elements.Menu.Windows.Progress, menu = Elements.Menu.SubMenu.Progress },
+}
+
+for _, link in ipairs(links) do
+	ImGui.LinkWindowToElement(link.window, link.menu)
+end
 
 local function ResetSaveData(isTainted)
 	local SaveManager = mod.SaveManager
@@ -182,6 +274,10 @@ local function ResetSaveData(isTainted)
 	RenderMenu = true
 end
 
+local TEdithOptions = {}
+
+---@param tabla table
+---@param prefijo? string
 local function recorrerTablaImGui(tabla, prefijo)
     prefijo = prefijo or ""
     for clave, valor in pairs(tabla) do
@@ -189,14 +285,23 @@ local function recorrerTablaImGui(tabla, prefijo)
             recorrerTablaImGui(valor, prefijo .. clave .. ".")
         else
 			if not ImGui.ElementExists(valor) then
-				elementTab[clave] = valor
+				if not string.find(valor, "Tainted") then 
+					elementTab[clave] = valor
+				end
 			end
         end
     end
 end
+recorrerTablaImGui(Elements)
 
-recorrerTablaImGui(options)
-function mod:CheckIntegrity()
+local function AddTEdithOptionsToElements()
+	if not isTaintedEdithUnlocked() then return end
+	for k, v in pairs(TEdithOptions) do
+		elementTab[k] = v
+	end
+end
+
+function mod:CheckImGuiIntegrity()
 	for _, ID in pairs(elementTab) do
 		if not ImGui.ElementExists(ID) then return false end
 	end
@@ -208,16 +313,15 @@ function mod:UpdateImGuiData()
 	local saveData = SaveManager.GetSettingsSave()
 
 	if not saveData then return end
-	if not mod:CheckIntegrity() then return end
-
-	print("as[ojdaopsjopaodsop]")
+	if not mod:CheckImGuiIntegrity() then return end
 
 	local EdithData = saveData.EdithData ---@cast EdithData EdithData
 	local TEdithData = saveData.TEdithData ---@cast TEdithData TEdithData
 	local MiscData = saveData.MiscData
-	local EdithOptions = options.Edith
-	local TEdithOptions = options.TEdith
-	local MiscOptions = options.Misc
+	local Options = Elements.Options
+	local EdithOptions = Options.Edith
+	local TEdithOptions = Options.TEdith
+	local MiscOptions = Options.Misc
 
 	local data = {
 		[EdithOptions.Visuals.TargetDesign] = (EdithData.TargetDesign - 1) or 0,
@@ -232,98 +336,106 @@ function mod:UpdateImGuiData()
 		[EdithOptions.Gameplay.EnableDropKey2Jump] = EdithData.DropKey2Jump or false,
 		[EdithOptions.Gameplay.EnableTrainingMode] = EdithData.TrainingMode or false,
 
-		[TEdithOptions.Visuals.ArrowDesign] = (TEdithData.ArrowDesign - 1) or 0,
-		[TEdithOptions.Visuals.EnableHopdashTrail] = TEdithData.EnableHopdashTrail or false,
-		[TEdithOptions.Visuals.TrailDesign] = (TEdithData.TrailDesign - 1) or 0,
-		[TEdithOptions.Visuals.SetRGBMode] = TEdithData.RGBMode or false,
-		[TEdithOptions.Visuals.SetRGBSpeed] = TEdithData.RGBSpeed or 0.005,
-		[TEdithOptions.Visuals.EnableExtraGore] = TEdithData.EnableExtraGore or false,
-		[TEdithOptions.Visuals.DisableSaltGibs] = TEdithData.DisableSaltGibs or false,
-		[TEdithOptions.Sounds.SetHopSound] = (TEdithData.HopSound - 1) or 0,
-		[TEdithOptions.Sounds.SetParrySound] = (TEdithData.ParrySound - 1) or 0,
-		[TEdithOptions.Sounds.SetVolume] = TEdithData.Volume or 100,
-
 		-- [MiscOptions.CustomActionKey] = MiscData.CustomActionKey or Keyboard.KEY_Z,
 		[MiscOptions.EnableShakescreen] = MiscData.EnableShakescreen or false,
 	}
 
+	if isTaintedEdithUnlocked() then
+		local taintedData = {
+			[TEdithOptions.Visuals.ArrowDesign] = (TEdithData.ArrowDesign - 1) or 0,
+			[TEdithOptions.Visuals.EnableHopdashTrail] = TEdithData.EnableHopdashTrail or false,
+			[TEdithOptions.Visuals.TrailDesign] = (TEdithData.TrailDesign - 1) or 0,
+			[TEdithOptions.Visuals.SetRGBMode] = TEdithData.RGBMode or false,
+			[TEdithOptions.Visuals.SetRGBSpeed] = TEdithData.RGBSpeed or 0.005,
+			[TEdithOptions.Visuals.EnableExtraGore] = TEdithData.EnableExtraGore or false,
+			[TEdithOptions.Visuals.DisableSaltGibs] = TEdithData.DisableSaltGibs or false,
+			[TEdithOptions.Sounds.SetHopSound] = (TEdithData.HopSound - 1) or 0,
+			[TEdithOptions.Sounds.SetParrySound] = (TEdithData.ParrySound - 1) or 0,
+			[TEdithOptions.Sounds.SetVolume] = TEdithData.Volume or 100,
+		}
+
+		for k, v in pairs(taintedData) do
+			data[k] = v
+		end
+
+		local arrowcolor = TEdithData.ArrowColor
+	local trailColor = TEdithData.TrailColor
+
+		ImGui.UpdateData(TEdithOptions.Visuals.ArrowColor, ImGuiData.ColorValues, 
+		{
+			arrowcolor.Red,
+			arrowcolor.Green,
+			arrowcolor.Blue,
+		})
+		ImGui.UpdateData(TEdithOptions.Visuals.TrailColor, ImGuiData.ColorValues, 
+		{
+			trailColor.Red,
+			trailColor.Green,
+			trailColor.Blue,
+		})
+	end
+	
+
+
+	
 	for option, newValue in pairs(data) do
 		ImGui.UpdateData(option, ImGuiData.Value, newValue)
 	end
+
+	local targetColor = EdithData.TargetColor
+	
+
+	ImGui.UpdateData(EdithOptions.Visuals.TargetColor, ImGuiData.ColorValues, 
+	{
+		targetColor.Red,
+		targetColor.Green,
+		targetColor.Blue,
+	})
 end
 
-local TrainingOptions = {
-	EdithStompMultDamage = Prefixes.Edith.Gameplay .. "EdithStompMultDamage",
-}
+-- local TrainingOptions = {
+-- 	EdithStompMultDamage = Prefixes.Edith.Gameplay .. "EdithStompMultDamage",
+-- }
 
----@param enabled boolean
-local function DisplayTrainingOptions(enabled)
-	if not SaveManager.IsLoaded() then return end
-	local saveData = SaveManager.GetSettingsSave()
-
-	if not saveData then return end
-	local EdithData = saveData.EdithData
-	local TEdithData = saveData.TEdithData
-	local MiscData = saveData.MiscData
-
-	if enabled then
-		ImGui.AddDragFloat("EdithGameplaySettings", TrainingOptions.EdithStompMultDamage, "Set Stomp damage Mult", 
-		function(val)
-			EdithData.CustomStompDmgMult = val
-		end, 1, 0.005, 1, 2)
-	else
-		for _, options in pairs(TrainingOptions) do
-			ImGui.RemoveElement(options)
-		end
+local function AddTabBars()
+	ImGui.AddTabBar(Elements.Menu.Windows.Settings, Elements.Menu.TabBars.Settings)
+	
+	ImGui.AddTab(Elements.Menu.TabBars.Settings, Elements.Menu.Tabs.Edith.Main, "Edith")
+	if isTaintedEdithUnlocked() then
+		ImGui.AddTab(Elements.Menu.TabBars.Settings, Elements.Menu.Tabs.TEdith.Main, "Tainted Edith")
 	end
+	ImGui.AddTab(Elements.Menu.TabBars.Settings, Elements.Menu.Tabs.Misc.Main, "Misc")
 end
 
-local function OptionsUpdate()	
-	if not SaveManager.IsLoaded() then return end
-	local saveData = SaveManager.GetSettingsSave()
-	
-	if not saveData then return end
-	if mod:CheckIntegrity() then return end
-	
-	local EdithData = saveData.EdithData ---@cast EdithData EdithData
-	local TEdithData = saveData.TEdithData ---@cast TEdithData TEdithData
-	local MiscData = saveData.MiscData ---@cast MiscData MiscData
+local function AddEdithOptions()
+	local EdithTabBar = Elements.Menu.TabBars.Edith
+	local EdithTab = Elements.Menu.Tabs.Edith.Main
+	local EdithVisuals = Elements.Menu.Tabs.Edith.Visuals
+	local EdithSounds = Elements.Menu.Tabs.Edith.Sounds
+	local EdithGameplay = Elements.Menu.Tabs.Edith.Gameplay
+	local OptionVisuals = Elements.Options.Edith.Visuals
+	local OptionSounds = Elements.Options.Edith.Sounds
+	local OptionGameplay = Elements.Options.Edith.Gameplay
+	local Separator = Elements.Menu.Separator.Edith
+	local EdithData = SaveManager:GetSettingsSave().EdithData --[[@as EdithData]]
 
-	local EdithOptions = options.Edith
-	local TEdithOptions = options.TEdith
-	local MiscOptions = options.Misc
+	ImGui.AddTabBar(EdithTab, EdithTabBar)
+	ImGui.AddTab(EdithTabBar, EdithVisuals, "Visuals")
+	ImGui.AddTab(EdithTabBar, EdithSounds, "Sounds")
+	ImGui.AddTab(EdithTabBar, EdithGameplay, "Gameplay")
 
-	ImGui.AddTabBar("settingswindow", "Settings")
-	ImGui.AddTab("Settings", "EdithSetting", "Edith")
-	ImGui.AddTab("Settings", "TaintedEdithSetting", "Tainted Edith")
-	ImGui.AddTab("Settings", "MiscSetting", "Misc")
-
-	ImGui.AddTabBar("EdithSetting", "EdithSettings")
-	ImGui.AddTab("EdithSettings", "EdithVisualSettings", "Visuals")
-	ImGui.AddTab("EdithSettings", "EdithSoundsSettings", "Sounds")
-	ImGui.AddTab("EdithSettings", "EdithGameplaySettings", "Gameplay")
-
-	ImGui.AddTabBar("TaintedEdithSetting", "TaintedEdithSettings")
-	ImGui.AddTab("TaintedEdithSettings", "TaintedEdithVisualSettings", "Visuals")
-	ImGui.AddTab("TaintedEdithSettings", "TaintedEdithSoundsSettings", "Sounds")
-
-	ImGui.AddTabBar("creditsWindow", "Credits")
-	ImGui.AddTab("Credits", "CreditsResources", "Resources")
-	ImGui.AddTab("Credits", "CreditsColabTesters", "Colaborators and testers")
-	ImGui.AddTab("Credits", "CreditsDevTeam", "Dev team")
-
--- Edith configs
-	-- Visuals 
-	ImGui.AddElement("EdithVisualSettings", "EdithTargetSeparator", ImGuiElement.SeparatorText, "Target")
-	ImGui.AddCombobox("EdithVisualSettings", EdithOptions.Visuals.TargetDesign, "Set Target Design", 
+-- Visuals
+	ImGui.AddElement(EdithVisuals, Separator.Visuals.Target, ImGuiElement.SeparatorText, "Target")
+	ImGui.AddCombobox(EdithVisuals, OptionVisuals.TargetDesign, "Set Target Design", 
 		function(index)
 			EdithData.TargetDesign = index + 1
 			for _, target in pairs(Isaac.FindByType(EntityType.ENTITY_EFFECT, variants.EFFECT_EDITH_TARGET)) do
 				Isaac.RunCallback(callbacks.TARGET_SPRITE_CHANGE, target)
 			end
-		end, 
+		end,
 	ImGuiTables.TargetDesign, 0, false)
-	ImGui.AddInputColor("EdithVisualSettings", EdithOptions.Visuals.TargetColor, "Target Color",
+
+	ImGui.AddInputColor(EdithVisuals, OptionVisuals.TargetColor, "Target Color",
 		function(r, g, b)
 			EdithData.TargetColor = {
 				Red = r,
@@ -332,80 +444,100 @@ local function OptionsUpdate()
 			}
 		end,
 	1, 1, 1)
-	ImGui.SetHelpmarker(EdithOptions.Visuals.TargetColor, "Only works when target design is set to Choose Color")
+	ImGui.SetHelpmarker(OptionVisuals.TargetColor, "Only works when target design is set to Choose Color")
+	ImGui.AddCheckbox(EdithVisuals, OptionVisuals.TargetLine, "Enable Target line", 
+		function(check)
+			EdithData.TargetLine = check
+		end,
+	false)
 
-	ImGui.AddCheckbox("EdithVisualSettings", EdithOptions.Visuals.TargetLine, "Enable Target line", function(check)
-		EdithData.TargetLine = check
-	end, false)
+	ImGui.AddElement(EdithVisuals, Separator.Visuals.RGB, ImGuiElement.SeparatorText, "RGB")
+	ImGui.AddCheckbox(EdithVisuals, OptionVisuals.SetRGBMode, "Set RGB Mode", 
+		function(check)
+			EdithData.RGBMode = check
+		end,
+	false)
+	ImGui.SetHelpmarker(OptionVisuals.SetRGBMode, "Makes the target cycle between colors \nOnly works when target design is set to Choose Color")
 
-	ImGui.AddElement("EdithVisualSettings", "EdithRGBSeparator", ImGuiElement.SeparatorText, "RGB")
-	ImGui.AddCheckbox("EdithVisualSettings", EdithOptions.Visuals.SetRGBMode, "Set RGB Mode", function(check)
-		EdithData.RGBMode = check
-	end, false)
-	ImGui.SetHelpmarker(EdithOptions.Visuals.SetRGBMode, "Makes the target cycle between colors \nOnly works when target design is set to Choose Color")
-	ImGui.AddSliderFloat("EdithVisualSettings", EdithOptions.Visuals.SetRGBSpeed, "Set RGB Speed", function(val)
-		EdithData.RGBSpeed = val
-	end, 0.005, 0.001, 0.03, "%.5f")
+	ImGui.AddSliderFloat(EdithVisuals, OptionVisuals.SetRGBSpeed, "Set RGB Speed",
+		function(val)
+			EdithData.RGBSpeed = val
+		end,
+	0.005, 0.001, 0.03, "%.5f")
 
-	ImGui.AddElement("EdithVisualSettings", "EdithVisualsStompSeparator", ImGuiElement.SeparatorText, "Stomp")
+	ImGui.AddElement(EdithVisuals, Separator.Visuals.Stomp, ImGuiElement.SeparatorText, "Stomp")
+	ImGui.AddCheckbox(EdithVisuals, OptionVisuals.EnableExtraGore, "Enable stomp kill extra gore", 
+		function(check)
+			EdithData.EnableExtraGore = check
+		end,
+	false)
+	ImGui.AddCheckbox(EdithVisuals, OptionVisuals.DisableSaltGibs, "Disable salt gibs", 
+		function(check)
+			EdithData.DisableSaltGibs = check
+		end, 
+	false)
+-- Visuals end
 
-	ImGui.AddCheckbox("EdithVisualSettings", EdithOptions.Visuals.EnableExtraGore, "Enable stomp kill extra gore", function(check)
-		EdithData.EnableExtraGore = check
-	end, false)
-	ImGui.AddCheckbox("EdithVisualSettings", EdithOptions.Visuals.DisableSaltGibs, "Disable salt gibs", function(check)
-		EdithData.DisableSaltGibs = check
-	end, false)
-	-- Visuals end
-
-	-- sounds
-	ImGui.AddElement("EdithSoundsSettings", "EdithSoundStompSeparator", ImGuiElement.SeparatorText, "Stomp")
-	ImGui.AddCombobox("EdithSoundsSettings", EdithOptions.Sounds.SetStompSound, "Set Stomp Sound", 
+-- Sounds
+	ImGui.AddElement(EdithSounds, Separator.Sounds.Stomp, ImGuiElement.SeparatorText, "Stomp")
+	ImGui.AddCombobox(EdithSounds, OptionSounds.SetStompSound, "Set Stomp Sound", 
 		function(index)
 			EdithData.StompSound = index + 1
 		end, 
 	ImGuiTables.StompSound, 0)
-	ImGui.AddSliderInteger("EdithSoundsSettings", EdithOptions.Sounds.SetStompVolume, "Set stomp volume", function(index)
-		EdithData.StompVolume = index
-	end, 100, 25, 100, "%d%")
+	ImGui.AddSliderInteger(EdithSounds, OptionSounds.SetStompVolume, "Set stomp volume", 
+		function(index)
+			EdithData.StompVolume = index
+		end, 
+	100, 25, 100, "%d%")
 
-	ImGui.AddElement("EdithSoundsSettings", "EdithCooldownSeparator", ImGuiElement.SeparatorText, "Cooldown")
-	ImGui.AddCombobox("EdithSoundsSettings", EdithOptions.Sounds.SetJumpCooldownSound, "Set jump cooldown sound", 
+	ImGui.AddElement(EdithSounds, Separator.Sounds.Cooldown, ImGuiElement.SeparatorText, "Cooldown")
+	ImGui.AddCombobox(EdithSounds, OptionSounds.SetJumpCooldownSound, "Set jump cooldown sound", 
 		function(index)
 			EdithData.JumpCooldownSound = index + 1
 		end, 
 	{"Stone", "Beep"}, 0, true)
-	-- sounds end
-		
-	local color = EdithData.TargetColor
-		
-	ImGui.UpdateData(EdithOptions.Visuals.TargetColor, ImGuiData.ColorValues, 
-		{
-			color.Red,
-			color.Green,
-			color.Blue,
-		}
-	)
-	-- Gameplay
-	ImGui.AddElement("EdithGameplaySettings", "EdithGameplayStompSeparator", ImGuiElement.SeparatorText, "Stomp")
-	ImGui.AddCheckbox("EdithGameplaySettings", EdithOptions.Gameplay.EnableDropKey2Jump, "Enable Drop key to jump", function(check)
-		EdithData.DropKey2Jump = check
-	end, true)
+-- Sounds end
 
-	ImGui.AddElement("EdithGameplaySettings", "EdithGameplayTrainingModeSeparator", ImGuiElement.SeparatorText, "Training")
-	ImGui.AddCheckbox("EdithGameplaySettings", EdithOptions.Gameplay.EnableTrainingMode, "Enable Training Mode", function(check)
-		EdithData.TrainingMode = check
-		DisplayTrainingOptions(check)
-	end, true)
-	ImGui.SetHelpmarker(EdithOptions.Gameplay.EnableTrainingMode, "Enable Edith's training mode, making it able to adjust some values \n\u{21} Mod's achievements will be unobtainable in the run")
-	--Gameplay end
--- Edith configs end
-	
--- Tainted Edith Configs
-	local arrowcolor = TEdithData.ArrowColor
-	local trailColor = TEdithData.TrailColor
+-- Gameplay
+	ImGui.AddElement(EdithGameplay, Separator.Gameplay.Inputs, ImGuiElement.SeparatorText, "Inputs")
+	ImGui.AddCheckbox(EdithGameplay, OptionGameplay.EnableDropKey2Jump, "Enable Drop key to jump", 
+		function(check)
+			EdithData.DropKey2Jump = check
+		end,
+	true)
 
-	ImGui.AddElement("TaintedEdithVisualSettings", "TaintedEdithVisualArrowSeparator", ImGuiElement.SeparatorText, "Arrow")
-	ImGui.AddCombobox("TaintedEdithVisualSettings", TEdithOptions.Visuals.ArrowDesign, "Set Arrow Design", 		
+	ImGui.AddElement(EdithGameplay, Separator.Gameplay.Training, ImGuiElement.SeparatorText, "Training")
+	ImGui.AddCheckbox(EdithGameplay, OptionGameplay.EnableTrainingMode, "Enable Training Mode", 
+		function(check)
+			EdithData.TrainingMode = check
+			-- DisplayTrainingOptions(check)
+		end,
+	false)
+	ImGui.SetHelpmarker(OptionGameplay.EnableTrainingMode, "Enable Edith's training mode, making it able to adjust some values \n\u{21} Mod's achievements will be unobtainable in the run")
+-- Gameplay end
+end
+
+local function AddTaintedEdithOptions()
+	if not isTaintedEdithUnlocked() then return end
+	local TEdithTabBar = Elements.Menu.TabBars.TEdith
+	local TEdithTab = Elements.Menu.Tabs.TEdith.Main
+	local TEdithVisuals = Elements.Menu.Tabs.TEdith.Visuals
+	local TEdithSounds = Elements.Menu.Tabs.TEdith.Sounds
+	-- local TEdithGameplay = Elements.Menu.Tabs.TEdith.Gameplay
+	local OptionVisuals = Elements.Options.TEdith.Visuals
+	local OptionSounds = Elements.Options.TEdith.Sounds
+	local Separator = Elements.Menu.Separator.TEdith
+	local TEdithData = SaveManager:GetSettingsSave().TEdithData --[[@as TEdithData]]
+
+	ImGui.AddTabBar(TEdithTab, TEdithTabBar)
+	ImGui.AddTab(TEdithTabBar, TEdithVisuals, "Visuals")
+	ImGui.AddTab(TEdithTabBar, TEdithSounds, "Sounds")
+	-- ImGui.AddTab(TEdithTabBar, EdithGameplay, "Gameplay")
+
+-- Visuals
+	ImGui.AddElement(TEdithVisuals, Separator.Visuals.Arrow, ImGuiElement.SeparatorText, "Arrow")
+	ImGui.AddCombobox(TEdithVisuals, OptionVisuals.ArrowDesign, "Set Arrow Design", 		
 		function(index)
 			TEdithData.ArrowDesign = index + 1
 			for _, arrow in pairs(Isaac.FindByType(EntityType.ENTITY_EFFECT, variants.EFFECT_EDITH_B_TARGET)) do
@@ -413,23 +545,23 @@ local function OptionsUpdate()
 			end
 		end,
 	ImGuiTables.ArrowDesign, 0)
-	ImGui.AddInputColor("TaintedEdithVisualSettings", TEdithOptions.Visuals.ArrowColor, "Arror Color", 
-	function(r, g, b)
-		TEdithData.ArrowColor = {
-			Red = r,
-			Green = g,
-			Blue = b,
-		}
-	end,
+	ImGui.AddInputColor(TEdithVisuals, OptionVisuals.ArrowColor, "Arror Color", 
+		function(r, g, b)
+			TEdithData.ArrowColor = {
+				Red = r,
+				Green = g,
+				Blue = b,
+			}
+		end,
 	1, 1, 1)
 
-	ImGui.AddElement("TaintedEdithVisualSettings", "TaintedEdithVisualTrailSeparator", ImGuiElement.SeparatorText, "Trail")
-	ImGui.AddCheckbox("TaintedEdithVisualSettings", TEdithOptions.Visuals.EnableHopdashTrail, "Enable hopdash trail", 
+	ImGui.AddElement(TEdithVisuals, Separator.Visuals.Trail, ImGuiElement.SeparatorText, "Trail")
+	ImGui.AddCheckbox(TEdithVisuals, OptionVisuals.EnableHopdashTrail, "Enable hopdash trail", 
 		function(check) 
 			TEdithData.EnableHopdashTrail = check
 		end, 
 	false)
-	ImGui.AddCombobox("TaintedEdithVisualSettings", TEdithOptions.Visuals.TrailDesign, "Set Target Design", 
+	ImGui.AddCombobox(TEdithVisuals, OptionVisuals.TrailDesign, "Set Target Design",
 		function(index)
 			TEdithData.TrailDesign = index + 1
 			for _, trail in pairs(Isaac.FindByType(EntityType.ENTITY_EFFECT, EffectVariant.SPRITE_TRAIL)) do
@@ -438,140 +570,190 @@ local function OptionsUpdate()
 			end
 		end, 
 	ImGuiTables.TrailDesign, 0, false)
-
-	ImGui.AddInputColor("TaintedEdithVisualSettings", TEdithOptions.Visuals.TrailColor, "Trail Color", function(r, g, b)
-		TEdithData.TrailColor = {
-			Red = r,
-			Green = g,
-			Blue = b,
-		}
-	end,
+	ImGui.AddInputColor(TEdithVisuals, OptionVisuals.TrailColor, "Trail Color",
+		function(r, g, b)
+			TEdithData.TrailColor = {
+				Red = r,
+				Green = g,
+				Blue = b,
+			}
+		end,
 	1, 1, 1)
 
-	ImGui.AddElement("TaintedEdithVisualSettings", "TaintedEdithVisualRGBSeparator", ImGuiElement.SeparatorText, "RGB")
-	ImGui.AddCheckbox("TaintedEdithVisualSettings", TEdithOptions.Visuals.SetRGBMode, "Set RGB Mode", function(check)
+	ImGui.AddElement(TEdithVisuals, Separator.Visuals.RGB, ImGuiElement.SeparatorText, "RGB")
+	ImGui.AddCheckbox(TEdithVisuals, OptionVisuals.SetRGBMode, "Set RGB Mode", 
+	function(check)
 		TEdithData.RGBMode = check
 	end, false)
-	ImGui.AddSliderFloat("TaintedEdithVisualSettings", TEdithOptions.Visuals.SetRGBSpeed, "Set RGB Speed", function(index)
-		TEdithData.RGBSpeed = index
-	end, 0.005, 0.001, 0.03, "%.5f")
+	ImGui.AddSliderFloat(TEdithVisuals, OptionVisuals.SetRGBSpeed, "Set RGB Speed", 
+		function(index)
+			TEdithData.RGBSpeed = index
+		end,
+	0.005, 0.001, 0.03, "%.5f")
 
-	ImGui.AddElement("TaintedEdithVisualSettings", "TaintedEdithVisualHopAndParrySeparator", ImGuiElement.SeparatorText, "Hop & Parry")
-	ImGui.AddCheckbox("TaintedEdithVisualSettings", TEdithOptions.Visuals.EnableExtraGore, "Enable parry kill extra gore", function(check)
-		TEdithData.EnableExtraGore = check
-	end, false)
-	ImGui.AddCheckbox("TaintedEdithVisualSettings", TEdithOptions.Visuals.DisableSaltGibs, "Disable salt gibs", function(check)
-		TEdithData.DisableSaltGibs = check
-	end, false)
+	ImGui.AddElement(TEdithVisuals, Separator.Visuals.HopParry, ImGuiElement.SeparatorText, "Hop & Parry")
+	ImGui.AddCheckbox(TEdithVisuals, OptionVisuals.EnableExtraGore, "Enable parry kill extra gore", 
+		function(check)
+			TEdithData.EnableExtraGore = check
+		end,
+	false)
+	ImGui.AddCheckbox(TEdithVisuals, OptionVisuals.DisableSaltGibs, "Disable salt gibs", 
+		function(check)
+			TEdithData.DisableSaltGibs = check
+		end,
+	false)
+-- Visuals end
 
-	ImGui.AddElement("TaintedEdithSoundsSettings", "TaintedEdithSoundsHopAndParrySeparator", ImGuiElement.SeparatorText, "Hop & Parry")
-	ImGui.AddCombobox("TaintedEdithSoundsSettings", TEdithOptions.Sounds.SetHopSound, "Set Hop Sound", 		
+-- Sounds
+	ImGui.AddElement(TEdithSounds, Separator.Sounds.HopParry, ImGuiElement.SeparatorText, "Hop & Parry")
+	ImGui.AddCombobox(TEdithSounds, OptionSounds.SetHopSound, "Set Hop Sound",
 		function(index)
 			TEdithData.HopSound = index + 1
-		end, 
+		end,
 	ImGuiTables.HopSound, 0)
-	ImGui.AddCombobox("TaintedEdithSoundsSettings", TEdithOptions.Sounds.SetParrySound, "Set Parry Sound", 		
+	ImGui.AddCombobox(TEdithSounds, OptionSounds.SetParrySound, "Set Parry Sound",
 		function(index)
 			TEdithData.ParrySound = index + 1
 		end,
 	ImGuiTables.ParrySound, 0)
-	ImGui.AddSliderInteger("TaintedEdithSoundsSettings", TEdithOptions.Sounds.SetVolume, "Set stomp volume", function(index)
-		TEdithData.Volume = index 
-	end, 100, 25, 100, "%d%")	
+	ImGui.AddSliderInteger(TEdithSounds, OptionSounds.SetVolume, "Set stomp volume", 
+		function(index)
+			TEdithData.Volume = index 
+		end,
+	100, 25, 100, "%d%")
 
-	ImGui.UpdateData(TEdithOptions.Visuals.ArrowColor, ImGuiData.ColorValues, 
-	{
-		arrowcolor.Red,
-		arrowcolor.Green,
-		arrowcolor.Blue,
-	})
+	ImGui.AddElement(TEdithSounds, Separator.Sounds.Cooldown, ImGuiElement.SeparatorText, "Cooldown")
+	ImGui.AddCombobox(TEdithSounds, OptionSounds.SetParryCooldownSound, "Set parry cooldown sound", 
+		function(index)
+			TEdithData.ParryCooldownSound = index + 1
+		end, 
+	{"Stone", "Beep"}, 0, true)
+-- Sounds end
+end
 
-	ImGui.UpdateData(TEdithOptions.Visuals.TrailColor, ImGuiData.ColorValues, 
-	{
-		trailColor.Red,
-		trailColor.Green,
-		trailColor.Blue,
-	})
--- Tainted Edith Configs end
+local function AddMiscOptions()
+	local MiscTab = Elements.Menu.Tabs.Misc.Main
+	local MiscOptions = Elements.Options.Misc
+	local Separator = Elements.Menu.Separator.Misc
+	local MiscData = SaveManager:GetSettingsSave().MiscData --[[@as MiscData]]
 
--- Misc Configs
-	ImGui.AddElement("MiscSetting", MiscOptions.CustomActionKey, ImGuiElement.SeparatorText, "Input")
-		ImGui.AddInputKeyboard("MiscSetting", "Custom action key", "Set custom action key", 
+	ImGui.AddElement(MiscTab, Separator.Input, ImGuiElement.SeparatorText, "Inputs")
+	ImGui.AddInputKeyboard(MiscTab, MiscOptions.CustomActionKey, "Set custom action key", 
 		function(ID)
 			MiscData.CustomActionKey = ID
 		end, 
 	Keyboard.KEY_Z)
 
-	ImGui.AddElement("MiscSetting", "ResetData", ImGuiElement.SeparatorText, "Reset Data")
-	ImGui.AddButton("MiscSetting", MiscOptions.ResetEdithData, "Reset Edith Settings", function()
-		ResetSaveData(false)
-	end, true)
+	ImGui.AddElement(MiscTab, Separator.ResetData, ImGuiElement.SeparatorText, "Reset Data")
+	ImGui.AddButton(MiscTab, MiscOptions.ResetEdithData, "Reset Edith Settings", 
+		function()
+			ResetSaveData(false)
+		end, 
+	true)
+	if isTaintedEdithUnlocked() then
+		ImGui.AddButton(MiscTab, MiscOptions.ResetTEdithData, "Reset Tainted Edith Settings", 
+			function()
+				ResetSaveData(true)
+			end, 
+		true)
+	end
+	ImGui.AddElement(MiscTab, Separator.Misc, ImGuiElement.SeparatorText, "Misc")
+	ImGui.AddCheckbox(MiscTab, MiscOptions.EnableShakescreen, "Enable Stomp screen shake", 
+		function(check)
+			MiscData.EnableShakescreen = check
+		end, 
+	false)
+end
 
-	ImGui.AddButton("MiscSetting", MiscOptions.ResetTEdithData, "Reset Tainted Edith Settings", function()
-		ResetSaveData(true)
-	end, true)
+-- ---@param enabled boolean
+-- local function DisplayTrainingOptions(enabled)
+-- 	if not SaveManager.IsLoaded() then return end
+-- 	local saveData = SaveManager.GetSettingsSave()
 
-	ImGui.AddElement("MiscSetting", "Misc", ImGuiElement.SeparatorText, "Misc")
-	ImGui.AddCheckbox("MiscSetting", MiscOptions.EnableShakescreen, "Enable Stomp screen shake", function(check)
-		MiscData.EnableShakescreen = check
-	end, false)
+-- 	if not saveData then return end
+-- 	local EdithData = saveData.EdithData
+-- 	local TEdithData = saveData.TEdithData
+-- 	local MiscData = saveData.MiscData
 
+-- 	if enabled then
+-- 		ImGui.AddDragFloat("EdithGameplaySettings", TrainingOptions.EdithStompMultDamage, "Set Stomp damage Mult", 
+-- 		function(val)
+-- 			EdithData.CustomStompDmgMult = val
+-- 		end, 1, 0.005, 1, 2)
+-- 	else
+-- 		for _, options in pairs(TrainingOptions) do
+-- 			ImGui.RemoveElement(options)
+-- 		end
+-- 	end
+-- end
+
+local function OptionsUpdate()	
+	if not SaveManager.IsLoaded() then return end
+	local saveData = SaveManager.GetSettingsSave()
+
+	if not saveData then return end
+	if mod:CheckImGuiIntegrity() then return end
+
+
+	-- ImGui.AddText(Elements.Menu.SubMenu.Credits., 
+	-- [[
+	-- 	Used resources and utilities:
+	-- 	- JumpLib (Kerkel)
+	-- 	- Custom Shockwave API (Brakedude)
+	-- 	- Pre NPC kill callback (Kerkel)
+	-- 	- Isaac Save Manager (Catinsurance, Benny)
+	-- 	- HudHelper (Benny, CatWizard)
+	-- 	- Status Effect Library (Benny)
+	-- 	- SaveData System (AgentCucco)
+	-- 	- lhsx (Ilya Kolbin (iskolbin))
+	-- 	- Salt Shaker Sound Effect (Joshua Hadley): 
+	-- 	- Edith water stomp sound effect (ArtNinja) 
+	-- 	- Nine Sols Perfect Parry sound effect (Red Candle Games) 
+	-- 	- Pizza Tower taunt sound effect (Tour De Pizza)
+	-- 	- Ultrakill parry sound effect (New Blood, Arsi "Hakita" Patala)
+	-- 	- Hollow Knight parry sound effect (Team Cherry) 
+	-- 	- Iconoclasts parry sound effect (Joakim Sandberg (Konjak))
+	-- ]],
+	-- true)
+
+	-- ImGui.AddText("CreditsColabTesters", 
+	-- [[
+	-- 	Colaborators:
+	-- 	- JJ: Inspiration to start this project
+	-- 	- D!Edith team: Inspiration to resume this project
+	-- 	- Skulldier: Sal concept
+	-- 	- Marcy: Tainted Edith Birthright idea
+	-- 	- Sr Kalaka: Edith Sprite
+	-- 	- Yuls: Tainted Edith sprite base
+
+	-- 	Testers:
+	-- 	- ottostrasse
+	-- 	- Jozin191
+	-- 	- Tibu
+	-- 	- SethoJunk
+	-- 	- Noirsight
+	-- 	- Sylvy_owo
+	-- 	- .radiox
+	-- ]], true, "creditsText")
+
+	-- ImGui.AddText("CreditsDevTeam", 
+	-- [[
+	-- 	Team members:
+	-- 	- gigamouse: finished Tainted Edith sprite, items sprites
+	-- 	- Pattowolfx220: Testing, First Tainted Edith sprite, items sprites
+	-- 	- Kotry: Project leader, coder, unlock sheets sprite
+	-- ]],
+	-- true)
+
+-- 	ImGui.AddProgressBar("progressWindow", "GeneralUnlockProgress", "General unlocks progress", 0)
+-- 	ImGui.AddProgressBar("progressWindow", "EdithUnlockProgress", "Edith unlocks progress", 0)
+-- 	ImGui.AddProgressBar("progressWindow", "TEdithUnlockProgress", "Tainted Edith unlocks progress", 0)
+
+	AddTabBars()
+	AddEdithOptions()
+	AddTaintedEdithOptions()
+	AddMiscOptions()
 	mod:UpdateImGuiData()
-
-	ImGui.AddText("CreditsResources", 
-	[[
-		Used resources and utilities:
-		- JumpLib (Kerkel)
-		- Custom Shockwave API (Brakedude)
-		- Pre NPC kill callback (Kerkel)
-		- Isaac Save Manager (Catinsurance, Benny)
-		- HudHelper (Benny, CatWizard)
-		- Status Effect Library (Benny)
-		- SaveData System (AgentCucco)
-		- lhsx (Ilya Kolbin (iskolbin))
-		- Salt Shaker Sound Effect (Joshua Hadley): 
-		- Edith water stomp sound effect (ArtNinja) 
-		- Nine Sols Perfect Parry sound effect (Red Candle Games) 
-		- Pizza Tower taunt sound effect (Tour De Pizza)
-		- Ultrakill parry sound effect (New Blood, Arsi "Hakita" Patala)
-		- Hollow Knight parry sound effect (Team Cherry) 
-		- Iconoclasts parry sound effect (Joakim Sandberg (Konjak))
-	]],
-	true)
-
-	ImGui.AddText("CreditsColabTesters", 
-	[[
-		Colaborators:
-		- JJ: Inspiration to start this project
-		- D!Edith team: Inspiration to resume this project
-		- Skulldier: Sal concept
-		- Marcy: Tainted Edith Birthright idea
-		- Sr Kalaka: Edith Sprite
-		- Yuls: Tainted Edith sprite base
-
-		Testers:
-		- ottostrasse
-		- Jozin191
-		- Tibu
-		- SethoJunk
-		- Noirsight
-		- Sylvy_owo
-		- .radiox
-	]], true, "creditsText")
-
-	ImGui.AddText("CreditsDevTeam", 
-	[[
-		Team members:
-		- gigamouse: finished Tainted Edith sprite, items sprites
-		- Pattowolfx220: Testing, First Tainted Edith sprite, items sprites
-		- Kotry: Project leader, coder, unlock sheets sprite
-	]],
-	true)
-
-	ImGui.AddProgressBar("progressWindow", "GeneralUnlockProgress", "General unlocks progress", 0)
-	ImGui.AddProgressBar("progressWindow", "EdithUnlockProgress", "Edith unlocks progress", 0)
-	ImGui.AddProgressBar("progressWindow", "TEdithUnlockProgress", "Tainted Edith unlocks progress", 0)
-
 	RenderMenu = false
 end
 
@@ -631,18 +813,17 @@ end
 local function UpdateProgressBar()
 	local totaledithUnlocks = GetEdithUnlockedAchs() / 15
 	local totaltedithUnlocks = GetTEdithUnlockedAchs() / 7
-	local totalgeneralUnlocks = (GetEdithUnlockedAchs() + GetTEdithUnlockedAchs() + (Isaac.GetPersistentGameData():Unlocked(achievements.ACHIEVEMENT_THANK_YOU) and 1 or 0)) / 23
+	local totalgeneralUnlocks = (GetEdithUnlockedAchs() + GetTEdithUnlockedAchs() + (isTaintedEdithUnlocked() and 1 or 0)) / 23
 
 	ImGui.UpdateData("EdithUnlockProgress", ImGuiData.Value, totaledithUnlocks)
 	ImGui.UpdateData("TEdithUnlockProgress", ImGuiData.Value, totaltedithUnlocks)
 	ImGui.UpdateData("GeneralUnlockProgress", ImGuiData.Value, totalgeneralUnlocks)
 end
-mod:AddCallback(ModCallbacks.MC_POST_RENDER, UpdateProgressBar)
-mod:AddCallback(ModCallbacks.MC_MAIN_MENU_RENDER, UpdateProgressBar)
+-- mod:AddCallback(ModCallbacks.MC_POST_RENDER, UpdateProgressBar)
+-- mod:AddCallback(ModCallbacks.MC_MAIN_MENU_RENDER, UpdateProgressBar)
 
-
-local function DestroyImGuiOptions()
-	for k, ID in ipairs(elementTab) do
+function mod:DestroyImGuiOptions()
+	for _, ID in pairs(elementTab) do
 		if not ImGui.ElementExists(ID) then goto continue end 
 		ImGui.RemoveElement(ID)
 		::continue::
@@ -650,6 +831,8 @@ local function DestroyImGuiOptions()
 end
 
 local function InitSaveData()
+	RenderMenu = false
+
 	local SaveManager = mod.SaveManager
 	if not SaveManager and not SaveManager:IsLoaded() then return end
 	local menuData = SaveManager.GetSettingsSave()
@@ -687,15 +870,22 @@ local function InitSaveData()
 	TEdithData.TrailDesign = TEdithData.TrailDesign or 1
 
 	MiscData.EnableShakescreen = MiscData.EnableShakescreen or true
-	MiscData.CustomActionKey = MiscData.CustomActionKey or Keyboard.KEY_Z
-
-	DestroyImGuiOptions()
+	
+	mod:DestroyImGuiOptions()
 end
 
-mod:AddCallback(ModCallbacks.MC_MAIN_MENU_RENDER, DestroyImGuiOptions)
+function mod:ManageUnlock()
+	RenderMenu = false
+end
+mod:AddCallback(ModCallbacks.MC_POST_ACHIEVEMENT_UNLOCK, mod.ManageUnlock, achievements.ACHIEVEMENT_TAINTED_EDITH)
+
+mod:AddCallback(ModCallbacks.MC_MAIN_MENU_RENDER, mod.DestroyImGuiOptions)
 mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, InitSaveData)
 mod:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT, InitSaveData)
 mod:AddCallback(ModCallbacks.MC_PRE_MOD_UNLOAD, InitSaveData)
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, InitSaveData)
 mod:AddCallback(ModCallbacks.MC_POST_RENDER, OptionsUpdate)
 mod:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT, OptionsUpdate)
+mod:AddCallback(ModCallbacks.MC_PRE_MOD_UNLOAD, OptionsUpdate)
+mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, OptionsUpdate)
+mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, OptionsUpdate)

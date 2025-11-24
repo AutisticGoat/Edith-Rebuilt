@@ -169,20 +169,11 @@ end)
 
 ---@param effect EntityEffect
 function mod:Mierda(effect)
-	if not saveManager:IsLoaded() then return end
-	local saveData = funcs.MenuData()
-
-	if not saveData then return end
 	local isTarget = effect.Variant == Vars.EFFECT_EDITH_TARGET
-
-	local tEdithData = EdithRebuilt.GetConfigData("TEdithData") 
-
 	local MenuSprite = isTarget and mod.GetConfigData("EdithData").TargetDesign or mod.GetConfigData("TEdithData").ArrowDesign
 	local TargetTable = isTarget and tables.TargetSuffix or tables.ArrowSuffix
 	local path = isTarget and misc.TargetPath or misc.ArrowPath
-	print(MenuSprite)
-	print(path .. TargetTable[MenuSprite] .. ".png")
 
-	effect:GetSprite():ReplaceSpritesheet(0, path .. TargetTable[MenuSprite] .. ".png", true)
+	effect:GetSprite():ReplaceSpritesheet(0, path .. mod.When(MenuSprite, TargetTable, "") .. ".png", true)
 end
 mod:AddCallback(enums.Callbacks.TARGET_SPRITE_CHANGE, mod.Mierda)

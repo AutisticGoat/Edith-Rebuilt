@@ -15,7 +15,6 @@ function PepperGrinder:UsePepperGrinder(_, RNG, player, flag)
 	for _, enemy in ipairs(Isaac.FindInRadius(playerPos, 100, EntityPartition.ENEMY)) do
 		mod.TriggerPush(enemy, player, 20, 3, false)
 		mod.SetPeppered(enemy, frames, player)
-
 		data(enemy).Player = player
 	end
 	

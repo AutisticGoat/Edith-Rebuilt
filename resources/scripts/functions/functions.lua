@@ -93,10 +93,32 @@ function EdithRebuilt.WhenEval(value, cases, default)
     return v
 end
 
+---@param player EntityPlayer
+function EdithRebuilt.PlayerHasBirthright(player)
+	return player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT)
+end
+
+---Helper function for Edith's cooldown color manager
+---@param player EntityPlayer
+---@param intensity number
+---@param duration integer
+function EdithRebuilt.SetColorCooldown(player, intensity, duration)
+	local pcolor = player.Color
+	local col = pcolor:GetColorize()
+	local tint = pcolor:GetTint()
+	local off = pcolor:GetOffset()
+	local Red = off.R + (intensity + ((col.R + tint.R) * 0.2))
+	local Green = off.G + (intensity + ((col.G + tint.G) * 0.2))
+	local Blue = off.B + (intensity + ((col.B + tint.B) * 0.2))
+		
+	pcolor:SetOffset(Red, Green, Blue)
+	player:SetColor(pcolor, duration, 100, true, false)
+end
+
 ---Used to add some interactions to Judas' Birthright effect
 ---@param player EntityPlayer
 function EdithRebuilt.IsJudasWithBirthright(player)
-	return player:GetPlayerType() == PlayerType.PLAYER_JUDAS and player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT)
+	return player:GetPlayerType() == PlayerType.PLAYER_JUDAS and mod.PlayerHasBirthright(player)
 end
 
 ---Checks if player is pressing Edith's jump button
@@ -478,7 +500,10 @@ mod:AddCallback(ModCallbacks.MC_POST_BOMB_RENDER, mod.BombUpdate)
 
 local backdropColors = tables.BackdropColors
 ---@param player EntityPlayer
-function EdithRebuilt.InitEdithJump(player)	
+---@param jumpTag? string
+function EdithRebuilt.InitEdithJump(player, jumpTag)	
+	jumpTag = jumpTag or jumpTags.EdithJump
+
 	local canFly = player.CanFly
 	local jumpSpeed = canFly and 1.3 or 1.85
 	local soundeffect = canFly and SoundEffect.SOUND_ANGEL_WING or SoundEffect.SOUND_SHELLGAME
@@ -540,7 +565,7 @@ function EdithRebuilt.InitEdithJump(player)
 	local config = {
 		Height = jumpHeight,
 		Speed = jumpSpeed,
-		Tags = jumpTags.EdithJump,
+		Tags = jumpTag,
 		Flags = jumpFlags.EdithJump,
 	}
 
@@ -613,7 +638,7 @@ end
 ---@param tear EntityTear
 ---@param tainted? boolean
 function EdithRebuilt.ForceSaltTear(tear, tainted)
-	local IsBloodTear = mod.When(tear.Variant, tables.BloodytearVariants, false	)
+	local IsBloodTear = mod.When(tear.Variant, tables.BloodytearVariants, false)
 	doEdithTear(tear, IsBloodTear, tainted)
 end
 
@@ -1057,7 +1082,7 @@ local damageFlags = DamageFlag.DAMAGE_CRUSH | DamageFlag.DAMAGE_IGNORE_ARMOR
 ---@param dealEnt Entity
 ---@param damage number
 ---@param knockback number
-function EdithRebuilt.LandDamage(ent, dealEnt, damage, knockback)
+function EdithRebuilt.LandDamage(ent, dealEnt, damage, knockback)	
 	if not mod.IsEnemy(ent) then return end
 
 	ent:TakeDamage(damage, damageFlags, EntityRef(dealEnt), 0)
@@ -1067,13 +1092,16 @@ end
 ---@param ent Entity
 ---@param player EntityPlayer
 function EdithRebuilt.AddExtraGore(ent, player)
-	local menuData = saveManager:GetSettingsSave()
+	local enabledExtraGore
 
-	if not menuData then return end	
-	local targetData = mod.IsEdith(player, true) and menuData.TEdithData.EnableGore or menuData.EdithData.EnableGore 
+	if mod.IsEdith(player, false) then
+		enabledExtraGore = mod.GetConfigData(ConfigDataTypes.EDITH).EnableExtraGore
+	elseif mod.IsEdith(player, true) then
+		enabledExtraGore = mod.GetConfigData(ConfigDataTypes.TEDITH).EnableExtraGore
+	end
 
-	if not targetData then return end	
-	if ent:ToTear() then return end
+	if not enabledExtraGore then return end
+	if not ent:ToNPC() then return end
 
 	ent:AddEntityFlags(EntityFlag.FLAG_EXTRA_GORE)
 	ent:MakeBloodPoof(ent.Position, nil, 0.5)
@@ -1100,6 +1128,8 @@ function EdithRebuilt:EdithStomp(parent, radius, damage, knockback, breakGrid)
 	playerData.StompedEntities = Isaac.FindInCapsule(capsule)
 
 	for _, ent in ipairs(playerData.StompedEntities) do
+		if GetPtrHash(parent) == GetPtrHash(ent) then goto Break end
+
 		isSalted = mod.IsSalted(ent)
 		local knockbackMult = isSalted and 1.5 or 1
 
@@ -1109,7 +1139,7 @@ function EdithRebuilt:EdithStomp(parent, radius, damage, knockback, breakGrid)
 			ent:ToNPC().State = NpcState.STATE_SPECIAL
 		end
 
-		if not mod.IsEnemy(ent) then goto Break end
+		Isaac.RunCallback(mod.Enums.Callbacks.OFFENSIVE_STOMP, parent, ent)	
 
 		if isDefStomp then
 			EdithRebuilt.SetSalted(ent, SaltedTime, parent)
@@ -1118,6 +1148,8 @@ function EdithRebuilt:EdithStomp(parent, radius, damage, knockback, breakGrid)
 			end
 			goto Break
 		end
+
+		if not mod.IsEnemy(ent) then goto Break end
 
 		FrozenMult = ent:HasEntityFlags(EntityFlag.FLAG_FREEZE) and 1.2 or 1 
 		damage = (damage * FrozenMult) * TerraMult
@@ -1164,6 +1196,23 @@ function EdithRebuilt.GetStompedEnemies(player)
     end
     return enemyTable
 end
+
+---@param player EntityPlayer
+function mod:Peffect(player)
+	player:AddCacheFlags(CacheFlag.CACHE_DAMAGE)
+	player:EvaluateItems()	
+end
+mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, mod.Peffect)
+
+---@param player EntityPlayer
+---@param flag CacheFlag
+function mod:EvaluateCache(player, flag)
+	if flag ~= CacheFlag.CACHE_DAMAGE then return end
+	local damagemult = player:GetBoneHearts() * 0.75
+
+	player.Damage = player.Damage + damagemult
+end
+mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, mod.EvaluateCache)
 
 ---Triggers a push to `pushed` from `pusher`
 ---@param pushed Entity
