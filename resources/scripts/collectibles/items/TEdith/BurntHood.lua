@@ -1,7 +1,6 @@
 local mod = EdithRebuilt
 local enums = mod.Enums
 local items = enums.CollectibleType
-local sounds = enums.SoundEffect
 local BurntHood = {}
 local funcs = {
     GetData = mod.CustomDataWrapper.getData,
