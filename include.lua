@@ -23,6 +23,7 @@ local includeFiles = {
 	funcs .. "functions",
 	funcs .. "unlock_functions",
 	misc .. "ImGui",
+	misc .. "UnlockManager",
 	effects .. "Salted",
 	effects .. "Peppered",
 	effects .. "HydrargyrumCurse",
