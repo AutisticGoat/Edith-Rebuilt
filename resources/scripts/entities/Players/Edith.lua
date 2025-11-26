@@ -9,15 +9,16 @@ local level = utils.Level
 local game = utils.Game 
 local sfx = utils.SFX
 local JumpParams = tables.JumpParams
+local JumpTags = tables.JumpTags
 local data = mod.CustomDataWrapper.getData
 local VecDir = include("resources.scripts.functions.VecDir")
 local EdithMod = include("resources.scripts.functions.Edith")
 local Land = include("resources.scripts.functions.Land")
+local jumpMod = include("resources.scripts.functions.Jump")
+local helpers = include("resources.scripts.functions.Helpers")
 local params = EdithMod.GetJumpStompParams
 
 local Edith = {}
-
-
 
 --[[
 	Desbloqueada por morir por una fuente de fuego
@@ -67,7 +68,7 @@ function Edith:EdithJumpHandler(player)
 	local jumpData = JumpLib:GetData(player)
 	local isPitfall = JumpLib:IsPitfalling(player)
 	local isJumping = EdithMod.IsJumping(player)
-	local IsVestige = mod.IsVestigeChallenge() 
+	local IsVestige = helpers.IsVestigeChallenge() 
 	local jumpparams = params(player)
 
 	playerData.ExtraJumps = playerData.ExtraJumps or 0
@@ -94,7 +95,7 @@ function Edith:EdithJumpHandler(player)
 	end
 
 	if jumpparams.Cooldown == 0 and jumpparams.Jumps > 0 and not isJumping and not IsVestige then
-		mod.InitEdithJump(player)
+		jumpMod.InitEdithJump(player, JumpTags.EdithJump, vestige)	
 	end
 	
 	local dir = mod.GetEdithTargetDistance(player) <= 5 and Direction.DOWN or VecDir.VectorToDirection(mod.GetEdithTargetDirection(player))
@@ -164,20 +165,12 @@ function Edith:EdithLanding(player, _, pitfall)
 	EdithMod.BombStompManager(player, jumpParams)
 
 	player:SetMinDamageCooldown(25)
-
 	player:MultiplyFriction(0.1)
 	
 	Land.EdithStomp(player, jumpParams.Radius, jumpParams.Damage, jumpParams.Knockback, true)
 	edithTarget:GetSprite():Play("Idle")
 
-	-- if not mod.IsKeyStompPressed(player) and not mod.IsEdithTargetMoving(player) then
-	-- 	if distance <= 5 and distance >= 60 then
-	-- 		player.Position = edithTarget.Position
-	-- 	end
-	-- 	if playerData.ExtraJumps <= 0 then
-	-- 		mod.RemoveEdithTarget(player)
-	-- 	end
-	-- end
+	--
 	-- playerData.IsFalling = false
 
 	playerData.RocketLaunch = false
