@@ -170,6 +170,19 @@ function Edith:DamageStuff(_, damage, _, source)
 end
 mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Edith.DamageStuff)
 
+---@param player EntityPlayer
+function Edith:EdithRender(player)
+	local sprite = player:GetSprite()
+	
+	if not mod.IsEdith(player, false) then return end
+	if not IsInTrapdoor(player) then return end
+	if not sprite:IsPlaying("Trapdoor") then return end
+	if sprite:GetFrame() ~= 8 then return end
+
+	game:StartStageTransition(false, 0, player)
+end
+mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_RENDER, Edith.EdithRender)
+
 ---@param ID CollectibleType
 ---@param player EntityPlayer
 function Edith:OnActiveItemRemoveTarget(ID, _, player)
