@@ -1,47 +1,22 @@
 local mod = EdithRebuilt
 local enums = mod.Enums
-local misc = enums.Misc
 local players = enums.PlayerType
 local costumes = enums.NullItemID
 local utils = enums.Utils
 local tables = enums.Tables
-local level = utils.Level
 local game = utils.Game 
-local sfx = utils.SFX
 local JumpParams = tables.JumpParams
-local JumpTags = tables.JumpTags
-local data = mod.CustomDataWrapper.getData
-local VecDir = include("resources.scripts.functions.VecDir")
 local EdithMod = include("resources.scripts.functions.Edith")
 local Land = include("resources.scripts.functions.Land")
-local jumpMod = include("resources.scripts.functions.Jump")
 local helpers = include("resources.scripts.functions.Helpers")
 local params = EdithMod.GetJumpStompParams
-
 local Edith = {}
-
---[[
-	Desbloqueada por morir por una fuente de fuego
-]]
-
----@param player EntityPlayer
----@param jumps integer
-local function setEdithJumps(player, jumps)
-	params(player).Jumps = jumps
-end
-
----@param player EntityPlayer
----@return integer
-local function GetNumTears(player)
-	return player:GetMultiShotParams(WeaponType.WEAPON_TEARS):GetNumTears()
-end
 
 ---@param player EntityPlayer
 function Edith:EdithInit(player)
 	if not mod.IsEdith(player, false) then return end
 	mod.SetNewANM2(player, "gfx/EdithAnim.anm2")
 	local isVestige = mod.IsVestigeChallenge()
-
 	local costume = isVestige and costumes.ID_EDITH_VESTIGE_SCARF or costumes.ID_EDITH_SCARF
 
 	mod.ForceCharacterCostume(player, players.PLAYER_EDITH, costume)
@@ -55,10 +30,8 @@ end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, Edith.EdithInit)
 
 ---@param player EntityPlayer
-function Edith:EdithJumpHandler(player)
+function Edith:OnEdithUpdate(player)
 	if not mod.IsEdith(player, false) then return end
-
-	local playerData = data(player)
 	if player:IsDead() then mod.RemoveEdithTarget(player) return end
 
 	local isMoving = mod.IsEdithTargetMoving(player)
@@ -69,79 +42,48 @@ function Edith:EdithJumpHandler(player)
 	local isPitfall = JumpLib:IsPitfalling(player)
 	local isJumping = EdithMod.IsJumping(player)
 	local IsVestige = helpers.IsVestigeChallenge() 
-	local jumpparams = params(player)
-
-	playerData.ExtraJumps = playerData.ExtraJumps or 0
-
-	-- print(JumpLib:IsFalling(player))
+	local jumpParams = params(player)
 
 	if player.FrameCount > 0 and (isMoving or isKeyStompPressed or (hasMarked and isShooting)) and not isPitfall then
 		mod.SpawnEdithTarget(player)
 	end
 
-	mod.ManageEdithWeapons(player)
-	mod.CustomDropBehavior(player, jumpData)
-	mod.DashItemBehavior(player)
-
-	-- print(jumpparams.Jumps)
+	EdithMod.ManageEdithWeapons(player)
+	EdithMod.CustomDropBehavior(player, jumpData)
+	EdithMod.DashItemBehavior(player)
 
 	local target = mod.GetEdithTarget(player)
 	if not target then return end
 
 	EdithMod.TargetMovementManager(player, target, isMoving)
-
-	if isKeyStompPressed and not isJumping and not IsVestige then
-		setEdithJumps(player, GetNumTears(player))
-	end
-
-	if jumpparams.Cooldown == 0 and jumpparams.Jumps > 0 and not isJumping and not IsVestige then
-		jumpMod.InitEdithJump(player, JumpTags.EdithJump, vestige)	
-	end
-	
-	local dir = mod.GetEdithTargetDistance(player) <= 5 and Direction.DOWN or VecDir.VectorToDirection(mod.GetEdithTargetDirection(player))
-	
-	if not (isJumping or (not isShooting) or (isKeyStompPressed)) then return end
-	player:SetHeadDirection(dir, 1, true)
+	EdithMod.JumpTriggerManager(player, jumpParams, isKeyStompPressed, isJumping, IsVestige)
+	EdithMod.HeadDirectionManager(player, isJumping, isShooting, isKeyStompPressed)
 end
-mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, Edith.EdithJumpHandler)
+mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, Edith.OnEdithUpdate)
 
 ---@param player EntityPlayer
 ---@return boolean
-local function isNearTrapdoor(player)
-	local room = game:GetRoom()
-	local playerPos = player.Position
-	local gent, GentType
+local function IsInTrapdoor(player)
+	local grid = game:GetRoom():GetGridEntityFromPos(player.Position)
 
-	for i = 1, room:GetGridSize() do
-		gent = room:GetGridEntity(i)
-
-		if not gent then goto Break end
-		GentType = gent:GetType()
-
-		if GentType == GridEntityType.GRID_GRAVITY then return true end
-		if not mod.When(GentType, tables.DisableLandFeedbackGrids, false) then
-			return playerPos:Distance(gent.Position) <= 20
-		end
-		::Break::
-	end
-	return false
-end
+	return grid and grid:GetType() == GridEntityType.GRID_TRAPDOOR or false
+end	
 
 ---@param player EntityPlayer
 function Edith:OnStartingJump(player)
-	data(player).JumpStartPos = player.Position
-	data(player).JumpStartDist = mod.GetEdithTargetDistance(player)
+	local jumpParams = params(player)
+	jumpParams.JumpStartPos = player.Position
+	jumpParams.JumpStartDist = mod.GetEdithTargetDistance(player)
 
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_LUMP_OF_COAL) then return end
 	local rng = player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_LUMP_OF_COAL)
-	data(player).CoalBonus = mod.RandomFloat(rng, 0.5, 0.6) * mod.GetEdithTargetDistance(player) / 40
+	jumpParams.CoalBonus = mod.RandomFloat(rng, 0.5, 0.6) * mod.GetEdithTargetDistance(player) / 40
 end
 mod:AddCallback(JumpLib.Callbacks.POST_ENTITY_JUMP, Edith.OnStartingJump, JumpParams.EdithJump)
 
 ---@param player EntityPlayer
 ---@param pitfall boolean
-function Edith:EdithLanding(player, _, pitfall)
-	local playerData = data(player)
+function Edith:OnEdithLanding(player, _, pitfall)
 	local edithTarget = mod.GetEdithTarget(player)
 	local jumpParams = params(player)
 
@@ -153,7 +95,7 @@ function Edith:EdithLanding(player, _, pitfall)
 		return
 	end
 
-	if isNearTrapdoor(player) == false then
+	if not IsInTrapdoor(player) then
 		Land.LandFeedbackManager(player, mod:GetLandSoundTable(false), player.Color, false)
 	end
 
@@ -170,75 +112,40 @@ function Edith:EdithLanding(player, _, pitfall)
 	Land.EdithStomp(player, jumpParams.Radius, jumpParams.Damage, jumpParams.Knockback, true)
 	edithTarget:GetSprite():Play("Idle")
 
-	--
-	-- playerData.IsFalling = false
-
-	playerData.RocketLaunch = false
+	jumpParams.RocketLaunch = false
 end
-mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, Edith.EdithLanding, JumpParams.EdithJump)
+mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, Edith.OnEdithLanding, JumpParams.EdithJump)
 
 ---@param player EntityPlayer
-function Edith:EdithPEffectUpdate(player)
+function Edith:OnEdithPEffectUpdate(player)
 	if not mod.IsEdith(player, false) then return end
-
-	local playerData = data(player)
-	local jumpparams = params(player)
-
-	if jumpparams.RocketLaunch then return end
-
-	jumpparams.Cooldown = math.max(jumpparams.Cooldown - 1, 0)
-
-	if jumpparams.Cooldown == 1 and player.FrameCount > 20 then
-		mod.SetColorCooldown(player, 0.6, 5)
-		local EdithSave = mod.GetConfigData("EdithData") ---@cast EdithSave EdithData
-		local soundTab = tables.CooldownSounds[EdithSave.JumpCooldownSound or 1]
-		local pitch = soundTab.Pitch == 1.2 and (soundTab.Pitch * mod.RandomFloat(player:GetDropRNG(), 1, 1.1)) or soundTab.Pitch
-		sfx:Play(soundTab.SoundID, 2, 0, false, pitch)
-		jumpparams.StompedEntities = nil
-		jumpparams.IsDefensiveStomp = false
-	end
-
-	if mod.IsVestigeChallenge() then return end
-	if not mod.GetEdithTarget(player) then return end
-	if not EdithMod.IsJumping(player) then return end
-
-	local div = (mod.IsKeyStompPressed(player) and player.CanFly) and 70 or 50
-	mod.EdithDash(player, mod.GetEdithTargetDirection(player, false), mod.GetEdithTargetDistance(player), div)
-end
-mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, Edith.EdithPEffectUpdate)
-
----@param player EntityPlayer
----@param jumpdata JumpConfig
-function Edith:EdithBomb(player, jumpdata)
-	local jumpinternalData = JumpLib.Internal:GetData(player)
 	local jumpParams = params(player)
 
-	mod.FallBehavior(player)
-	mod.BombFall(player, jumpdata)
+	if jumpParams.RocketLaunch then return end
 
-	if not mod.IsKeyStompPressed(player) then return end
-	if jumpinternalData.UpdateFrame ~= 9 then return end
-	if mod.IsVestigeChallenge() then return end
-
-	local CanFly = player.CanFly
-	local HeightMult = CanFly and 0.8 or 0.65
-	local JumpSpeed = CanFly and 1.2 or 1.5
-
-	jumpParams.IsDefensiveStomp = true
-	mod.SetColorCooldown(player, -0.8, 10)
-	sfx:Play(SoundEffect.SOUND_STONE_IMPACT, 1, 0, false, 0.8)
-	
-	jumpinternalData.StaticHeightIncrease = jumpinternalData.StaticHeightIncrease * HeightMult
-	jumpinternalData.StaticJumpSpeed = JumpSpeed
+	EdithMod.CooldownUpdate(player, jumpParams)
+	EdithMod.JumpMovement(player)
 end
-mod:AddCallback(JumpLib.Callbacks.ENTITY_UPDATE_60, Edith.EdithBomb, JumpParams.EdithJump)
+mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, Edith.OnEdithPEffectUpdate)
+
+---@param player EntityPlayer
+---@param jumpdata JumpData
+function Edith:OnEdithJump60Update(player, jumpdata)
+	local jumpIntData = JumpLib.Internal:GetData(player)
+	local jumpParams = params(player)
+
+	EdithMod.DefensiveStompManager(player, jumpIntData, jumpParams)
+	EdithMod.FallBehavior(player, jumpdata, jumpParams)
+	EdithMod.BombFall(player, jumpdata, jumpParams)
+end
+mod:AddCallback(JumpLib.Callbacks.ENTITY_UPDATE_60, Edith.OnEdithJump60Update, JumpParams.EdithJump)
 
 function Edith:EdithOnNewRoom()
 	for _, player in pairs(PlayerManager.GetPlayers()) do
 		if not mod.IsEdith(player, false) then goto Break end
 		mod:ChangeColor(player, _, _, _, 1)
 		mod.RemoveEdithTarget(player)
-		setEdithJumps(player, 0)
+		EdithMod.SetJumps(player, 0)
 		::Break::
 	end
 end
@@ -280,7 +187,7 @@ function Edith:OnBombExplode(bomb)
 
 		if not mod.IsEdith(player, false) then goto continue end
 
-		mod.ExplosionRecoil(player, bomb)
+		EdithMod.ExplosionRecoil(player, params(player), bomb)
 
 		::continue::
 	end

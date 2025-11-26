@@ -1,20 +1,12 @@
 ---@diagnostic disable: undefined-global, param-type-mismatch
 local mod = EdithRebuilt
 local enums = mod.Enums
-local effectVariant = enums.EffectVariant
 local utils = enums.Utils
 local game = utils.Game
-local level = utils.Level
 local sfx = utils.SFX
 local ConfigDataTypes = enums.ConfigDataTypes
 local tables = enums.Tables
-local jumpTags = tables.JumpTags
-local jumpFlags = tables.JumpFlags
-local misc = enums.Misc
-local players = enums.PlayerType
-local sounds = enums.SoundEffect
 local data = mod.CustomDataWrapper.getData
-local saveManager = mod.SaveManager
 local Math = include("resources.scripts.functions.Maths")
 local Land = {}
 
@@ -34,8 +26,6 @@ function Land.EdithStomp(parent, radius, damage, knockback, breakGrid)
 	local capsule = Capsule(parent.Position, Vector.One, 0, radius)
 	local SaltedTime = Math.Round(Math.Clamp(120 * (mod.GetTPS(parent) / 2.73), 60, 360))
 	local isSalted
-
-	print(radius, damage, knockback)
 
 	playerData.StompedEntities = Isaac.FindInCapsule(capsule)
 
