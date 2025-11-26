@@ -159,17 +159,6 @@ function EdithRebuilt.IsDefensiveStomp(player)
 	return data(player).IsDefensiveStomp 
 end
 
----Helper tears stat manager function
----@param firedelay number
----@param val number
----@param mult? boolean
----@return number
-function EdithRebuilt.tearsUp(firedelay, val, mult)
-    local currentTears = 30 / (firedelay + 1)
-    local newTears = mult and (currentTears * val) or currentTears + val
-    return math.max((30 / newTears) - 1, -0.75)
-end
-
 ---Helper range stat manager function
 ---@param range number
 ---@param val number
@@ -329,94 +318,6 @@ function EdithRebuilt:TargetDoorManager(effect, player, triggerDistance)
 	end
 end
 
----@param player EntityPlayer
-function EdithRebuilt.ManageEdithWeapons(player)
-	local weapon = player:GetWeapon(1)
-
-	if not weapon then return end
-	if not mod.When(weapon:GetWeaponType(), tables.OverrideWeapons, false) then return end
-	local newWeapon = Isaac.CreateWeapon(WeaponType.WEAPON_TEARS, player)
-	Isaac.DestroyWeapon(weapon)
-	player:EnableWeaponType(WeaponType.WEAPON_TEARS, true)
-	player:SetWeapon(newWeapon, 1)	
-end
-
----@param player EntityPlayer
----@param jumpData JumpData
-function EdithRebuilt.CustomDropBehavior(player, jumpData)
-	if not mod.IsEdith(player, false) then return end
-	local playerData = data(player)
-	playerData.ShouldDrop = playerData.ShouldDrop or false
-
-	if playerData.ShouldDrop == false then
-	---@diagnostic disable-next-line: undefined-field
-		player:SetActionHoldDrop(0)
-	end
-
-	if not jumpData.Jumping then playerData.ShouldDrop = false return end
-	if not Input.IsActionTriggered(ButtonAction.ACTION_DROP, player.ControllerIndex) then return end
-	if not (jumpData.Height > 10 and not JumpLib:IsFalling(player)) then return end
-	playerData.ShouldDrop = true
-	---@diagnostic disable-next-line: undefined-field
-	player:SetActionHoldDrop(119)
-end
-
----@param player EntityPlayer
-function EdithRebuilt.DashItemBehavior(player)
-	local edithTarget = mod.GetEdithTarget(player)
-
-	if not edithTarget then return end
-	local effects = player:GetEffects()
-	local hasMarsEffect = effects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_MARS)
-	local hasAnyPonyEffect = effects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_PONY) or effects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_WHITE_PONY)
-	local direction = mod.GetEdithTargetDirection(player, false)
-	local distance = mod.GetEdithTargetDistance(player)
-
-	if hasMarsEffect or hasAnyPonyEffect then
-		mod.EdithDash(player, direction, distance, 50)
-	end
-
-	if player.Velocity:Length() <= 3 then
-		effects:RemoveCollectibleEffect(CollectibleType.COLLECTIBLE_PONY, -1)
-		effects:RemoveCollectibleEffect(CollectibleType.COLLECTIBLE_WHITE_PONY, -1)
-	end
-
-	local primaryActiveSlot = player:GetActiveItemDesc(ActiveSlot.SLOT_PRIMARY)
-	local activeItem = primaryActiveSlot.Item
-
-	if activeItem == 0 then return end
-
-	local isMoveBasedActive = tables.MovementBasedActives[activeItem] or false
-	local itemConfig = Isaac.GetItemConfig():GetCollectible(activeItem)
-	local maxItemCharge = itemConfig.MaxCharges
-	local currentItemCharge = primaryActiveSlot.Charge
-	local itemBatteryCharge = primaryActiveSlot.BatteryCharge
-	local totalItemCharge = currentItemCharge + itemBatteryCharge
-	local usedCharge = totalItemCharge - maxItemCharge
-
-	if not isMoveBasedActive or totalItemCharge < maxItemCharge then return end
-	if not Input.IsActionTriggered(ButtonAction.ACTION_ITEM, player.ControllerIndex) then return end
-
-	mod.EdithDash(player, direction, distance, 50)
-	player:UseActiveItem(activeItem)
-	player:SetActiveCharge(usedCharge, ActiveSlot.SLOT_PRIMARY)
-end
-
----@param player EntityPlayer
-function EdithRebuilt.FallBehavior(player)
-	local distance = mod.GetEdithTargetDistance(player)
-	local jumpdata = JumpLib:GetData(player)
-
-	if mod.IsDefensiveStomp(player) then return end
-	if not (player.CanFly and ((mod.IsEdithTargetMoving(player) and distance <= 50) or distance <= 5)) then return end
-
-	player:MultiplyFriction(isMovingTarget and 1 or 0.2)
-
-	if not (jumpdata.Fallspeed < 8.5 and JumpLib:IsFalling(player)) then return end
-	sfx:Play(SoundEffect.SOUND_SHELLGAME)
-	JumpLib:SetSpeed(player, 10 + (jumpdata.Height / 10))
-end
-
 ---@param Type ConfigDataTypes
 function EdithRebuilt.GetConfigData(Type)
 	if not saveManager:IsLoaded() then return end
@@ -432,75 +333,6 @@ function EdithRebuilt.GetConfigData(Type)
 
 	return mod.When(Type, switch)
 end
-
----@param player EntityPlayer
----@param bomb? EntityBomb
-function EdithRebuilt.ExplosionRecoil(player, bomb)
-	JumpLib:Jump(player, {
-		Height = 10,
-		Speed = 1.5,
-		Tags = jumpTags.EdithJump,
-		Flags = jumpFlags.EdithJump,
-	})
-
-	local velTarget = (
-		bomb and (player.Position - bomb.Position) or 
-		-player.Velocity
-	):Normalized()
-
-	player.Velocity = velTarget:Resized(15)
-	data(player).RocketLaunch = true
-end
-
----@param player EntityPlayer
----@param jumpdata JumpConfig
-function EdithRebuilt.BombFall(player, jumpdata)	
-	if mod.IsVestigeChallenge() then return end
-	if mod.IsDefensiveStomp(player) then return end
-	if not Input.IsActionTriggered(ButtonAction.ACTION_BOMB, player.ControllerIndex) then return end
-
-	local HasDrFetus = player:HasCollectible(CollectibleType.COLLECTIBLE_DR_FETUS)
-
-	if not (HasDrFetus or player:GetNumBombs() > 0 or player:HasGoldenBomb()) then return end
-
-	local playerData = data(player) 
-
-	playerData.BombStomp = true
-
-	if player:HasCollectible(CollectibleType.COLLECTIBLE_ROCKET_IN_A_JAR) then 
-		local TargetAnglev = mod.GetEdithTargetDirection(player, false):GetAngleDegrees()
-		local bomb = Isaac.Spawn(EntityType.ENTITY_BOMB, BombVariant.BOMB_ROCKET, 0, player.Position, Vector.Zero, player):ToBomb() ---@cast bomb EntityBomb
-		bomb:SetRocketAngle(TargetAnglev)
-		bomb:SetRocketSpeed(40)
-		local ShouldKeepBomb = HasDrFetus or player:HasGoldenBomb()
-
-		if not ShouldKeepBomb then
-			player:AddBombs(-1)
-		end
-
-		sfx:Play(SoundEffect.SOUND_ROCKET_LAUNCH)
-		
-		mod.ExplosionRecoil(player)
-
-		playerData.RocketLaunch = true
-		data(bomb).IsEdithRocket = true
-		return
-	end
-
-	if playerData.RocketLaunch then return end
-	JumpLib:SetSpeed(player, 8 + (jumpdata.Height / 10))
-end
-
----@param bomb EntityBomb
-function mod:BombUpdate(bomb)
-	if not data(bomb).IsEdithRocket then return end
-	local rocketHeight = JumpLib:GetData(bomb).Height
-
-	if rocketHeight <= 15 then
-		JumpLib:QuitJump(bomb)
-	end
-end
-mod:AddCallback(ModCallbacks.MC_POST_BOMB_RENDER, mod.BombUpdate)
 
 local backdropColors = tables.BackdropColors
 
@@ -1587,13 +1419,6 @@ function EdithRebuilt.ParryLandManager(player, IsTaintedEdith)
 	playerData.IsParryJump = false
 
 	return PerfectParry, EnemiesInImpreciseParry
-end
-
----Function made to adjust landing volumes
----@param Percent number
----@return number
-local function GetVolume(Percent)
-	return (Percent / 100) ^ 2
 end
 
 ---@param entity Entity

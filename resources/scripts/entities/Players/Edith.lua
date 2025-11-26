@@ -109,7 +109,7 @@ function Edith:OnEdithLanding(player, _, pitfall)
 	player:SetMinDamageCooldown(25)
 	player:MultiplyFriction(0.1)
 	
-	Land.EdithStomp(player, jumpParams.Radius, jumpParams.Damage, jumpParams.Knockback, true)
+	Land.EdithStomp(player, jumpParams, true)
 	edithTarget:GetSprite():Play("Idle")
 
 	jumpParams.RocketLaunch = false

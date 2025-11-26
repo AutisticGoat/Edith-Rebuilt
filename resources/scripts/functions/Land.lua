@@ -12,24 +12,24 @@ local Land = {}
 
 ---Custom Edith stomp Behavior
 ---@param parent EntityPlayer
----@param radius number
----@param damage number
----@param knockback number
+---@param params EdithJumpStompParams
 ---@param breakGrid boolean
-function Land.EdithStomp(parent, radius, damage, knockback, breakGrid)
-	local isDefStomp = mod.IsDefensiveStomp(parent) or data(parent).HoodLand
+function Land.EdithStomp(parent, params, breakGrid)
+	local isDefStomp = params.IsDefensiveStomp or data(parent).HoodLand
+	local damage, knockback, radius = params.Damage, params.Knockback, params.Radius
 	local HasTerra = parent:HasCollectible(CollectibleType.COLLECTIBLE_TERRA)
 	local TerraRNG = parent:GetCollectibleRNG(CollectibleType.COLLECTIBLE_TERRA)
 	local TerraMult = HasTerra and mod.RandomFloat(TerraRNG, 0.5, 2) or 1	
-	local playerData = data(parent)
 	local FrozenMult, BCRRNG
 	local capsule = Capsule(parent.Position, Vector.One, 0, radius)
 	local SaltedTime = Math.Round(Math.Clamp(120 * (mod.GetTPS(parent) / 2.73), 60, 360))
 	local isSalted
 
-	playerData.StompedEntities = Isaac.FindInCapsule(capsule)
+	params.StompedEntities = Isaac.FindInCapsule(capsule)
 
-	for _, ent in ipairs(playerData.StompedEntities) do
+
+	--- Pendiente de reducir
+	for _, ent in ipairs(params.StompedEntities) do
 		if GetPtrHash(parent) == GetPtrHash(ent) then goto Break end
 
 		isSalted = mod.IsSalted(ent)
@@ -114,6 +114,8 @@ function Land.LandFeedbackManager(player, soundTable, GibColor, IsParryLand)
 	local menuData = saveManager:GetSettingsSave()
 	if not menuData then return end
 
+
+	--- Pendiente de reducir
 	local room = game:GetRoom()
 	local BackDrop = room:GetBackdropType()
 	local hasWater = room:HasWater()
