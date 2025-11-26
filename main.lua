@@ -6,7 +6,7 @@ EdithRebuilt.CustomDataWrapper.init(mod)
 EdithRebuilt.SaveManager = require("resources.scripts.libs.EdithRebuiltSaveManager")
 EdithRebuilt.SaveManager.Init(mod)
 
-include("resources.scripts.libs.EdithKotryJumpLib").Init(mod)
+include("resources.scripts.libs.EdithKotryJumpLib").Init()
 include("include")
 
 local enums = mod.Enums

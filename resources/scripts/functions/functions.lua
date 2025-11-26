@@ -16,6 +16,8 @@ local sounds = enums.SoundEffect
 local data = mod.CustomDataWrapper.getData
 local saveManager = mod.SaveManager
 
+local Math = include("resources.scripts.functions.Maths")
+
 local MortisBackdrop = {
 	FLESH = 1,
 	MOIST = 2,
@@ -811,30 +813,6 @@ function EdithRebuilt.GetNearestEnemy(player)
     return closestEnemy
 end
 
----Expontential function
----@param number number
----@param coeffcient number
----@param power number
----@return integer
-function EdithRebuilt.exp(number, coeffcient, power)
-    return number ~= 0 and coeffcient * number ^ (power - 1) or 0
-end
-
----Logaritmic function
----@param x number
----@param base number
----@return number?
-function EdithRebuilt.Log(x, base)
-    if x <= 0 or base <= 1 then
-        return nil
-    end
-
-    local logNatural = math.log(x)
-    local logBase = math.log(base)
-    
-    return logNatural / logBase
-end
-
 ---Changes `player`'s ANM2 file
 ---@param player EntityPlayer
 ---@param FilePath string
@@ -1129,7 +1107,7 @@ end
 ---@param p EntityPlayer
 ---@return number
 function EdithRebuilt.GetTPS(p)
-    return mod.Round(30 / (p.MaxFireDelay + 1), 2)
+    return Math.Round(30 / (p.MaxFireDelay + 1), 2)
 end
 
 local KeyRequiredChests = {
@@ -1274,8 +1252,10 @@ function EdithRebuilt:EdithStomp(parent, radius, damage, knockback, breakGrid)
 	local playerData = data(parent)
 	local FrozenMult, BCRRNG
 	local capsule = Capsule(parent.Position, Vector.One, 0, radius)
-	local SaltedTime = mod.Round(mod.Clamp(120 * (mod.GetTPS(parent) / 2.73), 60, 360))
+	local SaltedTime = Math.Round(Math.Clamp(120 * (mod.GetTPS(parent) / 2.73), 60, 360))
 	local isSalted
+
+	print(radius, damage, knockback)
 
 	playerData.StompedEntities = Isaac.FindInCapsule(capsule)
 
@@ -1492,64 +1472,6 @@ function EdithRebuilt.GetMortisDrop()
 	else
 		return MortisBackdrop.FLESH
 	end
-end
-
---- Rounds a number to the closest number of decimal places given.
---- Defaults to rounding to the nearest integer. 
---- (from Library of Isaac)
----@param n number
----@param decimalPlaces integer? @Default: 0
----@return number
-function EdithRebuilt.Round(n, decimalPlaces)
-	decimalPlaces = decimalPlaces or 0
-	local mult = 10^(decimalPlaces or 0)
-	return math.floor(n * mult + 0.5) / mult
-end
-
---- Helper function to clamp a number into a range (from Library of Isaac).
----@param a number
----@param min number
----@param max number
----@return number
-function EdithRebuilt.Clamp(a, min, max)
-	if min > max then
-		local temp = min
-		min = max
-		max = temp
-	end
-
-	return math.max(min, math.min(a, max))
-end
-
---- Helper function to convert a given amount of angle degrees into the corresponding `Direction` enum (From Library of Isaac, tweaked a bit)
----@param angleDegrees number
----@return Direction
-function EdithRebuilt.AngleToDirection(angleDegrees)
-    local normalizedDegrees = angleDegrees % 360
-    if normalizedDegrees < 45 or normalizedDegrees >= 315 then
-        return Direction.RIGHT
-    elseif normalizedDegrees < 135 then
-        return Direction.DOWN
-    elseif normalizedDegrees < 225 then
-        return Direction.LEFT
-    else
-        return Direction.UP
-    end
-end
-
---- Returns a direction corresponding to the direction the provided vector is pointing (from Library of Isaac)
----@param vector Vector
----@return Direction
-function EdithRebuilt.VectorToDirection(vector)
-	return mod.AngleToDirection(vector:GetAngleDegrees())
-end
-
----Helper function to check if two vectors are exactly equal (from Library).
----@param v1 Vector
----@param v2 Vector
----@return boolean
-function EdithRebuilt.VectorEquals(v1, v2)
-    return v1.X == v2.X and v1.Y == v1.Y
 end
 
 ---Function used to spawn Tainted Edith's birthright fire jets

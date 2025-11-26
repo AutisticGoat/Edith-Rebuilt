@@ -5,6 +5,8 @@
         ".anm2": "xml"
     },
     "editor.wordWrap": "on",
-    "Lua.codeLens.enable": true
-
+    "Lua.codeLens.enable": true,
+    "Lua.runtime.special": {
+        "include": "require"
+    }
 }
