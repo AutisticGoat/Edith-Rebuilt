@@ -11,8 +11,8 @@ local sfx = utils.SFX
 local JumpParams = tables.JumpParams
 local data = mod.CustomDataWrapper.getData
 local VecDir = include("resources.scripts.functions.VecDir")
-local Maths = include("resources.scripts.functions.Maths")
 local EdithMod = include("resources.scripts.functions.Edith")
+local Land = include("resources.scripts.functions.Land")
 local params = EdithMod.GetJumpStompParams
 
 local Edith = {}
@@ -58,7 +58,7 @@ function Edith:EdithJumpHandler(player)
 	if not mod.IsEdith(player, false) then return end
 
 	local playerData = data(player)
-	if player:IsDead() then mod.RemoveEdithTarget(player); playerData.isJumping = false return end
+	if player:IsDead() then mod.RemoveEdithTarget(player) return end
 
 	local isMoving = mod.IsEdithTargetMoving(player)
 	local isKeyStompPressed = mod.IsKeyStompPressed(player)
@@ -66,11 +66,10 @@ function Edith:EdithJumpHandler(player)
 	local isShooting = mod:IsPlayerShooting(player)
 	local jumpData = JumpLib:GetData(player)
 	local isPitfall = JumpLib:IsPitfalling(player)
-	local isJumping = jumpData.Jumping 
+	local isJumping = EdithMod.IsJumping(player)
 	local IsVestige = mod.IsVestigeChallenge() 
 	local jumpparams = params(player)
 
-	playerData.isJumping = playerData.isJumping or false
 	playerData.ExtraJumps = playerData.ExtraJumps or 0
 
 	-- print(JumpLib:IsFalling(player))
@@ -96,10 +95,7 @@ function Edith:EdithJumpHandler(player)
 
 	if jumpparams.Cooldown == 0 and jumpparams.Jumps > 0 and not isJumping and not IsVestige then
 		mod.InitEdithJump(player)
-		playerData.isJumping = true
 	end
-
-	
 	
 	local dir = mod.GetEdithTargetDistance(player) <= 5 and Direction.DOWN or VecDir.VectorToDirection(mod.GetEdithTargetDirection(player))
 	
@@ -153,12 +149,11 @@ function Edith:EdithLanding(player, _, pitfall)
 
 	if pitfall then
 		mod.RemoveEdithTarget(player)
-		playerData.isJumping = false
 		return
 	end
 
 	if isNearTrapdoor(player) == false then
-		mod.LandFeedbackManager(player, mod:GetLandSoundTable(false), player.Color, false)
+		Land.LandFeedbackManager(player, mod:GetLandSoundTable(false), player.Color, false)
 	end
 
 	EdithMod.StompDamageManager(player, jumpParams)
@@ -170,12 +165,9 @@ function Edith:EdithLanding(player, _, pitfall)
 
 	player:SetMinDamageCooldown(25)
 
-	print("================================")
-	for k, v in pairs(jumpParams) do
-		print(k, v)
-	end
-
-	mod:EdithStomp(player, jumpParams.Radius, jumpParams.Damage, jumpParams.Knockback, true)
+	player:MultiplyFriction(0.1)
+	
+	Land.EdithStomp(player, jumpParams.Radius, jumpParams.Damage, jumpParams.Knockback, true)
 	edithTarget:GetSprite():Play("Idle")
 
 	-- if not mod.IsKeyStompPressed(player) and not mod.IsEdithTargetMoving(player) then
@@ -188,7 +180,6 @@ function Edith:EdithLanding(player, _, pitfall)
 	-- end
 	-- playerData.IsFalling = false
 
-	playerData.isJumping = false
 	playerData.RocketLaunch = false
 end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, Edith.EdithLanding, JumpParams.EdithJump)
@@ -216,7 +207,7 @@ function Edith:EdithPEffectUpdate(player)
 
 	if mod.IsVestigeChallenge() then return end
 	if not mod.GetEdithTarget(player) then return end
-	if not playerData.isJumping then return end
+	if not EdithMod.IsJumping(player) then return end
 
 	local div = (mod.IsKeyStompPressed(player) and player.CanFly) and 70 or 50
 	mod.EdithDash(player, mod.GetEdithTargetDirection(player, false), mod.GetEdithTargetDistance(player), div)
@@ -295,7 +286,6 @@ function Edith:OnBombExplode(bomb)
 		player = ent:ToPlayer() ---@cast player EntityPlayer
 
 		if not mod.IsEdith(player, false) then goto continue end
-		if not data(player).isJumping then goto continue end
 
 		mod.ExplosionRecoil(player, bomb)
 

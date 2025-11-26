@@ -193,4 +193,9 @@ function Edith.BombStompManager(player, params)
     params.BombStomp = false
 end
 
+---@param player EntityPlayer
+function Edith.IsJumping(player)
+    return JumpLib:GetData(player).Jumping
+end
+
 return Edith
