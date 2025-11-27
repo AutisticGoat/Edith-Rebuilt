@@ -120,9 +120,11 @@ end
 mod:AddCallback(ModCallbacks.MC_POST_ACHIEVEMENT_UNLOCK, mod.ThankYou)
 
 function unlocks:CheckStartUnlocks()
+    local pgd = Isaac.GetPersistentGameData()
+
     for _, charTable in pairs(UnlockTable) do     
         for _, tab in pairs(charTable) do
-            if Isaac.GetPersistentGameData():Unlocked(tab.Unlock) then goto continue end
+            if pgd:Unlocked(tab.Unlock) then goto continue end
             if tab.Item then
                 pool:RemoveCollectible(tab.Item)
             end
@@ -131,6 +133,10 @@ function unlocks:CheckStartUnlocks()
             end
             ::continue::
         end
+    end
+
+    if not pgd:Unlocked(achievements.ACHIEVEMENT_SALT_HEART) then
+        pool:RemoveCollectible(items.COLLECTIBLE_SALT_HEART)
     end
 end
 mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, unlocks.CheckStartUnlocks)
