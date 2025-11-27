@@ -198,32 +198,10 @@ end
 ---@param player PlayerType
 function unlocks:OnTriggerCompletion(mark, player)
     local pgd = Isaac.GetPersistentGameData()
-    local tableRef = player == players.PLAYER_EDITH and UnlockTable.Edith or players.PLAYER_EDITH_B and UnlockTable.TEdith or nil
     local difficulty = game.Difficulty
-
-    if not tableRef then return end
-    local unlock = mod.When(mark, UnlockTable.Edith)
 
     TriggerEdithUnlocks(mark, player, pgd, difficulty)
     TriggerTEdithUnlocks(mark, player, pgd, difficulty)
-
-    -- if not unlock then 
-    --     if not player == players.PLAYER_EDITH_B then return end
-
-    --     if Isaac.AllTaintedCompletion(players.PLAYER_EDITH_B, TaintedMarksGroup.SOULSTONE) == 2 then
-    --         pgd:TryUnlock(achievements.ACHIEVEMENT_SOUL_OF_EDITH)
-    --     end
-
-    --     if Isaac.AllTaintedCompletion(players.PLAYER_EDITH_B, TaintedMarksGroup.POLAROID_NEGATIVE) == 2 then
-    --         pgd:TryUnlock(achievements.ACHIEVEMENT_BURNT_SALT)
-    --     end
-
-    --     if difficulty == Difficulty.DIFFICULTY_GREEDIER then
-    --         pgd:TryUnlock(achievements.ACHIEVEMENT_JACK_OF_CLUBS)
-    --     end
-
-    --     return
-    -- end
 
     mod:ThankYou()
 end

@@ -3,11 +3,11 @@ local enums = mod.Enums
 local Vars = enums.EffectVariant 
 local game = enums.Utils.Game
 local misc = enums.Misc
-local saveManager = mod.SaveManager
 local tables = enums.Tables
 local Hsx = mod.Hsx
 local defColor = Color.Default
 local RGBColors = { Target = Color(1, 0, 0), Arrow = Color(1, 0, 0) }
+local Edith = include("resources.scripts.functions.Edith")
 local data = mod.CustomDataWrapper.getData
 
 -- local funcs = {
@@ -55,10 +55,10 @@ local function EdithTargetManagement(effect, player)
 
 	local playerPos = player.Position
 	local effectPos = effect.Position
-	local playerData = data(player)
 	local room = game:GetRoom()
+	local params = Edith.GetJumpStompParams(player)
 
-	if mod.IsKeyStompPressed(player) or playerData.ExtraJumps > 0 and playerData.EdithJumpTimer == 0 then
+	if mod.IsKeyStompPressed(player) or params.Jumps > 0 and params.Cooldown == 0 then
 		effect:GetSprite():Play("Blink")
 	end
 
