@@ -19,13 +19,10 @@ function Edith:EdithInit(player)
 	local isVestige = mod.IsVestigeChallenge()
 	local costume = isVestige and costumes.ID_EDITH_VESTIGE_SCARF or costumes.ID_EDITH_SCARF
 
-	mod.ForceCharacterCostume(player, players.PLAYER_EDITH, costume)
+	player:AddNullCostume(costume)
 
-	if isVestige then
-		for i = 0, 14 do
-			player:GetSprite():ReplaceSpritesheet(i, "gfx/characters/costumes/characterEdithVestige.png", true)
-		end
-	end
+	-- mod.ForceCharacterCostume(player, players.PLAYER_EDITH, costume)
+	EdithMod.SetVestigeSprite(player, isVestige)
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, Edith.EdithInit)
 

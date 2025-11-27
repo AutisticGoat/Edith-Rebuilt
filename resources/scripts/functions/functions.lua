@@ -730,31 +730,6 @@ function EdithRebuilt:SpawnPepperCreep(parent, position, damage, timeout)
 	pepper:SetTimeout(mod:SecondsToFrames(timeout) or 30)
 end
 
----Forcefully adds a costume for a character
----@param player EntityPlayer
----@param playertype PlayerType
----@param costume integer
-function EdithRebuilt.ForceCharacterCostume(player, playertype, costume)
-	local playerData = data(player)
-
-	playerData.HasCostume = {}
-
-	local hasCostume = playerData.HasCostume[playertype] or false
-	local isCurrentPlayerType = player:GetPlayerType() == playertype
-
-	if isCurrentPlayerType then
-		if not hasCostume then
-			player:AddNullCostume(costume)
-			playerData.HasCostume[playertype] = true
-		end
-	else
-		if hasCostume then
-			player:TryRemoveNullCostume(costume)
-			playerData.HasCostume[playertype] = false
-		end
-	end
-end
-
 ---Checks if player is shooting by checking if shoot inputs are being pressed
 ---@param player EntityPlayer
 ---@return boolean

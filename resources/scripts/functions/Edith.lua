@@ -100,6 +100,15 @@ function Edith.JumpTriggerManager(player, params, keyStomp, jumping, vestige)
 end
 
 ---@param player EntityPlayer
+---@param isVestige boolean
+function Edith.SetVestigeSprite(player, isVestige)
+	if not isVestige then return end
+	for i = 0, 14 do
+		player:GetSprite():ReplaceSpritesheet(i, "gfx/characters/costumes/characterEdithVestige.png", true)
+	end
+end
+
+---@param player EntityPlayer
 ---@param jumping boolean
 ---@param shooting boolean
 ---@param keyStomp boolean

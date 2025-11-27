@@ -27,7 +27,6 @@ function Land.EdithStomp(parent, params, breakGrid)
 
 	params.StompedEntities = Isaac.FindInCapsule(capsule)
 
-
 	--- Pendiente de reducir
 	for _, ent in ipairs(params.StompedEntities) do
 		if GetPtrHash(parent) == GetPtrHash(ent) then goto Break end

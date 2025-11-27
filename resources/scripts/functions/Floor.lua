@@ -37,8 +37,8 @@ end
 function Floor.IsChap4()
 	local backdrop = game:GetRoom():GetBackdropType()
 	
-	if floor.IsLJMortis() then return true end
+	if Floor.IsLJMortis() then return true end
 	return mod.When(backdrop, tables.Chap4Backdrops, false)
 end
 
-return floor
+return Floor
