@@ -925,7 +925,6 @@ function EdithRebuilt.GetBombRadiusFromDamage(damage)
     end
 end
 
-
 ---Checks if are in Chapter 4 (Womb, Utero, Scarred Womb, Corpse)
 ---@return boolean
 function EdithRebuilt:isChap4()
@@ -960,11 +959,6 @@ end
 local function ShouldConsumeKeys(player)
 	return (player:GetNumKeys() > 0 and not player:HasGoldenKey())
 end
-
-function mod:PiUpdate(pickup)
-	print(pickup:GetSprite():GetAnimation())
-end
-mod:AddCallback(ModCallbacks.MC_POST_PICKUP_UPDATE, mod.PiUpdate)
 
 ---@param ent Entity
 ---@param parent EntityPlayer

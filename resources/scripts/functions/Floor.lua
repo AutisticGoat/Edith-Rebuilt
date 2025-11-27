@@ -5,11 +5,11 @@ local utils = enums.Utils
 local game = utils.Game
 local tables = enums.Tables
 
-local floor = {}
+local Floor = {}
 
 ---Checks if player is in Last Judgement's Mortis 
 ---@return boolean
-function floor.IsLJMortis()
+function Floor.IsLJMortis()
 	if not StageAPI then return false end
 	if not LastJudgement then return false end
 
@@ -20,8 +20,8 @@ function floor.IsLJMortis()
 end
 
 ---@return integer
-function floor.GetMortisDrop()
-	if not floor.IsLJMortis() then return 0 end
+function Floor.GetMortisDrop()
+	if not Floor.IsLJMortis() then return 0 end
 
 	if LastJudgement.UsingMorgueisBackdrop then
 		return tables.MortisBackdrop.MORGUE
@@ -34,7 +34,7 @@ end
 
 ---Checks if player run is in Chapter 4 (Womb, Utero, Scarred Womb, Corpse)
 ---@return boolean
-function floor.IsChap4()
+function Floor.IsChap4()
 	local backdrop = game:GetRoom():GetBackdropType()
 	
 	if floor.IsLJMortis() then return true end
