@@ -6,7 +6,7 @@ local sfx = utils.SFX
 local tables = enums.Tables
 local jumpTags = tables.JumpTags
 local jumpFlags = tables.JumpFlags
-local helpers = mod.Modules.HELPERS
+local helpers = require("resources.scripts.functions.Helpers")
 local data = helpers.getData
 local jump = {}
 

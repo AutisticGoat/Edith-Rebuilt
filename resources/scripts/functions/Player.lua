@@ -1,7 +1,7 @@
 local mod = EdithRebuilt
 local enums = mod.Enums
 local players = enums.PlayerType
-local maths = mod.Modules.MATHS
+local maths = require("resources.scripts.functions.Maths")
 local data = mod.CustomDataWrapper.getData
 
 local player = {}

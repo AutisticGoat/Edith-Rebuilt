@@ -3,7 +3,7 @@ local enums = mod.Enums
 local variants = enums.EffectVariant
 local game = enums.Utils.Game
 local level = enums.Utils.Level
-local helpers = mod.Modules.HELPERS
+local helpers = require("resources.scripts.functions.Helpers")
 local data = mod.CustomDataWrapper.getData
 local targetArrow = {}
 

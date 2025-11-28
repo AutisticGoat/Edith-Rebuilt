@@ -1,3 +1,4 @@
+local modPath = ""
 local mod = EdithRebuilt
 local enums = mod.Enums
 local utils = enums.Utils
@@ -8,11 +9,10 @@ local misc = enums.Misc
 local tables = enums.Tables
 local JumpTags = tables.JumpTags
 local jumpFlags = tables.JumpFlags
-local modules = mod.Modules
-local Player = modules.PLAYER
-local Math = modules.MATHS 
-local VecDir = modules.VEC_DIR 
-local jump = modules.JUMP
+local Player = require("resources.scripts.functions.Player")
+local Math = require("resources.scripts.functions.Maths")
+local VecDir = require("resources.scripts.functions.VecDir")
+local jump = require("resources.scripts.functions.Jump")
 local data = mod.CustomDataWrapper.getData
 local Edith = {}
 
