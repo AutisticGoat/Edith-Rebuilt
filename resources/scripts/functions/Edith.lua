@@ -8,10 +8,11 @@ local misc = enums.Misc
 local tables = enums.Tables
 local JumpTags = tables.JumpTags
 local jumpFlags = tables.JumpFlags
-local Player = include("resources.scripts.functions.Player")
-local Math = include("resources.scripts.functions.Maths")
-local VecDir = include("resources.scripts.functions.VecDir")
-local jump = include("resources.scripts.functions.Jump")
+local modules = mod.Modules
+local Player = modules.PLAYER
+local Math = modules.MATHS 
+local VecDir = modules.VEC_DIR 
+local jump = modules.JUMP
 local data = mod.CustomDataWrapper.getData
 local Edith = {}
 
@@ -90,11 +91,12 @@ end
 ---@param jumping boolean
 ---@param vestige boolean
 function Edith.JumpTriggerManager(player, params, keyStomp, jumping, vestige)
-    if keyStomp and not jumping and not vestige then
+	local commonConditional = not jumping and not vestige
+    if keyStomp and commonConditional then
 		Edith.SetJumps(player, Edith.GetNumTears(player))
 	end
 
-	if params.Cooldown == 0 and params.Jumps > 0 and not jumping and not vestige then
+	if params.Cooldown == 0 and params.Jumps > 0 and commonConditional then
 		jump.InitEdithJump(player, JumpTags.EdithJump, vestige)	
 	end
 end
@@ -225,9 +227,6 @@ function Edith.BombFall(player, jumpConfig, jumpParams)
 	local HasDrFetus = player:HasCollectible(CollectibleType.COLLECTIBLE_DR_FETUS)
 
 	if not (HasDrFetus or player:GetNumBombs() > 0 or player:HasGoldenBomb()) then return end
-
-	local playerData = data(player) 
-
 	jumpParams.BombStomp = true
 
 	if player:HasCollectible(CollectibleType.COLLECTIBLE_ROCKET_IN_A_JAR) then 
@@ -250,7 +249,7 @@ function Edith.BombFall(player, jumpConfig, jumpParams)
 		return
 	end
 
-	if playerData.RocketLaunch then return end
+	if jumpParams.RocketLaunch then return end
 	JumpLib:SetSpeed(player, 8 + (jumpConfig.Height / 10))
 end
 
@@ -278,8 +277,10 @@ function Edith.TargetMovementManager(player, target, isMoving)
 			right = Input.GetActionValue(ButtonAction.ACTION_RIGHT, player.ControllerIndex),
 		}
 
-		local VectorX = ((input.left > 0.3 and -input.left) or (input.right > 0.3 and input.right) or 0) * (game:GetRoom():IsMirrorWorld() and -1 or 1)
+		local VectorX = ((input.left > 0.3 and -input.left) or (input.right > 0.3 and input.right) or 0) * (game:GetRoom():IsMirrorWorld() and -1 or 1) 
 		local VectorY = ((input.up > 0.3 and -input.up) or (input.down > 0.3 and input.down) or 0)
+		VectorX = VectorX 
+
 		friction = target:GetSprite():IsPlaying("Blink") and 0.5 or 0.775
 
 		target.Velocity = target.Velocity + Vector(VectorX, VectorY):Normalized():Resized(4)

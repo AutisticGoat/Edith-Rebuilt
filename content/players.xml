@@ -1,5 +1,4 @@
 <players root="gfx/characters/costumes/" portraitroot="gfx/ui/stage/" nameimageroot="gfx/ui/boss/">
-		 
 	<player 
 		name="Edith​​​" 
 		skin="characterEdith.png" 
@@ -25,6 +24,6 @@
 		healthtype="1"
 		birthright="Scorching leaps"
 		noshake="true"
-		achievement="The Punished"
+		achievement="EdithRebuilt_The Punished"
 	/>
 </players>

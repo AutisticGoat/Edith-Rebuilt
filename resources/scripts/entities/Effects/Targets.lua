@@ -7,18 +7,8 @@ local tables = enums.Tables
 local Hsx = mod.Hsx
 local defColor = Color.Default
 local RGBColors = { Target = Color(1, 0, 0), Arrow = Color(1, 0, 0) }
-local Edith = include("resources.scripts.functions.Edith")
+local Edith = mod.Modules.EDITH
 local data = mod.CustomDataWrapper.getData
-
--- local funcs = {
--- 	GetData = 
--- 	DrawLine = mod.drawLine,
--- 	MenuData = saveManager.GetSettingsSave,
--- 	Switch = mod.When,
--- 	HSVToRGB = Hsx.hsv2rgb,
--- 	RGBToHSV = Hsx.rgb2hsv,
--- }
-
 local teleportPoints = {
 	Vector(110, 135),
 	Vector(595, 385),

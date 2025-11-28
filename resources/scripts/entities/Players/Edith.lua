@@ -1,14 +1,15 @@
 local mod = EdithRebuilt
 local enums = mod.Enums
-local players = enums.PlayerType
 local costumes = enums.NullItemID
 local utils = enums.Utils
 local tables = enums.Tables
-local game = utils.Game 
+local game = utils.Game
 local JumpParams = tables.JumpParams
-local EdithMod = include("resources.scripts.functions.Edith")
-local Land = include("resources.scripts.functions.Land")
-local helpers = include("resources.scripts.functions.Helpers")
+local modules = mod.Modules
+local EdithMod = modules.EDITH
+local Land = modules.LAND
+local TargetArrow = modules.TARGET_ARROW
+local helpers = modules.HELPERS
 local params = EdithMod.GetJumpStompParams
 local Edith = {}
 
@@ -20,8 +21,6 @@ function Edith:EdithInit(player)
 	local costume = isVestige and costumes.ID_EDITH_VESTIGE_SCARF or costumes.ID_EDITH_SCARF
 
 	player:AddNullCostume(costume)
-
-	-- mod.ForceCharacterCostume(player, players.PLAYER_EDITH, costume)
 	EdithMod.SetVestigeSprite(player, isVestige)
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, Edith.EdithInit)

@@ -16,7 +16,7 @@ local sounds = enums.SoundEffect
 local data = mod.CustomDataWrapper.getData
 local saveManager = mod.SaveManager
 
-local Math = include("resources.scripts.functions.Maths")
+local Math = mod.Modules.MATHS
 
 local MortisBackdrop = {
 	FLESH = 1,

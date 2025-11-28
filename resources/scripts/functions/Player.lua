@@ -1,7 +1,8 @@
 local mod = EdithRebuilt
 local enums = mod.Enums
 local players = enums.PlayerType
-local maths = include("resources.scripts.functions.Maths")
+local maths = mod.Modules.MATHS
+local data = mod.CustomDataWrapper.getData
 
 local player = {}
 
@@ -23,6 +24,32 @@ end
 ---@param player EntityPlayer
 function player.PlayerHasBirthright(player)
 	return player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT)
+end
+
+---Forcefully adds a costume for a character
+---@param player EntityPlayer
+---@param playertype PlayerType
+---@param costume integer
+function player.ForceCharacterCostume(player, playertype, costume)
+	local playerData = data(player)
+
+	playerData.HasCostume = {}
+	local hasCostume = playerData.HasCostume[playertype] or false
+
+	
+	-- local isCurrentPlayerType = player:GetPlayerType() == playertype
+
+	-- if isCurrentPlayerType then
+	-- 	if not hasCostume then
+	-- 		player:AddNullCostume(costume)
+	-- 		playerData.HasCostume[playertype] = true
+	-- 	end
+	-- else
+	-- 	if hasCostume then
+	-- 		player:TryRemoveNullCostume(costume)
+	-- 		playerData.HasCostume[playertype] = false
+	-- 	end
+	-- end
 end
 
 ---Helper function for Edith's cooldown color manager

@@ -7,7 +7,7 @@ local sfx = utils.SFX
 local ConfigDataTypes = enums.ConfigDataTypes
 local tables = enums.Tables
 local data = mod.CustomDataWrapper.getData
-local Math = include("resources.scripts.functions.Maths")
+local Math = mod.Modules.MATHS
 local Land = {}
 
 ---Custom Edith stomp Behavior

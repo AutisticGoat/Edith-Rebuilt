@@ -4,7 +4,7 @@ local game = enums.Utils.Game
 local tables = enums.Tables
 local ConfigDataTypes = enums.ConfigDataTypes
 local saveManager = mod.SaveManager
-local floor = include("resources.scripts.functions.Floor")
+local floor = mod.Modules.FLOOR
 
 local Helpers = {}
 

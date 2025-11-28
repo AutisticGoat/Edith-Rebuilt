@@ -9,6 +9,7 @@
 		chargetype="timed"
 		maxcharges="360"
 		tags=""
+		achievement="EdithRebuilt_Salt Shaker"
 	/>
 	<active
 		id="1" 
@@ -17,6 +18,7 @@
 		gfx="collectibles_PepperGrinder.png"
 		quality="2" 
 		maxcharges="1"
+		achievement="EdithRebuilt_Pepper Grinder"
 	/>
 	<active
 		id="2" 
@@ -26,6 +28,7 @@
 		quality="3"
 		chargetype="timed"
 		maxcharges="360"
+		achievement="EdithRebuilt_Sulfuric Fire"
 	/>	
 	<passive
 		id="3" 
@@ -35,6 +38,7 @@
 		quality="2"
 		cache="firedelay damage"
 		tags="offensive"
+		achievement="EdithRebuilt_Ediths Hood"
 	/>
 	<passive
 		id="4" 
@@ -43,6 +47,7 @@
 		gfx="collectibles_Sal.png"
 		quality="2"
 		tags="summonable"
+		achievement="EdithRebuilt_Sal"
 	/>
 	<passive
 		id="5" 
@@ -52,6 +57,7 @@
 		quality="2"
 		coins="5"
 		tags="offensive summonable"
+		achievement="EdithRebuilt_Gilded Stone"
 	/>
 	<passive
 		id="6" 
@@ -61,6 +67,7 @@
 		gfx="collectibles_Molten_Core.png"
 		quality="3"
 		tags="offensive"
+		achievement="EdithRebuilt_Molten Core"
 	/>
 	<active
 		id="7" 
@@ -71,6 +78,7 @@
 		maxcharges="4"
 		cache="damage"
 		tags="offensive"
+		achievement="EdithRebuilt_Ediths Hood"
 	/>	
 	<passive
 		id="8" 
@@ -80,6 +88,7 @@
 		gfx="collectibles_Salt_Heart.png"
 		quality="2"
 		tags="nolostbr"
+		achievement="EdithRebuilt_Salt Heart"
 	/>
 	<active
 		id="9" 
@@ -91,6 +100,7 @@
 		chargetype="timed"
 		maxcharges="420"
 		tags="nolostbr"
+		achievement="EdithRebuilt_Divine Retribution"
 	/>
 	<passive
 		id="10" 
@@ -98,7 +108,7 @@
 		description="Rocky grudge" 
 		gfx="collectibles_Chunk_Of_Basalt.png"
 		quality="2"
-		
+		achievement="EdithRebuilt_Chunk of Basalt"
 	/>
 	<passive	
 		id="11" 
@@ -107,16 +117,19 @@
 		cache="damage"
 		gfx="collectibles_Hydrargyrum.png"
 		quality="2"
+		achievement="EdithRebuilt_Hydrargyrum"
 	/>
 	<trinket 
 		name="Geode"
 		description="Crack it open" 
 		gfx="Geode.png" 
+		achievement="EdithRebuilt_Geode"
 	/>
 	<trinket 
 		name="Rumbling Pebble"
 		description="Rock scattering" 
 		gfx="RumblingPebble.png" 
+		achievement="EdithRebuilt_Rumbling Pebble"
 	/>
 	<!-- Edith unlocks end -->
 
@@ -129,6 +142,7 @@
 		gfx="collectibles_Divine_Wrath.png"
 		quality="2"
 		maxcharges="4"
+		achievement="EdithRebuilt_Divine Wrath"
 	/>	
 	<active
 		id="13" 
@@ -138,16 +152,19 @@
 		quality="2"
 		chargetype="timed"
 		maxcharges="180"
+		achievement="EdithRebuilt_Burnt Hood"
 	/>	
 	<trinket 
 		name="Paprika"
 		description="Spicy death" 
 		gfx="Paprika.png" 
+		achievement="EdithRebuilt_Paprika"
 	/>
 	<trinket 
 		name="Burnt Salt"
 		description="Burns to death" 
 		gfx="BurntSalt.png" 
+		achievement="EdithRebuilt_Burnt Salt"
 	/>
 
 	<!-- Challenges -->
@@ -157,5 +174,6 @@
 		description="A vestige of the past"
 		gfx="collectibles_Effigy.png"
 		maxcharges="4"
+		achievement="EdithRebuilt_Effigy"
 	/>
 </items>
