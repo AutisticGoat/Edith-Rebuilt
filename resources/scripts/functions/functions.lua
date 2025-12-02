@@ -866,18 +866,6 @@ end
 
 local damageFlags = DamageFlag.DAMAGE_CRUSH | DamageFlag.DAMAGE_IGNORE_ARMOR
 
----comment
----@param ent Entity
----@param dealEnt Entity
----@param damage number
----@param knockback number
-function EdithRebuilt.LandDamage(ent, dealEnt, damage, knockback)	
-	if not mod.IsEnemy(ent) then return end
-
-	ent:TakeDamage(damage, damageFlags, EntityRef(dealEnt), 0)
-	mod.TriggerPush(ent, dealEnt, knockback, 5, false)
-end
-
 ---@param ent Entity
 ---@param player EntityPlayer
 function EdithRebuilt.AddExtraGore(ent, player)
@@ -1006,20 +994,6 @@ local CinderHopRNG = RNG()
 mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, function()
 	CinderHopRNG:SetSeed(game:GetSeeds():GetStartSeed())
 end)
-
----Tainted Edith parry land behavior
----@param parent EntityPlayer
----@param radius number
----@param damage number
----@param knockback number
-function EdithRebuilt:TaintedEdithHop(parent, radius, damage, knockback)
-	local capsule = Capsule(parent.Position, Vector.One, 0, radius)
-	
-	for _, ent in ipairs(Isaac.FindInCapsule(capsule)) do
-		mod.HandleEntityInteraction(ent, parent, knockback)
-		mod.LandDamage(ent, parent, damage, knockback)
-	end
-end
 
 ---@return integer
 function EdithRebuilt.GetMortisDrop()

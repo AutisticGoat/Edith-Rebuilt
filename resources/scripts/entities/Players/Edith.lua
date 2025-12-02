@@ -45,7 +45,7 @@ function Edith:OnEdithUpdate(player)
 		TargetArrow.SpawnEdithTarget(player)
 	end
 
-	EdithMod.ManageEdithWeapons(player)
+	Player.ManageEdithWeapons(player)
 	EdithMod.CustomDropBehavior(player, jumpData)
 	EdithMod.DashItemBehavior(player)
 

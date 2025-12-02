@@ -13,6 +13,20 @@ local modRNG = require("resources.scripts.functions.RNG")
 local Player = require("resources.scripts.functions.Player")
 local Land = {}
 
+local damageFlags = DamageFlag.DAMAGE_CRUSH | DamageFlag.DAMAGE_IGNORE_ARMOR
+
+---@param ent Entity
+---@param dealEnt Entity
+---@param damage number
+---@param knockback number
+function Land.LandDamage(ent, dealEnt, damage, knockback)	
+	if not mod.IsEnemy(ent) then return end
+
+	ent:TakeDamage(damage, damageFlags, EntityRef(dealEnt), 0)
+	Helpers.TriggerPush(ent, dealEnt, knockback, 5, false)
+end
+
+
 ---@param ent Entity
 ---@param parent EntityPlayer
 ---@param knockback number
@@ -129,7 +143,7 @@ function Land.EdithStomp(parent, params, breakGrid)
 		FrozenMult = ent:HasEntityFlags(EntityFlag.FLAG_FREEZE) and 1.2 or 1 
 		damage = (damage * FrozenMult) * TerraMult
 
-		mod.LandDamage(ent, parent, damage, knockback)
+		Land.LandDamage(ent, parent, damage, knockback)
 		sfx:Play(SoundEffect.SOUND_MEATY_DEATHS)
 
 		if ent.HitPoints > damage then goto Break end
@@ -146,6 +160,20 @@ function Land.EdithStomp(parent, params, breakGrid)
 
 	if breakGrid then
 		mod:DestroyGrid(parent, radius)
+	end
+end
+
+---Tainted Edith parry land behavior
+---@param parent EntityPlayer
+---@param radius number
+---@param damage number
+---@param knockback number
+function Land.TaintedEdithHop(parent, radius, damage, knockback)
+	local capsule = Capsule(parent.Position, Vector.One, 0, radius)
+	
+	for _, ent in ipairs(Isaac.FindInCapsule(capsule)) do
+		Land.HandleEntityInteraction(ent, parent, knockback)
+		Land.LandDamage(ent, parent, damage, knockback)
 	end
 end
 

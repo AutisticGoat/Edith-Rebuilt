@@ -26,6 +26,18 @@ function player.PlayerHasBirthright(player)
 	return player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT)
 end
 
+---@param player EntityPlayer
+function player.ManageEdithWeapons(player)
+	local weapon = player:GetWeapon(1)
+
+	if not weapon then return end
+	if not mod.When(weapon:GetWeaponType(), enums.Tables.OverrideWeapons, false) then return end
+	local newWeapon = Isaac.CreateWeapon(WeaponType.WEAPON_TEARS, player)
+	Isaac.DestroyWeapon(weapon)
+	player:EnableWeaponType(WeaponType.WEAPON_TEARS, true)
+	player:SetWeapon(newWeapon, 1)	
+end
+
 ---Changes `player`'s ANM2 file
 ---@param player EntityPlayer
 ---@param FilePath string
