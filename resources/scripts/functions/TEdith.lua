@@ -91,11 +91,11 @@ local function PerfectParryMisc(player, IsTaintedEdith, isenemy)
 
     local playerData = data(player)
     local hasBirthright = Player.PlayerHasBirthright(player)
-	playerData.ImpulseCharge = playerData.ImpulseCharge + 20
+	-- playerData.ImpulseCharge = playerData.ImpulseCharge + 20
 
-	if playerData.ImpulseCharge >= 100 and hasBirthright then
-		playerData.BirthrightCharge = playerData.BirthrightCharge + 15
-	end
+	-- if playerData.ImpulseCharge >= 100 and hasBirthright then
+	-- 	playerData.BirthrightCharge = playerData.BirthrightCharge + 15
+	-- end
 end
 
 ---@param ent Entity
