@@ -320,13 +320,13 @@ function TEdith:EdithParryJump(player)
 		TEdith.ResetHopDashCharge(player)
 	end
 
-	local perfectParry, EnemiesInImpreciseParry = mod.ParryLandManager(player, true)
+	local perfectParry, EnemiesInImpreciseParry = TEdithMod.ParryLandManager(player, true)
 	local parryAdd = perfectParry and 20 or (not EnemiesInImpreciseParry and -15)
 
 	land.LandFeedbackManager(player, mod:GetLandSoundTable(true, perfectParry), misc.BurntSaltColor, perfectParry)
 
 	if not parryAdd then return end
-	TEdith.AddHopDashCharge(player, parryAdd, 0.75)
+	TEdithMod.AddHopDashCharge(player, parryAdd, 0.75)
 end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, TEdith.EdithParryJump, jumpParams.TEdithJump)
 
