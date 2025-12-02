@@ -60,6 +60,23 @@ function Helpers:DestroyGrid(entity, radius)
 	end
 end
 
+---Makes the tear to receive a boost, increasing its speed and damage
+---@param tear EntityTear	
+---@param speed number
+---@param dmgMult number
+function Helpers.BoostTear(tear, speed, dmgMult)
+	local player = mod:GetPlayerFromTear(tear) ---@cast player EntityPlayer	
+	local nearEnemy = Helpers.GetNearestEnemy(player)
+
+	if nearEnemy then
+		tear.Velocity = (nearEnemy.Position - tear.Position):Normalized()
+	end
+	
+	tear.CollisionDamage = tear.CollisionDamage * dmgMult
+	tear.Velocity = tear.Velocity:Resized(speed)
+	tear:AddTearFlags(TearFlags.TEAR_KNOCKBACK)
+end
+
 --- returns a `ConfigDataTypes`, used for mod's menu data management
 ---@param Type ConfigDataTypes
 function Helpers.GetConfigData(Type)
@@ -169,13 +186,12 @@ function Helpers.GetPlayerFromTear(entity)
 	if not check then return end
 	local checkType = check.Type
 
-	if checkType == EntityType.ENTITY_PLAYER then
-		return mod:GetPtrHashEntity(check):ToPlayer()
-	elseif checkType == EntityType.ENTITY_FAMILIAR then
-		return check:ToFamiliar().Player:ToPlayer()
-	end
+	local ent = (
+		checkType == EntityType.ENTITY_PLAYER and Helpers.GetPtrHashEntity(check) or
+		checkType == EntityType.ENTITY_FAMILIAR and check:ToFamiliar().Player
+	):ToPlayer() or nil
 
-	return nil
+	return ent
 end
 
 ---@param entity Entity|EntityRef

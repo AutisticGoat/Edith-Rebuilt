@@ -4,6 +4,7 @@ local variants = enums.EffectVariant
 local game = enums.Utils.Game
 local level = enums.Utils.Level
 local helpers = require("resources.scripts.functions.Helpers")
+local Player = require("resources.scripts.functions.Player")
 local data = mod.CustomDataWrapper.getData
 local targetArrow = {}
 
@@ -95,11 +96,11 @@ end
 ---@param effect EntityEffect
 ---@param player EntityPlayer
 ---@param triggerDistance number
-function targetArrow:TargetDoorManager(effect, player, triggerDistance)
+function targetArrow.TargetDoorManager(effect, player, triggerDistance)
 	local room = game:GetRoom()
 	local effectPos = effect.Position
 	local roomName = level:GetCurrentRoomDesc().Data.Name
-	local isTainted = mod.IsEdith(player, true) or false
+	local isTainted = Player.IsEdith(player, true) or false
 	local MirrorRoomCheck = roomName == "Mirror Room" and player:HasInstantDeathCurse()
 	local playerHasPhoto = (player:HasCollectible(CollectibleType.COLLECTIBLE_POLAROID) or player:HasCollectible(CollectibleType.COLLECTIBLE_NEGATIVE))
 

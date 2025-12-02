@@ -7,8 +7,82 @@ local sfx = utils.SFX
 local ConfigDataTypes = enums.ConfigDataTypes
 local tables = enums.Tables
 local data = mod.CustomDataWrapper.getData
-local Math = mod.Modules.MATHS
+local Math = require("resources.scripts.functions.Maths")
+local Helpers = require("resources.scripts.functions.Helpers")
+local modRNG = require("resources.scripts.functions.RNG")
+local Player = require("resources.scripts.functions.Player")
 local Land = {}
+
+---@param ent Entity
+---@param parent EntityPlayer
+---@param knockback number
+function Land.HandleEntityInteraction(ent, parent, knockback)
+	local var = ent.Variant
+    local stompBehavior = {
+        [EntityType.ENTITY_TEAR] = function()
+            local tear = ent:ToTear()
+            if not tear then return end
+			if Player.IsEdith(parent, true) then return end
+
+			mod.BoostTear(tear, 25, 1.5)
+        end,
+        [EntityType.ENTITY_FIREPLACE] = function()
+            if var == 4 then return end
+            ent:Die()
+        end,
+        [EntityType.ENTITY_FAMILIAR] = function()
+            if not Helpers.When(var, tables.PhysicsFamiliar, false) then return end
+            Helpers.TriggerPush(ent, parent, knockback, 3, false)
+        end,
+        [EntityType.ENTITY_BOMB] = function()
+			if Player.IsEdith(parent, true) then return end
+            Helpers.TriggerPush(ent, parent, knockback, 3, false)
+        end,
+        [EntityType.ENTITY_PICKUP] = function()
+            local pickup = ent:ToPickup() ---@cast pickup EntityPickup
+            local isFlavorTextPickup = mod.When(var, tables.BlacklistedPickupVariants, false)
+            local IsLuckyPenny = var == PickupVariant.PICKUP_COIN and ent.SubType == CoinSubType.COIN_LUCKYPENNY
+
+            if isFlavorTextPickup or IsLuckyPenny then return end
+			parent:ForceCollide(pickup, true)
+
+			if not Player.IsEdith(parent, false) then return end
+
+			if IsKeyRequiredChest(pickup) then
+				if var == PickupVariant.PICKUP_MEGACHEST then
+					local rng = pickup:GetDropRNG()
+					local piData = data(pickup)
+
+					piData.OpenAttempts = 0
+					piData.OpenAttempts = piData.OpenAttempts + 1
+
+					local attempt = piData.OpenAttempts
+					local openRoll = rng:RandomInt(attempt, 7)
+
+					if openRoll == 7 then
+						pickup:TryOpenChest(parent)
+					else
+						pickup:GetSprite():Play("UseKey")
+					end
+				else
+					pickup:TryOpenChest(parent)
+				end
+
+				if ShouldConsumeKeys(parent) then
+					parent:AddKeys(-1)
+				end
+			end
+
+            if not (var == PickupVariant.PICKUP_BOMBCHEST and Player.IsEdith(parent, false)) then return end
+			pickup:TryOpenChest(parent)
+        end,
+        [EntityType.ENTITY_SHOPKEEPER] = function()
+			if Player.IsEdith(parent, true) then return end
+            ent:Kill()
+        end,
+    }
+	mod.WhenEval(ent.Type, stompBehavior)
+end
 
 ---Custom Edith stomp Behavior
 ---@param parent EntityPlayer
@@ -34,7 +108,7 @@ function Land.EdithStomp(parent, params, breakGrid)
 		isSalted = mod.IsSalted(ent)
 		local knockbackMult = isSalted and 1.5 or 1
 
-		mod.HandleEntityInteraction(ent, parent, knockback * knockbackMult)
+		Land.HandleEntityInteraction(ent, parent, knockback * knockbackMult)
 
 		if ent.Type == EntityType.ENTITY_STONEY then
 			ent:ToNPC().State = NpcState.STATE_SPECIAL
@@ -131,7 +205,7 @@ function Land.LandFeedbackManager(player, soundTable, GibColor, IsParryLand)
 	local IsSoulOfEdith = data(player).IsSoulOfEdithJump 
 	local IsEdithsHood = data(player).HoodLand
 	local IsMortis = EdithRebuilt.IsLJMortis()
-	local isEdithJump = mod.IsEdith(player, false) or IsSoulOfEdith or IsEdithsHood
+	local isEdithJump = Player.IsEdith(player, false) or IsSoulOfEdith or IsEdithsHood
 	local isVestige = mod.IsVestigeChallenge()
 
 	if isEdithJump then
@@ -163,7 +237,7 @@ function Land.LandFeedbackManager(player, soundTable, GibColor, IsParryLand)
 	)
 
 	local rng = stompGFX:GetDropRNG()
-	local RandSize = { X = mod.RandomFloat(rng, 0.8, 1), Y = mod.RandomFloat(rng, 0.8, 1) }
+	local RandSize = { X = modRNG.RandomFloat(rng, 0.8, 1), Y = modRNG.RandomFloat(rng, 0.8, 1) }
 	local SizeX, SizeY = size * RandSize.X, size * RandSize.Y
 	
 	if mod.GetConfigData(ConfigDataTypes.MISC).EnableShakescreen then
@@ -194,7 +268,7 @@ function Land.LandFeedbackManager(player, soundTable, GibColor, IsParryLand)
 		color = newcolor
 	end
 
-	stompGFX:GetSprite().PlaybackSpeed = 1.3 * mod.RandomFloat(rng, 1, 1.5)
+	stompGFX:GetSprite().PlaybackSpeed = 1.3 * modRNG.RandomFloat(rng, 1, 1.5)
 	stompGFX.SpriteScale = Vector(SizeX, SizeY) * player.SpriteScale.X
 	stompGFX.Color = color
 

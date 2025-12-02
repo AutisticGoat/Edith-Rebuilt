@@ -38,15 +38,6 @@ end
 function EdithRebuilt:IsAnyEdith(player)
 	return mod.IsEdith(player, true) or mod.IsEdith(player, false)
 end
-	
----Changes `Entity` velocity so now it goes to `Target`'s Position, `strenght` determines how fast it'll go
----@param Entity Entity
----@param Target Entity
----@param strenght number
----@return Vector
-function EdithRebuilt.ChangeVelToTarget(Entity, Target, strenght)
-	return ((Entity.Position - Target.Position) * -1):Normalized():Resized(strenght)
-end
 
 ---Checks if Edith's target is moving
 ---@param player EntityPlayer
@@ -235,36 +226,6 @@ function EdithRebuilt.RenderAreaOfEffect(pos, AreaSize, AreaColor) -- Took from 
 		LINE_SPRITE.Color = AreaColor or misc.ColorDefault
         LINE_SPRITE:Render(renderPosition)
     end
-end
-
----Returns a random rune (Used for Geode trinket)
----@param rng RNG
----@return integer
-function EdithRebuilt.GetRandomRune(rng)
-	return mod.When(rng:RandomInt(1, #tables.Runes), tables.Runes)
-end
-
----Returns a chance based boolean
----@param rng? RNG -- if `nil`, the function will use Mod's `RNG` object instead
----@param chance? number if `nil`, default chance will be 0.5 (50%)
-function EdithRebuilt.RandomBoolean(rng, chance)
-	return (rng or utils.RNG):RandomFloat() <= (chance or 0.5)
-end
-
----Helper function for a better management of random floats, allowing to use min and max values, like `math.random()` and `RNG:RandomInt()`
----@param rng? RNG if `nil`, the function will use Mod's `RNG` object instead
----@param min number
----@param max? number if `nil`, returned number will be one between 0 and `min`
-function EdithRebuilt.RandomFloat(rng, min, max)
-	if not max then
-		max = min
-		min = 0
-	end
-
-	min = min * 1000
-	max = max * 1000
-
-	return (rng or utils.RNG):RandomInt(min, max) / 1000
 end
 
 ---Manages Edith's Target and Tainted Edith's arrow behavior when going trough doors
@@ -624,38 +585,6 @@ function EdithRebuilt:SpawnBlackPowder(parent, quantity, position, distance)
 	Pentagram.Scale = distance + distance / 2	
 end
 
----@param player EntityPlayer
-function EdithRebuilt.GetNearestEnemy(player)
-	local closestDistance = math.huge
-    local playerPos = player.Position
-	local room = game:GetRoom()
-	local closestEnemy, enemyPos, distanceToPlayer, checkline
-
-	for _, enemy in ipairs(mod.GetEnemies()) do
-		if enemy:HasEntityFlags(EntityFlag.FLAG_CHARM) then goto Break end
-		enemyPos = enemy.Position
-		distanceToPlayer = enemyPos:Distance(playerPos)
-		checkline = room:CheckLine(playerPos, enemyPos, LineCheckMode.PROJECTILE, 0, false, false)
-		if not checkline then goto Break end
-        if distanceToPlayer >= closestDistance then goto Break end
-        closestEnemy = enemy
-        closestDistance = distanceToPlayer
-        ::Break::
-	end
-    return closestEnemy
-end
-
----Changes `player`'s ANM2 file
----@param player EntityPlayer
----@param FilePath string
-function EdithRebuilt.SetNewANM2(player, FilePath)
-	local playerSprite = player:GetSprite()
-
-	if not (playerSprite:GetFilename() ~= FilePath and not player:IsCoopGhost()) then return end
-	playerSprite:Load(FilePath, true)
-	playerSprite:Update()
-end
-
 ---Spawns Salt Creep
 ---@param parent Entity
 ---@param position Vector
@@ -935,77 +864,6 @@ local function ShouldConsumeKeys(player)
 	return (player:GetNumKeys() > 0 and not player:HasGoldenKey())
 end
 
----@param ent Entity
----@param parent EntityPlayer
----@param knockback number
-function EdithRebuilt.HandleEntityInteraction(ent, parent, knockback)
-	local var = ent.Variant
-    local stompBehavior = {
-        [EntityType.ENTITY_TEAR] = function()
-            local tear = ent:ToTear()
-            if not tear then return end
-			if mod.IsEdith(parent, true) then return end
-
-			mod.BoostTear(tear, 25, 1.5)
-        end,
-        [EntityType.ENTITY_FIREPLACE] = function()
-            if var == 4 then return end
-            ent:Die()
-        end,
-        [EntityType.ENTITY_FAMILIAR] = function()
-            if not mod.When(var, tables.PhysicsFamiliar, false) then return end
-            mod.TriggerPush(ent, parent, knockback, 3, false)
-        end,
-        [EntityType.ENTITY_BOMB] = function()
-			if mod.IsEdith(parent, true) then return end
-            mod.TriggerPush(ent, parent, knockback, 3, false)
-        end,
-        [EntityType.ENTITY_PICKUP] = function()
-            local pickup = ent:ToPickup() ---@cast pickup EntityPickup
-            local isFlavorTextPickup = mod.When(var, tables.BlacklistedPickupVariants, false)
-            local IsLuckyPenny = var == PickupVariant.PICKUP_COIN and ent.SubType == CoinSubType.COIN_LUCKYPENNY
-
-            if isFlavorTextPickup or IsLuckyPenny then return end
-			parent:ForceCollide(pickup, true)
-
-			if not mod.IsEdith(parent, false) then return end
-
-			if IsKeyRequiredChest(pickup) then
-				if var == PickupVariant.PICKUP_MEGACHEST then
-					local rng = pickup:GetDropRNG()
-					local piData = data(pickup)
-
-					piData.OpenAttempts = 0
-					piData.OpenAttempts = piData.OpenAttempts + 1
-
-					local attempt = piData.OpenAttempts
-					local openRoll = rng:RandomInt(attempt, 7)
-
-					if openRoll == 7 then
-						pickup:TryOpenChest(parent)
-					else
-						pickup:GetSprite():Play("UseKey")
-					end
-				else
-					pickup:TryOpenChest(parent)
-				end
-
-				if ShouldConsumeKeys(parent) then
-					parent:AddKeys(-1)
-				end
-			end
-
-            if not (var == PickupVariant.PICKUP_BOMBCHEST and mod.IsEdith(parent, false)) then return end
-			pickup:TryOpenChest(parent)
-        end,
-        [EntityType.ENTITY_SHOPKEEPER] = function()
-			if mod.IsEdith(parent, true) then return end
-            ent:Kill()
-        end,
-    }
-	mod.WhenEval(ent.Type, stompBehavior)
-end
-
 local damageFlags = DamageFlag.DAMAGE_CRUSH | DamageFlag.DAMAGE_IGNORE_ARMOR
 
 ---comment
@@ -1064,37 +922,6 @@ function EdithRebuilt.GetStompedEnemies(player)
 		::continue::
     end
     return enemyTable
-end
-
----@param player EntityPlayer
-function mod:Peffect(player)
-	player:AddCacheFlags(CacheFlag.CACHE_DAMAGE)
-	player:EvaluateItems()	
-end
-mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, mod.Peffect)
-
----Triggers a push to `pushed` from `pusher`
----@param pushed Entity
----@param pusher Entity
----@param strength number
----@param duration integer
----@param impactDamage? boolean
-function EdithRebuilt.TriggerPush(pushed, pusher, strength, duration, impactDamage)
-	local dir = ((pusher.Position - pushed.Position) * -1):Resized(strength)
-	pushed:AddKnockback(EntityRef(pusher), dir, duration, impactDamage or false)
-end
-
----The same as `EdithRebuilt.TriggerPush` but this accepts a `Vector` for positions instead
----@param pusher Entity
----@param pushed Entity
----@param pushedPos Vector
----@param pusherPos Vector
----@param strength number
----@param duration integer
----@param impactDamage? boolean
-function EdithRebuilt.TriggerPushPos(pusher, pushed, pushedPos, pusherPos, strength, duration, impactDamage)
-	local dir = ((pusherPos - pushedPos) * -1):Resized(strength)
-	pushed:AddKnockback(EntityRef(pusher), dir, duration, impactDamage or false)
 end
 
 ---Method used for Edith's dash behavior (Like A Pony/White Pony or Mars usage)
@@ -1242,23 +1069,6 @@ local function PerfectParryMisc(player, IsTaintedEdith, isenemy)
 	if playerData.ImpulseCharge >= 100 and hasBirthright then
 		playerData.BirthrightCharge = playerData.BirthrightCharge + 15
 	end
-end
-
----Makes the tear to receive a boost, increasing its speed and damage
----@param tear EntityTear	
----@param speed number
----@param dmgMult number
-function EdithRebuilt.BoostTear(tear, speed, dmgMult)
-	local player = mod:GetPlayerFromTear(tear) ----@cast player EntityPlayer	
-	local nearEnemy = mod.GetNearestEnemy(player)
-
-	if nearEnemy then
-		tear.Velocity = (nearEnemy.Position - tear.Position):Normalized()
-	end
-	
-	tear.CollisionDamage = tear.CollisionDamage * dmgMult
-	tear.Velocity = tear.Velocity:Resized(speed)
-	tear:AddTearFlags(TearFlags.TEAR_KNOCKBACK)
 end
 
 ---@param ent Entity

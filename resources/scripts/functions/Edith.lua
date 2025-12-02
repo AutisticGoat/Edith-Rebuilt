@@ -1,4 +1,3 @@
-local modPath = ""
 local mod = EdithRebuilt
 local enums = mod.Enums
 local utils = enums.Utils
@@ -13,6 +12,8 @@ local Player = require("resources.scripts.functions.Player")
 local Math = require("resources.scripts.functions.Maths")
 local VecDir = require("resources.scripts.functions.VecDir")
 local jump = require("resources.scripts.functions.Jump")
+local TargetArrow = require("resources.scripts.functions.TargetArrow")
+local modRNG = require("resources.scripts.functions.RNG")
 local data = mod.CustomDataWrapper.getData
 local Edith = {}
 
@@ -353,7 +354,7 @@ end
 function Edith.StompTargetRemover(player, params)
     if jump.IsKeyStompPressed(player) or mod.IsEdithTargetMoving(player) then return end
     if params.Jumps > 0 then return end
-    mod.RemoveEdithTarget(player)
+    TargetArrow.RemoveEdithTarget(player)
 end 
 
 ---@param player EntityPlayer
@@ -385,7 +386,7 @@ function Edith.CooldownUpdate(player, jumpParams)
     mod.SetColorCooldown(player, 0.6, 5)
     local EdithSave = mod.GetConfigData("EdithData") ---@cast EdithSave EdithData
     local soundTab = tables.CooldownSounds[EdithSave.JumpCooldownSound or 1]
-    local pitch = soundTab.Pitch == 1.2 and (soundTab.Pitch * mod.RandomFloat(player:GetDropRNG(), 1, 1.1)) or soundTab.Pitch
+    local pitch = soundTab.Pitch == 1.2 and (soundTab.Pitch * modRNG.RandomFloat(player:GetDropRNG(), 1, 1.1)) or soundTab.Pitch
     sfx:Play(soundTab.SoundID, 2, 0, false, pitch)
     jumpParams.StompedEntities = nil
     jumpParams.IsDefensiveStomp = false

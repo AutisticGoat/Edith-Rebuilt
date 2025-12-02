@@ -8,6 +8,7 @@ local Hsx = mod.Hsx
 local defColor = Color.Default
 local RGBColors = { Target = Color(1, 0, 0), Arrow = Color(1, 0, 0) }
 local Edith = mod.Modules.EDITH
+local targetArrow = mod.Modules.TARGET_ARROW
 local data = mod.CustomDataWrapper.getData
 local teleportPoints = {
 	Vector(110, 135),
@@ -136,7 +137,7 @@ mod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, effect)
 	local player = effect.SpawnerEntity:ToPlayer()
 
     if not player then return end
-	mod:TargetDoorManager(effect, player, effect.Variant == Vars.EFFECT_EDITH_TARGET and 28 or 20)
+	targetArrow.TargetDoorManager(effect, player, effect.Variant == Vars.EFFECT_EDITH_TARGET and 28 or 20)
     EdithTargetManagement(effect, player)
 end)
 

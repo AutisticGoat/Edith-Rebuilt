@@ -10,14 +10,15 @@ local EdithMod = modules.EDITH
 local Land = modules.LAND
 local TargetArrow = modules.TARGET_ARROW
 local helpers = modules.HELPERS
+local Player = modules.PLAYER
 local params = EdithMod.GetJumpStompParams
 local Edith = {}
 
 ---@param player EntityPlayer
 function Edith:EdithInit(player)
-	if not mod.IsEdith(player, false) then return end
-	mod.SetNewANM2(player, "gfx/EdithAnim.anm2")
-	local isVestige = mod.IsVestigeChallenge()
+	if not Player.IsEdith(player, false) then return end
+	Player.SetNewANM2(player, "gfx/EdithAnim.anm2")
+	local isVestige = helpers.IsVestigeChallenge()
 	local costume = isVestige and costumes.ID_EDITH_VESTIGE_SCARF or costumes.ID_EDITH_SCARF
 
 	player:AddNullCostume(costume)
@@ -27,8 +28,8 @@ mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, Edith.EdithInit)
 
 ---@param player EntityPlayer
 function Edith:OnEdithUpdate(player)
-	if not mod.IsEdith(player, false) then return end
-	if player:IsDead() then mod.RemoveEdithTarget(player) return end
+	if not Player.IsEdith(player, false) then return end
+	if player:IsDead() then TargetArrow.RemoveEdithTarget(player) return end
 
 	local isMoving = mod.IsEdithTargetMoving(player)
 	local isKeyStompPressed = mod.IsKeyStompPressed(player)
@@ -41,14 +42,14 @@ function Edith:OnEdithUpdate(player)
 	local jumpParams = params(player)
 
 	if player.FrameCount > 0 and (isMoving or isKeyStompPressed or (hasMarked and isShooting)) and not isPitfall then
-		mod.SpawnEdithTarget(player)
+		TargetArrow.SpawnEdithTarget(player)
 	end
 
 	EdithMod.ManageEdithWeapons(player)
 	EdithMod.CustomDropBehavior(player, jumpData)
 	EdithMod.DashItemBehavior(player)
 
-	local target = mod.GetEdithTarget(player)
+	local target = TargetArrow.GetEdithTarget(player)
 	if not target then return end
 
 	EdithMod.TargetMovementManager(player, target, isMoving)
@@ -61,7 +62,6 @@ mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, Edith.OnEdithUpdate)
 ---@return boolean
 local function IsInTrapdoor(player)
 	local grid = game:GetRoom():GetGridEntityFromPos(player.Position)
-
 	return grid and grid:GetType() == GridEntityType.GRID_TRAPDOOR or false
 end	
 
@@ -87,7 +87,7 @@ function Edith:OnEdithLanding(player, _, pitfall)
 	jumpParams.Jumps = math.max(jumpParams.Jumps - 1, 0)
 
 	if pitfall then
-		mod.RemoveEdithTarget(player)
+		TargetArrow.RemoveEdithTarget(player)
 		return
 	end
 
@@ -114,7 +114,7 @@ mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, Edith.OnEdithLanding, JumpParams.
 
 ---@param player EntityPlayer
 function Edith:OnEdithPEffectUpdate(player)
-	if not mod.IsEdith(player, false) then return end
+	if not Player.IsEdith(player, false) then return end
 	local jumpParams = params(player)
 
 	if jumpParams.RocketLaunch then return end
@@ -138,9 +138,9 @@ mod:AddCallback(JumpLib.Callbacks.ENTITY_UPDATE_60, Edith.OnEdithJump60Update, J
 
 function Edith:EdithOnNewRoom()
 	for _, player in pairs(PlayerManager.GetPlayers()) do
-		if not mod.IsEdith(player, false) then goto Break end
+		if not Player.IsEdith(player, false) then goto Break end
 		mod:ChangeColor(player, _, _, _, 1)
-		mod.RemoveEdithTarget(player)
+		TargetArrow.RemoveEdithTarget(player)
 		EdithMod.SetJumps(player, 0)
 		::Break::
 	end
@@ -157,7 +157,7 @@ function Edith:DamageStuff(_, damage, _, source)
 	local player = mod.GetPlayerFromRef(source)
 
 	if not player then return end
-	if not mod.IsEdith(player, false) then return end
+	if not Player.IsEdith(player, false) then return end
 	if not JumpLib:GetData(player).Jumping then return end  
 	local HasHeels = player:HasCollectible(CollectibleType.COLLECTIBLE_MOMS_HEELS)
 
@@ -170,7 +170,7 @@ mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Edith.DamageStuff)
 function Edith:EdithRender(player)
 	local sprite = player:GetSprite()
 	
-	if not mod.IsEdith(player, false) then return end
+	if not Player.IsEdith(player, false) then return end
 	if not IsInTrapdoor(player) then return end
 	if not sprite:IsPlaying("Trapdoor") then return end
 	if sprite:GetFrame() ~= 8 then return end
@@ -183,7 +183,7 @@ mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_RENDER, Edith.EdithRender)
 ---@param player EntityPlayer
 function Edith:OnActiveItemRemoveTarget(ID, _, player)
 	if not mod.When(ID, tables.RemoveTargetItems, false) then return end
-	mod.RemoveEdithTarget(player)
+	TargetArrow.RemoveEdithTarget(player)
 end
 mod:AddCallback(ModCallbacks.MC_PRE_USE_ITEM, Edith.OnActiveItemRemoveTarget)
 
@@ -194,7 +194,7 @@ function Edith:OnBombExplode(bomb)
 	for _, ent in ipairs(Isaac.FindInRadius(bomb.Position, mod.GetBombRadiusFromDamage(bomb.ExplosionDamage), EntityPartition.PLAYER)) do
 		player = ent:ToPlayer() ---@cast player EntityPlayer
 
-		if not mod.IsEdith(player, false) then goto continue end
+		if not Player.IsEdith(player, false) then goto continue end
 
 		EdithMod.ExplosionRecoil(player, params(player), bomb)
 

@@ -26,31 +26,17 @@ function player.PlayerHasBirthright(player)
 	return player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT)
 end
 
----Forcefully adds a costume for a character
+---Changes `player`'s ANM2 file
 ---@param player EntityPlayer
----@param playertype PlayerType
----@param costume integer
-function player.ForceCharacterCostume(player, playertype, costume)
-	local playerData = data(player)
+---@param FilePath string
+function player.SetNewANM2(player, FilePath)
+	local playerSprite = player:GetSprite()
 
-	playerData.HasCostume = {}
-	local hasCostume = playerData.HasCostume[playertype] or false
-
-	
-	-- local isCurrentPlayerType = player:GetPlayerType() == playertype
-
-	-- if isCurrentPlayerType then
-	-- 	if not hasCostume then
-	-- 		player:AddNullCostume(costume)
-	-- 		playerData.HasCostume[playertype] = true
-	-- 	end
-	-- else
-	-- 	if hasCostume then
-	-- 		player:TryRemoveNullCostume(costume)
-	-- 		playerData.HasCostume[playertype] = false
-	-- 	end
-	-- end
+	if not (playerSprite:GetFilename() ~= FilePath and not player:IsCoopGhost()) then return end
+	playerSprite:Load(FilePath, true)
+	playerSprite:Update()
 end
+
 
 ---Helper function for Edith's cooldown color manager
 ---@param player EntityPlayer
