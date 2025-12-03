@@ -11,30 +11,24 @@ local jumpTags = tables.JumpTags
 local jumpParams = tables.JumpParams
 local players = enums.PlayerType
 local misc = enums.Misc
-local VecDir = mod.Modules.VEC_DIR
-local helpers = mod.Modules.HELPERS
-local maths = mod.Modules.MATHS
-local land = mod.Modules.LAND
-local Player = mod.Modules.PLAYER
-local TEdithMod = mod.Modules.TEDITH
+local modules = mod.Modules
+local VecDir = modules.VEC_DIR
+local helpers = modules.HELPERS
+local maths = modules.MATHS
+local land = modules.LAND
+local Player = modules.PLAYER
+local TargetArrow = modules.TARGET_ARROW
+local TEdithMod = modules.TEDITH
+local data = mod.CustomDataWrapper.getData
 local TEdith = {}
-local funcs = {
-	GetData = mod.CustomDataWrapper.getData,
-	TargetMov = mod.IsEdithTargetMoving,
-	GetTPS = mod.GetTPS,
-	Switch = mod.When,
-	log = mod.Log,
-	exp = mod.exp,
-	FeedbackMan = mod.LandFeedbackManager,
-	Clamp = mod.Clamp,
-	EdithWeapons = mod.ManageEdithWeapons
-}
+
+---@Class 
 
 ---@param player EntityPlayer
 ---@param checkBirthright? boolean
 ---@return number
 function TEdith.GetHopDashCharge(player, checkBirthright)
-	local playerData = funcs.GetData(player)
+	local playerData = data(player)
 	if not playerData.ImpulseCharge then return 0 end
 	return playerData.ImpulseCharge + (checkBirthright and playerData.BirthrightCharge or 0)
 end
@@ -44,7 +38,7 @@ end
 function TEdith.ResetHopDashCharge(player)
 	if TEdith.GetHopDashCharge(player) == 0 then return end
 
-	local playerData = funcs.GetData(player)
+	local playerData = data(player)
 	playerData.ImpulseCharge = 0
 	playerData.BirthrightCharge = 0
 end
@@ -57,7 +51,7 @@ end
 function TEdith.StopTEdithHops(player, cooldown, useQuitJump, resetChrg)
 	if not Player.IsEdith(player, true) then return end
 
-	local playerData = funcs.GetData(player)
+	local playerData = data(player)
 	playerData.IsHoping = false
 	playerData.HopVector = Vector.Zero
 	player:MultiplyFriction(0.5)
@@ -83,7 +77,7 @@ function TEdith:TaintedEdithInit(player)
 	player:AddNullCostume(enums.NullItemID.ID_EDITH_B_SCARF)
 	-- mod.ForceCharacterCostume(player, players.PLAYER_EDITH_B, enums.NullItemID.ID_EDITH_B_SCARF)
 	
-	local playerData = funcs.GetData(player)
+	local playerData = data(player)
 
 	playerData.HopVector = Vector.Zero
 	playerData.MoveCharge = playerData.MoveCharge or 0
@@ -100,7 +94,7 @@ local JumpHeightParams = {
 }
 
 function mod:InitTaintedEdithHop(player)
-	local charge = funcs.GetData(player).MoveCharge
+	local charge = data(player).MoveCharge
 	local jumpHeight = TEdithMod.HopHeightCalc(6, charge, JumpHeightParams)
 	local jumpSpeed = 2.8 * maths.Log(charge, 100)
 	local config = {
@@ -120,7 +114,7 @@ end
 function mod:TaintedEdithUpdate(player)
 	if not Player.IsEdith(player, true) then return end
 
-	local playerData = funcs.GetData(player)
+	local playerData = data(player)
 	local isJumping = JumpLib:GetData(player).Jumping
 
 	playerData.ImpulseCharge = playerData.ImpulseCharge or 0
@@ -131,6 +125,7 @@ function mod:TaintedEdithUpdate(player)
 	local colorChange = math.min((playerData.ImpulseCharge) / 100, 1) * 0.5
 	local colorBRChange = math.min(playerData.BirthrightCharge / 100, 1) * 0.1
 	local charge = playerData.MoveCharge
+	local isArrowMoving = TargetArrow.IsEdithTargetMoving(player)
 
 	if colorChange > 0 and colorChange <= 1 then
 		player:SetColor(Color(1, 1, 1, 1, colorChange, colorBRChange, 0), 5, 100, true, false)
@@ -164,7 +159,7 @@ function mod:TaintedEdithUpdate(player)
 		TEdith.StopTEdithHops(player, 20, true, not playerData.TaintedEdithTarget)
 	end
 
-	if funcs.TargetMov(player) then
+	if isArrowMoving then
 		mod.SpawnEdithTarget(player, true)
 	end
 
@@ -206,14 +201,14 @@ function mod:TaintedEdithUpdate(player)
 				playerData.IsHoping = true
 			end
 		else
-			if not funcs.TargetMov(player) and playerData.IsHoping == false and not isHopVecZero then
+			if not isArrowMoving and playerData.IsHoping == false and not isHopVecZero then
 				TEdith.ResetHopDashCharge(player)
 				playerData.HopVector = Vector.Zero
 			end
 		end
 	end
 
-	if not funcs.TargetMov(player) and target then
+	if not isArrowMoving and target then
 		mod.RemoveEdithTarget(player, true)
 	end
 end
@@ -224,7 +219,7 @@ function mod:EdithPlayerUpdate(player)
 
 	Player.ManageEdithWeapons(player)
 
-	local playerData = funcs.GetData(player)
+	local playerData = data(player)
 	local IsJumping = JumpLib:GetData(player).Jumping
 	local arrow = mod.GetEdithTarget(player, true)
 	local input = {
@@ -292,7 +287,7 @@ local ndegree = 360/jets
 local damageBase = 3.5
 ---@param player EntityPlayer
 function mod:EdithHopLanding(player)	
-	local playerData = funcs.GetData(player)
+	local playerData = data(player)
 	local tearRange = player.TearRange / 40
 	local Knockbackbase = (player.ShotSpeed * 10) + 2
 	local Charge = playerData.MoveCharge
@@ -331,7 +326,7 @@ end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, TEdith.EdithParryJump, jumpParams.TEdithJump)
 
 function TEdith:TaintedEdithDamageManager(player, _, flags)
-	local playerData = funcs.GetData(player)
+	local playerData = data(player)
 
 	if not Player.IsEdith(player, true) then return end
 	if not (playerData.IsHoping == true and playerData.MoveCharge >= 30) then return end
@@ -350,7 +345,7 @@ HudHelper.RegisterHUDElement({
 	YPadding = 0,
 	OnRender = function(player)
 		local playerpos = game:GetRoom():WorldToScreenPosition(player.Position)
-		local playerData = funcs.GetData(player)
+		local playerData = data(player)
 		local dashCharge = playerData.ImpulseCharge 
 		local dashBRCharge = playerData.BirthrightCharge 
 		local offset = misc.ChargeBarcenterVector

@@ -1,4 +1,4 @@
----@diagnostic disable: undefined-global
+---@diagnostic disable: undefined-global, param-type-mismatch
 local mod = EdithRebuilt
 local enums = mod.Enums
 local misc = enums.Misc
