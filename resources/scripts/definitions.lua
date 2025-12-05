@@ -67,13 +67,18 @@ EdithRebuilt.Enums = {
 		---* entity `Entity`
 		PERFECT_PARRY_KILL = "EdithRebuilt_PERFECT_PARRY_KILL",
 
-		-- Called everytime Edith does an offensive stomp and damages at least `One Enemy
+		-- Called everytime Edith does an offensive stomp
+		---* player `EntityPlayer`
+		OFFENSIVE_STOMP = "EdithRebuilt_OFFENSIVE_STOMP",
+
+		-- Called everytime Edith does an offensive stomp and damages at least `One` Enemy
 		---* player `EntityPlayer`
 		---* entity `Entity`
-		OFFENSIVE_STOMP = "EdithRebuilt_OFFENSIVE_STOMP",
+		OFFENSIVE_STOMP_HIT = "EdithRebuilt_OFFENSIVE_STOMP",
 
 		-- Called everytime Edith's Target (or Tainted Edith's arrow) changes its design		
 		TARGET_SPRITE_CHANGE = "EdithRebuilt_TARGET_SPRITE_CHANGE",
+		
 		 -- Called everytime Tainted Edith's trail sprite is changed	
 		TRAIL_SPRITE_CHANGE = "EdithRebuilt_TRAIL_SPRITE_CHANGE",
 	},
@@ -406,7 +411,7 @@ EdithRebuilt.Enums = {
 		ChargeBarcenterVector = Vector(0, 10),
 		ChargeBarrightVector = Vector(8, 10),
 		PaprikaColor = Color(0.8, 0.2, 0),
-		ParryPartitions = EntityPartition.ENEMY | EntityPartition.BULLET | EntityPartition.TEAR, --[[@as EntityPartition]]
+		ParryPartitions = EntityPartition.ENEMY | EntityPartition.BULLET | EntityPartition.TEAR, --[[@as EntityPartition|integer]]
 		NewProjectilFlags = ProjectileFlags.HIT_ENEMIES | ProjectileFlags.CANT_HIT_PLAYER,
 	},
 }

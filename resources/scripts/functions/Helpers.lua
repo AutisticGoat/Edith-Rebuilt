@@ -146,6 +146,12 @@ function Helpers.TriggerPushPos(pusher, pushed, pushedPos, pusherPos, strength, 
 	pushed:AddKnockback(EntityRef(pusher), dir, duration, impactDamage or false)
 end
 
+---@param ent Entity
+---@return number
+local function GetPushFactor(ent)
+	return math.max(0.01, 1 + (5 - ent.Mass) * 1/250)
+end	
+
 ---Triggers a push to `pushed` from `pusher`
 ---@param pushed Entity
 ---@param pusher Entity
@@ -153,7 +159,11 @@ end
 ---@param duration integer
 ---@param impactDamage? boolean
 function Helpers.TriggerPush(pushed, pusher, strength, duration, impactDamage)
-	local dir = ((pusher.Position - pushed.Position) * -1):Resized(strength)
+	print(GetPushFactor(pushed))
+
+	local dir = ((pusher.Position - pushed.Position) * -1):Resized(strength) * GetPushFactor(pushed)
+	-- print(pushed.Mass)
+	-- print(pushed.Mass/10)
 	pushed:AddKnockback(EntityRef(pusher), dir, duration, impactDamage or false)
 end
 

@@ -27,6 +27,25 @@ function Land.LandDamage(ent, dealEnt, damage, knockback)
 	Helpers.TriggerPush(ent, dealEnt, knockback, 5, false)
 end
 
+---@param ent Entity
+---@param player EntityPlayer
+function AddExtraGore(ent, player)
+	local enabledExtraGore
+
+	if Player.IsEdith(player, false) then
+		enabledExtraGore = mod.GetConfigData(ConfigDataTypes.EDITH).EnableExtraGore
+	elseif Player.IsEdith(player, true) then
+		enabledExtraGore = mod.GetConfigData(ConfigDataTypes.TEDITH).EnableExtraGore
+	end
+
+	if not enabledExtraGore then return end
+	if not ent:ToNPC() then return end
+
+	ent:AddEntityFlags(EntityFlag.FLAG_EXTRA_GORE)
+	ent:MakeBloodPoof(ent.Position, nil, 0.5)
+	sfx:Play(SoundEffect.SOUND_DEATH_BURST_LARGE)
+end
+
 
 ---@param ent Entity
 ---@param parent EntityPlayer
@@ -99,6 +118,37 @@ function Land.HandleEntityInteraction(ent, parent, knockback)
 	mod.WhenEval(ent.Type, stompBehavior)
 end
 
+---@param parent EntityPlayer
+---@param isSalted boolean	
+local function EdithBirthcake(parent, isSalted)
+	if not (BirthcakeRebaked and parent:HasTrinket(BirthcakeRebaked.Birthcake.ID) and isSalted) then return end
+	BCRRNG = parent:GetTrinketRNG(BirthcakeRebaked.Birthcake.ID)
+	for _ = 1, BCRRNG:RandomInt(3, 7) do
+		parent:FireTear(parent.Position, RandomVector():Resized(15))
+	end
+end
+
+---@param parent EntityPlayer
+---@param ent Entity
+---@param isDefStomp boolean
+---@param SaltedTime boolean
+local function SaltEnemyManager(parent, ent, isDefStomp, SaltedTime)
+	if not isDefStomp then return end
+	EdithRebuilt.SetSalted(ent, SaltedTime, parent)
+	data(ent).SaltType = data(parent).HoodLand and enums.SaltTypes.EDITHS_HOOD		
+end
+
+---@param parent EntityPlayer
+---@param ent Entity
+---@param damage number
+---@param TerraMult number
+---@param knockback number
+local function DamageManager(parent, ent, damage, TerraMult, knockback)
+	FrozenMult = ent:HasEntityFlags(EntityFlag.FLAG_FREEZE) and 1.2 or 1 
+	damage = (damage * FrozenMult) * TerraMult
+	Land.LandDamage(ent, parent, damage, knockback)
+end
+
 ---Custom Edith stomp Behavior
 ---@param parent EntityPlayer
 ---@param params EdithJumpStompParams
@@ -129,33 +179,18 @@ function Land.EdithStomp(parent, params, breakGrid)
 			ent:ToNPC().State = NpcState.STATE_SPECIAL
 		end
 
-		Isaac.RunCallback(mod.Enums.Callbacks.OFFENSIVE_STOMP, parent, ent)	
+		Isaac.RunCallback(mod.Enums.Callbacks.OFFENSIVE_STOMP_HIT, parent, ent)	
 
-		if isDefStomp then
-			EdithRebuilt.SetSalted(ent, SaltedTime, parent)
-			if data(parent).HoodLand then
-				data(ent).SaltType = enums.SaltTypes.EDITHS_HOOD
-			end
-			goto Break
-		end
+		SaltEnemyManager(parent, ent, isDefStomp, SaltedTime)
 
-		if not mod.IsEnemy(ent) then goto Break end
-
-		FrozenMult = ent:HasEntityFlags(EntityFlag.FLAG_FREEZE) and 1.2 or 1 
-		damage = (damage * FrozenMult) * TerraMult
-
-		Land.LandDamage(ent, parent, damage, knockback)
 		sfx:Play(SoundEffect.SOUND_MEATY_DEATHS)
 
-		if ent.HitPoints > damage then goto Break end
+		if not mod.IsEnemy(ent) then goto Break end
+		DamageManager(parent, ent, damage, TerraMult, knockback)
 
-		if BirthcakeRebaked and parent:HasTrinket(BirthcakeRebaked.Birthcake.ID) and isSalted then
-			BCRRNG = parent:GetTrinketRNG(BirthcakeRebaked.Birthcake.ID)
-			for _ = 1, BCRRNG:RandomInt(3, 7) do
-				parent:FireTear(parent.Position, RandomVector():Resized(15))
-			end
-		end
-		mod.AddExtraGore(ent, parent)
+		if ent.HitPoints > damage then goto Break end
+		EdithBirthcake(parent, isSalted)
+		AddExtraGore(ent, parent)
 		::Break::
 	end
 
