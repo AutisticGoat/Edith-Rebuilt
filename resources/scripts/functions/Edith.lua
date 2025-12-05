@@ -14,6 +14,7 @@ local VecDir = require("resources.scripts.functions.VecDir")
 local jump = require("resources.scripts.functions.Jump")
 local TargetArrow = require("resources.scripts.functions.TargetArrow")
 local modRNG = require("resources.scripts.functions.RNG")
+local Helpers= require("resources.scripts.functions.Helpers")
 local data = mod.CustomDataWrapper.getData
 local Edith = {}
 
@@ -75,18 +76,6 @@ function Edith.GetNumTears(player)
 end
 
 ---@param player EntityPlayer
-function Edith.ManageEdithWeapons(player)
-	local weapon = player:GetWeapon(1)
-
-	if not weapon then return end
-	if not mod.When(weapon:GetWeaponType(), tables.OverrideWeapons, false) then return end
-	local newWeapon = Isaac.CreateWeapon(WeaponType.WEAPON_TEARS, player)
-	Isaac.DestroyWeapon(weapon)
-	player:EnableWeaponType(WeaponType.WEAPON_TEARS, true)
-	player:SetWeapon(newWeapon, 1)	
-end
-
----@param player EntityPlayer
 ---@param params EdithJumpStompParams
 ---@param keyStomp boolean
 ---@param jumping boolean
@@ -125,7 +114,7 @@ end
 ---@param player EntityPlayer
 ---@param jumpData JumpData
 function Edith.CustomDropBehavior(player, jumpData)
-	if not mod.IsEdith(player, false) then return end
+	if not Player.IsEdith(player, false) then return end
 	local playerData = data(player)
 	playerData.ShouldDrop = playerData.ShouldDrop or false
 
@@ -221,8 +210,8 @@ end
 ---@param jumpConfig JumpData
 ---@param jumpParams EdithJumpStompParams
 function Edith.BombFall(player, jumpConfig, jumpParams)	
-	if mod.IsVestigeChallenge() then return end
-	if mod.IsDefensiveStomp(player) then return end
+	if Helpers.IsVestigeChallenge() then return end
+	if jumpParams.IsDefensiveStomp then return end
 	if not Input.IsActionTriggered(ButtonAction.ACTION_BOMB, player.ControllerIndex) then return end
 
 	local HasDrFetus = player:HasCollectible(CollectibleType.COLLECTIBLE_DR_FETUS)
@@ -394,7 +383,7 @@ end
 
 ---@param player EntityPlayer
 function Edith.JumpMovement(player)
-	if mod.IsVestigeChallenge() then return end
+	if Helpers.IsVestigeChallenge() then return end
 	if not mod.GetEdithTarget(player) then return end
 	if not Edith.IsJumping(player) then return end
 

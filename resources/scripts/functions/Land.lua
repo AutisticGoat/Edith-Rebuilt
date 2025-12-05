@@ -11,6 +11,7 @@ local Math = require("resources.scripts.functions.Maths")
 local Helpers = require("resources.scripts.functions.Helpers")
 local modRNG = require("resources.scripts.functions.RNG")
 local Player = require("resources.scripts.functions.Player")
+local Edith  = require("resources.scripts.functions.Edith")
 local Land = {}
 
 local damageFlags = DamageFlag.DAMAGE_CRUSH | DamageFlag.DAMAGE_IGNORE_ARMOR
@@ -238,7 +239,7 @@ function Land.LandFeedbackManager(player, soundTable, GibColor, IsParryLand)
 
 	if isEdithJump then
 		local isRocketLaunchStomp = data(player).RocketLaunch
-		local isDefensive = mod.IsDefensiveStomp(player) or IsEdithsHood
+		local isDefensive = Edith.GetJumpStompParams(player).IsDefensiveStomp or IsEdithsHood
 		local EdithData = mod.GetConfigData(ConfigDataTypes.EDITH) ---@cast EdithData EdithData
 		size = (IsSoulOfEdith and 0.8 or (isDefensive and 0.6 or 0.7)) * (isRocketLaunchStomp and 1.25 or 1)
 		soundPick = EdithData.StompSound
