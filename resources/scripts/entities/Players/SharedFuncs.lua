@@ -90,7 +90,7 @@ mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, function(_, tear)
 	if not player then return end
     if not Player.IsAnyEdith(player) then return end
 
-    local isTainted = mod.IsEdith(player, true)
+    local isTainted = Player.IsEdith(player, true)
     local target = mod.GetEdithTarget(player)
 
 	mod.ForceSaltTear(tear, isTainted)

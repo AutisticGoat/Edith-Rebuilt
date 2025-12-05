@@ -2,7 +2,7 @@ local mod = EdithRebuilt
 local enums = mod.Enums
 local items = enums.CollectibleType
 local saltTypes = enums.SaltTypes
-local sounds = enums.SoundEffect
+local Player = mod.Modules.PLAYER
 local tables = enums.Tables
 local jumpTags = tables.JumpTags
 local jumpParams = tables.JumpParams
@@ -15,7 +15,7 @@ function EdithsHood:ShootSaltTears(tear)
 	local player = mod:GetPlayerFromTear(tear)
 	
 	if not player then return end
-	if mod:IsAnyEdith(player) then return end
+	if Player.IsAnyEdith(player) then return end
 	if not player:HasCollectible(items.COLLECTIBLE_EDITHS_HOOD) then return end
 	
 	mod.ForceSaltTear(tear)
