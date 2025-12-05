@@ -69,17 +69,19 @@ EdithRebuilt.Enums = {
 
 		-- Called everytime Edith does an offensive stomp
 		---* player `EntityPlayer`
+		---* params `EdithJumpStompParams`
 		OFFENSIVE_STOMP = "EdithRebuilt_OFFENSIVE_STOMP",
 
 		-- Called everytime Edith does an offensive stomp and damages at least `One` Enemy
 		---* player `EntityPlayer`
 		---* entity `Entity`
-		OFFENSIVE_STOMP_HIT = "EdithRebuilt_OFFENSIVE_STOMP",
+		---* params `EdithJumpStompParams`
+		OFFENSIVE_STOMP_HIT = "EdithRebuilt_OFFENSIVE_STOMP_HIT",
 
 		-- Called everytime Edith's Target (or Tainted Edith's arrow) changes its design		
 		TARGET_SPRITE_CHANGE = "EdithRebuilt_TARGET_SPRITE_CHANGE",
-		
-		 -- Called everytime Tainted Edith's trail sprite is changed	
+
+		-- Called everytime Tainted Edith's trail sprite is changed	
 		TRAIL_SPRITE_CHANGE = "EdithRebuilt_TRAIL_SPRITE_CHANGE",
 	},
 	SubTypes = {

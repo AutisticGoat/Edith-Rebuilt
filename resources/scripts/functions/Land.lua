@@ -6,6 +6,7 @@ local game = utils.Game
 local sfx = utils.SFX
 local ConfigDataTypes = enums.ConfigDataTypes
 local tables = enums.Tables
+local callbacks = enums.Callbacks
 local data = mod.CustomDataWrapper.getData
 local Math = require("resources.scripts.functions.Maths")
 local Helpers = require("resources.scripts.functions.Helpers")
@@ -122,7 +123,7 @@ end
 ---@param isSalted boolean	
 local function EdithBirthcake(parent, isSalted)
 	if not (BirthcakeRebaked and parent:HasTrinket(BirthcakeRebaked.Birthcake.ID) and isSalted) then return end
-	BCRRNG = parent:GetTrinketRNG(BirthcakeRebaked.Birthcake.ID)
+	local BCRRNG = parent:GetTrinketRNG(BirthcakeRebaked.Birthcake.ID)
 	for _ = 1, BCRRNG:RandomInt(3, 7) do
 		parent:FireTear(parent.Position, RandomVector():Resized(15))
 	end
@@ -144,9 +145,23 @@ end
 ---@param TerraMult number
 ---@param knockback number
 local function DamageManager(parent, ent, damage, TerraMult, knockback)
-	FrozenMult = ent:HasEntityFlags(EntityFlag.FLAG_FREEZE) and 1.2 or 1 
+	sfx:Play(SoundEffect.SOUND_MEATY_DEATHS)
+
+	local FrozenMult = ent:HasEntityFlags(EntityFlag.FLAG_FREEZE) and 1.2 or 1 
 	damage = (damage * FrozenMult) * TerraMult
+	
 	Land.LandDamage(ent, parent, damage, knockback)
+end
+
+local function EntityInteractHandler(ent, parent, knockback)
+	local isSalted = mod.IsSalted(ent)
+	local knockbackMult = isSalted and 1.5 or 1
+
+	Land.HandleEntityInteraction(ent, parent, knockback * knockbackMult)
+
+	if ent.Type == EntityType.ENTITY_STONEY then
+		ent:ToNPC().State = NpcState.STATE_SPECIAL
+	end
 end
 
 ---Custom Edith stomp Behavior
@@ -159,32 +174,23 @@ function Land.EdithStomp(parent, params, breakGrid)
 	local HasTerra = parent:HasCollectible(CollectibleType.COLLECTIBLE_TERRA)
 	local TerraRNG = parent:GetCollectibleRNG(CollectibleType.COLLECTIBLE_TERRA)
 	local TerraMult = HasTerra and mod.RandomFloat(TerraRNG, 0.5, 2) or 1	
-	local FrozenMult, BCRRNG
 	local capsule = Capsule(parent.Position, Vector.One, 0, radius)
 	local SaltedTime = Math.Round(Math.Clamp(120 * (mod.GetTPS(parent) / 2.73), 60, 360))
 	local isSalted
 
 	params.StompedEntities = Isaac.FindInCapsule(capsule)
 
+	Isaac.RunCallback(callbacks.OFFENSIVE_STOMP, parent, params)
+
 	--- Pendiente de reducir
 	for _, ent in ipairs(params.StompedEntities) do
 		if GetPtrHash(parent) == GetPtrHash(ent) then goto Break end
 
-		isSalted = mod.IsSalted(ent)
-		local knockbackMult = isSalted and 1.5 or 1
-
-		Land.HandleEntityInteraction(ent, parent, knockback * knockbackMult)
-
-		if ent.Type == EntityType.ENTITY_STONEY then
-			ent:ToNPC().State = NpcState.STATE_SPECIAL
-		end
-
-		Isaac.RunCallback(mod.Enums.Callbacks.OFFENSIVE_STOMP_HIT, parent, ent)	
-
+		EntityInteractHandler(ent, parent, knockback)
 		SaltEnemyManager(parent, ent, isDefStomp, SaltedTime)
 
 		if not mod.IsEnemy(ent) then goto Break end
-		sfx:Play(SoundEffect.SOUND_MEATY_DEATHS)
+		Isaac.RunCallback(callbacks.OFFENSIVE_STOMP_HIT, parent, ent, params)
 		DamageManager(parent, ent, damage, TerraMult, knockback)
 
 		if ent.HitPoints > damage then goto Break end
