@@ -183,9 +183,8 @@ function Land.EdithStomp(parent, params, breakGrid)
 
 		SaltEnemyManager(parent, ent, isDefStomp, SaltedTime)
 
-		sfx:Play(SoundEffect.SOUND_MEATY_DEATHS)
-
 		if not mod.IsEnemy(ent) then goto Break end
+		sfx:Play(SoundEffect.SOUND_MEATY_DEATHS)
 		DamageManager(parent, ent, damage, TerraMult, knockback)
 
 		if ent.HitPoints > damage then goto Break end
