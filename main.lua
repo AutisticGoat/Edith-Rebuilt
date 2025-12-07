@@ -7,32 +7,29 @@ EdithRebuilt.SaveManager = require("resources.scripts.libs.EdithRebuiltSaveManag
 EdithRebuilt.SaveManager.Init(mod)
 
 include("resources.scripts.libs.EdithKotryJumpLib").Init()
-
 include("resources.scripts.definitions")
 
-EdithRebuilt.Modules = {}
-local mods = EdithRebuilt.Modules
+EdithRebuilt.Modules = {
+	FLOOR = include("resources.scripts.functions.Floor"),
+	RNG = include("resources.scripts.functions.RNG"),
+	HELPERS = include("resources.scripts.functions.Helpers"),
+	VEC_DIR = include("resources.scripts.functions.VecDir"),
+	JUMP = include("resources.scripts.functions.Jump"),
+	MATHS = include("resources.scripts.functions.Maths"),
+	TARGET_ARROW = include("resources.scripts.functions.TargetArrow"),
+	PLAYER = include("resources.scripts.functions.Player"),
+	EDITH = include("resources.scripts.functions.Edith"),
+	LAND = include("resources.scripts.functions.Land"),
+	TEDITH = include("resources.scripts.functions.TEdith"),
+}
 
-mods.FLOOR = include("resources.scripts.functions.Floor")
-mods.HELPERS = include("resources.scripts.functions.Helpers")
-mods.VEC_DIR = include("resources.scripts.functions.VecDir")
-mods.JUMP = include("resources.scripts.functions.Jump")
-mods.MATHS = include("resources.scripts.functions.Maths")
-mods.PLAYER = include("resources.scripts.functions.Player")
-mods.EDITH = include("resources.scripts.functions.Edith")
-
-
-mods.LAND = include("resources.scripts.functions.Land")
-mods.TARGET_ARROW = include("resources.scripts.functions.TargetArrow")
-mods.TEDITH = include("resources.scripts.functions.TEdith")
-
+for k, v in pairs(EdithRebuilt.Modules) do
+	print(k, v)
+end
 
 include("include")
 
-local enums = mod.Enums
-local utils = enums.Utils
-local game = utils.Game
-
+local utils = mod.Enums.Utils
 mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, function()
-	utils.RNG:SetSeed(game:GetSeeds():GetStartSeed())
+	utils.RNG:SetSeed(utils.Game:GetSeeds():GetStartSeed())
 end)

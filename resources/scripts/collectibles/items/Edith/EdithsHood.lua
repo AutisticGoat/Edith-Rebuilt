@@ -1,3 +1,4 @@
+local Edith = require "resources.scripts.functions.Edith"
 local mod = EdithRebuilt
 local enums = mod.Enums
 local items = enums.CollectibleType
@@ -6,6 +7,12 @@ local Player = mod.Modules.PLAYER
 local tables = enums.Tables
 local jumpTags = tables.JumpTags
 local jumpParams = tables.JumpParams
+local modules = mod.Modules
+local Math = modules.MATHS
+local helpers = modules.HELPERS
+local RNGMod = modules.RNG
+local Jump = modules.JUMP
+local Land = modules.LAND
 local sfx = enums.Utils.SFX
 local data = mod.CustomDataWrapper.getData
 local EdithsHood = {}
@@ -38,12 +45,12 @@ function EdithsHood:JumpCooldown(player)
 
 	local playerData = data(player)
 	playerData.HoodJumpTimer = playerData.HoodJumpTimer or 0
-	playerData.HoodJumpTimer = mod.Clamp(playerData.HoodJumpTimer - 1, 0, 90) or 0
+	playerData.HoodJumpTimer = Math.Clamp(playerData.HoodJumpTimer - 1, 0, 90) or 0
 
 	if playerData.HoodJumpTimer ~= 1 then return end
 	local EdithSave = mod.GetConfigData("EdithData") --[[@as EdithData]]
 	local soundTab = tables.CooldownSounds[EdithSave.JumpCooldownSound or 1]
-	local pitch = soundTab.Pitch == 1.2 and (soundTab.Pitch * mod.RandomFloat(player:GetDropRNG(), 1, 1.1)) or soundTab.Pitch
+	local pitch = soundTab.Pitch == 1.2 and (soundTab.Pitch * RNGMod.RandomFloat(player:GetDropRNG(), 1, 1.1)) or soundTab.Pitch
 	sfx:Play(soundTab.SoundID, 2, 0, false, pitch)
 	mod.SetColorCooldown(player, 0.6, 5)
 	playerData.StompedEntities = nil
@@ -60,17 +67,38 @@ function EdithsHood:TriggerJump(player)
 	
 	data.HoodJumpTimer = 90
 
-	EdithRebuilt.InitEdithJump(player, jumpTags.EdithsHoodJump)
+	Jump.InitEdithJump(player, jumpTags.EdithsHoodJump)
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, EdithsHood.TriggerJump)
 
 function EdithsHood:OnHoodJumpLand(player)
-	mod.LandFeedbackManager(player, mod:GetLandSoundTable(false), Color.Default, false)
-	mod:EdithStomp(player, 30, (player.Damage * 0.75) * 3, 30, false)
+	local params = Edith.GetJumpStompParams(player)
+
+	params.Damage = (player.Damage * 0.75) * 3
+	params.Radius = 30
+	params.Knockback = 5
+
+	Land.LandFeedbackManager(player, mod:GetLandSoundTable(false), Color.Default, false)
+	Land.EdithStomp(player, params, false)
+
+	print(params.StompedEntities)
+
+	for _, ent in ipairs(params.StompedEntities) do
+		local PushFactor = helpers.GetPushFactor(ent)
+
+		if helpers.IsEnemy(ent) then
+			JumpLib:TryJump(ent, {
+			Height = 10 * PushFactor,
+			Speed = 1.8 * PushFactor,
+			Tags = "EdithRebuilt_EnemyJump",
+			-- Flags = JumpLib.Flags.
+		})	
+		end
+	end
+
 	for i = 1, maxCreep do
 		mod:SpawnSaltCreep(player, player.Position + Vector(0, 30):Rotated(saltDegrees*i), 0.1, 5, 1, 3, saltTypes.EDITHS_HOOD)
 	end
-	
 	player:SetMinDamageCooldown(20)
 end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, EdithsHood.OnHoodJumpLand, jumpParams.EdithsHoodJump)

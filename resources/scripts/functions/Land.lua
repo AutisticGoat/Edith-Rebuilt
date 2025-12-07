@@ -25,7 +25,7 @@ function Land.LandDamage(ent, dealEnt, damage, knockback)
 	if not mod.IsEnemy(ent) then return end
 
 	ent:TakeDamage(damage, damageFlags, EntityRef(dealEnt), 0)
-	Helpers.TriggerPush(ent, dealEnt, knockback, 5, false)
+	Helpers.TriggerPush(ent, dealEnt, knockback)
 end
 
 ---@param ent Entity
@@ -67,11 +67,11 @@ function Land.HandleEntityInteraction(ent, parent, knockback)
         end,
         [EntityType.ENTITY_FAMILIAR] = function()
             if not Helpers.When(var, tables.PhysicsFamiliar, false) then return end
-            Helpers.TriggerPush(ent, parent, knockback, 3, false)
+            Helpers.TriggerPush(ent, parent, knockback)
         end,
         [EntityType.ENTITY_BOMB] = function()
 			if Player.IsEdith(parent, true) then return end
-            Helpers.TriggerPush(ent, parent, knockback, 3, false)
+            Helpers.TriggerPush(ent, parent, knockback)
         end,
         [EntityType.ENTITY_PICKUP] = function()
             local pickup = ent:ToPickup() ---@cast pickup EntityPickup
@@ -169,7 +169,7 @@ end
 ---@param params EdithJumpStompParams
 ---@param breakGrid boolean
 function Land.EdithStomp(parent, params, breakGrid)
-	local isDefStomp = params.IsDefensiveStomp or data(parent).HoodLand
+	local isDefStomp = params.IsDefensiveStomp
 	local damage, knockback, radius = params.Damage, params.Knockback, params.Radius
 	local HasTerra = parent:HasCollectible(CollectibleType.COLLECTIBLE_TERRA)
 	local TerraRNG = parent:GetCollectibleRNG(CollectibleType.COLLECTIBLE_TERRA)
@@ -185,7 +185,6 @@ function Land.EdithStomp(parent, params, breakGrid)
 	--- Pendiente de reducir
 	for _, ent in ipairs(params.StompedEntities) do
 		if GetPtrHash(parent) == GetPtrHash(ent) then goto Break end
-
 		EntityInteractHandler(ent, parent, knockback)
 		SaltEnemyManager(parent, ent, isDefStomp, SaltedTime)
 
@@ -203,6 +202,11 @@ function Land.EdithStomp(parent, params, breakGrid)
 		mod:DestroyGrid(parent, radius)
 	end
 end
+
+-- local function NPCUpdate(npc)
+	
+-- end
+-- mod:AddCallback(ModCallbacks.)
 
 ---Tainted Edith parry land behavior
 ---@param parent EntityPlayer

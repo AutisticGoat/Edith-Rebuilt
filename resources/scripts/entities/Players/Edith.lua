@@ -108,9 +108,32 @@ function Edith:OnEdithLanding(player, _, pitfall)
 	Land.EdithStomp(player, jumpParams, true)
 	edithTarget:GetSprite():Play("Idle")
 
+	for _, ent in ipairs(jumpParams.StompedEntities) do
+		local PushFactor = helpers.GetPushFactor(ent)
+
+		if helpers.IsEnemy(ent) then
+			JumpLib:TryJump(ent, {
+			Height = 10 * PushFactor,
+			Speed = 1.8 * PushFactor,
+			Tags = "EdithRebuilt_EnemyJump",
+			-- Flags = JumpLib.Flags.
+		})	
+		end
+	end
+
 	jumpParams.RocketLaunch = false
 end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, Edith.OnEdithLanding, JumpParams.EdithJump)
+mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, Edith.OnEdithLanding, JumpParams.EdithsHoodJump)
+
+---@param npc EntityNPC
+local function OnNPCUpdate(_, npc)
+	local jumpData = JumpLib:GetData(npc)
+
+	if not jumpData.Jumping then return end
+	if jumpData.Tags.EdithRebuilt_EnemyJump then return true end
+end
+mod:AddCallback(ModCallbacks.MC_PRE_NPC_UPDATE, OnNPCUpdate)
 
 ---@param player EntityPlayer
 function Edith:OnEdithPEffectUpdate(player)
@@ -118,7 +141,6 @@ function Edith:OnEdithPEffectUpdate(player)
 	local jumpParams = params(player)
 
 	if jumpParams.RocketLaunch then return end
-
 	EdithMod.CooldownUpdate(player, jumpParams)
 	EdithMod.JumpMovement(player)
 end
@@ -139,7 +161,7 @@ mod:AddCallback(JumpLib.Callbacks.ENTITY_UPDATE_60, Edith.OnEdithJump60Update, J
 function Edith:EdithOnNewRoom()
 	for _, player in pairs(PlayerManager.GetPlayers()) do
 		if not Player.IsEdith(player, false) then goto Break end
-		mod:ChangeColor(player, _, _, _, 1)
+		helpers.ChangeColor(player, _, _, _, 1)
 		TargetArrow.RemoveEdithTarget(player)
 		EdithMod.SetJumps(player, 0)
 		::Break::
@@ -182,7 +204,7 @@ mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_RENDER, Edith.EdithRender)
 ---@param ID CollectibleType
 ---@param player EntityPlayer
 function Edith:OnActiveItemRemoveTarget(ID, _, player)
-	if not mod.When(ID, tables.RemoveTargetItems, false) then return end
+	if not helpers.When(ID, tables.RemoveTargetItems, false) then return end
 	TargetArrow.RemoveEdithTarget(player)
 end
 mod:AddCallback(ModCallbacks.MC_PRE_USE_ITEM, Edith.OnActiveItemRemoveTarget)
@@ -193,11 +215,8 @@ function Edith:OnBombExplode(bomb)
 	local player 
 	for _, ent in ipairs(Isaac.FindInRadius(bomb.Position, mod.GetBombRadiusFromDamage(bomb.ExplosionDamage), EntityPartition.PLAYER)) do
 		player = ent:ToPlayer() ---@cast player EntityPlayer
-
 		if not Player.IsEdith(player, false) then goto continue end
-
 		EdithMod.ExplosionRecoil(player, params(player), bomb)
-
 		::continue::
 	end
 end

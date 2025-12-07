@@ -157,7 +157,7 @@ function TEdith.ParryLandManager(player, IsTaintedEdith)
 	for _, ent in pairs(Isaac.FindInCapsule(ImpreciseParryCapsule, misc.ParryPartitions)) do
 		if ent:ToTear() then goto continue end
 		local pushMult = mod.IsCinder(ent) and 1.5 or 1
-		helpers.TriggerPush(ent, player, 20 * pushMult, 5, false)
+		helpers.TriggerPush(ent, player, 20 * pushMult)
 
 		if not mod.IsEnemy(ent) then goto continue end
 		if IsEntInTwoCapsules(ent, ImpreciseParryCapsule, PerfectParryCapsule) then goto continue end		

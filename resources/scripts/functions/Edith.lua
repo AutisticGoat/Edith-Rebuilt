@@ -303,7 +303,7 @@ function Edith.StompDamageManager(player, params)
     }
 	local playerDamage = player.Damage
 	local coalBonus = params.CoalBonus or 0
-	local damageBase = 15 + (5.75 * (chapter - 1))
+	local damageBase = 12 + (6 * (chapter - 1))
 	local DamageStat = playerDamage + ((playerDamage / 5.25) - 1)
     local RawFormula = (
         (damageBase + DamageStat) *
@@ -317,14 +317,14 @@ function Edith.StompDamageManager(player, params)
 	local damageFormula = math.max(Math.Round(RawFormula, 2), 1)
 	local stompDamage = (mod.IsVestigeChallenge() and 40 + player.Damage/2) or damageFormula
 
-    params.Damage = stompDamage
+    params.Damage = not params.IsDefensiveStomp and stompDamage or 0
 end
 
 ---@param player EntityPlayer
 ---@param params EdithJumpStompParams
 function Edith.StompKnockbackManager(player, params)
     local flightMult = player.CanFly and 1.15 or 1
-	params.Knockback = math.min(50, (10 ^ 1.2) * flightMult) * player.ShotSpeed
+	params.Knockback = math.min(50, (7 ^ 1.2) * flightMult) * player.ShotSpeed
 end
 
 ---@param player EntityPlayer

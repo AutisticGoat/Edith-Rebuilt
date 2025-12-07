@@ -849,25 +849,6 @@ local function ShouldConsumeKeys(player)
 	return (player:GetNumKeys() > 0 and not player:HasGoldenKey())
 end
 
----@param ent Entity
----@param player EntityPlayer
-function EdithRebuilt.AddExtraGore(ent, player)
-	local enabledExtraGore
-
-	if mod.IsEdith(player, false) then
-		enabledExtraGore = mod.GetConfigData(ConfigDataTypes.EDITH).EnableExtraGore
-	elseif mod.IsEdith(player, true) then
-		enabledExtraGore = mod.GetConfigData(ConfigDataTypes.TEDITH).EnableExtraGore
-	end
-
-	if not enabledExtraGore then return end
-	if not ent:ToNPC() then return end
-
-	ent:AddEntityFlags(EntityFlag.FLAG_EXTRA_GORE)
-	ent:MakeBloodPoof(ent.Position, nil, 0.5)
-	sfx:Play(SoundEffect.SOUND_DEATH_BURST_LARGE)
-end
-
 function EdithRebuilt.IsVestigeChallenge()
 	return Isaac.GetChallenge() == enums.Challenge.CHALLENGE_VESTIGE
 end
