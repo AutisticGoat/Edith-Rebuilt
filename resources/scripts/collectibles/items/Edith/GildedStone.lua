@@ -1,6 +1,8 @@
 local mod = EdithRebuilt
 local enums = mod.Enums
 local items = enums.CollectibleType
+local modules = mod.Modules
+local ModRNG = modules.RNG
 local plyMan = PlayerManager
 local GildedStone = {}
 
@@ -11,10 +13,10 @@ function GildedStone:ShootingRockTears(tear)
 	if not player:HasCollectible(items.COLLECTIBLE_GILDED_STONE) then return end
 	local rng = player:GetCollectibleRNG(items.COLLECTIBLE_GILDED_STONE)
 	
-	if not mod.RandomBoolean(rng, player:GetNumCoins()  / 100) then return end
+	if not ModRNG.RandomBoolean(rng, player:GetNumCoins() / 100) then return end
 	tear:AddTearFlags(TearFlags.TEAR_ROCK)
 	tear:ChangeVariant(TearVariant.ROCK)
-	tear.CollisionDamage = tear.CollisionDamage * mod.RandomFloat(rng, 0.5, 2)
+	tear.CollisionDamage = tear.CollisionDamage * ModRNG.RandomFloat(rng, 0.5, 2)
 end
 mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, GildedStone.ShootingRockTears)
 
@@ -56,7 +58,7 @@ function GildedStone:OnDestroyingRockReward(rock)
 	end
 	local GeneralSpawnFormula = ((CoinCount / 2) + (math.min(collectiveLuck, 1) - 1)) / 100
 
-	if not mod.RandomBoolean(rng, GeneralSpawnFormula) then return end
+	if not ModRNG.RandomBoolean(rng, GeneralSpawnFormula) then return end
 
 	local reward = getRandomReward(rng) ---@cast reward table
 	local vel = reward.Variant == 20 and rng:RandomVector():Resized(3) or Vector.Zero
