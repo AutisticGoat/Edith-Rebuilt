@@ -9,7 +9,7 @@ local data = mod.CustomDataWrapper.getData
 function MoltenCore:MoltenCoreStats(player)
 	local MoltenCoreCount = player:GetCollectibleNum(items.COLLECTIBLE_MOLTEN_CORE)
 	if MoltenCoreCount < 1 then return end
-	player.Damage = player.Damage + (0.8 * MoltenCoreCount)
+	player.Damage = player.Damage + (0.5 * MoltenCoreCount)
 end
 mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, MoltenCore.MoltenCoreStats, CacheFlag.CACHE_DAMAGE)
 
