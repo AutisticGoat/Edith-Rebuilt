@@ -7,8 +7,10 @@ local tables = enums.Tables
 local Hsx = mod.Hsx
 local defColor = Color.Default
 local RGBColors = { Target = Color(1, 0, 0), Arrow = Color(1, 0, 0) }
-local Edith = mod.Modules.EDITH
-local targetArrow = mod.Modules.TARGET_ARROW
+local modules = mod.Modules
+local Edith = modules.EDITH
+local TEdith = modules.TEDITH
+local targetArrow = modules.TARGET_ARROW
 local data = mod.CustomDataWrapper.getData
 local teleportPoints = {
 	Vector(110, 135),
@@ -49,9 +51,8 @@ local function EdithTargetManagement(effect, player)
 	local room = game:GetRoom()
 	local params = Edith.GetJumpStompParams(player)
 
-	if mod.IsKeyStompPressed(player) or params.Jumps > 0 and params.Cooldown == 0 then
-		effect:GetSprite():Play("Blink")
-	end
+	local anim = (mod.IsKeyStompPressed(player) or params.Jumps > 0 and params.Cooldown == 0) and "Blink" or "Idle" 
+	effect:GetSprite():Play(anim)
 
 	room:GetCamera():SetFocusPosition(interpolateVector2D(playerPos, effectPos, 0.6))
 
@@ -119,7 +120,7 @@ local function TaintedEdithArrowRender(effect, player, saveData)
 	effect.Visible = effect.FrameCount > 1
 
 	if saveData.ArrowDesign ~= 7 then
-		effect:GetSprite().Rotation = data(player).HopVector:GetAngleDegrees() 
+		effect:GetSprite().Rotation = TEdith.GetHopParryParams(player).HopDirection:GetAngleDegrees() 
 	end
 
 	if saveData.RGBMode then

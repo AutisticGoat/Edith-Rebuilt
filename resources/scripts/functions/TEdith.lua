@@ -6,77 +6,189 @@ local utils = enums.Utils
 local game = utils.Game
 local sfx = utils.SFX
 local data = mod.CustomDataWrapper.getData
+local jumpFlags = enums.Tables.JumpFlags
+local jumpTags = enums.Tables.JumpTags
 local maths = require("resources.scripts.functions.Maths")
 local helpers = require("resources.scripts.functions.Helpers")
 local Player = require("resources.scripts.functions.Player")
+local StatusEffects = require("resources.scripts.functions.StatusEffects")
+local Land = require("resources.scripts.functions.Land")
+local Floor = require("resources.scripts.functions.Floor")
 local TEdith = {}
 
----@class TEdithParryParams
----@field Damage number
----@field Radius number
----@field Knockback number
+---@class TEdithHopParryParams
+---@field HopDamage number
+---@field HopRadius number
+---@field HopKnockback number
+---@field HopDirection Vector
+---@field HopMoveCharge number
+---@field HopMoveBRCharge number
+---@field HopStaticCharge number -- Used to render ChargeBar and ChargeBar mechanics when TEdith isn't moving
+---@field HopStaticBRCharge number -- Used to render ChargeBar and ChargeBar mechanics when TEdith isn't moving
+---@field ParryDamage number
+---@field ParryRadius number
+---@field ParryKnockback number
+---@field ParryCooldown number
+---@field IsHoping boolean
+---@field IsParryJump boolean
 
-local DefaultStompParams = {
-    Damage = 0,
-    Radius = 0,
-    Knockback = 0,
+local DefaultHopDashParams = {
+    HopDamage = 0,
+    HopRadius = 0,
+    HopKnockback = 0,
+	HopDirection = Vector.Zero,
+	IsHoping = false,
+	IsParryJump = false,
+	HopMoveCharge = 0,
+	HopMoveBRCharge = 0,
+	HopStaticCharge = 0,
+	HopStaticBRCharge = 0,
+	ParryDamage = 0,
+	ParryKnockback = 0,
+	ParryRadius = 0,
+	ParryCooldown = 0,
 
-} --[[@as TEdithParryParams]]
+} --[[@as TEdithHopParryParams]]
 
 ---@param player EntityPlayer
----@return TEdithParryParams
-function TEdith.GetParryParams(player)
-    data(player).ParryParams = data(player).ParryParams or DefaultStompParams 
-    local params = data(player).ParryParams ---@cast DefaultStompParams TEdithParryParams
+---@return TEdithHopParryParams
+function TEdith.GetHopParryParams(player)
+	local playerData = data(player)
+    playerData.HopDashParams = playerData.HopDashParams or DefaultHopDashParams
+    local params = playerData.HopDashParams ---@cast params TEdithHopParryParams
 
     return params
 end
 
----@class TEdithHopParams
----@field Damage number
----@field Knockback number
----@field Radius number
-local DefaultHopParams = {
-    Damage = 0,
-    Knockback = 0,
-    Radius = 0,
-}
-
----@generic growth, offset, curve
----@param const number
----@param var number
----@param params { growth: number, offset: number, curve: number }
+---@param player EntityPlayer
+---@param Static boolean --- `true` to get Static charge, otherwise gets Move charge 
+---@param checkBirthright? boolean --- Setting it to `true` will add Birthright charge to the returned value
 ---@return number
-function TEdith.HopHeightCalc(const, var, params)
-    -- Validaciones estrictas
-    assert(type(var) == "number", "var should be a number")
-    assert(var >= 0 and var <= 100, "var should be a number between 0 and 100")
+function TEdith.GetHopDashCharge(player, Static, checkBirthright)
+	local hopParams = TEdith.GetHopParryParams(player)
+	local charge = Static and hopParams.HopStaticCharge or hopParams.HopMoveCharge
+	local chargeBR = Static and hopParams.HopStaticBRCharge or hopParams.HopMoveBRCharge
 
-    -- Caso exclusivo cuando variable es exactamente 100
-    if var == 100 then return const end
+	if not charge then return 0 end
+	return charge + (checkBirthright and chargeBR or 0)
+end
 
-	local limit = 0.999999
-    local growth = math.max(0, params.growth or 1) 
-    local offset = maths.Clamp(params.offset or 0, -1, 1) 
-    local curve = math.max(0.1, math.min(params.curve or 1, 10))
-	local formula = (var / 100) ^ curve * growth + offset
-    local progresion = math.min(formula, limit)
+---Reset both Tainted Edith's Move charge and Birthright charge
+---@param player EntityPlayer
+---@param Move boolean Resets both `HopMoveCharge` and HopMoveBRCharge
+---@param Static boolean Resets both `HopStaticCharge` and `HopStaticBRCharge`
+function TEdith.ResetHopDashCharge(player, Move, Static)
+	local hopParams = TEdith.GetHopParryParams(player)
 
-    -- Resultado final garantizado que nunca iguala la constante
-    return const * maths.Clamp(progresion, 0, limit)
+	if Move then
+		hopParams.HopMoveCharge = 0
+		hopParams.HopMoveBRCharge = 0
+	end
+
+	if Static then
+		hopParams.HopStaticCharge = 0
+		hopParams.HopStaticBRCharge = 0
+	end
+end
+
+---Helper function to stop Tainted Edith's hop-dash
+---@param player EntityPlayer
+---@param cooldown integer
+---@param useQuitJump boolean
+---@param resetChrg boolean
+function TEdith.StopTEdithHops(player, cooldown, useQuitJump, resetChrg)
+	if not Player.IsEdith(player, true) then return end
+
+	local HopParams = TEdith.GetHopParryParams(player)
+
+	HopParams.IsHoping = false
+	HopParams.HopDirection = Vector.Zero
+	player:MultiplyFriction(0.5)
+
+	cooldown = cooldown or 0
+	useQuitJump = useQuitJump or false
+
+	if useQuitJump then
+		JumpLib:QuitJump(player)
+	end
+
+	if resetChrg then
+		TEdith.ResetHopDashCharge(player, true, true)
+	end
+
+	player:SetMinDamageCooldown(cooldown)
+end
+
+---@param player EntityPlayer
+---@param hopParams TEdithHopParryParams
+function TEdith.HopDashMovementManager(player, hopParams)
+	local HopVec = hopParams.HopDirection
+	local isHopVecZero = HopVec.X == 0 and HopVec.Y == 0
+	local isJumping = JumpLib:GetData(player).Jumping
+	local chargeMult = (TEdith.GetHopDashCharge(player, false, false) / 100)
+
+	if not isHopVecZero then
+		if not isJumping then
+			TEdith.InitTaintedEdithHop(player)
+		end
+		hopParams.IsHoping = true
+	end
+
+	if not isJumping then return end
+	local smoothFactor = 0.225
+	local targetVel = ((HopVec * 2) * (10 + (player.MoveSpeed - 1))) * chargeMult
+	player.Velocity = player.Velocity + (targetVel - player.Velocity) * smoothFactor
 end
 
 ---@param player EntityPlayer
 ---@param charge number
 ---@param BRMult number
 function TEdith.AddHopDashCharge(player, charge, BRMult)
-	local playerData = data(player)
-	local shouldAddToBrCharge = mod.PlayerHasBirthright(player) and playerData.ImpulseCharge >= 100
+	local HopParams = TEdith.GetHopParryParams(player)
+	local shouldAddToBrCharge = mod.PlayerHasBirthright(player) and HopParams.HopMoveCharge >= 100
 
-	playerData.ImpulseCharge = maths.Clamp(playerData.ImpulseCharge + charge, 0, 100)
-	
+	HopParams.HopMoveCharge = maths.Clamp(HopParams.HopMoveCharge + charge, 0, 100)
+	HopParams.HopStaticCharge = maths.Clamp(HopParams.HopStaticCharge + charge, 0, 100)
+
 	if not shouldAddToBrCharge then return end
-	playerData.BirthrightCharge = shouldAddToBrCharge and maths.Clamp(playerData.BirthrightCharge + (charge * BRMult), 0, 100)
+	HopParams.HopMoveBRCharge = maths.Clamp(HopParams.HopMoveBRCharge + (charge * BRMult), 0, 100)
+	HopParams.HopStaticBRCharge = maths.Clamp(HopParams.HopStaticBRCharge + (charge * BRMult), 0, 100)
+end
+
+---@param player EntityPlayer
+---@param arrow EntityEffect
+function TEdith.HopDashChargeManager(player, arrow)
+	local HopParams = TEdith.GetHopParryParams(player)
+	local posDif = arrow.Position - player.Position
+	local posDifLenght = posDif:Length()
+	local maxDist = 2.5
+	local targetframecount = arrow.FrameCount
+	local chargeAdd = 8 * maths.exp(player.MoveSpeed, 1, 1.5)
+	HopParams.HopDirection = posDif:Normalized()
+
+	local arrowVel = data(player).movementVector
+	local HopVec = arrowVel
+
+	
+
+	-- Calcula la velocidad objetivo (la que ya usabas)
+	local targetVel = HopVec:Resized(10)
+
+	if posDifLenght >= maxDist then
+		targetVel = targetVel - (posDif:Normalized() * (posDifLenght / maxDist))
+	end
+
+	local smoothFactor = 0.5
+	arrow.Velocity = arrow.Velocity + (targetVel - arrow.Velocity) * smoothFactor
+
+	if targetframecount < 2 and HopParams.IsHoping == true then
+		TEdith.StopTEdithHops(player, 20, true, true)
+		Land.LandFeedbackManager(player, Land.GetLandSoundTable(true), misc.BurntSaltColor, false)
+	end
+
+	if targetframecount > 1 and (not HopParams.IsHoping and not isJumping) then
+		TEdith.AddHopDashCharge(player, chargeAdd, 0.5)
+	end
 end
 
 --- Misc function used to manage some perfect parry stuff (i made it to be able to return something in the main parry function sorry)
@@ -124,19 +236,77 @@ local function IsEntInTwoCapsules(ent, capsule1, capsule2)
 	return IsInsideCapsule1 and IsInsideCapsule2
 end
 
+---Function used to trigger Tainted Edith and Burnt Hood's parry-jump
+---@param player EntityPlayer
+---@param tag string
+function TEdith.InitTaintedEdithParryJump(player, tag)
+	local jumpHeight = 8
+	local jumpSpeed = 2.5
+	local room = game:GetRoom()
+	local RoomWater = room:HasWater()
+	local isChap4 = Floor.IsChap4()
+	local variant = RoomWater and EffectVariant.BIG_SPLASH or (isChap4 and EffectVariant.POOF02 or EffectVariant.POOF01)
+	local subType = RoomWater and 1 or (isChap4 and 66 or 1)
+	
+	sfx:Play(SoundEffect.SOUND_SHELLGAME)
+	
+	local DustCloud = Isaac.Spawn(
+		EntityType.ENTITY_EFFECT, 
+		variant, 
+		subType, 
+		player.Position, 
+		Vector.Zero, 
+		player
+	) ---@cast DustCloud EntityEffect 
+
+    helpers.SetBloodEffectColor(DustCloud)
+
+	DustCloud.SpriteScale = DustCloud.SpriteScale * player.SpriteScale.X
+	DustCloud.DepthOffset = -100
+	DustCloud:GetSprite().PlaybackSpeed = RoomWater and 1.3 or 2	
+
+	local config = {
+		Height = jumpHeight,
+		Speed = jumpSpeed,
+		Tags = tag,
+		Flags = jumpFlags.TEdithJump
+	}
+	JumpLib:Jump(player, config)
+	data(player).IsParryJump = true
+end
+
+local JumpHeightParams = {
+	growth = 0.35, 
+	offset = 0.65, 
+	curve = 1
+}
+
+---@param player any
+function TEdith.InitTaintedEdithHop(player)
+	local charge = TEdith.GetHopDashCharge(player, false, false)
+	local jumpHeight = maths.HopHeightCalc(6, charge, JumpHeightParams)
+	local jumpSpeed = 3 * maths.Log(charge, 100)
+	local config = {
+		Height = jumpHeight,
+		Speed = jumpSpeed,
+		Tags = jumpTags.TEdithHop,
+		Flags = jumpFlags.TEdithHop
+	}
+	JumpLib:Jump(player, config) 
+end
+
 ---Helper function used to manage Tainted Edith and Burnt Hood's parry-lands 
 ---@param player EntityPlayer
 ---@param IsTaintedEdith? boolean 
 ---@return boolean PerfectParry Returns a boolean that tells if there was a perfect parry 
 ---@return boolean EnemiesInImpreciseParry
 function TEdith.ParryLandManager(player, IsTaintedEdith)
+	local HopParams = TEdith.GetHopParryParams(player)
 	local damageBase = 13.5
 	local DamageStat = player.Damage 
 	local rawFormula = (damageBase + DamageStat) / 1.5 
 	local PerfectParry = false
 	local EnemiesInImpreciseParry = false
-	local playerPos = player.Position
-	local playerData = data(player)
 	local ImpreciseParryCapsule = Capsule(player.Position, Vector.One, 0, misc.ImpreciseParryRadius)	
 	local PerfectParryCapsule = Capsule(player.Position, Vector.One, 0, misc.PerfectParryRadius)
 	local hasBirthright = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT)
@@ -147,21 +317,23 @@ function TEdith.ParryLandManager(player, IsTaintedEdith)
 	local spawner, targetEnt, proj
 
 	if IsTaintedEdith then
-		local damageIncrease = 1 + (playerData.ImpulseCharge + playerData.BirthrightCharge) / 400
+		local damageIncrease = 1 + (HopParams.HopStaticCharge + HopParams.HopStaticBRCharge) / 400
 		DamageFormula = DamageFormula * damageIncrease
 	end
 
 	local tearsMult = (mod.GetTPS(player) / 2.73) 
-	local CinderTime = mod:SecondsToFrames((4 * tearsMult))
+	local CinderTime = maths.SecondsToFrames((4 * tearsMult))
 
 	for _, ent in pairs(Isaac.FindInCapsule(ImpreciseParryCapsule, misc.ParryPartitions)) do
 		if ent:ToTear() then goto continue end
-		local pushMult = mod.IsCinder(ent) and 1.5 or 1
+		local pushMult = StatusEffects.EntHasStatusEffect(ent, enums.EdithStatusEffects.CINDER) and 1.5 or 1
 		helpers.TriggerPush(ent, player, 20 * pushMult)
 
-		if not mod.IsEnemy(ent) then goto continue end
+		if not helpers.IsEnemy(ent) then goto continue end
 		if IsEntInTwoCapsules(ent, ImpreciseParryCapsule, PerfectParryCapsule) then goto continue end		
-		mod.SetCinder(ent, CinderTime, player)
+
+		ent:TakeDamage(DamageFormula * 0.25, 0, EntityRef(player), 0)
+		StatusEffects.SetStatusEffect(enums.EdithStatusEffects.CINDER, ent, CinderTime, player)
 		EnemiesInImpreciseParry = true
 		::continue::
 	end
@@ -185,22 +357,17 @@ function TEdith.ParryLandManager(player, IsTaintedEdith)
 			end
 		else
 			local tear = ent:ToTear()
-			if shouldTriggerFireJets then
-				local jets = 6
-				local ndegree = 360 / jets
-
-				for i = 1, jets do
-					local jetPos = playerPos + Vector(35, 0):Rotated(ndegree*i)
-					mod.SpawnFireJet(player, jetPos, DamageFormula / 1.5, true, 1)				
-				end
-			end
 		
 			if ent.Type == EntityType.ENTITY_STONEY then
 				ent:ToNPC().State = NpcState.STATE_SPECIAL
 			end
 
 			if tear then
-				helpers.BoostTear(tear, 20, 1.5)
+				helpers.BoostTear(tear, 20, 1.5 + ((HopParams.HopStaticCharge + HopParams.HopStaticBRCharge) / 100))
+
+				if Player.PlayerHasBirthright(player) and HopParams.HopStaticBRCharge > 0 then
+					tear:AddTearFlags(TearFlags.TEAR_BURN)
+				end
 			end
 
 			ent:TakeDamage(DamageFormula, 0, EntityRef(player), 0)
@@ -212,7 +379,7 @@ function TEdith.ParryLandManager(player, IsTaintedEdith)
 
 			if ent.HitPoints <= DamageFormula then
 				Isaac.RunCallback(enums.Callbacks.PERFECT_PARRY_KILL, player, ent)
-				mod.AddExtraGore(ent, player)
+				Land.AddExtraGore(ent, player)
 			end
 		end
 		PerfectParry = true		
@@ -221,8 +388,8 @@ function TEdith.ParryLandManager(player, IsTaintedEdith)
 	player:SetMinDamageCooldown(PerfectParry and 30 or 15)
 	PerfectParryMisc(player, IsTaintedEdith, PerfectParry)
 
-	playerData.ParryCounter = IsTaintedEdith and (PerfectParry and (hasBirthcake and 8 or 10) or 15)
-	playerData.IsParryJump = false
+	HopParams.ParryCooldown = IsTaintedEdith and (PerfectParry and (hasBirthcake and 8 or 10) or 15) or 0
+	HopParams.IsParryJump = false
 
 	return PerfectParry, EnemiesInImpreciseParry
 end

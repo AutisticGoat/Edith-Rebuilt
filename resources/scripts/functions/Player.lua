@@ -2,8 +2,6 @@ local mod = EdithRebuilt
 local enums = mod.Enums
 local players = enums.PlayerType
 local maths = require("resources.scripts.functions.Maths")
-local data = mod.CustomDataWrapper.getData
-
 local player = {}
 
 ---Checks if player is Edith

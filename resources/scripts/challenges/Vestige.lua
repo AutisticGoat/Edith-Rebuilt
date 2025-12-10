@@ -15,6 +15,7 @@
 
 
 local mod = EdithRebuilt
+local TargetArrow = mod.Modules.TARGET_ARROW
 local data = mod.CustomDataWrapper.getData
 local Vestige = {}
 
@@ -24,7 +25,7 @@ function Vestige:EdithJumpHandler(player)
 	if not mod.IsEdith(player, false) then return end
 
 	local playerData = data(player)
-	if player:IsDead() then mod.RemoveEdithTarget(player); playerData.isJumping = false return end
+	if player:IsDead() then TargetArrow.RemoveEdithTarget(player); playerData.isJumping = false return end
 
 	local isKeyStompTriggered = mod:IsKeyStompTriggered(player)
 	local jumpData = JumpLib:GetData(player)

@@ -1,4 +1,3 @@
-local Edith = require "resources.scripts.functions.Edith"
 local mod = EdithRebuilt
 local enums = mod.Enums
 local items = enums.CollectibleType
@@ -11,7 +10,7 @@ local modules = mod.Modules
 local Math = modules.MATHS
 local helpers = modules.HELPERS
 local RNGMod = modules.RNG
-local Jump = modules.JUMP
+local Edith = modules.EDITH
 local Land = modules.LAND
 local sfx = enums.Utils.SFX
 local data = mod.CustomDataWrapper.getData
@@ -19,7 +18,7 @@ local EdithsHood = {}
 
 ---@param tear EntityTear
 function EdithsHood:ShootSaltTears(tear)
-	local player = mod:GetPlayerFromTear(tear)
+	local player = helpers.GetPlayerFromTear(tear)
 	
 	if not player then return end
 	if Player.IsAnyEdith(player) then return end
@@ -67,7 +66,7 @@ function EdithsHood:TriggerJump(player)
 	
 	data.HoodJumpTimer = 90
 
-	Jump.InitEdithJump(player, jumpTags.EdithsHoodJump)
+	Edith.InitEdithJump(player, jumpTags.EdithsHoodJump)
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, EdithsHood.TriggerJump)
 
@@ -78,23 +77,9 @@ function EdithsHood:OnHoodJumpLand(player)
 	params.Radius = 30
 	params.Knockback = 5
 
-	Land.LandFeedbackManager(player, mod:GetLandSoundTable(false), Color.Default, false)
+	Land.LandFeedbackManager(player, Land.GetLandSoundTable(false), Color.Default, false)
 	Land.EdithStomp(player, params, false)
-
-	print(params.StompedEntities)
-
-	for _, ent in ipairs(params.StompedEntities) do
-		local PushFactor = helpers.GetPushFactor(ent)
-
-		if helpers.IsEnemy(ent) then
-			JumpLib:TryJump(ent, {
-			Height = 10 * PushFactor,
-			Speed = 1.8 * PushFactor,
-			Tags = "EdithRebuilt_EnemyJump",
-			-- Flags = JumpLib.Flags.
-		})	
-		end
-	end
+	Land.TriggerLandenemyJump(jumpParams, 10, 1.8)
 
 	for i = 1, maxCreep do
 		mod:SpawnSaltCreep(player, player.Position + Vector(0, 30):Rotated(saltDegrees*i), 0.1, 5, 1, 3, saltTypes.EDITHS_HOOD)

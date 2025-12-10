@@ -1,16 +1,19 @@
 local mod = EdithRebuilt
 local enums = mod.Enums
+local modules = mod.Modules
+local ModRNG = modules.RNG
+local Helpers = modules.HELPERS
 local trinket = enums.TrinketType
 local data = mod.CustomDataWrapper.getData
 local BurntSalt = {}
 
 ---@param tear EntityTear
 function BurntSalt:SaltTearShoot(tear)
-    local player = mod:GetPlayerFromTear(tear) 
+    local player = Helpers.GetPlayerFromTear(tear) 
 
     if not player then return end
     if not player:HasTrinket(trinket.TRINKET_BURNT_SALT) then return end
-    if not mod.RandomBoolean(player:GetTrinketRNG(trinket.TRINKET_BURNT_SALT)) then return end 
+    if not ModRNG.RandomBoolean(player:GetTrinketRNG(trinket.TRINKET_BURNT_SALT)) then return end 
     mod.ForceSaltTear(tear, true)
     data(tear).BurntSaltTear = true
     tear.CollisionDamage = tear.CollisionDamage * 1.25
@@ -48,4 +51,4 @@ function BurntSalt:OnKill(npc, source)
         mod.ForceSaltTear(burntSaltTear, true)
     end
 end
-mod:AddCallback(PRE_NPC_KILL.ID, BurntSalt.OnKill)
+mod:AddCallback(ModCallbacks.MC_POST_ENTITY_KILL, BurntSalt.OnKill)

@@ -1,6 +1,9 @@
 local mod = EdithRebuilt
 local enums = mod.Enums
 local items = enums.CollectibleType
+local modules = mod.Modules
+local ModRNG = modules.RNG
+local Helpers = modules.HELPERS
 local DivineWrath = {}
 
 local baseRange = 6.5
@@ -21,17 +24,17 @@ local function ShootFireRockTear(player, rng, minTears, maxTears)
 
         if not tear then return end
 
-        fallSpeedVar = mod.RandomFloat(rng, 1.8, 2.2)
+        fallSpeedVar = ModRNG.RandomFloat(rng, 1.8, 2.2)
 
 		tear.Visible = false
 		tear.Height = baseHeight * 3
-        tear.Velocity = tear.Velocity * mod.RandomFloat(rng, 0.2, 0.6)
-        tear.FallingAcceleration = (mod.RandomFloat(rng, 0.7, 1.6)) * 3
+        tear.Velocity = tear.Velocity * ModRNG.RandomFloat(rng, 0.2, 0.6)
+        tear.FallingAcceleration = (ModRNG.RandomFloat(rng, 0.7, 1.6)) * 3
         tear.FallingSpeed = (baseMultiplier * (fallSpeedVar)) 
         tear.CollisionDamage = tear.CollisionDamage * rng:RandomInt(8, 12) / 10
 		tear.Scale = tear.CollisionDamage/3.5
         tear:AddTearFlags(TearFlags.TEAR_BURN)
-        mod:ChangeColor(tear, 1, 0.2, 0)
+        Helpers.ChangeColor(tear, 1, 0.2, 0)
 
 		tear.Visible = true
     end

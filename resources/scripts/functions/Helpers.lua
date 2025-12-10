@@ -47,7 +47,7 @@ end
 ---Helper grid destroyer function
 ---@param entity Entity
 ---@param radius number
-function Helpers:DestroyGrid(entity, radius)
+function Helpers.DestroyGrid(entity, radius)
 	radius = radius or 10
 	local room = game:GetRoom()
 
@@ -65,7 +65,7 @@ end
 ---@param speed number
 ---@param dmgMult number
 function Helpers.BoostTear(tear, speed, dmgMult)
-	local player = mod:GetPlayerFromTear(tear) ---@cast player EntityPlayer	
+	local player = Helpers.GetPlayerFromTear(tear) ---@cast player EntityPlayer	
 	local nearEnemy = Helpers.GetNearestEnemy(player)
 
 	if nearEnemy then
@@ -108,7 +108,7 @@ function Helpers.GetNearestEnemy(player)
 	local room = game:GetRoom()
 	local closestEnemy, enemyPos, distanceToPlayer, checkline
 
-	for _, enemy in ipairs(mod.GetEnemies()) do
+	for _, enemy in ipairs(Helpers.GetEnemies()) do
 		if enemy:HasEntityFlags(EntityFlag.FLAG_CHARM) then goto Break end
 		enemyPos = enemy.Position
 		distanceToPlayer = enemyPos:Distance(playerPos)
@@ -133,7 +133,7 @@ function Helpers.IsVestigeChallenge()
 	return Isaac.GetChallenge() == enums.Challenge.CHALLENGE_VESTIGE
 end
 
----The same as `EdithRebuilt.TriggerPush` but this accepts a `Vector` for positions instead
+---The same as `Helpers.TriggerPush` but this accepts a `Vector` for positions instead
 ---@param pusher Entity
 ---@param pushed Entity
 ---@param pushedPos Vector
@@ -177,7 +177,7 @@ end
 function Helpers.GetEnemies()
     local enemyTable = {}
     for _, ent in ipairs(Isaac.GetRoomEntities()) do
-        if not mod.IsEnemy(ent) then goto continue end
+        if not Helpers.IsEnemy(ent) then goto continue end
         table.insert(enemyTable, ent)
 		::continue::
     end
@@ -232,7 +232,7 @@ function Helpers.GetPlayerFromRef(EntityRef)
 
 	if not ent then return nil end
 	local familiar = ent:ToFamiliar()
-	return ent:ToPlayer() or mod:GetPlayerFromTear(ent) or familiar and familiar.Player 
+	return ent:ToPlayer() or Helpers.GetPlayerFromTear(ent) or familiar and familiar.Player 
 end
 
 ---Helper function to directly change `entity`'s color
@@ -277,7 +277,7 @@ function Helpers.SetBloodEffectColor(effect)
 					[MortisBackdrop.MOIST] = Color(0, 0.8, 0.76, 1, 0, 0, 0),
 					[MortisBackdrop.FLESH] = Color(0, 0, 0, 1, 0.55, 0.5, 0.55),
 				}
-				color = mod.When(EdithRebuilt.GetMortisDrop(), Colors, Color.Default)
+				color = mod.When(floor.GetMortisDrop(), Colors, Color.Default)
             else
                 color = backdropColors[BackDrop] or Color(1, 0, 0)
 			end
@@ -299,4 +299,95 @@ function Helpers.IsInTrapdoor(player)
 
 	return grid and grid:GetType() == GridEntityType.GRID_TRAPDOOR or false
 end	
+
+---Function used to spawn Tainted Edith's birthright fire jets
+---@param player EntityPlayer
+---@param position Vector
+---@param damage number
+---@param mult number
+---@param scale number
+function Helpers.SpawnFireJet(player, position, damage, mult, scale)
+	local Fire = Isaac.Spawn(
+		EntityType.ENTITY_EFFECT,
+		EffectVariant.FIRE_JET,
+		0,
+		position,
+		Vector.Zero,
+		player
+	)
+	Fire.SpriteScale = Fire.SpriteScale * (scale or 1)
+	Fire.CollisionDamage = damage * mult
+end
+
+--Checks if player is pressing Edith's jump button
+---@param player EntityPlayer
+---@return boolean
+function Helpers.IsKeyStompPressed(player)
+	local k_stomp =
+		Input.IsButtonPressed(Keyboard.KEY_Z, player.ControllerIndex) or
+        Input.IsButtonPressed(Keyboard.KEY_LEFT_SHIFT, player.ControllerIndex) or
+        Input.IsButtonPressed(Keyboard.KEY_RIGHT_SHIFT, player.ControllerIndex) or
+		Input.IsButtonPressed(Keyboard.KEY_RIGHT_CONTROL, player.ControllerIndex) or
+        Input.IsActionPressed(ButtonAction.ACTION_DROP, player.ControllerIndex)
+		
+	return k_stomp
+end
+
+---Checks if player triggered Edith's jump button
+---@param player EntityPlayer
+---@return boolean
+function Helpers.IsKeyStompTriggered(player)
+	local k_stomp =
+		Input.IsButtonTriggered(Keyboard.KEY_Z, player.ControllerIndex) or
+        Input.IsButtonTriggered(Keyboard.KEY_LEFT_SHIFT, player.ControllerIndex) or
+        Input.IsButtonTriggered(Keyboard.KEY_RIGHT_SHIFT, player.ControllerIndex) or
+		Input.IsButtonTriggered(Keyboard.KEY_RIGHT_CONTROL, player.ControllerIndex) or
+        Input.IsActionTriggered(ButtonAction.ACTION_DROP, player.ControllerIndex)
+		
+	return k_stomp
+end
+
+---@param parent Entity
+---@param Number number
+---@param speed number?
+---@param color Color?
+---@param inheritParentVel boolean?
+function Helpers.SpawnSaltGib(parent, Number, speed, color, inheritParentVel)
+    local parentColor = parent.Color
+    local parentPos = parent.Position
+    local finalColor = Color(1, 1, 1) or parent.Color
+
+    if color then
+        local CTint = color:GetTint()
+        local COff = color:GetOffset()
+		local PTint = parentColor:GetTint()
+        local POff = parentColor:GetOffset()
+        local PCol = parentColor:GetColorize()
+
+        finalColor:SetTint(CTint.R + PTint.R - 1, CTint.G + PTint.G - 1, CTint.B + PTint.B - 1, 1)
+        finalColor:SetOffset(COff.R + POff.R, COff.G + POff.G, COff.B + POff.B)
+        finalColor:SetColorize(PCol.R, PCol.G, PCol.B, PCol.A)
+    end
+
+    local saltGib
+
+    for _ = 1, Number do    
+        saltGib = Isaac.Spawn(
+            EntityType.ENTITY_EFFECT,
+            EffectVariant.TOOTH_PARTICLE,
+            0,
+            parentPos,
+            RandomVector():Resized(speed or 3),
+            parent
+        ):ToEffect() ---@cast saltGib EntityEffect
+
+        saltGib.Color = finalColor
+        saltGib.Timeout = 5
+
+		if inheritParentVel then
+            saltGib.Velocity = saltGib.Velocity + parent.Velocity
+        end
+    end
+end
+
 return Helpers

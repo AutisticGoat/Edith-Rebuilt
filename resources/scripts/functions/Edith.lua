@@ -11,10 +11,10 @@ local jumpFlags = tables.JumpFlags
 local Player = require("resources.scripts.functions.Player")
 local Math = require("resources.scripts.functions.Maths")
 local VecDir = require("resources.scripts.functions.VecDir")
-local jump = require("resources.scripts.functions.Jump")
 local TargetArrow = require("resources.scripts.functions.TargetArrow")
 local modRNG = require("resources.scripts.functions.RNG")
-local Helpers= require("resources.scripts.functions.Helpers")
+local Helpers = require("resources.scripts.functions.Helpers")
+local Floor = require("resources.scripts.functions.Floor")
 local data = mod.CustomDataWrapper.getData
 local Edith = {}
 
@@ -82,12 +82,12 @@ end
 ---@param vestige boolean
 function Edith.JumpTriggerManager(player, params, keyStomp, jumping, vestige)
 	local commonConditional = not jumping and not vestige
-    if keyStomp and commonConditional then
+    if params.Cooldown == 0 and keyStomp and commonConditional then
 		Edith.SetJumps(player, Edith.GetNumTears(player))
 	end
 
 	if params.Cooldown == 0 and params.Jumps > 0 and commonConditional then
-		jump.InitEdithJump(player, JumpTags.EdithJump, vestige)	
+		Edith.InitEdithJump(player, JumpTags.EdithJump, vestige)	
 	end
 end
 
@@ -269,10 +269,8 @@ function Edith.TargetMovementManager(player, target, isMoving)
 
 		local VectorX = ((input.left > 0.3 and -input.left) or (input.right > 0.3 and input.right) or 0) * (game:GetRoom():IsMirrorWorld() and -1 or 1) 
 		local VectorY = ((input.up > 0.3 and -input.up) or (input.down > 0.3 and input.down) or 0)
-		VectorX = VectorX 
 
 		friction = target:GetSprite():IsPlaying("Blink") and 0.5 or 0.775
-
 		target.Velocity = target.Velocity + Vector(VectorX, VectorY):Normalized():Resized(4)
 	end
     target:MultiplyFriction(friction or 0.8)
@@ -341,7 +339,7 @@ end
 ---@param player EntityPlayer
 ---@param params EdithJumpStompParams
 function Edith.StompTargetRemover(player, params)
-    if jump.IsKeyStompPressed(player) or mod.IsEdithTargetMoving(player) then return end
+    if Helpers.IsKeyStompPressed(player) or mod.IsEdithTargetMoving(player) then return end
     if params.Jumps > 0 then return end
     TargetArrow.RemoveEdithTarget(player)
 end 
@@ -408,6 +406,51 @@ function Edith.BombStompManager(player, params)
     end
 
     params.BombStomp = false
+end
+
+---@param player EntityPlayer
+---@param jumpTag? string
+---@param vestige? boolean
+function Edith.InitEdithJump(player, jumpTag, vestige)	
+	vestige = vestige or false
+    jumpTag = jumpTag or JumpTags.EdithJump
+
+	local canFly = player.CanFly
+	local jumpSpeed = vestige and (3.75 + (player.MoveSpeed - 1)) or canFly and 1.3 or 1.85
+	local soundeffect = canFly and SoundEffect.SOUND_ANGEL_WING or SoundEffect.SOUND_SHELLGAME
+	local div = canFly and 25 or 15
+	local base = canFly and 15 or 13
+	local epicFetusMult = player:HasCollectible(CollectibleType.COLLECTIBLE_EPIC_FETUS) and 3 or 1
+	local jumpHeight = (base + (mod.GetEdithTargetDistance(player) / 40) / div) * epicFetusMult
+	local room = game:GetRoom()
+	local isChap4 = Floor.IsChap4()
+	local hasWater = room:HasWater()
+	local variant = hasWater and EffectVariant.BIG_SPLASH or (isChap4 and EffectVariant.POOF02 or EffectVariant.POOF01)
+	local subType = (isChap4 and 66 or 1)
+	local DustCloud = Isaac.Spawn(
+		EntityType.ENTITY_EFFECT, 
+		variant, 
+		subType, 
+		player.Position, 
+		Vector.Zero, 
+		player
+	):ToEffect() ---@cast DustCloud EntityEffect 
+	sfx:Play(soundeffect)
+
+    Helpers.SetBloodEffectColor(DustCloud)
+
+	DustCloud.SpriteScale = DustCloud.SpriteScale * player.SpriteScale.X
+	DustCloud.DepthOffset = -100
+	DustCloud:GetSprite().PlaybackSpeed = hasWater and 1.3 or 2	
+
+	local config = {
+		Height = jumpHeight,
+		Speed = jumpSpeed,
+		Tags = jumpTag,
+		Flags = jumpFlags.EdithJump,
+	}
+
+	JumpLib:Jump(player, config)
 end
 
 ---@param player EntityPlayer

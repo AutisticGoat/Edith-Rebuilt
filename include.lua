@@ -18,15 +18,10 @@ local includeFiles = {
 	libs .. "CustomShockwaveAPI",
 	libs .. "lhsx",
 	libs .. "EdithKotryHudHelper",
-	libs .. "status_effect_library",
 	funcs .. "functions",
 	funcs .. "unlock_functions",
 	misc .. "ImGui",
 	misc .. "UnlockManager",
-	effects .. "Salted",
-	effects .. "Peppered",
-	effects .. "HydrargyrumCurse",
-	effects .. "Cinder",
 
 	-- Items
 	col .. "items/Edith/SaltShaker",

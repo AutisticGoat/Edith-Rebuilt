@@ -54,7 +54,7 @@ function targetArrow.SpawnEdithTarget(player, tainted)
 		player.Position,
 		Vector.Zero,
 		player
-	):ToEffect()
+	):ToEffect() ---@cast target EntityEffect
 	target.DepthOffset = -100
 	target.SortingLayer = SortingLayer.SORTING_NORMAL
 	
@@ -123,7 +123,7 @@ function targetArrow.TargetDoorManager(effect, player, triggerDistance)
 
 		if door:IsOpen() or MirrorRoomCheck or ShouldMoveToStrangeDoorPos then
 			player.Position = doorPos
-			mod.RemoveEdithTarget(player, isTainted)
+			targetArrow.RemoveEdithTarget(player, isTainted)
 		elseif StrangeDoorCheck then
 			if not playerHasPhoto then goto Break end
 			door:TryUnlock(player)

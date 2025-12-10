@@ -1,9 +1,10 @@
 local mod = EdithRebuilt
-local sfx = mod.Enums.Utils.SFX
-local data = mod.CustomDataWrapper.getData
+local enums = mod.Enums
+local sfx = enums.Utils.SFX
 local modules = mod.Modules
 local herlpers = modules.HELPERS
 local ModRNG = modules.RNG
+local StatusEffects = modules.STATUS_EFFECTS
 local PepperGrinder = {}
 
 ---@param RNG RNG
@@ -17,8 +18,7 @@ function PepperGrinder:UsePepperGrinder(_, RNG, player, flag)
 
 	for _, enemy in ipairs(Isaac.FindInRadius(playerPos, 100, EntityPartition.ENEMY)) do
 		herlpers.TriggerPush(enemy, player, 20)
-		mod.SetPeppered(enemy, frames, player)
-		data(enemy).Player = player
+		StatusEffects.SetStatusEffect(enums.EdithStatusEffects.PEPPERED, enemy, frames, player)
 	end
 	
 	local PepperCloud = Isaac.Spawn(

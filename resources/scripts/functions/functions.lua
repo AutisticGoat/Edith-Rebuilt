@@ -15,7 +15,7 @@ local players = enums.PlayerType
 local sounds = enums.SoundEffect
 local data = mod.CustomDataWrapper.getData
 local saveManager = mod.SaveManager
-
+local Helpers = mod.Modules.HELPERS
 local Math = mod.Modules.MATHS
 
 local MortisBackdrop = {
@@ -170,22 +170,6 @@ function EdithRebuilt:ChangeColor(entity, red, green, blue, alpha)
 	entity.Color = color
 end
 
----Helper grid destroyer function
----@param entity Entity
----@param radius number
-function EdithRebuilt:DestroyGrid(entity, radius)
-	radius = radius or 10
-	local room = game:GetRoom()
-
-	for i = 0, room:GetGridSize() do
-		local grid = room:GetGridEntity(i)
-		if not grid then goto Break end  
-		if entity.Position:Distance(grid.Position) > radius then goto Break end
-		grid:Destroy(false)
-		::Break::
-	end
-end
-
 local LINE_SPRITE = Sprite("gfx/TinyBug.anm2", true)
 local MAX_POINTS = 360
 local ANGLE_SEPARATION = 360 / MAX_POINTS
@@ -213,57 +197,6 @@ function EdithRebuilt.RenderAreaOfEffect(pos, AreaSize, AreaColor) -- Took from 
     end
 end
 
----Manages Edith's Target and Tainted Edith's arrow behavior when going trough doors
----@param effect EntityEffect
----@param player EntityPlayer
----@param triggerDistance number
-function EdithRebuilt:TargetDoorManager(effect, player, triggerDistance)
-	local room = game:GetRoom()
-	local effectPos = effect.Position
-	local roomName = level:GetCurrentRoomDesc().Data.Name
-	local isTainted = mod.IsEdith(player, true) or false
-	local MirrorRoomCheck = roomName == "Mirror Room" and player:HasInstantDeathCurse()
-	local playerHasPhoto = (player:HasCollectible(CollectibleType.COLLECTIBLE_POLAROID) or player:HasCollectible(CollectibleType.COLLECTIBLE_NEGATIVE))
-
-	for i = 0, 7 do
-		local door = room:GetDoor(i)
-		if not door then goto Break end
-		local sprite = door:GetSprite()
-		local doorSpritePath = sprite:GetLayer(0):GetSpritesheetPath()
-		local MausoleumRoomCheck = string.find(doorSpritePath, "mausoleum") ~= nil
-		local StrangeDoorCheck = string.find(doorSpritePath, "mausoleum_alt") ~= nil
-		local ShouldMoveToStrangeDoorPos = StrangeDoorCheck and sprite:WasEventTriggered("FX")
-		local doorPos = room:GetDoorSlotPosition(i)
-
-		if not (doorPos and effectPos:Distance(doorPos) <= triggerDistance) then 	
-			if player.Color.A < 1 then
-				mod:ChangeColor(player, _, _, _, 1)
-			end
-			goto Break 
-		end
-
-		if door:IsOpen() or MirrorRoomCheck or ShouldMoveToStrangeDoorPos then
-			player.Position = doorPos
-			mod.RemoveEdithTarget(player, isTainted)
-		elseif StrangeDoorCheck then
-			if not playerHasPhoto then goto Break end
-			door:TryUnlock(player)
-		elseif MausoleumRoomCheck then
-			if not sprite:IsPlaying("KeyOpen") then
-				sprite:Play("KeyOpen")
-			end
-
-			if sprite:IsFinished("KeyOpen") then
-				door:TryUnlock(player, true)
-			end
-		else
-			mod:ChangeColor(player, 1, 1, 1, 1)
-			door:TryUnlock(player)
-		end
-		::Break::
-	end
-end
-
 ---@param Type ConfigDataTypes
 function EdithRebuilt.GetConfigData(Type)
 	if not saveManager:IsLoaded() then return end
@@ -278,180 +211,6 @@ function EdithRebuilt.GetConfigData(Type)
 	}
 
 	return mod.When(Type, switch)
-end
-
-local backdropColors = tables.BackdropColors
-
----@param player EntityPlayer
-function EdithRebuilt.InitVestigeJump(player)
-	local jumpSpeed = 3.75 + (player.MoveSpeed - 1)
-	local jumpHeight = 40
-	local room = game:GetRoom()
-	local isChap4 = mod:isChap4()
-	local BackDrop = room:GetBackdropType()
-	local hasWater = room:HasWater()
-	local variant = hasWater and EffectVariant.BIG_SPLASH or (isChap4 and EffectVariant.POOF02 or EffectVariant.POOF01)
-	local subType = hasWater and 1 or (isChap4 and 66 or 1)
-	local DustCloud = Isaac.Spawn(
-		EntityType.ENTITY_EFFECT, 
-		variant, 
-		subType, 
-		player.Position, 
-		Vector.Zero, 
-		player
-	)
-
-	local color = Color(1, 1, 1)
-	local switch = {
-		[EffectVariant.BIG_SPLASH] = function()
-			color = backdropColors[BackDrop] or Color(0.7, 0.75, 1)
-			if IsMortis then
-				color = Color(0, 0.8, 0.76, 1, 0, 0, 0)
-			end
-		end,
-		[EffectVariant.POOF02] = function()
-			color = backdropColors[BackDrop] or Color(1, 0, 0)
-
-			if IsMortis then
-				local Colors = {
-					[MortisBackdrop.MORGUE] = Color(0, 0, 0, 1, 0.45, 0.5, 0.575),
-					[MortisBackdrop.MOIST] = Color(0, 0.8, 0.76, 1, 0, 0, 0),
-					[MortisBackdrop.FLESH] = Color(0, 0, 0, 1, 0.55, 0.5, 0.55),
-				}
-				local newcolor = mod.When(EdithRebuilt.GetMortisDrop(), Colors, Color.Default)
-				color = newcolor
-			end
-		end,
-		[EffectVariant.POOF01] = function()
-			if hasWater then
-				color = backdropColors[BackDrop]
-			end
-		end
-	}
-	mod.WhenEval(variant, switch)
-
-	DustCloud.SpriteScale = DustCloud.SpriteScale * player.SpriteScale.X
-	DustCloud.DepthOffset = -100
-	DustCloud:SetColor(color, -1, 100, false, false)
-	DustCloud:GetSprite().PlaybackSpeed = hasWater and 1.3 or 2	
-
-	local config = {
-		Height = jumpHeight,
-		Speed = jumpSpeed,
-		Tags = jumpTags.EdithJump,
-		Flags = jumpFlags.EdithJump,
-	}
-
-	JumpLib:Jump(player, config)
-end
-
----@param player EntityPlayer
----@param jumpTag? string
-function EdithRebuilt.InitEdithJump(player, jumpTag)	
-	jumpTag = jumpTag or jumpTags.EdithJump
-
-	local canFly = player.CanFly
-	local jumpSpeed = canFly and 1.3 or 1.85
-	local soundeffect = canFly and SoundEffect.SOUND_ANGEL_WING or SoundEffect.SOUND_SHELLGAME
-	local div = canFly and 25 or 15
-	local base = canFly and 15 or 13
-	local IsMortis = mod.IsLJMortis()
-	local epicFetusMult = player:HasCollectible(CollectibleType.COLLECTIBLE_EPIC_FETUS) and 3 or 1
-	local jumpHeight = (base + (mod.GetEdithTargetDistance(player) / 40) / div) * epicFetusMult
-	local room = game:GetRoom()
-	local isChap4 = mod:isChap4()
-	local BackDrop = room:GetBackdropType()
-	local hasWater = room:HasWater()
-	local variant = hasWater and EffectVariant.BIG_SPLASH or (isChap4 and EffectVariant.POOF02 or EffectVariant.POOF01)
-	local subType = hasWater and 1 or (isChap4 and 66 or 1)
-	local DustCloud = Isaac.Spawn(
-		EntityType.ENTITY_EFFECT, 
-		variant, 
-		subType, 
-		player.Position, 
-		Vector.Zero, 
-		player
-	)
-	sfx:Play(soundeffect)
-
-	local color = Color(1, 1, 1)
-	local switch = {
-		[EffectVariant.BIG_SPLASH] = function()
-			color = backdropColors[BackDrop] or Color(0.7, 0.75, 1)
-			if IsMortis then
-				color = Color(0, 0.8, 0.76, 1, 0, 0, 0)
-			end
-		end,
-		[EffectVariant.POOF02] = function()
-			color = backdropColors[BackDrop] or Color(1, 0, 0)
-
-			if IsMortis then
-				local Colors = {
-					[MortisBackdrop.MORGUE] = Color(0, 0, 0, 1, 0.45, 0.5, 0.575),
-					[MortisBackdrop.MOIST] = Color(0, 0.8, 0.76, 1, 0, 0, 0),
-					[MortisBackdrop.FLESH] = Color(0, 0, 0, 1, 0.55, 0.5, 0.55),
-				}
-				local newcolor = mod.When(EdithRebuilt.GetMortisDrop(), Colors, Color.Default)
-				color = newcolor
-			end
-		end,
-		[EffectVariant.POOF01] = function()
-			if hasWater then
-				color = backdropColors[BackDrop]
-			end
-		end
-	}
-	mod.WhenEval(variant, switch)
-
-	DustCloud.SpriteScale = DustCloud.SpriteScale * player.SpriteScale.X
-	DustCloud.DepthOffset = -100
-	DustCloud:SetColor(color, -1, 100, false, false)
-	DustCloud:GetSprite().PlaybackSpeed = hasWater and 1.3 or 2	
-
-	local config = {
-		Height = jumpHeight,
-		Speed = jumpSpeed,
-		Tags = jumpTag,
-		Flags = jumpFlags.EdithJump,
-	}
-
-	JumpLib:Jump(player, config)
-end
-
-local LandSounds = {
-	Edith = {
-		[1] = SoundEffect.SOUND_STONE_IMPACT, 
-		[2] = sounds.SOUND_EDITH_STOMP,
-		[3] = sounds.SOUND_FART_REVERB,
-		[4] = sounds.SOUND_VINE_BOOM,
-	},
-	TEdith = {
-		Hop = {
-			[1] = SoundEffect.SOUND_STONE_IMPACT,
-			[2] = sounds.SOUND_YIPPEE,
-			[3] = sounds.SOUND_SPRING,
-		},
-		Parry = {
-			[1] = SoundEffect.SOUND_ROCK_CRUMBLE,
-			[2] = sounds.SOUND_PIZZA_TAUNT,
-			[3] = sounds.SOUND_VINE_BOOM,
-			[4] = sounds.SOUND_FART_REVERB,
-			[5] = sounds.SOUND_SOLARIAN,
-			[6] = sounds.SOUND_MACHINE,
-			[7] = sounds.SOUND_MECHANIC,
-			[8] = sounds.SOUND_KNIGHT,
-			[9] = sounds.SOUND_BLOQUEO,
-			[10] = sounds.SOUND_NAUTRASH,
-		}
-	}
-}
-
----@param tainted boolean
----@param isParryLand? boolean
----@return table
-function EdithRebuilt:GetLandSoundTable(tainted, isParryLand)
-	local TEdithSounds = LandSounds.TEdith
-	return tainted and (isParryLand and TEdithSounds.Parry or TEdithSounds.Hop) or LandSounds.Edith
 end
 
 ---Returns `true` if Dogma's appear cutscene is playing
@@ -495,7 +254,7 @@ mod:AddCallback(ModCallbacks.MC_POST_TEAR_DEATH, tearCol)
 ---@param IsBlood boolean
 ---@param isTainted boolean
 local function doEdithTear(tear, IsBlood, isTainted)
-	local player = mod:GetPlayerFromTear(tear)
+	local player = Helpers.GetPlayerFromTear(tear)
 
 	if not player then return end
 
@@ -529,11 +288,6 @@ end
 ---@return number
 function EdithRebuilt:SecondsToFrames(seconds)
 	return math.ceil(seconds * 30)
-end
-
-function EdithRebuilt.PepperEnemy(ent, player, frames)
-	ent:AddSlowing(EntityRef(player), frames, 0.5, Color(0.5, 0.5, 0.5))
-	data(ent).PepperFrames = frames
 end
 
 ---Custom black powder spawn (Used for Edith's black powder stomp synergy)
@@ -594,7 +348,7 @@ function EdithRebuilt:SpawnSaltCreep(parent, position, damage, timeout, gibAmoun
 	):ToEffect() ---@cast salt EntityEffect
 
 	local saltColor = inheritParentColor and parent.Color or Color.Default
-	local timeOutSeconds = mod:SecondsToFrames(timeout) or 30
+	local timeOutSeconds = Math.SecondsToFrames(timeout) or 30
 
 	salt.CollisionDamage = damage or 0
 	salt.Color = color or saltColor
@@ -602,7 +356,7 @@ function EdithRebuilt:SpawnSaltCreep(parent, position, damage, timeout, gibAmoun
 
 	if gibAmount > 0 then
 		local gibColor = color or (inheritParentColor and Color.Default or nil)
-		mod:SpawnSaltGib(parent, gibAmount, gibSpeed, gibColor, inheritParentVel)
+		Helpers.SpawnSaltGib(parent, gibAmount, gibSpeed, gibColor, inheritParentVel)
 	end
 	data(salt).SpawnType = spawnType
 end
@@ -623,25 +377,6 @@ end
 function EdithRebuilt.GetEdithTargetDirection(player, tainted)
 	local target = mod.GetEdithTarget(player, tainted or false)
 	return (target.Position - player.Position):Normalized()
-end
-
----Spawns Pepper creep, used for Pepper Grinder
----@param parent Entity
----@param position Vector
----@param damage number
----@param timeout number
-function EdithRebuilt:SpawnPepperCreep(parent, position, damage, timeout)
-	local pepper = Isaac.Spawn(
-		EntityType.ENTITY_EFFECT, 
-		EffectVariant.PLAYER_CREEP_RED, 
-		enums.SubTypes.PEPPER_CREEP,
-		position,
-		Vector.Zero,
-		parent
-	):ToEffect() ---@cast pepper EntityEffect
-
-	pepper.CollisionDamage = damage or 0
-	pepper:SetTimeout(mod:SecondsToFrames(timeout) or 30)
 end
 
 ---Checks if player is shooting by checking if shoot inputs are being pressed
@@ -681,77 +416,6 @@ function EdithRebuilt.drawLine(from, to, color, isObscure)
 	end
 end
 
----@param parent Entity
----@param Number number
----@param speed number?
----@param color Color?
----@param inheritParentVel boolean?
-function EdithRebuilt:SpawnSaltGib(parent, Number, speed, color, inheritParentVel)
-    local parentColor = parent.Color
-    local parentPos = parent.Position
-    local finalColor = Color(1, 1, 1) or parent.Color
-
-    if color then
-        local CTint = color:GetTint()
-        local COff = color:GetOffset()
-		local PTint = parentColor:GetTint()
-        local POff = parentColor:GetOffset()
-        local PCol = parentColor:GetColorize()
-
-        finalColor:SetTint(CTint.R + PTint.R - 1, CTint.G + PTint.G - 1, CTint.B + PTint.B - 1, 1)
-        finalColor:SetOffset(COff.R + POff.R, COff.G + POff.G, COff.B + POff.B)
-        finalColor:SetColorize(PCol.R, PCol.G, PCol.B, PCol.A)
-    end
-
-    local saltGib
-
-    for _ = 1, Number do    
-        saltGib = Isaac.Spawn(
-            EntityType.ENTITY_EFFECT,
-            EffectVariant.TOOTH_PARTICLE,
-            0,
-            parentPos,
-            RandomVector():Resized(speed or 3),
-            parent
-        ):ToEffect() ---@cast saltGib EntityEffect
-
-        saltGib.Color = finalColor
-        saltGib.Timeout = 5
-
-		if inheritParentVel then
-            saltGib.Velocity = saltGib.Velocity + parent.Velocity
-        end
-    end
-end
-
----Function to spawn Edith's Target, setting `tainted` to `true` will Spawn Tainted Edith's Arrow
----@param player EntityPlayer
----@param tainted? boolean
-function EdithRebuilt.SpawnEdithTarget(player, tainted)
-	if mod.IsDogmaAppearCutscene() then return end
-	if mod.GetEdithTarget(player, tainted or false) then return end 
-
-	local playerData = data(player)
-	local TargetVariant = tainted and effectVariant.EFFECT_EDITH_B_TARGET or effectVariant.EFFECT_EDITH_TARGET
-	local target = Isaac.Spawn(	
-		EntityType.ENTITY_EFFECT,
-		TargetVariant,
-		0,
-		player.Position,
-		Vector.Zero,
-		player
-	):ToEffect()
-	target.DepthOffset = -100
-	target.SortingLayer = SortingLayer.SORTING_NORMAL
-	
-	if tainted then
-		playerData.TaintedEdithTarget = target
-	else
-		target.GridCollisionClass = GridCollisionClass.COLLISION_SOLID
-		playerData.EdithTarget = target
-	end
-end
-
 ---Function to get Edith's Target, setting `tainted` to `true` will return Tainted Edith's Arrow
 ---@param player EntityPlayer
 ---@param tainted boolean?
@@ -759,23 +423,6 @@ end
 function EdithRebuilt.GetEdithTarget(player, tainted)
 	local playerData = data(player)
 	return tainted and playerData.TaintedEdithTarget or playerData.EdithTarget
-end
-
----Function to remove Edith's target
----@param player EntityPlayer
----@param tainted? boolean
-function EdithRebuilt.RemoveEdithTarget(player, tainted)
-	local target = mod.GetEdithTarget(player, tainted)
-
-	if not target then return end
-	target:Remove()
-
-	local playerData = data(player)
-	if tainted then
-		playerData.TaintedEdithTarget = nil
-	else
-		playerData.EdithTarget = nil
-	end
 end
 
 function EdithRebuilt.HasBitFlags(flags, checkFlag)
@@ -794,13 +441,6 @@ function EdithRebuilt.IsLJMortis()
 	return IsMortis
 end
 
----@param ent Entity
----@return boolean
-function EdithRebuilt.IsEnemy(ent)
-	return (ent:IsActiveEnemy() and ent:IsVulnerableEnemy()) or
-	(ent.Type == EntityType.ENTITY_GEMINI and ent.Variant == 12) -- this for blighted ovum little sperm like shit i hate it fuuuck
-end
-
 ---Helper function to find out how large a bomb explosion is based on the damage inflicted.
 ---@param damage number
 ---@return number
@@ -812,15 +452,6 @@ function EdithRebuilt.GetBombRadiusFromDamage(damage)
     else
         return 90
     end
-end
-
----Checks if are in Chapter 4 (Womb, Utero, Scarred Womb, Corpse)
----@return boolean
-function EdithRebuilt:isChap4()
-	local backdrop = game:GetRoom():GetBackdropType()
-	
-	if EdithRebuilt.IsLJMortis() then return true end
-	return mod.When(backdrop, tables.Chap4Backdrops, false)
 end
 
 ---Returns player's tears stat as portrayed in game's stats HUD
@@ -861,7 +492,7 @@ function EdithRebuilt.GetPlayerFromRef(EntityRef)
 
 	if not ent then return nil end
 	local familiar = ent:ToFamiliar()
-	return ent:ToPlayer() or mod:GetPlayerFromTear(ent) or familiar and familiar.Player 
+	return ent:ToPlayer() or Helpers.GetPlayerFromTear(ent) or familiar and familiar.Player 
 end
 
 ---@param player EntityPlayer
@@ -885,141 +516,7 @@ function EdithRebuilt.EdithDash(player, dir, dist, div)
 	player.Velocity = player.Velocity + dir * dist / div
 end
 
---- Helper function that returns a table containing all existing enemies in room
----@return Entity[]
-function EdithRebuilt.GetEnemies()
-    local enemyTable = {}
-    for _, ent in ipairs(Isaac.GetRoomEntities()) do
-        if not mod.IsEnemy(ent) then goto continue end
-        table.insert(enemyTable, ent)
-		::continue::
-    end
-    return enemyTable
-end 
-
----Function used to trigger Tainted Edith and Burnt Hood's parry-jump
----@param player EntityPlayer
----@param tag string
-function EdithRebuilt:InitTaintedEdithParryJump(player, tag)
-	local backdropColors = tables.BackdropColors
-	local jumpHeight = 8
-	local jumpSpeed = 2.5
-	local room = game:GetRoom()
-	local RoomWater = room:HasWater()
-	local isChap4 = mod:isChap4()
-	local BackDrop = room:GetBackdropType()
-	local variant = RoomWater and EffectVariant.BIG_SPLASH or (isChap4 and EffectVariant.POOF02 or EffectVariant.POOF01)
-	local subType = RoomWater and 1 or (isChap4 and 66 or 1)
-	
-	sfx:Play(SoundEffect.SOUND_SHELLGAME)
-	
-	local DustCloud = Isaac.Spawn(
-		EntityType.ENTITY_EFFECT, 
-		variant, 
-		subType, 
-		player.Position, 
-		Vector.Zero, 
-		player
-	) 
-
-	local color = DustCloud.Color
-	local switch = {
-		[EffectVariant.BIG_SPLASH] = function()
-			color = backdropColors[BackDrop] or Color(0.7, 0.75, 1)
-		end,
-		[EffectVariant.POOF02] = function()
-			color = backdropColors[BackDrop] or Color(1, 0, 0)
-		end,
-		[EffectVariant.POOF01] = function()
-			if RoomWater then
-				color = backdropColors[BackDrop]
-			end
-		end
-	}
-
-	mod.WhenEval(variant, switch)
-
-	DustCloud.SpriteScale = DustCloud.SpriteScale * player.SpriteScale.X
-	DustCloud.DepthOffset = -100
-	DustCloud:SetColor(color, -1, 100, false, false)
-	DustCloud:GetSprite().PlaybackSpeed = RoomWater and 1.3 or 2	
-
-	local config = {
-		Height = jumpHeight,
-		Speed = jumpSpeed,
-		Tags = tag,
-		Flags = jumpFlags.TEdithJump
-	}
-	JumpLib:Jump(player, config)
-	data(player).IsParryJump = true
-end
-
 local CinderHopRNG = RNG()
 mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, function()
 	CinderHopRNG:SetSeed(game:GetSeeds():GetStartSeed())
 end)
-
----@return integer
-function EdithRebuilt.GetMortisDrop()
-	if not EdithRebuilt.IsLJMortis() then return 0 end
-
-	if LastJudgement.UsingMorgueisBackdrop then
-		return MortisBackdrop.MORGUE
-	elseif LastJudgement.UsingMoistisBackdrop then 
-		return MortisBackdrop.MOIST
-	else
-		return MortisBackdrop.FLESH
-	end
-end
-
----Function used to spawn Tainted Edith's birthright fire jets
----@param player EntityPlayer
----@param position Vector
----@param damage number
----@param useDefaultMult? boolean
----@param scale number
-function EdithRebuilt.SpawnFireJet(player, position, damage, useDefaultMult, scale)
-	useDefaultMult = useDefaultMult or false
-	local playerData = data(player)
-	local Fire = Isaac.Spawn(
-		EntityType.ENTITY_EFFECT,
-		EffectVariant.FIRE_JET,
-		0,
-		position,
-		Vector.Zero,
-		player
-	)
-	Fire.SpriteScale = Fire.SpriteScale * (scale or 1)
-	Fire.CollisionDamage = damage * (useDefaultMult and 1 or (playerData.MoveBrCharge / 100))
-end
-
----@param entity Entity
----@return EntityPlayer?
-function EdithRebuilt:GetPlayerFromTear(entity)
-	local check = entity.Parent or entity.SpawnerEntity
-
-	if not check then return end
-	local checkType = check.Type
-
-	if checkType == EntityType.ENTITY_PLAYER then
-		return mod:GetPtrHashEntity(check):ToPlayer()
-	elseif checkType == EntityType.ENTITY_FAMILIAR then
-		return check:ToFamiliar().Player:ToPlayer()
-	end
-
-	return nil
-end
-
----@param entity Entity|EntityRef
----@return Entity?
-function EdithRebuilt:GetPtrHashEntity(entity)
-	if not entity then return end
-	entity = entity.Entity or entity
-
-	for _, matchEntity in pairs(Isaac.FindByType(entity.Type, entity.Variant, entity.SubType, false, false)) do
-		if GetPtrHash(entity) == GetPtrHash(matchEntity) then
-			return matchEntity
-		end
-	end
-	return nil
-end

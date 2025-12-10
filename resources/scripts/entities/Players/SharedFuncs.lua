@@ -5,6 +5,7 @@ local utils = enums.Utils
 local game = utils.Game
 local modules = mod.Modules
 local Player = modules.PLAYER
+local Helpers = modules.HELPERS
 local costumes = enums.NullItemID
 
 ---@param entity Entity
@@ -65,7 +66,7 @@ mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_ADD_COSTUME, function(_, itemconfig, 
 end)
 
 mod:AddCallback(ModCallbacks.MC_POST_TEAR_UPDATE, function(_, tear)
-    local player = mod:GetPlayerFromTear(tear)
+    local player = Helpers.GetPlayerFromTear(tear)
 
 	if not player then return end
 	if not Player.IsAnyEdith(player) then return end
@@ -85,7 +86,7 @@ mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG, function(_, player, _, flag
 end)
 
 mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, function(_, tear)
-    local player = mod:GetPlayerFromTear(tear)
+    local player = Helpers.GetPlayerFromTear(tear)
 
 	if not player then return end
     if not Player.IsAnyEdith(player) then return end

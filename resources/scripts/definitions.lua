@@ -87,6 +87,7 @@ EdithRebuilt.Enums = {
 	SubTypes = {
 		SALT_CREEP = Isaac.GetEntitySubTypeByName("Salt Creep"),
 		PEPPER_CREEP = Isaac.GetEntitySubTypeByName("Pepper Creep"),
+		CINDER_CREEP = Isaac.GetEntitySubTypeByName("Cinder Creep"),
 	},
 	SoundEffect = {
 		SOUND_EDITH_STOMP = Isaac.GetSoundIdByName("Edith Stomp"),
@@ -158,6 +159,13 @@ EdithRebuilt.Enums = {
 		EDITH = "EdithData",
 		TEDITH = "TEdithData",
 		MISC = "MiscData",
+	},
+	---@enum EdithStatusEffects
+	EdithStatusEffects = {
+		SALTED = "Salted",
+		CINDER = "Cinder",
+		PEPPERED = "Peppered",
+		HYDRARGYRUM_CURSE = "HydrargyrumCurse"
 	},
 	Tables = {
 		OverrideActions = {

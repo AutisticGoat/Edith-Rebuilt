@@ -1,5 +1,7 @@
 local mod = EdithRebuilt
 local enums = mod.Enums 
+local modules = mod.Modules
+local ModRNG = modules.RNG
 local trinket = enums.TrinketType
 local Paprika = {}
 
@@ -13,7 +15,7 @@ function Paprika:OnKilling(entity, source, _, amount)
 
     if not player then return end
     if not player:HasTrinket(trinket.TRINKET_PAPRIKA) then return end
-    if not mod.RandomBoolean(player:GetTrinketRNG(trinket.TRINKET_PAPRIKA)) then return end
+    if not ModRNG.RandomBoolean(player:GetTrinketRNG(trinket.TRINKET_PAPRIKA)) then return end
 
     local entPos = entity.Position
     local paprikaMult = player:GetTrinketMultiplier(trinket.TRINKET_PAPRIKA)

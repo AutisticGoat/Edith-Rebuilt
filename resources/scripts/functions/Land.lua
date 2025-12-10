@@ -6,13 +6,17 @@ local game = utils.Game
 local sfx = utils.SFX
 local ConfigDataTypes = enums.ConfigDataTypes
 local tables = enums.Tables
+local sounds = enums.SoundEffect
 local callbacks = enums.Callbacks
+local status = enums.EdithStatusEffects
 local data = mod.CustomDataWrapper.getData
 local Math = require("resources.scripts.functions.Maths")
 local Helpers = require("resources.scripts.functions.Helpers")
 local modRNG = require("resources.scripts.functions.RNG")
 local Player = require("resources.scripts.functions.Player")
 local Edith  = require("resources.scripts.functions.Edith")
+local StatusEffect = require("resources.scripts.functions.StatusEffects")
+local Floor = require("resources.scripts.functions.Floor")
 local Land = {}
 
 local damageFlags = DamageFlag.DAMAGE_CRUSH | DamageFlag.DAMAGE_IGNORE_ARMOR
@@ -22,15 +26,51 @@ local damageFlags = DamageFlag.DAMAGE_CRUSH | DamageFlag.DAMAGE_IGNORE_ARMOR
 ---@param damage number
 ---@param knockback number
 function Land.LandDamage(ent, dealEnt, damage, knockback)	
-	if not mod.IsEnemy(ent) then return end
+	if not Helpers.IsEnemy(ent) then return end
 
 	ent:TakeDamage(damage, damageFlags, EntityRef(dealEnt), 0)
 	Helpers.TriggerPush(ent, dealEnt, knockback)
 end
 
+local LandSounds = {
+	Edith = {
+		[1] = SoundEffect.SOUND_STONE_IMPACT, 
+		[2] = sounds.SOUND_EDITH_STOMP,
+		[3] = sounds.SOUND_FART_REVERB,
+		[4] = sounds.SOUND_VINE_BOOM,
+	},
+	TEdith = {
+		Hop = {
+			[1] = SoundEffect.SOUND_STONE_IMPACT,
+			[2] = sounds.SOUND_YIPPEE,
+			[3] = sounds.SOUND_SPRING,
+		},
+		Parry = {
+			[1] = SoundEffect.SOUND_ROCK_CRUMBLE,
+			[2] = sounds.SOUND_PIZZA_TAUNT,
+			[3] = sounds.SOUND_VINE_BOOM,
+			[4] = sounds.SOUND_FART_REVERB,
+			[5] = sounds.SOUND_SOLARIAN,
+			[6] = sounds.SOUND_MACHINE,
+			[7] = sounds.SOUND_MECHANIC,
+			[8] = sounds.SOUND_KNIGHT,
+			[9] = sounds.SOUND_BLOQUEO,
+			[10] = sounds.SOUND_NAUTRASH,
+		}
+	}
+}
+
+---@param tainted boolean
+---@param isParryLand? boolean
+---@return table
+function Land.GetLandSoundTable(tainted, isParryLand)
+	local TEdithSounds = LandSounds.TEdith
+	return tainted and (isParryLand and TEdithSounds.Parry or TEdithSounds.Hop) or LandSounds.Edith
+end
+
 ---@param ent Entity
 ---@param player EntityPlayer
-function AddExtraGore(ent, player)
+function Land.AddExtraGore(ent, player)
 	local enabledExtraGore
 
 	if Player.IsEdith(player, false) then
@@ -135,7 +175,7 @@ end
 ---@param SaltedTime boolean
 local function SaltEnemyManager(parent, ent, isDefStomp, SaltedTime)
 	if not isDefStomp then return end
-	EdithRebuilt.SetSalted(ent, SaltedTime, parent)
+	StatusEffect.SetStatusEffect(status.SALTED, ent, SaltedTime, parent)
 	data(ent).SaltType = data(parent).HoodLand and enums.SaltTypes.EDITHS_HOOD		
 end
 
@@ -145,7 +185,6 @@ end
 ---@param TerraMult number
 ---@param knockback number
 local function DamageManager(parent, ent, damage, TerraMult, knockback)
-	sfx:Play(SoundEffect.SOUND_MEATY_DEATHS)
 
 	local FrozenMult = ent:HasEntityFlags(EntityFlag.FLAG_FREEZE) and 1.2 or 1 
 	damage = (damage * FrozenMult) * TerraMult
@@ -154,7 +193,7 @@ local function DamageManager(parent, ent, damage, TerraMult, knockback)
 end
 
 local function EntityInteractHandler(ent, parent, knockback)
-	local isSalted = mod.IsSalted(ent)
+	local isSalted = StatusEffect.EntHasStatusEffect(ent, status.SALTED)
 	local knockbackMult = isSalted and 1.5 or 1
 
 	Land.HandleEntityInteraction(ent, parent, knockback * knockbackMult)
@@ -188,25 +227,25 @@ function Land.EdithStomp(parent, params, breakGrid)
 		EntityInteractHandler(ent, parent, knockback)
 		SaltEnemyManager(parent, ent, isDefStomp, SaltedTime)
 
-		if not mod.IsEnemy(ent) then goto Break end
+		if not Helpers.IsEnemy(ent) then goto Break end
 		Isaac.RunCallback(callbacks.OFFENSIVE_STOMP_HIT, parent, ent, params)
+		
+		if not params.IsDefensiveStomp then
+			sfx:Play(SoundEffect.SOUND_MEATY_DEATHS)
+		end
+
 		DamageManager(parent, ent, damage, TerraMult, knockback)
 
 		if ent.HitPoints > damage then goto Break end
 		EdithBirthcake(parent, isSalted)
-		AddExtraGore(ent, parent)
+		Land.AddExtraGore(ent, parent)
 		::Break::
 	end
 
 	if breakGrid then
-		mod:DestroyGrid(parent, radius)
+		Helpers.DestroyGrid(parent, radius)
 	end
 end
-
--- local function NPCUpdate(npc)
-	
--- end
--- mod:AddCallback(ModCallbacks.)
 
 ---Tainted Edith parry land behavior
 ---@param parent EntityPlayer
@@ -260,12 +299,11 @@ function Land.LandFeedbackManager(player, soundTable, GibColor, IsParryLand)
 	local menuData = saveManager:GetSettingsSave()
 	if not menuData then return end
 
-
 	--- Pendiente de reducir
 	local room = game:GetRoom()
 	local BackDrop = room:GetBackdropType()
 	local hasWater = room:HasWater()
-	local IsChap4 = mod:isChap4()
+	local IsChap4 = Floor.IsChap4()
 	local Variant = hasWater and EffectVariant.BIG_SPLASH or EffectVariant.POOF02
 	local SubType = hasWater and 2 or (IsChap4 and 3 or 1)
 	local backColor = tables.BackdropColors
@@ -337,7 +375,7 @@ function Land.LandFeedbackManager(player, soundTable, GibColor, IsParryLand)
 			[MortisBackdrop.MOIST] = Color(0, 0.8, 0.76, 1, 0, 0, 0),
 			[MortisBackdrop.FLESH] = Color(0, 0, 0, 1, 0.55, 0.5, 0.55),
 		}
-		local newcolor = mod.When(EdithRebuilt.GetMortisDrop(), Colors, Color.Default)
+		local newcolor = mod.When(Floor.GetMortisDrop(), Colors, Color.Default)
 		color = newcolor
 	end
 
@@ -348,7 +386,7 @@ function Land.LandFeedbackManager(player, soundTable, GibColor, IsParryLand)
 	GibColor = GibColor or defColor
 
 	if gibAmount > 0 then	
-		mod:SpawnSaltGib(player, gibAmount, gibSpeed, GibColor)
+		Helpers.SpawnSaltGib(player, gibAmount, gibSpeed, GibColor)
 	end
 
 	local sound = mod.When(soundPick, soundTable, 1)
@@ -356,4 +394,21 @@ function Land.LandFeedbackManager(player, soundTable, GibColor, IsParryLand)
 	SfxFeedbackManager(sound, volume, IsChap4, hasWater)
 end
 
+---@param params EdithJumpStompParams
+---@param height number
+---@param speed number
+function Land.TriggerLandenemyJump(params, height, speed)
+	for _, ent in ipairs(params.StompedEntities) do
+		local PushFactor = Helpers.GetPushFactor(ent)
+
+		if Helpers.IsEnemy(ent) then
+			JumpLib:TryJump(ent, {
+			Height = height * PushFactor,
+			Speed = speed * PushFactor,
+			Tags = "EdithRebuilt_EnemyJump",
+			-- Flags = JumpLib.Flags.
+		})	
+		end
+	end
+end
 return Land

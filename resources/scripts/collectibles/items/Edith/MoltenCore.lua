@@ -4,6 +4,7 @@ local items = enums.CollectibleType
 local utils = enums.Utils
 local game = utils.Game
 local MoltenCore = {}
+local Helpers = mod.Modules.HELPERS
 local data = mod.CustomDataWrapper.getData
 
 function MoltenCore:MoltenCoreStats(player)
@@ -15,7 +16,7 @@ mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, MoltenCore.MoltenCoreStats, Cach
 
 ---@param tear EntityTear
 function MoltenCore:OnFiringTears(tear)
-	local player = mod:GetPlayerFromTear(tear)
+	local player = Helpers.GetPlayerFromTear(tear)
 
 	if not player then return end 
 	if not player:HasCollectible(items.COLLECTIBLE_MOLTEN_CORE) then return end
@@ -37,7 +38,7 @@ function MoltenCore:KillingSalEnemy(entity, amount, _, source)
 
 	if not player then return end
 	if not player:HasCollectible(items.COLLECTIBLE_MOLTEN_CORE) then return end
-	if not mod.IsEnemy(entity) then return end
+	if not Helpers.IsEnemy(entity) then return end
 
 	entity:AddBurn(source, 120, 1)
 

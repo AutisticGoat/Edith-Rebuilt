@@ -3,7 +3,9 @@ local enums = mod.Enums
 local items = enums.CollectibleType
 local data = mod.CustomDataWrapper.getData
 local saltTypes = enums.SaltTypes
-local ModRNG = mod.Modules.RNG
+local modules = mod.Modules
+local ModRNG = modules.RNG
+local StatusEffects = modules.STATUS_EFFECTS
 local Sal = {}
 
 local baseRange = 6.5
@@ -51,7 +53,7 @@ mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, Sal.SalSpawnSaltCreep)
 ---@param entity Entity
 ---@param source EntityRef
 function Sal:KillingSalEnemy(entity, source)
-	if not mod.IsSalted(entity) then return end
+	if not StatusEffects.EntHasStatusEffect(entity, enums.EdithStatusEffects.SALTED) then return end
 
 	local Ent = source.Entity
 	local player = mod.GetPlayerFromRef(source)
@@ -63,4 +65,4 @@ function Sal:KillingSalEnemy(entity, source)
 
 	ShootSalTear(player, entity.Position, player:GetCollectibleRNG(items.COLLECTIBLE_SAL), 6, 12)
 end
-mod:AddCallback(PRE_NPC_KILL.ID, Sal.KillingSalEnemy)
+mod:AddCallback(ModCallbacks.MC_POST_ENTITY_KILL, Sal.KillingSalEnemy)

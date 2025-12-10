@@ -3,13 +3,14 @@ local enums = mod.Enums
 local card = enums.Card
 local utils = enums.Utils
 local game = utils.Game
+local Helpers = mod.Modules.HELPERS
 local JackOfClubs = {}
 
 ---@param player EntityPlayer
 function JackOfClubs:OnJackOfClubsUse(_, player)
     local rng = player:GetCardRNG(card.CARD_JACK_OF_CLUBS)
     local enemyPos
-    for _, enemy in pairs(mod.GetEnemies()) do
+    for _, enemy in pairs(Helpers.GetEnemies()) do
         enemyPos = enemy.Position
 
         if not mod.RandomBoolean(rng, 0.4) then goto Break end

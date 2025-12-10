@@ -7,6 +7,9 @@ local utils = enums.Utils
 local saltTypes = enums.SaltTypes
 local sfx = utils.SFX
 local SaltQuantity = 14
+local modules = mod.Modules
+local ModRNG = modules.RNG
+local StsEffects = modules.STATUS_EFFECTS 
 local degree = 360 / SaltQuantity
 local data = mod.CustomDataWrapper.getData
 local SaltShaker = {}
@@ -39,7 +42,7 @@ function SaltShaker:UseSaltShaker(_, rng, player, flag)
 
 	data(player).SpawnCentralPosition = player.Position
 
-	sfx:Play(sounds.SOUND_SALT_SHAKER, 2, 0, false, mod.RandomFloat(rng, 0.9, 1.1), 0)
+	sfx:Play(sounds.SOUND_SALT_SHAKER, 2, 0, false, ModRNG.RandomFloat(rng, 0.9, 1.1), 0)
 	return true
 end
 mod:AddCallback(ModCallbacks.MC_USE_ITEM, SaltShaker.UseSaltShaker, items.COLLECTIBLE_SALTSHAKER)
@@ -47,7 +50,7 @@ mod:AddCallback(ModCallbacks.MC_USE_ITEM, SaltShaker.UseSaltShaker, items.COLLEC
 ---@param npc EntityNPC
 ---@param source EntityRef
 function SaltShaker:OnSaltedDeath(npc, source)
-	if not mod.IsSalted(npc) then return end
+	if not StsEffects.EntHasStatusEffect(npc, enums.EdithStatusEffects.SALTED) then return end
     local player = mod.GetPlayerFromRef(source)
 
 	if not player then return end

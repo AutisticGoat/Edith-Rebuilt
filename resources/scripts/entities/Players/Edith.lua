@@ -92,7 +92,7 @@ function Edith:OnEdithLanding(player, _, pitfall)
 	end
 
 	if not IsInTrapdoor(player) then
-		Land.LandFeedbackManager(player, mod:GetLandSoundTable(false), player.Color, false)
+		Land.LandFeedbackManager(player, Land.GetLandSoundTable(false), player.Color, false)
 	end
 
 	EdithMod.StompDamageManager(player, jumpParams)
@@ -104,27 +104,14 @@ function Edith:OnEdithLanding(player, _, pitfall)
 
 	player:SetMinDamageCooldown(25)
 	player:MultiplyFriction(0.1)
-	
+
 	Land.EdithStomp(player, jumpParams, true)
+	Land.TriggerLandenemyJump(jumpParams, 10, 1.8)
+
+	jumpParams.RocketLaunch = false	
 	edithTarget:GetSprite():Play("Idle")
-
-	for _, ent in ipairs(jumpParams.StompedEntities) do
-		local PushFactor = helpers.GetPushFactor(ent)
-
-		if helpers.IsEnemy(ent) then
-			JumpLib:TryJump(ent, {
-			Height = 10 * PushFactor,
-			Speed = 1.8 * PushFactor,
-			Tags = "EdithRebuilt_EnemyJump",
-			-- Flags = JumpLib.Flags.
-		})	
-		end
-	end
-
-	jumpParams.RocketLaunch = false
 end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, Edith.OnEdithLanding, JumpParams.EdithJump)
-mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, Edith.OnEdithLanding, JumpParams.EdithsHoodJump)
 
 ---@param npc EntityNPC
 local function OnNPCUpdate(_, npc)
@@ -191,7 +178,7 @@ mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Edith.DamageStuff)
 ---@param player EntityPlayer
 function Edith:EdithRender(player)
 	local sprite = player:GetSprite()
-	
+
 	if not Player.IsEdith(player, false) then return end
 	if not IsInTrapdoor(player) then return end
 	if not sprite:IsPlaying("Trapdoor") then return end

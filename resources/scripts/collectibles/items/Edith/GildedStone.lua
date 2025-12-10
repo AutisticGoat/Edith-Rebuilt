@@ -3,12 +3,13 @@ local enums = mod.Enums
 local items = enums.CollectibleType
 local modules = mod.Modules
 local ModRNG = modules.RNG
+local Helpers = modules.HELPERS
 local plyMan = PlayerManager
 local GildedStone = {}
 
 ---@param tear EntityTear
 function GildedStone:ShootingRockTears(tear)
-	local player = mod:GetPlayerFromTear(tear)
+	local player = Helpers.GetPlayerFromTear(tear)
 	if not player then return end
 	if not player:HasCollectible(items.COLLECTIBLE_GILDED_STONE) then return end
 	local rng = player:GetCollectibleRNG(items.COLLECTIBLE_GILDED_STONE)
@@ -28,7 +29,6 @@ local RockRewards = {
     [1] = {Variant = PickupVariant.PICKUP_COLLECTIBLE, SubType = CollectibleType.COLLECTIBLE_DOLLAR},
 }
 
----comment
 ---@param rng RNG
 ---@return table?
 local function getRandomReward(rng)
