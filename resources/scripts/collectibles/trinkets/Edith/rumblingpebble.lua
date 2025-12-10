@@ -3,6 +3,9 @@ local enums = mod.Enums
 local trinket = enums.TrinketType
 local data = mod.CustomDataWrapper.getData
 local baseHeight = -23.45
+local modules = mod.Modules
+local ModRNG = modules.RNG
+local Helpers = modules.HELPERS
 local RumblingPebble = {}
 
 function RumblingPebble:DestroyRockWithPebble(rock)	
@@ -27,10 +30,10 @@ function RumblingPebble:DestroyRockWithPebble(rock)
 			
 			if not rockTear then return end
 			
-			FallSpeedVar = mod.RandomFloat(rng, 0.8, 1.2)
+			FallSpeedVar = ModRNG.RandomFloat(rng, 0.8, 1.2)
 
 			rockTear:AddTearFlags(player.TearFlags | TearFlags.TEAR_ROCK)
-			rockTear.FallingAcceleration = mod.RandomFloat(rng, 1.5, 2)
+			rockTear.FallingAcceleration = ModRNG.RandomFloat(rng, 1.5, 2)
 			rockTear.FallingSpeed = (-10 * rangemult) * FallSpeedVar
 			rockTear.Height = baseHeight * rangemult
 			rockTear.Scale = FallSpeedVar
@@ -45,14 +48,14 @@ mod:AddCallback(ModCallbacks.MC_POST_GRID_ROCK_DESTROY, RumblingPebble.DestroyRo
 
 ---@param tear EntityTear
 function RumblingPebble:RandomRockTear(tear)
-	local player = mod:GetPlayerFromTear(tear)
+	local player = Helpers.GetPlayerFromTear(tear)
 
 	if not player then return end 
 	if not player:HasTrinket(trinket.TRINKET_RUMBLING_PEBBLE) then return end
 	local rng = player:GetTrinketRNG(trinket.TRINKET_RUMBLING_PEBBLE)
 
-	if not mod.RandomBoolean(rng, 0.3) then return end
-	tear.CollisionDamage = tear.CollisionDamage * mod.RandomFloat(rng, 0.5, 2)
+	if not ModRNG.RandomBoolean(rng, 0.3) then return end
+	tear.CollisionDamage = tear.CollisionDamage * ModRNG.RandomFloat(rng, 0.5, 2)
 	tear:AddTearFlags(TearFlags.TEAR_ROCK)
 	tear:ChangeVariant(TearVariant.ROCK)
 	data(tear).IsPebbleTear = true

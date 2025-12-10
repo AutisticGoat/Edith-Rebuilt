@@ -1,8 +1,8 @@
 <AnimatedActor>
-    <Info CreatedBy="robot" CreatedOn="18/08/2024 06:43:37 p. m." Fps="30" Version="114"/>
+    <Info CreatedBy="robot" CreatedOn="18/08/2024 06:43:30 p. m." Fps="30" Version="113"/>
     <Content>
         <Spritesheets>
-            <Spritesheet Id="0" Path="effects/peppercreep.png"/>
+            <Spritesheet Id="0" Path="effects/cindercreep.png"/>
         </Spritesheets>
         <Layers>
             <Layer Id="0" Name="body" SpritesheetId="0"/>

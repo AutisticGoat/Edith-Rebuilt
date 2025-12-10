@@ -1,7 +1,31 @@
 <pocketitems>
 <!--  Lost Cards  -->
-    <card type="suit" pickup="2" hud="Jack_of_Clubs" name="Jack of Clubs​​​" description="Partial destruction" mimiccharge="4"/>
-    <card type="object" pickup="230" name="Salt Rocks" description="Get Salted" hud="SaltRocks"/>
-    <card type="rune" pickup="231" name="Soul of Edith" description="The heaviness of your judgment" hud="SoulOfEdith" mimiccharge="4"/>
+    <card 
+        type="suit" 
+        pickup="2" 
+        hud="Jack_of_Clubs" 
+        name="Jack of Clubs​​​" 
+        description="Partial destruction" 
+        mimiccharge="4"
+        achievement="EdithRebuilt_Jack of Clubs"
+    />
+    <card 
+        type="object" 
+        pickup="230" 
+        name="Salt Rocks" 
+        description="Get Salted" 
+        hud="SaltRocks"
+        achievement="EdithRebuilt_Salt Rocks"
+    />
+    <card 
+        type="rune" 
+        pickup="231" 
+        name="Soul of Edith" 
+        description="The heaviness of your judgment" 
+        hud="SoulOfEdith" 
+        mimiccharge="4"
+        achievement="EdithRebuilt_Soul of Edith"
+    />
+
 </pocketitems>
 

@@ -119,51 +119,19 @@ function mod:ThankYou()
 end
 mod:AddCallback(ModCallbacks.MC_POST_ACHIEVEMENT_UNLOCK, mod.ThankYou)
 
-function unlocks:CheckStartUnlocks()
-    for _, charTable in pairs(UnlockTable) do     
-        for _, tab in pairs(charTable) do
-            if Isaac.GetPersistentGameData():Unlocked(tab.Unlock) then goto continue end
-            if tab.Item then
-                pool:RemoveCollectible(tab.Item)
-            end
-            if tab.Trinket then
-                pool:RemoveTrinket(tab.Trinket)
-            end
-            ::continue::
-        end
-    end
-end
-mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, unlocks.CheckStartUnlocks)
-
 ---@param mark CompletionType
 ---@param player PlayerType
-function unlocks:OnTriggerCompletion(mark, player)
-    local pgd = Isaac.GetPersistentGameData()
-    local tableRef = player == players.PLAYER_EDITH and UnlockTable.Edith or players.PLAYER_EDITH_B and UnlockTable.TEdith or nil
-    local difficulty = game.Difficulty
+---@param pgd PersistentGameData
+---@param difficulty Difficulty
+local function TriggerEdithUnlocks(mark, player, pgd, difficulty)
+    if player ~= players.PLAYER_EDITH then return end
 
-    if not tableRef then return end
-    local unlock = mod.When(mark, UnlockTable.Edith)
+    local tableRef = UnlockTable.Edith 
+    local unlock = mod.When(mark, tableRef)
 
-    if not unlock then 
-        if not player == players.PLAYER_EDITH_B then return end
+    if not unlock then return end
 
-        if Isaac.AllTaintedCompletion(players.PLAYER_EDITH_B, TaintedMarksGroup.SOULSTONE) == 2 then
-            pgd:TryUnlock(achievements.ACHIEVEMENT_SOUL_OF_EDITH)
-        end
-
-        if Isaac.AllTaintedCompletion(players.PLAYER_EDITH_B, TaintedMarksGroup.POLAROID_NEGATIVE) == 2 then
-            pgd:TryUnlock(achievements.ACHIEVEMENT_BURNT_SALT)
-        end
-
-        if difficulty == Difficulty.DIFFICULTY_GREEDIER then
-            pgd:TryUnlock(achievements.ACHIEVEMENT_JACK_OF_CLUBS)
-        end
-
-        return
-    end
-
-    if player == players.PLAYER_EDITH and difficulty == Difficulty.DIFFICULTY_GREEDIER then
+    if difficulty == Difficulty.DIFFICULTY_GREEDIER then
         pgd:TryUnlock(achievements.ACHIEVEMENT_HYDRARGYRUM)
         pgd:TryUnlock(achievements.ACHIEVEMENT_GILDED_STONE)
     end
@@ -174,6 +142,44 @@ function unlocks:OnTriggerCompletion(mark, player)
     if Isaac.AllMarksFilled(players.PLAYER_EDITH) == 2 then 
         pgd:TryUnlock(achievements.ACHIEVEMENT_SALT_HEART)
     end
+end
+
+---@param mark CompletionType
+---@param player PlayerType
+---@param pgd PersistentGameData
+---@param difficulty Difficulty
+local function TriggerTEdithUnlocks(mark, player, pgd, difficulty)
+    if player ~= players.PLAYER_EDITH_B then return end
+
+    local tableRef = UnlockTable.TEdith
+    local unlock = mod.When(mark, tableRef, nil)
+
+    if not unlock then return end
+
+    if Isaac.AllTaintedCompletion(players.PLAYER_EDITH_B, TaintedMarksGroup.SOULSTONE) == 2 then
+        pgd:TryUnlock(achievements.ACHIEVEMENT_SOUL_OF_EDITH)
+    end
+
+    if Isaac.AllTaintedCompletion(players.PLAYER_EDITH_B, TaintedMarksGroup.POLAROID_NEGATIVE) == 2 then
+        pgd:TryUnlock(achievements.ACHIEVEMENT_BURNT_SALT)
+    end
+
+    if difficulty == Difficulty.DIFFICULTY_GREEDIER then
+        pgd:TryUnlock(achievements.ACHIEVEMENT_JACK_OF_CLUBS)
+    end
+
+    if difficulty ~= unlock.Difficulty then return end
+    pgd:TryUnlock(unlock.Unlock)
+end
+
+---@param mark CompletionType
+---@param player PlayerType
+function unlocks:OnTriggerCompletion(mark, player)
+    local pgd = Isaac.GetPersistentGameData()
+    local difficulty = game.Difficulty
+
+    TriggerEdithUnlocks(mark, player, pgd, difficulty)
+    TriggerTEdithUnlocks(mark, player, pgd, difficulty)
 
     mod:ThankYou()
 end

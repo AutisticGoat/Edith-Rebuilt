@@ -67,19 +67,27 @@ EdithRebuilt.Enums = {
 		---* entity `Entity`
 		PERFECT_PARRY_KILL = "EdithRebuilt_PERFECT_PARRY_KILL",
 
-		-- Called everytime Edith does an offensive stomp and damages at least `One Enemy
+		-- Called everytime Edith does an offensive stomp
+		---* player `EntityPlayer`
+		---* params `EdithJumpStompParams`
+		OFFENSIVE_STOMP = "EdithRebuilt_OFFENSIVE_STOMP",
+
+		-- Called everytime Edith does an offensive stomp and damages at least `One` Enemy
 		---* player `EntityPlayer`
 		---* entity `Entity`
-		OFFENSIVE_STOMP = "EdithRebuilt_OFFENSIVE_STOMP",
+		---* params `EdithJumpStompParams`
+		OFFENSIVE_STOMP_HIT = "EdithRebuilt_OFFENSIVE_STOMP_HIT",
 
 		-- Called everytime Edith's Target (or Tainted Edith's arrow) changes its design		
 		TARGET_SPRITE_CHANGE = "EdithRebuilt_TARGET_SPRITE_CHANGE",
-		 -- Called everytime Tainted Edith's trail sprite is changed	
+
+		-- Called everytime Tainted Edith's trail sprite is changed	
 		TRAIL_SPRITE_CHANGE = "EdithRebuilt_TRAIL_SPRITE_CHANGE",
 	},
 	SubTypes = {
 		SALT_CREEP = Isaac.GetEntitySubTypeByName("Salt Creep"),
 		PEPPER_CREEP = Isaac.GetEntitySubTypeByName("Pepper Creep"),
+		CINDER_CREEP = Isaac.GetEntitySubTypeByName("Cinder Creep"),
 	},
 	SoundEffect = {
 		SOUND_EDITH_STOMP = Isaac.GetSoundIdByName("Edith Stomp"),
@@ -103,34 +111,34 @@ EdithRebuilt.Enums = {
 	},
 	Achievements = {
 		-- Edith unlocks
-		ACHIEVEMENT_SALT_SHAKER = Isaac.GetAchievementIdByName("Salt Shaker"),
-		ACHIEVEMENT_PEPPER_GRINDER = Isaac.GetAchievementIdByName("Pepper Grinder"),
-		ACHIEVEMENT_SAL = Isaac.GetAchievementIdByName("Sal"),
-		ACHIEVEMENT_SALT_HEART = Isaac.GetAchievementIdByName("Salt Heart"),
-		ACHIEVEMENT_FAITH_OF_THE_UNFAITHFUL = Isaac.GetAchievementIdByName("Faith Of The Unfaithful"),
-		ACHIEVEMENT_MOLTEN_CORE = Isaac.GetAchievementIdByName("Molten Core"),
-		ACHIEVEMENT_GILDED_STONE = Isaac.GetAchievementIdByName("Gilded Stone"),
-		ACHIEVEMENT_GEODE = Isaac.GetAchievementIdByName("Geode"),
-		ACHIEVEMENT_SULFURIC_FIRE = Isaac.GetAchievementIdByName("Sulfuric Fire"),
-		ACHIEVEMENT_RUMBLING_PEBBLE = Isaac.GetAchievementIdByName("Rumbling Pebble"),
-		ACHIEVEMENT_DIVINE_RETRIBUTION = Isaac.GetAchievementIdByName("Divine Retribution"),
-		ACHIEVEMENT_CHUNK_OF_BASALT = Isaac.GetAchievementIdByName("Chunk of Basalt"),
-		ACHIEVEMENT_EDITHS_HOOD = Isaac.GetAchievementIdByName("Ediths Hood"),
-		ACHIEVEMENT_HYDRARGYRUM = Isaac.GetAchievementIdByName("Hydrargyrum"),
-		ACHIEVEMENT_TAINTED_EDITH = Isaac.GetAchievementIdByName("The Punished"),
+		ACHIEVEMENT_SALT_SHAKER = Isaac.GetAchievementIdByName("EdithRebuilt_Salt Shaker"),
+		ACHIEVEMENT_PEPPER_GRINDER = Isaac.GetAchievementIdByName("EdithRebuilt_Pepper Grinder"),
+		ACHIEVEMENT_SAL = Isaac.GetAchievementIdByName("EdithRebuilt_Sal"),
+		ACHIEVEMENT_SALT_HEART = Isaac.GetAchievementIdByName("EdithRebuilt_Salt Heart"),
+		ACHIEVEMENT_FAITH_OF_THE_UNFAITHFUL = Isaac.GetAchievementIdByName("EdithRebuilt_Faith Of The Unfaithful"),
+		ACHIEVEMENT_MOLTEN_CORE = Isaac.GetAchievementIdByName("EdithRebuilt_Molten Core"),
+		ACHIEVEMENT_GILDED_STONE = Isaac.GetAchievementIdByName("EdithRebuilt_Gilded Stone"),
+		ACHIEVEMENT_GEODE = Isaac.GetAchievementIdByName("EdithRebuilt_Geode"),
+		ACHIEVEMENT_SULFURIC_FIRE = Isaac.GetAchievementIdByName("EdithRebuilt_Sulfuric Fire"),
+		ACHIEVEMENT_RUMBLING_PEBBLE = Isaac.GetAchievementIdByName("EdithRebuilt_Rumbling Pebble"),
+		ACHIEVEMENT_DIVINE_RETRIBUTION = Isaac.GetAchievementIdByName("EdithRebuilt_Divine Retribution"),
+		ACHIEVEMENT_CHUNK_OF_BASALT = Isaac.GetAchievementIdByName("EdithRebuilt_Chunk of Basalt"),
+		ACHIEVEMENT_EDITHS_HOOD = Isaac.GetAchievementIdByName("EdithRebuilt_Ediths Hood"),
+		ACHIEVEMENT_HYDRARGYRUM = Isaac.GetAchievementIdByName("EdithRebuilt_Hydrargyrum"),
+		ACHIEVEMENT_TAINTED_EDITH = Isaac.GetAchievementIdByName("EdithRebuilt_The Punished"),
 		-- Edith unlocks end
 		
 		-- Tainted Edith unlocks
-		ACHIEVEMENT_SALT_ROCKS = Isaac.GetAchievementIdByName("Salt Rocks"),
-		ACHIEVEMENT_BURNT_SALT = Isaac.GetAchievementIdByName("Burnt Salt"),
-		ACHIEVEMENT_JACK_OF_CLUBS = Isaac.GetAchievementIdByName("Jack of Clubs"),
-		ACHIEVEMENT_PAPRIKA = Isaac.GetAchievementIdByName("Paprika"),
-		ACHIEVEMENT_BURNT_HOOD = Isaac.GetAchievementIdByName("Burnt Hood"),
-		ACHIEVEMENT_SOUL_OF_EDITH = Isaac.GetAchievementIdByName("Soul of Edith"),
-		ACHIEVEMENT_DIVINE_WRATH = Isaac.GetAchievementIdByName("Divine Wrath"),
+		ACHIEVEMENT_SALT_ROCKS = Isaac.GetAchievementIdByName("EdithRebuilt_Salt Rocks"),
+		ACHIEVEMENT_BURNT_SALT = Isaac.GetAchievementIdByName("EdithRebuilt_Burnt Salt"),
+		ACHIEVEMENT_JACK_OF_CLUBS = Isaac.GetAchievementIdByName("EdithRebuilt_Jack of Clubs"),
+		ACHIEVEMENT_PAPRIKA = Isaac.GetAchievementIdByName("EdithRebuilt_Paprika"),
+		ACHIEVEMENT_BURNT_HOOD = Isaac.GetAchievementIdByName("EdithRebuilt_Burnt Hood"),
+		ACHIEVEMENT_SOUL_OF_EDITH = Isaac.GetAchievementIdByName("EdithRebuilt_Soul of Edith"),
+		ACHIEVEMENT_DIVINE_WRATH = Isaac.GetAchievementIdByName("EdithRebuilt_Divine Wrath"),
 		-- Tainted Edith unlocks end
 
-		ACHIEVEMENT_THANK_YOU = Isaac.GetAchievementIdByName("Thank You"),
+		ACHIEVEMENT_THANK_YOU = Isaac.GetAchievementIdByName("EdithRebuilt_Thank You"),
 	},
 	Utils = {
 		Game = Game(),
@@ -151,6 +159,13 @@ EdithRebuilt.Enums = {
 		EDITH = "EdithData",
 		TEDITH = "TEdithData",
 		MISC = "MiscData",
+	},
+	---@enum EdithStatusEffects
+	EdithStatusEffects = {
+		SALTED = "Salted",
+		CINDER = "Cinder",
+		PEPPERED = "Peppered",
+		HYDRARGYRUM_CURSE = "HydrargyrumCurse"
 	},
 	Tables = {
 		OverrideActions = {
@@ -406,7 +421,7 @@ EdithRebuilt.Enums = {
 		ChargeBarcenterVector = Vector(0, 10),
 		ChargeBarrightVector = Vector(8, 10),
 		PaprikaColor = Color(0.8, 0.2, 0),
-		ParryPartitions = EntityPartition.ENEMY | EntityPartition.BULLET | EntityPartition.TEAR, --[[@as EntityPartition]]
+		ParryPartitions = EntityPartition.ENEMY | EntityPartition.BULLET | EntityPartition.TEAR, --[[@as EntityPartition|integer]]
 		NewProjectilFlags = ProjectileFlags.HIT_ENEMIES | ProjectileFlags.CANT_HIT_PLAYER,
 	},
 }

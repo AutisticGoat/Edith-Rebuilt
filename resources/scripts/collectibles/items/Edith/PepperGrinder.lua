@@ -1,6 +1,10 @@
 local mod = EdithRebuilt
-local sfx = mod.Enums.Utils.SFX
-local data = mod.CustomDataWrapper.getData
+local enums = mod.Enums
+local sfx = enums.Utils.SFX
+local modules = mod.Modules
+local herlpers = modules.HELPERS
+local ModRNG = modules.RNG
+local StatusEffects = modules.STATUS_EFFECTS
 local PepperGrinder = {}
 
 ---@param RNG RNG
@@ -13,9 +17,8 @@ function PepperGrinder:UsePepperGrinder(_, RNG, player, flag)
 	local frames = hasCarBattery and 120 or 60
 
 	for _, enemy in ipairs(Isaac.FindInRadius(playerPos, 100, EntityPartition.ENEMY)) do
-		mod.TriggerPush(enemy, player, 20, 3, false)
-		mod.SetPeppered(enemy, frames, player)
-		data(enemy).Player = player
+		herlpers.TriggerPush(enemy, player, 20)
+		StatusEffects.SetStatusEffect(enums.EdithStatusEffects.PEPPERED, enemy, frames, player)
 	end
 	
 	local PepperCloud = Isaac.Spawn(
@@ -26,13 +29,13 @@ function PepperGrinder:UsePepperGrinder(_, RNG, player, flag)
         Vector.Zero,
         nil
     )
-	local X = mod.RandomFloat(RNG, 0.8, 1)
-	local Y = mod.RandomFloat(RNG, 0.8, 1)
+	local X = ModRNG.RandomFloat(RNG, 0.8, 1)
+	local Y = ModRNG.RandomFloat(RNG, 0.8, 1)
 
 	PepperCloud.SpriteScale = PepperCloud.SpriteScale * Vector(X, Y)
 
 	mod:ChangeColor(PepperCloud, 0.4, 0.4, 0.4)
-	sfx:Play(mod.Enums.SoundEffect.SOUND_PEPPER_GRINDER, 10, 0, false, mod.RandomFloat(RNG, 0.9, 1.1))
+	sfx:Play(mod.Enums.SoundEffect.SOUND_PEPPER_GRINDER, 10, 0, false, ModRNG.RandomFloat(RNG, 0.9, 1.1))
 	return true
 end
 mod:AddCallback(ModCallbacks.MC_USE_ITEM, PepperGrinder.UsePepperGrinder, mod.Enums.CollectibleType.COLLECTIBLE_PEPPERGRINDER)

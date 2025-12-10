@@ -884,7 +884,7 @@ function mod:DestroyImGuiOptions()
 end
 
 local function InitSaveData()
-	RenderMenu = false
+	RenderMenu = true
 
 	local SaveManager = mod.SaveManager
 	if not SaveManager and not SaveManager:IsLoaded() then return end
@@ -942,3 +942,7 @@ mod:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT, OptionsUpdate)
 mod:AddCallback(ModCallbacks.MC_PRE_MOD_UNLOAD, OptionsUpdate)
 mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, OptionsUpdate)
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, OptionsUpdate)
+
+mod:AddCallback(ModCallbacks.MC_POST_ACHIEVEMENT_UNLOCK, function()
+	RenderMenu = true
+end, achievements.ACHIEVEMENT_TAINTED_EDITH)

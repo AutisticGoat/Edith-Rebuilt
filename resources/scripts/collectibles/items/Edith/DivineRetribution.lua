@@ -3,6 +3,9 @@ local enums = mod.Enums
 local items = enums.CollectibleType
 local utils = enums.Utils
 local game = utils.Game
+local modules = mod.Modules
+local Helpers = modules.HELPERS
+local ModRNG = modules.RNG
 local sfx = utils.SFX
 local DivineRetribution = {}
 
@@ -14,11 +17,11 @@ function DivineRetribution:OnDRUse(_, rng, player, flags)
     if mod.HasBitFlags(flags, UseFlag.USE_CARBATTERY) then return end
     local IsJudasWithBirthright = mod.IsJudasWithBirthright(player)
 
-    if mod.RandomBoolean(rng) then
+    if ModRNG.RandomBoolean(rng) then
         sfx:Play(SoundEffect.SOUND_THUMBS_DOWN)
         Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.CRACK_THE_SKY, 1, player.Position, Vector.Zero, nil)
     else
-        local roomEnemies = mod.GetEnemies()
+        local roomEnemies = Helpers.GetEnemies()
         if #roomEnemies <= 0 then return end
         local Hascarbattery = player:HasCollectible(CollectibleType.COLLECTIBLE_CAR_BATTERY)
         local damage = (Hascarbattery and 50 or 25) * (IsJudasWithBirthright and 1.5 or 1)

@@ -1,4 +1,3 @@
----@diagnostic disable: undefined-field 
 local mod = EdithRebuilt
 local enums = mod.Enums
 local misc = enums.Misc

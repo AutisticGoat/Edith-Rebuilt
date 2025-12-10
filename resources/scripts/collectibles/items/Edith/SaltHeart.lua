@@ -4,8 +4,11 @@ local items = enums.CollectibleType
 local data = mod.CustomDataWrapper.getData
 local saltTypes = enums.SaltTypes
 local invalidDamageFlags = DamageFlag.DAMAGE_SPIKES | DamageFlag.DAMAGE_INVINCIBLE | DamageFlag.DAMAGE_NO_MODIFIERS | DamageFlag.DAMAGE_NO_PENALTIES
-local SaltHeart = {}
+local modules = mod.Modules
+local ModRNG = modules.RNG
+local StsEffects = modules.STATUS_EFFECTS
 local SaltedFlag = StatusEffectLibrary.StatusFlag.EDITH_REBUILT_SALTED
+local SaltHeart = {}
 
 ---@param entity Entity
 ---@param amount number
@@ -40,7 +43,7 @@ mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, SaltHeart.GettingDamage)
 
 ---@param player EntityPlayer
 function SaltHeart:SpawnSaltCreep(player)
-    if not mod.IsSalted(player) then return end
+    if not StsEffects.EntHasStatusEffect(player, StsEffects.SALTED) then return end
     if StatusEffectLibrary:GetStatusEffectCountdown(player, SaltedFlag) % 5 ~= 0 then return end
     
     mod:SpawnSaltCreep(player, player.Position, 0, 5, 2, 3, saltTypes.SALT_HEART, true, true)
@@ -61,10 +64,10 @@ function SaltHeart:OnSaltedDeath(npc, source)
     local player = mod.GetPlayerFromRef(source)
 
     if not player then return end
-    if not mod.IsSalted(npc) then return end
+    if not StsEffects.EntHasStatusEffect(player, StsEffects.SALTED) then return end
     if saltedType ~= saltTypes.SALT_HEART then return end
-    if not mod.RandomBoolean(player:GetCollectibleRNG(items.COLLECTIBLE_SALT_HEART), 0.25) then return end
+    if not ModRNG.RandomBoolean(player:GetCollectibleRNG(items.COLLECTIBLE_SALT_HEART), 0.25) then return end
 
     Isaac.Spawn(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_HEART, 0, npc.Position, Vector.Zero, nil)
 end 
-mod:AddCallback(PRE_NPC_KILL.ID, SaltHeart.OnSaltedDeath)
+mod:AddCallback(ModCallbacks.MC_POST_ENTITY_KILL, SaltHeart.OnSaltedDeath)

@@ -11,7 +11,6 @@ local effects = "StatusEffects/"
 
 local includeFiles = {
 	-- Cosas necesarias
-	"definitions",
 	compat .. "EID",
 	compat .. "Birthcake",
 	compat .. "RunicTablet",
@@ -19,14 +18,10 @@ local includeFiles = {
 	libs .. "CustomShockwaveAPI",
 	libs .. "lhsx",
 	libs .. "EdithKotryHudHelper",
-	libs .. "status_effect_library",
 	funcs .. "functions",
 	funcs .. "unlock_functions",
 	misc .. "ImGui",
-	effects .. "Salted",
-	effects .. "Peppered",
-	effects .. "HydrargyrumCurse",
-	effects .. "Cinder",
+	misc .. "UnlockManager",
 
 	-- Items
 	col .. "items/Edith/SaltShaker",
@@ -71,16 +66,16 @@ local includeFiles = {
 	"challenges/Vestige",
 
 	-- sinergias pisotones
-	stmpSyn .. "blackPowder",
-	stmpSyn .. "brimstone",
-	stmpSyn .. "techX",
-	stmpSyn .. "MomsKnife",
-	stmpSyn .. "Rockwaves",
-	stmpSyn .. "SpiritSword",
-	stmpSyn .. "EpicFetus",
-	stmpSyn .. "StatusEffects",
-	stmpSyn .. "GodHead",
-	stmpSyn .. "Technology",
+	-- stmpSyn .. "blackPowder",
+	-- stmpSyn .. "brimstone",
+	-- stmpSyn .. "techX",
+	-- stmpSyn .. "MomsKnife",
+	-- stmpSyn .. "Rockwaves",
+	-- stmpSyn .. "SpiritSword",
+	-- stmpSyn .. "EpicFetus",
+	-- stmpSyn .. "StatusEffects",
+	-- stmpSyn .. "GodHead",
+	-- stmpSyn .. "Technology",
 
 	parrySyn .. "Brimstone",
 }

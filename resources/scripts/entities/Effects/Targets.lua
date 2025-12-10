@@ -3,22 +3,15 @@ local enums = mod.Enums
 local Vars = enums.EffectVariant 
 local game = enums.Utils.Game
 local misc = enums.Misc
-local saveManager = mod.SaveManager
 local tables = enums.Tables
 local Hsx = mod.Hsx
 local defColor = Color.Default
 local RGBColors = { Target = Color(1, 0, 0), Arrow = Color(1, 0, 0) }
+local modules = mod.Modules
+local Edith = modules.EDITH
+local TEdith = modules.TEDITH
+local targetArrow = modules.TARGET_ARROW
 local data = mod.CustomDataWrapper.getData
-
--- local funcs = {
--- 	GetData = 
--- 	DrawLine = mod.drawLine,
--- 	MenuData = saveManager.GetSettingsSave,
--- 	Switch = mod.When,
--- 	HSVToRGB = Hsx.hsv2rgb,
--- 	RGBToHSV = Hsx.rgb2hsv,
--- }
-
 local teleportPoints = {
 	Vector(110, 135),
 	Vector(595, 385),
@@ -55,12 +48,11 @@ local function EdithTargetManagement(effect, player)
 
 	local playerPos = player.Position
 	local effectPos = effect.Position
-	local playerData = data(player)
 	local room = game:GetRoom()
+	local params = Edith.GetJumpStompParams(player)
 
-	if mod.IsKeyStompPressed(player) or playerData.ExtraJumps > 0 and playerData.EdithJumpTimer == 0 then
-		effect:GetSprite():Play("Blink")
-	end
+	local anim = (mod.IsKeyStompPressed(player) or params.Jumps > 0 and params.Cooldown == 0) and "Blink" or "Idle" 
+	effect:GetSprite():Play(anim)
 
 	room:GetCamera():SetFocusPosition(interpolateVector2D(playerPos, effectPos, 0.6))
 
@@ -128,7 +120,7 @@ local function TaintedEdithArrowRender(effect, player, saveData)
 	effect.Visible = effect.FrameCount > 1
 
 	if saveData.ArrowDesign ~= 7 then
-		effect:GetSprite().Rotation = data(player).HopVector:GetAngleDegrees() 
+		effect:GetSprite().Rotation = TEdith.GetHopParryParams(player).HopDirection:GetAngleDegrees() 
 	end
 
 	if saveData.RGBMode then
@@ -146,7 +138,7 @@ mod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, effect)
 	local player = effect.SpawnerEntity:ToPlayer()
 
     if not player then return end
-	mod:TargetDoorManager(effect, player, effect.Variant == Vars.EFFECT_EDITH_TARGET and 28 or 20)
+	targetArrow.TargetDoorManager(effect, player, effect.Variant == Vars.EFFECT_EDITH_TARGET and 28 or 20)
     EdithTargetManagement(effect, player)
 end)
 

@@ -5,14 +5,29 @@ EdithRebuilt.CustomDataWrapper = require("resources.scripts.libs.EdithRebuiltSav
 EdithRebuilt.CustomDataWrapper.init(mod)
 EdithRebuilt.SaveManager = require("resources.scripts.libs.EdithRebuiltSaveManager")
 EdithRebuilt.SaveManager.Init(mod)
+EdithRebuilt.Hsx = require("resources.scripts.libs.lhsx")
 
-include("resources.scripts.libs.EdithKotryJumpLib").Init(mod)
+include("resources.scripts.libs.EdithKotryJumpLib").Init()
+include("resources.scripts.definitions")
+include("resources.scripts.libs.status_effect_library")
+
+EdithRebuilt.Modules = {
+	FLOOR = include("resources.scripts.functions.Floor"),
+	RNG = include("resources.scripts.functions.RNG"),
+	HELPERS = include("resources.scripts.functions.Helpers"),
+	VEC_DIR = include("resources.scripts.functions.VecDir"),
+	MATHS = include("resources.scripts.functions.Maths"),
+	TARGET_ARROW = include("resources.scripts.functions.TargetArrow"),
+	PLAYER = include("resources.scripts.functions.Player"),
+	EDITH = include("resources.scripts.functions.Edith"),
+	LAND = include("resources.scripts.functions.Land"),
+	TEDITH = include("resources.scripts.functions.TEdith"),
+	STATUS_EFFECTS = include("resources.scripts.functions.StatusEffects")
+}
+
 include("include")
 
-local enums = mod.Enums
-local utils = enums.Utils
-local game = utils.Game
-
+local utils = mod.Enums.Utils
 mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, function()
-	utils.RNG:SetSeed(game:GetSeeds():GetStartSeed())
+	utils.RNG:SetSeed(utils.Game:GetSeeds():GetStartSeed())
 end)
