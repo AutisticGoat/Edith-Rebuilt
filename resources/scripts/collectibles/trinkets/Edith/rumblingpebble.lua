@@ -6,6 +6,7 @@ local baseHeight = -23.45
 local modules = mod.Modules
 local ModRNG = modules.RNG
 local Helpers = modules.HELPERS
+local Player = modules.PLAYER
 local RumblingPebble = {}
 
 function RumblingPebble:DestroyRockWithPebble(rock)	
@@ -15,7 +16,7 @@ function RumblingPebble:DestroyRockWithPebble(rock)
 		local trinketMult = player:GetTrinketMultiplier(trinket.TRINKET_RUMBLING_PEBBLE)
 		local totalrocks = rng:RandomInt(2 + trinketMult, 4 + trinketMult)
 		local shootDegree = 360 / totalrocks
-		local rangemult = mod.GetPlayerRange(player) / 6.5
+		local rangemult = Player.GetPlayerRange(player) / 6.5
 		local FallSpeedVar
 
 		for i = 1, totalrocks do

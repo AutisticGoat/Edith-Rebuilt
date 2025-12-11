@@ -31,10 +31,10 @@ function Edith:OnEdithUpdate(player)
 	if not Player.IsEdith(player, false) then return end
 	if player:IsDead() then TargetArrow.RemoveEdithTarget(player) return end
 
-	local isMoving = mod.IsEdithTargetMoving(player)
-	local isKeyStompPressed = mod.IsKeyStompPressed(player)
+	local isMoving = TargetArrow.IsEdithTargetMoving(player)
+	local isKeyStompPressed = helpers.IsKeyStompPressed(player)
 	local hasMarked = player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED)
-	local isShooting = mod:IsPlayerShooting(player)
+	local isShooting = Player.IsPlayerShooting(player)
 	local jumpData = JumpLib:GetData(player)
 	local isPitfall = JumpLib:IsPitfalling(player)
 	local isJumping = EdithMod.IsJumping(player)
@@ -69,18 +69,18 @@ end
 function Edith:OnStartingJump(player)
 	local jumpParams = params(player)
 	jumpParams.JumpStartPos = player.Position
-	jumpParams.JumpStartDist = mod.GetEdithTargetDistance(player)
+	jumpParams.JumpStartDist = TargetArrow.GetEdithTargetDistance(player)
 
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_LUMP_OF_COAL) then return end
 	local rng = player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_LUMP_OF_COAL)
-	jumpParams.CoalBonus = mod.RandomFloat(rng, 0.5, 0.6) * mod.GetEdithTargetDistance(player) / 40
+	jumpParams.CoalBonus = mod.RandomFloat(rng, 0.5, 0.6) * TargetArrow.GetEdithTargetDistance(player) / 40
 end
 mod:AddCallback(JumpLib.Callbacks.POST_ENTITY_JUMP, Edith.OnStartingJump, JumpParams.EdithJump)
 
 ---@param player EntityPlayer
 ---@param pitfall boolean
 function Edith:OnEdithLanding(player, _, pitfall)
-	local edithTarget = mod.GetEdithTarget(player)
+	local edithTarget = TargetArrow.GetEdithTarget(player)
 	local jumpParams = params(player)
 
 	if not edithTarget then return end
@@ -163,7 +163,7 @@ function Edith:DamageStuff(_, damage, _, source)
 	if source.Type == 0 then return end
 	local ent = source.Entity
 	local familiar = ent:ToFamiliar()
-	local player = mod.GetPlayerFromRef(source)
+	local player = helpers.GetPlayerFromRef(source)
 
 	if not player then return end
 	if not Player.IsEdith(player, false) then return end
@@ -200,7 +200,7 @@ mod:AddCallback(ModCallbacks.MC_PRE_USE_ITEM, Edith.OnActiveItemRemoveTarget)
 function Edith:OnBombExplode(bomb)
 	if not bomb:GetSprite():IsPlaying("Explode") then return end
 	local player 
-	for _, ent in ipairs(Isaac.FindInRadius(bomb.Position, mod.GetBombRadiusFromDamage(bomb.ExplosionDamage), EntityPartition.PLAYER)) do
+	for _, ent in ipairs(Isaac.FindInRadius(bomb.Position, helpers.GetBombRadiusFromDamage(bomb.ExplosionDamage), EntityPartition.PLAYER)) do
 		player = ent:ToPlayer() ---@cast player EntityPlayer
 		if not Player.IsEdith(player, false) then goto continue end
 		EdithMod.ExplosionRecoil(player, params(player), bomb)

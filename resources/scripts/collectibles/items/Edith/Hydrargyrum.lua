@@ -2,13 +2,13 @@ local mod = EdithRebuilt
 local enums = mod.Enums
 local items = enums.CollectibleType
 local StatusEffects = mod.Modules.STATUS_EFFECTS
+local Helpers = mod.Modules.HELPERS
 local Hydrargyrum = {}
-local data = mod.CustomDataWrapper.getData
 
 ---@param ent Entity
 ---@param source EntityRef
 function Hydrargyrum:ApplyHydrargyrumCurse(ent, _, _, source)
-    local player = mod.GetPlayerFromRef(source)
+    local player = Helpers.GetPlayerFromRef(source)
 
     if not player then return end
     if not player:HasCollectible(items.COLLECTIBLE_HYDRARGYRUM) then return end

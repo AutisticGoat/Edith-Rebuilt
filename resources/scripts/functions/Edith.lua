@@ -14,7 +14,6 @@ local VecDir = require("resources.scripts.functions.VecDir")
 local TargetArrow = require("resources.scripts.functions.TargetArrow")
 local modRNG = require("resources.scripts.functions.RNG")
 local Helpers = require("resources.scripts.functions.Helpers")
-local Floor = require("resources.scripts.functions.Floor")
 local data = mod.CustomDataWrapper.getData
 local Edith = {}
 
@@ -56,6 +55,15 @@ function Edith.GetJumpStompParams(player)
 end
 
 local params = Edith.GetJumpStompParams
+
+---Method used for Edith's dash behavior (Like A Pony/White Pony or Mars usage)
+---@param player EntityPlayer
+---@param dir Vector
+---@param dist number
+---@param div number
+function Edith.EdithDash(player, dir, dist, div)
+	player.Velocity = player.Velocity + dir * dist / div
+end
 
 ---@param player EntityPlayer
 ---@param jumps integer
@@ -105,7 +113,7 @@ end
 ---@param shooting boolean
 ---@param keyStomp boolean
 function Edith.HeadDirectionManager(player, jumping, shooting, keyStomp)
-    local dir = mod.GetEdithTargetDistance(player) <= 5 and Direction.DOWN or VecDir.VectorToDirection(mod.GetEdithTargetDirection(player))
+    local dir = TargetArrow.GetEdithTargetDistance(player) <= 5 and Direction.DOWN or VecDir.VectorToDirection(TargetArrow.GetEdithTargetDirection(player))
 	
 	if not (jumping or (not shooting) or (keyStomp)) then return end
 	player:SetHeadDirection(dir, 1, true)
@@ -133,17 +141,17 @@ end
 
 ---@param player EntityPlayer
 function Edith.DashItemBehavior(player)
-	local edithTarget = mod.GetEdithTarget(player)
+	local edithTarget = TargetArrow.GetEdithTarget(player)
 
 	if not edithTarget then return end
 	local effects = player:GetEffects()
 	local hasMarsEffect = effects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_MARS)
 	local hasAnyPonyEffect = effects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_PONY) or effects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_WHITE_PONY)
-	local direction = mod.GetEdithTargetDirection(player, false)
-	local distance = mod.GetEdithTargetDistance(player)
+	local direction = TargetArrow.GetEdithTargetDirection(player, false)
+	local distance = TargetArrow.GetEdithTargetDistance(player)
 
 	if hasMarsEffect or hasAnyPonyEffect then
-		mod.EdithDash(player, direction, distance, 50)
+		Edith.EdithDash(player, direction, distance, 50)
 	end
 
 	if player.Velocity:Length() <= 3 then
@@ -167,7 +175,7 @@ function Edith.DashItemBehavior(player)
 	if not isMoveBasedActive or totalItemCharge < maxItemCharge then return end
 	if not Input.IsActionTriggered(ButtonAction.ACTION_ITEM, player.ControllerIndex) then return end
 
-	mod.EdithDash(player, direction, distance, 50)
+	Edith.EdithDash(player, direction, distance, 50)
 	player:UseActiveItem(activeItem)
 	player:SetActiveCharge(usedCharge, ActiveSlot.SLOT_PRIMARY)
 end
@@ -176,16 +184,16 @@ end
 ---@param jumpIntData InternalJumpData
 ---@param jumpParams EdithJumpStompParams
 function Edith.DefensiveStompManager(player, jumpIntData, jumpParams)
-    if not mod.IsKeyStompPressed(player) then return end
+    if not Helpers.IsKeyStompPressed(player) then return end
 	if jumpIntData.UpdateFrame ~= 9 then return end
-	if mod.IsVestigeChallenge() then return end
+	if Helpers.IsVestigeChallenge() then return end
 
 	local CanFly = player.CanFly
 	local HeightMult = CanFly and 0.8 or 0.65
 	local JumpSpeed = CanFly and 1.2 or 1.5
 
 	jumpParams.IsDefensiveStomp = true
-	mod.SetColorCooldown(player, -0.8, 10)
+	Player.SetColorCooldown(player, -0.8, 10)
 	sfx:Play(SoundEffect.SOUND_STONE_IMPACT, 1, 0, false, 0.8)
 	
 	jumpIntData.StaticHeightIncrease = jumpIntData.StaticHeightIncrease * HeightMult
@@ -196,10 +204,10 @@ end
 ---@param jumpdata JumpConfig|JumpData
 ---@param jumpParams EdithJumpStompParams
 function Edith.FallBehavior(player, jumpdata, jumpParams)
-	local distance = mod.GetEdithTargetDistance(player)
+	local distance = TargetArrow.GetEdithTargetDistance(player)
 
 	if jumpParams.IsDefensiveStomp then return end
-	if not (player.CanFly and ((mod.IsEdithTargetMoving(player) and distance <= 50) or distance <= 5)) then return end
+	if not (player.CanFly and ((TargetArrow.IsEdithTargetMoving(player) and distance <= 50) or distance <= 5)) then return end
 
 	if not (jumpdata.Fallspeed < 8.5 and JumpLib:IsFalling(player)) then return end
 	sfx:Play(SoundEffect.SOUND_SHELLGAME)
@@ -220,7 +228,7 @@ function Edith.BombFall(player, jumpConfig, jumpParams)
 	jumpParams.BombStomp = true
 
 	if player:HasCollectible(CollectibleType.COLLECTIBLE_ROCKET_IN_A_JAR) then 
-		local TargetAnglev = mod.GetEdithTargetDirection(player, false):GetAngleDegrees()
+		local TargetAnglev = TargetArrow.GetEdithTargetDirection(player, false):GetAngleDegrees()
 		local bomb = Isaac.Spawn(EntityType.ENTITY_BOMB, BombVariant.BOMB_ROCKET, 0, player.Position, Vector.Zero, player):ToBomb() ---@cast bomb EntityBomb
 		bomb:SetRocketAngle(TargetAnglev)
 		bomb:SetRocketSpeed(40)
@@ -294,7 +302,7 @@ function Edith.StompDamageManager(player, params)
     local chapter = math.ceil(level:GetStage() / 2)
     local mults = {
         MultiShot = Math.Round(Math.exp(Edith.GetNumTears(player), 1, 0.68), 2),
-        Birthtight = mod.PlayerHasBirthright(player) and 1.2 or 1,
+        Birthtight = Player.PlayerHasBirthright(player) and 1.2 or 1,
         BloodClot = player:HasCollectible(CollectibleType.COLLECTIBLE_BLOOD_CLOT) and 1.1 or 1,
         Flight = Player.CanFly and 1.25 or 1,
         RocketLaunch = params.RocketLaunch and 1.2 or 1
@@ -313,7 +321,7 @@ function Edith.StompDamageManager(player, params)
     ) + coalBonus
 
 	local damageFormula = math.max(Math.Round(RawFormula, 2), 1)
-	local stompDamage = (mod.IsVestigeChallenge() and 40 + player.Damage/2) or damageFormula
+	local stompDamage = (Helpers.IsVestigeChallenge() and 40 + player.Damage/2) or damageFormula
 
     params.Damage = not params.IsDefensiveStomp and stompDamage or 0
 end
@@ -339,7 +347,7 @@ end
 ---@param player EntityPlayer
 ---@param params EdithJumpStompParams
 function Edith.StompTargetRemover(player, params)
-    if Helpers.IsKeyStompPressed(player) or mod.IsEdithTargetMoving(player) then return end
+    if Helpers.IsKeyStompPressed(player) or TargetArrow.IsEdithTargetMoving(player) then return end
     if params.Jumps > 0 then return end
     TargetArrow.RemoveEdithTarget(player)
 end 
@@ -370,8 +378,8 @@ function Edith.CooldownUpdate(player, jumpParams)
     jumpParams.Cooldown = math.max(jumpParams.Cooldown - 1, 0)
 
 	if not (jumpParams.Cooldown == 1 and player.FrameCount > 20) then return end
-    mod.SetColorCooldown(player, 0.6, 5)
-    local EdithSave = mod.GetConfigData("EdithData") ---@cast EdithSave EdithData
+    Player.SetColorCooldown(player, 0.6, 5)
+    local EdithSave = Helpers.GetConfigData("EdithData") ---@cast EdithSave EdithData
     local soundTab = tables.CooldownSounds[EdithSave.JumpCooldownSound or 1]
     local pitch = soundTab.Pitch == 1.2 and (soundTab.Pitch * modRNG.RandomFloat(player:GetDropRNG(), 1, 1.1)) or soundTab.Pitch
     sfx:Play(soundTab.SoundID, 2, 0, false, pitch)
@@ -382,11 +390,11 @@ end
 ---@param player EntityPlayer
 function Edith.JumpMovement(player)
 	if Helpers.IsVestigeChallenge() then return end
-	if not mod.GetEdithTarget(player) then return end
+	if not TargetArrow.GetEdithTarget(player) then return end
 	if not Edith.IsJumping(player) then return end
 
-	local div = (mod.IsKeyStompPressed(player) and player.CanFly) and 70 or 50
-	mod.EdithDash(player, mod.GetEdithTargetDirection(player, false), mod.GetEdithTargetDistance(player), div)
+	local div = (Helpers.IsKeyStompPressed(player) and player.CanFly) and 70 or 50
+	Edith.EdithDash(player, TargetArrow.GetEdithTargetDirection(player, false), TargetArrow.GetEdithTargetDistance(player), div)
 end
 
 ---@param player EntityPlayer
@@ -421,9 +429,9 @@ function Edith.InitEdithJump(player, jumpTag, vestige)
 	local div = canFly and 25 or 15
 	local base = canFly and 15 or 13
 	local epicFetusMult = player:HasCollectible(CollectibleType.COLLECTIBLE_EPIC_FETUS) and 3 or 1
-	local jumpHeight = (base + (mod.GetEdithTargetDistance(player) / 40) / div) * epicFetusMult
+	local jumpHeight = (base + (TargetArrow.GetEdithTargetDistance(player) / 40) / div) * epicFetusMult
 	local room = game:GetRoom()
-	local isChap4 = Floor.IsChap4()
+	local isChap4 = Helpers.IsChap4()
 	local hasWater = room:HasWater()
 	local variant = hasWater and EffectVariant.BIG_SPLASH or (isChap4 and EffectVariant.POOF02 or EffectVariant.POOF01)
 	local subType = (isChap4 and 66 or 1)

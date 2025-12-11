@@ -7,7 +7,7 @@ local items = enums.CollectibleType
 local trinkets = enums.TrinketType
 local game = utils.Game
 local level = utils.Level
-local pool = game:GetItemPool()
+local Helpers = mod.Modules.HELPERS
 local unlocks = {}
 local UnlockTable = {
     Edith = {
@@ -127,7 +127,7 @@ local function TriggerEdithUnlocks(mark, player, pgd, difficulty)
     if player ~= players.PLAYER_EDITH then return end
 
     local tableRef = UnlockTable.Edith 
-    local unlock = mod.When(mark, tableRef)
+    local unlock = Helpers.When(mark, tableRef)
 
     if not unlock then return end
 
@@ -152,7 +152,7 @@ local function TriggerTEdithUnlocks(mark, player, pgd, difficulty)
     if player ~= players.PLAYER_EDITH_B then return end
 
     local tableRef = UnlockTable.TEdith
-    local unlock = mod.When(mark, tableRef, nil)
+    local unlock = Helpers.When(mark, tableRef, nil)
 
     if not unlock then return end
 

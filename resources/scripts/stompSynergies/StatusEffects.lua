@@ -1,6 +1,7 @@
 local mod = EdithRebuilt
 local enums = mod.Enums
 local Callbacks = enums.Callbacks
+local Maths = mod.Modules.MATHS
 
 ---@param player EntityPlayer
 ---@param entity Entity
@@ -50,7 +51,7 @@ mod:AddCallback(Callbacks.OFFENSIVE_STOMP, function(_, player, entity)
     }
 
     for flag, func in pairs(tearEffects) do
-        if mod.HasBitFlags(player.TearFlags, flag) then
+        if Maths.HasBitFlags(player.TearFlags, flag) then
             func()
         end
     end

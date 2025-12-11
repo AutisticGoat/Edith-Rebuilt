@@ -16,7 +16,6 @@ local modRNG = require("resources.scripts.functions.RNG")
 local Player = require("resources.scripts.functions.Player")
 local Edith  = require("resources.scripts.functions.Edith")
 local StatusEffect = require("resources.scripts.functions.StatusEffects")
-local Floor = require("resources.scripts.functions.Floor")
 local Land = {}
 
 local damageFlags = DamageFlag.DAMAGE_CRUSH | DamageFlag.DAMAGE_IGNORE_ARMOR
@@ -74,9 +73,9 @@ function Land.AddExtraGore(ent, player)
 	local enabledExtraGore
 
 	if Player.IsEdith(player, false) then
-		enabledExtraGore = mod.GetConfigData(ConfigDataTypes.EDITH).EnableExtraGore
+		enabledExtraGore = Helpers.GetConfigData(ConfigDataTypes.EDITH).EnableExtraGore
 	elseif Player.IsEdith(player, true) then
-		enabledExtraGore = mod.GetConfigData(ConfigDataTypes.TEDITH).EnableExtraGore
+		enabledExtraGore = Helpers.GetConfigData(ConfigDataTypes.TEDITH).EnableExtraGore
 	end
 
 	if not enabledExtraGore then return end
@@ -85,6 +84,99 @@ function Land.AddExtraGore(ent, player)
 	ent:AddEntityFlags(EntityFlag.FLAG_EXTRA_GORE)
 	ent:MakeBloodPoof(ent.Position, nil, 0.5)
 	sfx:Play(SoundEffect.SOUND_DEATH_BURST_LARGE)
+end
+
+local KeyRequiredChests = {
+	[PickupVariant.PICKUP_LOCKEDCHEST] = true,
+	[PickupVariant.PICKUP_ETERNALCHEST] = true,
+	[PickupVariant.PICKUP_OLDCHEST] = true,
+	[PickupVariant.PICKUP_MEGACHEST] = true,
+}
+
+local Chests = {
+	[PickupVariant.PICKUP_CHEST] = true,
+	[PickupVariant.PICKUP_BOMBCHEST] = true,
+	[PickupVariant.PICKUP_SPIKEDCHEST] = true,
+	[PickupVariant.PICKUP_ETERNALCHEST] = true,
+	[PickupVariant.PICKUP_MIMICCHEST] = true,
+	[PickupVariant.PICKUP_OLDCHEST] = true,
+	[PickupVariant.PICKUP_WOODENCHEST] = true,
+	[PickupVariant.PICKUP_MEGACHEST] = true,
+	[PickupVariant.PICKUP_HAUNTEDCHEST] = true,
+	[PickupVariant.PICKUP_LOCKEDCHEST] = true,
+	[PickupVariant.PICKUP_REDCHEST] = true
+}
+
+---@param pickup EntityPickup
+---@return boolean
+function IsKeyRequiredChest(pickup)
+	return mod.When(pickup.Variant, KeyRequiredChests, false)
+end
+
+---@param pickup EntityPickup
+---@return boolean
+local function IsChest(pickup)
+	return Helpers.When(pickup.Variant, Chests, false)
+end
+
+---@param player EntityPlayer
+---@return boolean
+local function ShouldConsumeKeys(player)
+	return (player:GetNumKeys() > 0 and not player:HasGoldenKey())
+end
+
+---@param pickup EntityPickup
+local function MegaChestManager(player, pickup)
+	local sprite = pickup:GetSprite()
+	sprite:Play("Idle")
+
+	if not sprite:IsPlaying("UseKey") or sprite:IsFinished("UseKey") then
+		sprite:Play("UseKey")
+	end
+
+	player:TryUseKey()
+end
+
+local NonTriggerAnimPickupVar = {
+	[PickupVariant.PICKUP_COLLECTIBLE] = true,
+	[PickupVariant.PICKUP_TRINKET] = true,
+	[PickupVariant.PICKUP_BROKEN_SHOVEL] = true,
+	[PickupVariant.PICKUP_SHOPITEM] = true,
+	[PickupVariant.PICKUP_PILL] = true,
+	[PickupVariant.PICKUP_TAROTCARD] = true,
+	[PickupVariant.PICKUP_LIL_BATTERY] = true,
+	[PickupVariant.PICKUP_THROWABLEBOMB] = true,
+	[PickupVariant.PICKUP_BED] = true,
+	[PickupVariant.PICKUP_MOMSCHEST] = true,
+	[PickupVariant.PICKUP_TROPHY] = true,
+}
+
+---@param player EntityPlayer
+---@param pickup EntityPickup
+function Land.PickupManager(player, pickup)
+	local room = game:GetRoom()
+	local IsStopAnimPickup = Helpers.When(pickup.Variant, NonTriggerAnimPickupVar, false)
+	local IsEternalHeart = (pickup.Variant == PickupVariant.PICKUP_HEART and pickup.SubType == HeartSubType.HEART_ETERNAL)
+	local IsMegaChest = (pickup.Variant == PickupVariant.PICKUP_MEGACHEST)
+
+	if (IsStopAnimPickup or IsEternalHeart) then
+		player:StopExtraAnimation()
+	end
+
+	if IsChest(pickup) then
+		if room:GetType() == RoomType.ROOM_CHALLENGE then
+			player:StopExtraAnimation()
+			pickup.Position = player.Position
+			pickup.Velocity = Vector(0, 0)
+		elseif IsMegaChest then
+			MegaChestManager(player, pickup)
+		else
+			if IsKeyRequiredChest(pickup) and ShouldConsumeKeys(player) then
+				player:TryUseKey()
+			end
+			pickup:TryOpenChest()
+		end
+	end
 end
 
 
@@ -115,7 +207,7 @@ function Land.HandleEntityInteraction(ent, parent, knockback)
         end,
         [EntityType.ENTITY_PICKUP] = function()
             local pickup = ent:ToPickup() ---@cast pickup EntityPickup
-            local isFlavorTextPickup = mod.When(var, tables.BlacklistedPickupVariants, false)
+            local isFlavorTextPickup = Helpers.When(var, tables.BlacklistedPickupVariants, false)
             local IsLuckyPenny = var == PickupVariant.PICKUP_COIN and ent.SubType == CoinSubType.COIN_LUCKYPENNY
 
             if isFlavorTextPickup or IsLuckyPenny then return end
@@ -123,30 +215,7 @@ function Land.HandleEntityInteraction(ent, parent, knockback)
 
 			if not Player.IsEdith(parent, false) then return end
 
-			if IsKeyRequiredChest(pickup) then
-				if var == PickupVariant.PICKUP_MEGACHEST then
-					local rng = pickup:GetDropRNG()
-					local piData = data(pickup)
-
-					piData.OpenAttempts = 0
-					piData.OpenAttempts = piData.OpenAttempts + 1
-
-					local attempt = piData.OpenAttempts
-					local openRoll = rng:RandomInt(attempt, 7)
-
-					if openRoll == 7 then
-						pickup:TryOpenChest(parent)
-					else
-						pickup:GetSprite():Play("UseKey")
-					end
-				else
-					pickup:TryOpenChest(parent)
-				end
-
-				if ShouldConsumeKeys(parent) then
-					parent:AddKeys(-1)
-				end
-			end
+			Land.PickupManager(parent, pickup)
 
             if not (var == PickupVariant.PICKUP_BOMBCHEST and Player.IsEdith(parent, false)) then return end
 			pickup:TryOpenChest(parent)
@@ -156,7 +225,7 @@ function Land.HandleEntityInteraction(ent, parent, knockback)
             ent:Kill()
         end,
     }
-	mod.WhenEval(ent.Type, stompBehavior)
+	Helpers.WhenEval(ent.Type, stompBehavior)
 end
 
 ---@param parent EntityPlayer
@@ -214,7 +283,7 @@ function Land.EdithStomp(parent, params, breakGrid)
 	local TerraRNG = parent:GetCollectibleRNG(CollectibleType.COLLECTIBLE_TERRA)
 	local TerraMult = HasTerra and mod.RandomFloat(TerraRNG, 0.5, 2) or 1	
 	local capsule = Capsule(parent.Position, Vector.One, 0, radius)
-	local SaltedTime = Math.Round(Math.Clamp(120 * (mod.GetTPS(parent) / 2.73), 60, 360))
+	local SaltedTime = Math.Round(Math.Clamp(120 * (Player.GetplayerTears(parent) / 2.73), 60, 360))
 	local isSalted
 
 	params.StompedEntities = Isaac.FindInCapsule(capsule)
@@ -303,7 +372,7 @@ function Land.LandFeedbackManager(player, soundTable, GibColor, IsParryLand)
 	local room = game:GetRoom()
 	local BackDrop = room:GetBackdropType()
 	local hasWater = room:HasWater()
-	local IsChap4 = Floor.IsChap4()
+	local IsChap4 = Helpers.IsChap4()
 	local Variant = hasWater and EffectVariant.BIG_SPLASH or EffectVariant.POOF02
 	local SubType = hasWater and 2 or (IsChap4 and 3 or 1)
 	local backColor = tables.BackdropColors
@@ -315,14 +384,14 @@ function Land.LandFeedbackManager(player, soundTable, GibColor, IsParryLand)
 	local gibSpeed = 2
 	local IsSoulOfEdith = data(player).IsSoulOfEdithJump 
 	local IsEdithsHood = data(player).HoodLand
-	local IsMortis = EdithRebuilt.IsLJMortis()
+	local IsMortis = Helpers.IsLJMortis()
 	local isEdithJump = Player.IsEdith(player, false) or IsSoulOfEdith or IsEdithsHood
-	local isVestige = mod.IsVestigeChallenge()
+	local isVestige = Helpers.IsVestigeChallenge()
 
 	if isEdithJump then
 		local isRocketLaunchStomp = data(player).RocketLaunch
 		local isDefensive = Edith.GetJumpStompParams(player).IsDefensiveStomp or IsEdithsHood
-		local EdithData = mod.GetConfigData(ConfigDataTypes.EDITH) ---@cast EdithData EdithData
+		local EdithData = Helpers.GetConfigData(ConfigDataTypes.EDITH) ---@cast EdithData EdithData
 		size = (IsSoulOfEdith and 0.8 or (isDefensive and 0.6 or 0.7)) * (isRocketLaunchStomp and 1.25 or 1)
 		soundPick = EdithData.StompSound
 		volume = GetVolume(EdithData.StompVolume) * (isDefensive and 1.5 or 2)
@@ -330,7 +399,7 @@ function Land.LandFeedbackManager(player, soundTable, GibColor, IsParryLand)
 		gibAmount = EdithData.DisableSaltGibs and 0 or (isRocketLaunchStomp and 14 or 10)
 		gibSpeed = isDefensive and 2 or 3
 	else
-		local TEdithData = mod.GetConfigData(ConfigDataTypes.TEDITH) ---@cast TEdithData TEdithData
+		local TEdithData = Helpers.GetConfigData(ConfigDataTypes.TEDITH) ---@cast TEdithData TEdithData
 		size = IsParryLand and 0.7 or 0.5
 		soundPick = IsParryLand and TEdithData.ParrySound or TEdithData.HopSound 
 		volume = GetVolume(TEdithData.Volume) * (IsParryLand and 1.5 or 1)
@@ -351,7 +420,7 @@ function Land.LandFeedbackManager(player, soundTable, GibColor, IsParryLand)
 	local RandSize = { X = modRNG.RandomFloat(rng, 0.8, 1), Y = modRNG.RandomFloat(rng, 0.8, 1) }
 	local SizeX, SizeY = size * RandSize.X, size * RandSize.Y
 	
-	if mod.GetConfigData(ConfigDataTypes.MISC).EnableShakescreen then
+	if Helpers.GetConfigData(ConfigDataTypes.MISC).EnableShakescreen then
 		game:ShakeScreen(ScreenShakeIntensity)
 	end
 
@@ -359,14 +428,14 @@ function Land.LandFeedbackManager(player, soundTable, GibColor, IsParryLand)
 	local color = defColor
 	local switch = {
 		[EffectVariant.BIG_SPLASH] = function()
-			color = mod.When(BackDrop, backColor, Color(0.7, 0.75, 1))
+			color = Helpers.When(BackDrop, backColor, Color(0.7, 0.75, 1))
 		end,
 		[EffectVariant.POOF02] = function()
 			color = BackDrop == BackdropType.DROSS and defColor or backColor[BackDrop] 
 		end,
 	}
 	
-	mod.WhenEval(Variant, switch)
+	Helpers.WhenEval(Variant, switch)
 	color = color or defColor
 
 	if IsMortis then
@@ -375,7 +444,7 @@ function Land.LandFeedbackManager(player, soundTable, GibColor, IsParryLand)
 			[MortisBackdrop.MOIST] = Color(0, 0.8, 0.76, 1, 0, 0, 0),
 			[MortisBackdrop.FLESH] = Color(0, 0, 0, 1, 0.55, 0.5, 0.55),
 		}
-		local newcolor = mod.When(Floor.GetMortisDrop(), Colors, Color.Default)
+		local newcolor = Helpers.When(Helpers.GetMortisDrop(), Colors, Color.Default)
 		color = newcolor
 	end
 
@@ -389,7 +458,7 @@ function Land.LandFeedbackManager(player, soundTable, GibColor, IsParryLand)
 		Helpers.SpawnSaltGib(player, gibAmount, gibSpeed, GibColor)
 	end
 
-	local sound = mod.When(soundPick, soundTable, 1)
+	local sound = Helpers.When(soundPick, soundTable, 1)
 
 	SfxFeedbackManager(sound, volume, IsChap4, hasWater)
 end
@@ -411,4 +480,5 @@ function Land.TriggerLandenemyJump(params, height, speed)
 		end
 	end
 end
+
 return Land

@@ -6,6 +6,7 @@ local utils = enums.Utils
 local sfx = utils.SFX
 local rng = utils.RNG
 local jumpFlags = enums.Tables.JumpFlags
+local Helpers = mod.Modules.HELPERS
 local data = mod.CustomDataWrapper.getData
 local damageBase = 13.5
 local SoulOfEdith = {}
@@ -72,7 +73,7 @@ function SoulOfEdith:ParryJump(player)
 		tear.FallingSpeed = 4 * mod.RandomFloat(rng, 0.6, 1.8)
         tear.FallingAcceleration = 2.5 * mod.RandomFloat(rng, 0.6, 1.8)
 		tear:AddTearFlags(TearFlags.TEAR_SPECTRAL)
-		mod.ForceSaltTear(tear, false)
+		Helpers.ForceSaltTear(tear, false)
 		data(tear).IsSoulOfEdithTear = true
     end
 end

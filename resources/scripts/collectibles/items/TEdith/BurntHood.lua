@@ -15,7 +15,7 @@ mod:AddCallback(ModCallbacks.MC_USE_ITEM, BurntHood.OnUse, items.COLLECTIBLE_BUR
 ---@param player EntityPlayer
 function BurntHood:ParryJump(player)
 	local PerfectParry = TEdith.ParryLandManager(player, false)
-	Land.LandFeedbackManager(player, mod:GetLandSoundTable(true, PerfectParry), Color(1, 1, 1), PerfectParry)
+	Land.LandFeedbackManager(player, Land.GetLandSoundTable(true, PerfectParry), Color(1, 1, 1), PerfectParry)
 
 	if not PerfectParry then return end
 

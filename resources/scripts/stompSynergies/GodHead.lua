@@ -1,4 +1,5 @@
 local mod = EdithRebuilt
+local helpers = mod.Modules.HELPERS
 local funcs = require("resources.scripts.stompSynergies.Funcs")
 local EdithJump = require("resources.scripts.stompSynergies.JumpData")
 
@@ -15,7 +16,7 @@ function mod:GodHeadStomp(player)
     godTear:AddTearFlags(TearFlags.TEAR_GLOW | TearFlags.TEAR_SPECTRAL | TearFlags.TEAR_PIERCING)
 
     funcs.GetData(godTear).IsStompGodTear = true
-    mod:ChangeColor(godTear, nil, nil, nil, 0)
+    helpers.ChangeColor(godTear, nil, nil, nil, 0)
 end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, mod.GodHeadStomp, EdithJump)
 

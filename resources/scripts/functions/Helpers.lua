@@ -1,10 +1,12 @@
+---@diagnostic disable: undefined-global
 local mod = EdithRebuilt
 local enums = mod.Enums
 local game = enums.Utils.Game
+local misc = enums.Misc
 local tables = enums.Tables
 local ConfigDataTypes = enums.ConfigDataTypes
 local saveManager = mod.SaveManager
-local floor = require("resources.scripts.functions.Floor")
+local data = mod.CustomDataWrapper.getData
 
 local Helpers = {}
 
@@ -91,7 +93,7 @@ function Helpers.GetConfigData(Type)
 		[ConfigDataTypes.MISC] = config.MiscData --[[@as MiscData]], 
 	}
 
-	return mod.When(Type, switch)
+	return Helpers.When(Type, switch)
 end
 
 ---Converts seconds to game update frames
@@ -192,10 +194,13 @@ function Helpers.GetPlayerFromTear(entity)
 	if not check then return end
 	local checkType = check.Type
 
-	local ent = (
-		checkType == EntityType.ENTITY_PLAYER and Helpers.GetPtrHashEntity(check) or
-		checkType == EntityType.ENTITY_FAMILIAR and check:ToFamiliar().Player
-	):ToPlayer() or nil
+	local ent = nil
+
+	if checkType == EntityType.ENTITY_PLAYER then
+		ent = Helpers.GetPtrHashEntity(check):ToPlayer()
+	elseif checkType == EntityType.ENTITY_FAMILIAR then
+		ent = check:ToFamiliar().Player
+	end
 
 	return ent
 end
@@ -259,7 +264,7 @@ local MortisBackdrop = tables.MortisBackdrop
 ---@param effect EntityEffect
 function Helpers.SetBloodEffectColor(effect)
     local room = game:GetRoom()
-    local IsMortis = floor.IsLJMortis()
+    local IsMortis = Helpers.IsLJMortis()
 	local BackDrop = room:GetBackdropType()
 	local hasWater = room:HasWater()
 	local color = Color(1, 1, 1)
@@ -277,7 +282,7 @@ function Helpers.SetBloodEffectColor(effect)
 					[MortisBackdrop.MOIST] = Color(0, 0.8, 0.76, 1, 0, 0, 0),
 					[MortisBackdrop.FLESH] = Color(0, 0, 0, 1, 0.55, 0.5, 0.55),
 				}
-				color = mod.When(floor.GetMortisDrop(), Colors, Color.Default)
+				color = Helpers.When(Helpers.GetMortisDrop(), Colors, Color.Default)
             else
                 color = backdropColors[BackDrop] or Color(1, 0, 0)
 			end
@@ -288,7 +293,7 @@ function Helpers.SetBloodEffectColor(effect)
 			end
 		end
 	}
-	mod.WhenEval(effect.Variant, switch)
+	Helpers.WhenEval(effect.Variant, switch)
     effect:SetColor(color, -1, 100, false, false)
 end
 
@@ -387,6 +392,140 @@ function Helpers.SpawnSaltGib(parent, Number, speed, color, inheritParentVel)
 		if inheritParentVel then
             saltGib.Velocity = saltGib.Velocity + parent.Velocity
         end
+    end
+end
+
+---Helper function to find out how large a bomb explosion is based on the damage inflicted.
+---@param damage number
+---@return number
+function Helpers.GetBombRadiusFromDamage(damage)
+    if damage > 175 then
+        return 105
+    elseif damage <= 140 then
+        return 75
+    else
+        return 90
+    end
+end
+
+---Checks if player is in Last Judgement's Mortis 
+---@return boolean
+function Helpers.IsLJMortis()
+	if not StageAPI then return false end
+	if not LastJudgement then return false end
+
+	local stage = LastJudgement.STAGE
+	local IsMortis = StageAPI and (stage.Mortis:IsStage() or stage.MortisTwo:IsStage() or stage.MortisXL:IsStage())
+
+	return IsMortis
+end
+
+---@return integer
+function Helpers.GetMortisDrop()
+	if not Helpers.IsLJMortis() then return 0 end
+
+	if LastJudgement.UsingMorgueisBackdrop then
+		return tables.MortisBackdrop.MORGUE
+	elseif LastJudgement.UsingMoistisBackdrop then 
+		return tables.MortisBackdrop.MOIST
+	else
+		return tables.MortisBackdrop.FLESH
+	end
+end
+
+---Checks if player run is in Chapter 4 (Womb, Utero, Scarred Womb, Corpse)
+---@return boolean
+function Helpers.IsChap4()
+	local backdrop = game:GetRoom():GetBackdropType()
+	
+	if Helpers.IsLJMortis() then return true end
+	return Helpers.When(backdrop, tables.Chap4Backdrops, false)
+end
+
+---@param tear EntityTear
+local function tearCol(_, tear)
+	local tearData = data(tear)
+	if not tearData.IsEdithRebuiltSaltTear then return end
+
+	local var, sprite, Path
+
+	for _, ent in ipairs(Isaac.FindByType(EntityType.ENTITY_EFFECT)) do
+		var = ent.Variant
+		sprite = ent:GetSprite()
+		
+		if not (var == EffectVariant.ROCK_POOF or var == EffectVariant.TOOTH_PARTICLE) then goto Break end
+		if ent.Position:Distance(tear.Position) > 10 then goto Break end
+
+		Path = var == EffectVariant.ROCK_POOF and tearData.ShatterSprite or tearData.SaltGibsSprite
+
+		if var == EffectVariant.TOOTH_PARTICLE then
+			if ent.SpawnerEntity then goto Break end
+			ent.Color = tear.Color
+		end
+
+		sprite:ReplaceSpritesheet(0, misc.TearPath .. Path .. ".png", true)
+		::Break::
+	end
+end
+mod:AddCallback(ModCallbacks.MC_POST_TEAR_DEATH, tearCol)
+
+---@param tear EntityTear
+---@param IsBlood boolean
+---@param isTainted boolean
+local function doEdithTear(tear, IsBlood, isTainted)
+	local player = Helpers.GetPlayerFromTear(tear)
+
+	if not player then return end
+
+	local tearSizeMult = player:HasCollectible(CollectibleType.COLLECTIBLE_SOY_MILK) and 1 or 0.85
+	local tearData = data(tear)
+	local path = (isTainted and (IsBlood and "burnt_blood_salt_tears" or "burnt_salt_tears") or (IsBlood and "blood_salt_tears" or "salt_tears"))
+	local newSprite = misc.TearPath .. path .. ".png"
+
+	tear.Scale = tear.Scale * tearSizeMult
+
+	tear:ChangeVariant(TearVariant.ROCK)
+	
+	tearData.ShatterSprite = (isTainted and (IsBlood and "burnt_blood_salt_shatter" or "burnt_salt_shatter") or (IsBlood and "blood_salt_shatter" or "salt_shatter"))
+	tearData.SaltGibsSprite = (isTainted and (IsBlood and "burnt_blood_salt_gibs" or "burnt_salt_gibs") or (IsBlood and "blood_salt_gibs" or "salt_gibs"))
+	
+	tear:GetSprite():ReplaceSpritesheet(0, newSprite, true)
+	tear.Color = player.Color
+	tearData.IsEdithRebuiltSaltTear = true
+end
+
+---Forces tears to look like salt tears. `tainted` argument sets tears for Tainted Edith
+---@param tear EntityTear
+---@param tainted boolean
+function Helpers.ForceSaltTear(tear, tainted)
+	local IsBloodTear = Helpers.When(tear.Variant, tables.BloodytearVariants, false)
+	doEdithTear(tear, IsBloodTear, tainted)
+end
+
+local LINE_SPRITE = Sprite("gfx/TinyBug.anm2", true)
+local MAX_POINTS = 360
+local ANGLE_SEPARATION = 360 / MAX_POINTS
+
+LINE_SPRITE:SetFrame("Dead", 0)
+
+---@param pos Vector
+---@param AreaSize number
+---@param AreaColor Color
+function Helpers.RenderAreaOfEffect(pos, AreaSize, AreaColor) -- Took from Melee lib, tweaked a little bit
+	if game:GetRoom():GetRenderMode() == RenderMode.RENDER_WATER_REFLECT then return end
+
+    local renderPosition = Isaac.WorldToScreen(pos) - game.ScreenShakeOffset
+    local hitboxSize = AreaSize
+    local offset = Isaac.WorldToScreen(pos + Vector(0, hitboxSize)) - renderPosition + Vector(0, 1)
+    local offset2 = offset:Rotated(ANGLE_SEPARATION)
+    local segmentSize = offset:Distance(offset2)
+    LINE_SPRITE.Scale = Vector(segmentSize * (2 / 3), 0.5)
+    for i = 1, MAX_POINTS do
+        local angle = ANGLE_SEPARATION * i
+        LINE_SPRITE.Rotation = angle
+        LINE_SPRITE.Offset = offset:Rotated(angle)
+		LINE_SPRITE.Color = AreaColor or misc.ColorDefault
+        LINE_SPRITE:Render(renderPosition)
     end
 end
 

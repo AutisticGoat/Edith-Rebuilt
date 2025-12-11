@@ -72,7 +72,7 @@ function mod:TaintedEdithUpdate(player)
 
 	playerData.ParryReadyGlowCount = (
 		not isTaintedEdithJump(player) and
-		not mod.GetEdithTarget(player, true) and
+		not TargetArrow.GetEdithTarget(player, true) and
 		(playerData.ParryReadyGlowCount and playerData.ParryReadyGlowCount < 20 ) and 
 		maths.Clamp(playerData.ParryReadyGlowCount + 1, 1, 20) or 0
 	)
@@ -81,7 +81,7 @@ function mod:TaintedEdithUpdate(player)
 		player:SetColor(Color(1, 1, 1, 1, colorChange + 0.3, 0, 0), 5, 100, true, false)
 	end
 
-	if (player:CollidesWithGrid() and HopParams.IsHoping == true) and not isJumping or mod.IsDogmaAppearCutscene() then
+	if (player:CollidesWithGrid() and HopParams.IsHoping == true) and not isJumping or Helpers.IsDogmaAppearCutscene() then
 		TEdithMod.StopTEdithHops(player, 20, true, not playerData.TaintedEdithTarget)
 	end
 
@@ -99,7 +99,7 @@ function mod:EdithPlayerUpdate(player)
 	local playerData = data(player)
 	local HopParams = TEdithMod.GetHopParryParams(player)
 	local IsJumping = JumpLib:GetData(player).Jumping
-	local arrow = mod.GetEdithTarget(player, true)
+	local arrow = TargetArrow.GetEdithTarget(player, true)
 	local input = {
 		up = Input.GetActionValue(ButtonAction.ACTION_UP, player.ControllerIndex),
 		down = Input.GetActionValue(ButtonAction.ACTION_DOWN, player.ControllerIndex),
@@ -134,7 +134,7 @@ function mod:EdithPlayerUpdate(player)
 		end
 	end
 
-	if mod:IsPlayerShooting(player) then return end
+	if Player.IsPlayerShooting(player) then return end
 
 	local faceDirection = VecDir.VectorToDirection(HopParams.HopDirection)
 	local chosenDir = faceDirection	or Direction.DOWN
@@ -152,7 +152,7 @@ mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, mod.EdithPlayerUpdate)
 function mod:OnNewRoom()
 	for _, player in ipairs(PlayerManager.GetPlayers()) do
 		if not Player.IsEdith(player, true) then goto continue end
-		mod:ChangeColor(player, _, _, _, 1)
+		Helpers.ChangeColor(player, _, _, _, 1)
 		TEdithMod.StopTEdithHops(player, 0, true, true)
 		TargetArrow.RemoveEdithTarget(player, true)
 		::continue::
@@ -188,7 +188,7 @@ mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, mod.EdithHopLanding, jumpParams.T
 
 ---@param player EntityPlayer
 function TEdith:EdithParryJump(player)
-	if mod.GetEdithTarget(player, true) then 
+	if TargetArrow.GetEdithTarget(player, true) then 
 		TEdithMod.ResetHopDashCharge(player, true, true)
 	end
 
@@ -236,7 +236,7 @@ HudHelper.RegisterHUDElement({
 		playerData.ChargeBar = playerData.ChargeBar or Sprite("gfx/TEdithChargebar.anm2", true)
 		playerData.BRChargeBar = playerData.BRChargeBar or Sprite("gfx/TEdithBRChargebar.anm2", true)
 
-		if mod.PlayerHasBirthright(player) and not playerData.BRChargeBar:IsFinished("Disappear") then
+		if Player.PlayerHasBirthright(player) and not playerData.BRChargeBar:IsFinished("Disappear") then
 			offset = misc.ChargeBarleftVector
 		end
 

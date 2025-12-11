@@ -22,7 +22,7 @@ function MoltenCore:OnFiringTears(tear)
 	if not player:HasCollectible(items.COLLECTIBLE_MOLTEN_CORE) then return end
 
 	tear:ChangeVariant(TearVariant.FIRE_MIND)
-	mod:ChangeColor(tear, 0.8, 0.5, 0.4)
+	Helpers.ChangeColor(tear, 0.8, 0.5, 0.4)
 	data(tear).MoltenCoreTear = true
 end
 
@@ -34,7 +34,7 @@ mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, MoltenCore.OnFiringTears)
 function MoltenCore:KillingSalEnemy(entity, amount, _, source)
 	local Ent = source.Entity
 	if not Ent or Ent.Type == 0 then return end
-	local player = mod.GetPlayerFromRef(source)
+	local player = Helpers.GetPlayerFromRef(source)
 
 	if not player then return end
 	if not player:HasCollectible(items.COLLECTIBLE_MOLTEN_CORE) then return end

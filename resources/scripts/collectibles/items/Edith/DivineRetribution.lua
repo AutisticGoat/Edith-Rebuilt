@@ -6,6 +6,8 @@ local game = utils.Game
 local modules = mod.Modules
 local Helpers = modules.HELPERS
 local ModRNG = modules.RNG
+local Player = modules.PLAYER
+local Maths = modules.MATHS
 local sfx = utils.SFX
 local DivineRetribution = {}
 
@@ -14,8 +16,8 @@ local DivineRetribution = {}
 ---@param flags UseFlag
 ---@return boolean?
 function DivineRetribution:OnDRUse(_, rng, player, flags)
-    if mod.HasBitFlags(flags, UseFlag.USE_CARBATTERY) then return end
-    local IsJudasWithBirthright = mod.IsJudasWithBirthright(player)
+    if Maths.HasBitFlags(flags, UseFlag.USE_CARBATTERY) then return end
+    local IsJudasWithBirthright = Player.IsJudasWithBirthright(player)
 
     if ModRNG.RandomBoolean(rng) then
         sfx:Play(SoundEffect.SOUND_THUMBS_DOWN)

@@ -17,20 +17,22 @@
 local mod = EdithRebuilt
 local TargetArrow = mod.Modules.TARGET_ARROW
 local data = mod.CustomDataWrapper.getData
+local Helpers = mod.Modules.HELPERS
+local EdithMod = mod.Modules.EDITH
 local Vestige = {}
 
 ---@param player EntityPlayer
 function Vestige:EdithJumpHandler(player)
-    if not mod.IsVestigeChallenge() then return end
+    if not Helpers.IsVestigeChallenge() then return end
 	if not mod.IsEdith(player, false) then return end
 
 	local playerData = data(player)
 	if player:IsDead() then TargetArrow.RemoveEdithTarget(player); playerData.isJumping = false return end
 
-	local isKeyStompTriggered = mod:IsKeyStompTriggered(player)
+	local isKeyStompTriggered = Helpers.IsKeyStompTriggered(player)
 	local jumpData = JumpLib:GetData(player)
 	local isJumping = jumpData.Jumping 
-	local target = mod.GetEdithTarget(player)
+	local target = TargetArrow.GetEdithTarget(player)
 	local sprite = player:GetSprite()
 	local jumpInternalData = JumpLib.Internal:GetData(player)
 
@@ -46,7 +48,7 @@ function Vestige:EdithJumpHandler(player)
     end
 
 	if jumpInternalData.UpdateFrame and jumpInternalData.UpdateFrame > 6 then
-		mod.EdithDash(player, mod.GetEdithTargetDirection(player), mod.GetEdithTargetDistance(player), 50)
+		EdithMod.EdithDash(player, TargetArrow.GetEdithTargetDirection(player), TargetArrow.GetEdithTargetDistance(player), 50)
 	end
 
 	if target and JumpLib:IsFalling(player) then

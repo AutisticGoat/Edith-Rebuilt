@@ -10,6 +10,7 @@ local RGBColors = { Target = Color(1, 0, 0), Arrow = Color(1, 0, 0) }
 local modules = mod.Modules
 local Edith = modules.EDITH
 local TEdith = modules.TEDITH
+local Helpers = modules.HELPERS
 local targetArrow = modules.TARGET_ARROW
 local data = mod.CustomDataWrapper.getData
 local teleportPoints = {
@@ -41,6 +42,30 @@ local function RGBFunction(color, step, value)
 	color.R, color.G, color.B = Hsx.hsv2rgb(color.R, color.G, color.B)
 end
 
+local targetSprite = Sprite("gfx/edith rebuilt target.anm2", true)
+
+---Draws a line between from `from` position to `to` position
+---@param from Vector
+---@param to Vector
+---@param color Color
+---@param isObscure? boolean
+local function drawLine(from, to, color, isObscure)
+	local diffVector = to - from
+	local angle = diffVector:GetAngleDegrees()
+	local sectionCount = math.floor(diffVector:Length() / 16) - 1
+	local direction = Vector.FromAngle(angle)
+
+	targetSprite:SetFrame("Line", isObscure and 1 or 0)
+	targetSprite.Color = color
+	targetSprite.Rotation = angle
+
+	local currentPos
+	for i = 0, sectionCount do
+		currentPos = from + direction * (i * 16)
+		targetSprite:Render(Isaac.WorldToScreen(currentPos))
+	end
+end
+
 ---@param effect EntityEffect
 ---@param player EntityPlayer
 local function EdithTargetManagement(effect, player)
@@ -51,7 +76,7 @@ local function EdithTargetManagement(effect, player)
 	local room = game:GetRoom()
 	local params = Edith.GetJumpStompParams(player)
 
-	local anim = (mod.IsKeyStompPressed(player) or params.Jumps > 0 and params.Cooldown == 0) and "Blink" or "Idle" 
+	local anim = (Helpers.IsKeyStompPressed(player) or params.Jumps > 0 and params.Cooldown == 0) and "Blink" or "Idle" 
 	effect:GetSprite():Play(anim)
 
 	room:GetCamera():SetFocusPosition(interpolateVector2D(playerPos, effectPos, 0.6))
@@ -104,11 +129,11 @@ local function EdithTargetRender(effect, player, saveData)
 
 	if not saveData.TargetLine then return end
 	local targetlineColor = misc.TargetLineColor
-	local isObscure = effectSprite:GetFrame() >= mod.When(effectSprite:GetAnimation(), tables.FrameLimits, 0)	
-	local lineColor = mod.When(targetDesign, tables.TargetLineColorValues, color)
+	local isObscure = effectSprite:GetFrame() >= Helpers.When(effectSprite:GetAnimation(), tables.FrameLimits, 0)	
+	local lineColor = Helpers.When(targetDesign, tables.TargetLineColorValues, color)
 	targetlineColor:SetColorize(lineColor.R, lineColor.G, lineColor.B, 1)
 
-	mod.drawLine(player.Position, effect.Position, targetlineColor, isObscure) 
+	drawLine(player.Position, effect.Position, targetlineColor, isObscure) 
 end
 
 ---@param effect EntityEffect
@@ -125,10 +150,10 @@ local function TaintedEdithArrowRender(effect, player, saveData)
 
 	if saveData.RGBMode then
 		RGBFunction(RGBColors.Arrow, saveData.RGBSpeed, effectData.RGBState)
-		mod:ChangeColor(effect, RGBColors.Arrow.R, RGBColors.Arrow.G, RGBColors.Arrow.B)
+		Helpers.ChangeColor(effect, RGBColors.Arrow.R, RGBColors.Arrow.G, RGBColors.Arrow.B)
 	else
 		local color = saveData.ArrowColor
-		mod:ChangeColor(effect, color.Red, color.Green, color.Blue)
+		Helpers.ChangeColor(effect, color.Red, color.Green, color.Blue)
 	end
 end
 
@@ -152,7 +177,7 @@ mod:AddCallback(ModCallbacks.MC_PRE_EFFECT_RENDER, function(_, effect)
     if not player then return end
 	local isTarget = effect.Variant == Vars.EFFECT_EDITH_TARGET
 	local dataType = isTarget and enums.ConfigDataTypes.EDITH or enums.ConfigDataTypes.TEDITH
-	local data = mod.GetConfigData(dataType) ---@cast data EdithData|TEdithData	
+	local data = Helpers.GetConfigData(dataType) ---@cast data EdithData|TEdithData	
 	local func = isTarget and EdithTargetRender or TaintedEdithArrowRender
 	
 	func(effect, player, data)
@@ -161,10 +186,10 @@ end)
 ---@param effect EntityEffect
 function mod:Mierda(effect)
 	local isTarget = effect.Variant == Vars.EFFECT_EDITH_TARGET
-	local MenuSprite = isTarget and mod.GetConfigData("EdithData").TargetDesign or mod.GetConfigData("TEdithData").ArrowDesign
+	local MenuSprite = isTarget and Helpers.GetConfigData("EdithData").TargetDesign or Helpers.GetConfigData("TEdithData").ArrowDesign
 	local TargetTable = isTarget and tables.TargetSuffix or tables.ArrowSuffix
 	local path = isTarget and misc.TargetPath or misc.ArrowPath
 
-	effect:GetSprite():ReplaceSpritesheet(0, path .. mod.When(MenuSprite, TargetTable, "") .. ".png", true)
+	effect:GetSprite():ReplaceSpritesheet(0, path .. Helpers.When(MenuSprite, TargetTable, "") .. ".png", true)
 end
 mod:AddCallback(enums.Callbacks.TARGET_SPRITE_CHANGE, mod.Mierda)

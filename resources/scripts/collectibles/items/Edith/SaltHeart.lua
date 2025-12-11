@@ -7,6 +7,9 @@ local invalidDamageFlags = DamageFlag.DAMAGE_SPIKES | DamageFlag.DAMAGE_INVINCIB
 local modules = mod.Modules
 local ModRNG = modules.RNG
 local StsEffects = modules.STATUS_EFFECTS
+local Helpers = modules.HELPERS
+local Creeps = modules.CREEPS
+local Maths = modules.MATHS
 local SaltedFlag = StatusEffectLibrary.StatusFlag.EDITH_REBUILT_SALTED
 local SaltHeart = {}
 
@@ -17,12 +20,12 @@ local SaltHeart = {}
 function SaltHeart:GettingDamage(entity, amount, flags, source)
     local player = entity:ToPlayer()
     if not (player and player:HasCollectible(items.COLLECTIBLE_SALT_HEART)) then return end
-    if mod.HasBitFlags(flags, invalidDamageFlags) then return end
+    if Maths.HasBitFlags(flags, invalidDamageFlags) then return end
 
     local playerData = data(player)
 
     playerData.SaltHeartDDFlag = playerData.SaltHeartDDFlag or false
-    mod.SetSalted(player, 90, player)
+    StsEffects.SetStatusEffect(enums.EdithStatusEffects.SALTED, player, 90, player)
 
     if not playerData.SaltHeartDDFlag then 
         playerData.SaltHeartDDFlag = true
@@ -35,7 +38,7 @@ function SaltHeart:GettingDamage(entity, amount, flags, source)
         local tears = player:FireTear(entity.Position, RandomVector() * (player.ShotSpeed * 10), false, false, false, player, 1)
 		
         tears.CollisionDamage = tears.CollisionDamage / 2
-		mod.ForceSaltTear(tears)
+		Helpers.ForceSaltTear(tears, false)
 		tears:AddTearFlags(TearFlags.TEAR_PIERCING)
     end
 end
@@ -46,7 +49,7 @@ function SaltHeart:SpawnSaltCreep(player)
     if not StsEffects.EntHasStatusEffect(player, StsEffects.SALTED) then return end
     if StatusEffectLibrary:GetStatusEffectCountdown(player, SaltedFlag) % 5 ~= 0 then return end
     
-    mod:SpawnSaltCreep(player, player.Position, 0, 5, 2, 3, saltTypes.SALT_HEART, true, true)
+    Creeps.SpawnSaltCreep(player, player.Position, 0, 5, 2, 3, saltTypes.SALT_HEART, true, true)
 end
 mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, SaltHeart.SpawnSaltCreep)
 
@@ -61,7 +64,7 @@ mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, SaltHeart.Stats, CacheFlag.CACHE
 ---@param source EntityRef
 function SaltHeart:OnSaltedDeath(npc, source)
     local saltedType = data(npc).SaltType ---@cast saltedType SaltTypes
-    local player = mod.GetPlayerFromRef(source)
+    local player = Helpers.GetPlayerFromRef(source)
 
     if not player then return end
     if not StsEffects.EntHasStatusEffect(player, StsEffects.SALTED) then return end

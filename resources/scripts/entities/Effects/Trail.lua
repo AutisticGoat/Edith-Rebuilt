@@ -4,6 +4,7 @@ local tables = enums.Tables
 local misc = enums.Misc
 local Trail = {}
 local SaveManager = mod.SaveManager
+local Helpers = mod.Modules.HELPERS
 local data = mod.CustomDataWrapper.getData
 
 function Trail.ResetTEdithTrail(player)
@@ -29,7 +30,7 @@ function Trail.SpawnTEdithTrail(player)
     if not Settings then return end
 
     local TEdithSettings = Settings.TEdithData
-    local trailParams = mod.When(TEdithSettings.TrailDesign, tables.TEdithTrailParams)
+    local trailParams = Helpers.When(TEdithSettings.TrailDesign, tables.TEdithTrailParams)
 
 	trail:FollowParent(entityParent)
 	trail.Color = Color(1, 1, 1, 1)
@@ -74,7 +75,7 @@ function Trail:OnTrailSpriteChange(trail)
     if not Settings then return end
 
     local TEdithSettings = Settings.TEdithData
-    local trailParams = mod.When(TEdithSettings.TrailDesign, tables.TEdithTrailParams)
+    local trailParams = Helpers.When(TEdithSettings.TrailDesign, tables.TEdithTrailParams)
 
     trail.SpriteScale = Vector.One * trailParams.Size
     trail:GetSprite():ReplaceSpritesheet(0, misc.TrailPath .. trailParams.Suffix .. ".png", true)

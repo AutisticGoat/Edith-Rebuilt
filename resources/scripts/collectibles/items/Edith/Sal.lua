@@ -5,6 +5,8 @@ local data = mod.CustomDataWrapper.getData
 local saltTypes = enums.SaltTypes
 local modules = mod.Modules
 local ModRNG = modules.RNG
+local Helpers = modules.HELPERS
+local Creeps = modules.CREEPS
 local StatusEffects = modules.STATUS_EFFECTS
 local Sal = {}
 
@@ -23,7 +25,7 @@ local function ShootSalTear(player, position, rng, minTears, maxTears)
 
         fallSpeedVar = ModRNG.RandomFloat(rng, 1.8, 2.2)
 
-		mod.ForceSaltTear(tear)
+		Helpers.ForceSaltTear(tear, false)
 		tear.Height = baseHeight * 3
         tear.Velocity = tear.Velocity * ModRNG.RandomFloat(rng, 0.2, 0.6)
         tear.FallingAcceleration = (ModRNG.RandomFloat(rng, 0.7, 1.6)) * 3
@@ -46,7 +48,7 @@ function Sal:SalSpawnSaltCreep(player)
 		amount = rng:RandomInt(2, 5),
 		speed = ModRNG.RandomFloat(rng, 1, 2.5) 
 	}
-	mod:SpawnSaltCreep(player, player.Position, 0, 3, randomGib.amount, randomGib.speed, saltTypes.SAL, true, true)
+	Creeps.SpawnSaltCreep(player, player.Position, 0, 3, randomGib.amount, randomGib.speed, saltTypes.SAL, true, true)
 end
 mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, Sal.SalSpawnSaltCreep)
 
@@ -56,7 +58,7 @@ function Sal:KillingSalEnemy(entity, source)
 	if not StatusEffects.EntHasStatusEffect(entity, enums.EdithStatusEffects.SALTED) then return end
 
 	local Ent = source.Entity
-	local player = mod.GetPlayerFromRef(source)
+	local player = Helpers.GetPlayerFromRef(source)
 	local tear = Ent and Ent:ToTear()
 	
 	if not player then return end

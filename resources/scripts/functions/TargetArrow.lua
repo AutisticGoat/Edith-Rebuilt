@@ -136,7 +136,7 @@ function targetArrow.TargetDoorManager(effect, player, triggerDistance)
 				door:TryUnlock(player, true)
 			end
 		else
-			mod:ChangeColor(player, 1, 1, 1, 1)
+			helpers.ChangeColor(player, 1, 1, 1, 1)
 			door:TryUnlock(player)
 		end
 		::Break::

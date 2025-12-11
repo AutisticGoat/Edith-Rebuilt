@@ -22,7 +22,8 @@ EdithRebuilt.Modules = {
 	EDITH = include("resources.scripts.functions.Edith"),
 	LAND = include("resources.scripts.functions.Land"),
 	TEDITH = include("resources.scripts.functions.TEdith"),
-	STATUS_EFFECTS = include("resources.scripts.functions.StatusEffects")
+	STATUS_EFFECTS = include("resources.scripts.functions.StatusEffects"),
+	CREEPS = include("resources.scripts.functions.Creeps"),
 }
 
 include("include")

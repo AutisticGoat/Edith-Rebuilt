@@ -2,6 +2,7 @@ local mod = EdithRebuilt
 local enums = mod.Enums
 local players = enums.PlayerType
 local maths = require("resources.scripts.functions.Maths")
+local Helpers = require("resources.scripts.functions.Helpers")
 local player = {}
 
 ---Checks if player is Edith
@@ -29,7 +30,7 @@ function player.ManageEdithWeapons(player)
 	local weapon = player:GetWeapon(1)
 
 	if not weapon then return end
-	if not mod.When(weapon:GetWeaponType(), enums.Tables.OverrideWeapons, false) then return end
+	if not Helpers.When(weapon:GetWeaponType(), enums.Tables.OverrideWeapons, false) then return end
 	local newWeapon = Isaac.CreateWeapon(WeaponType.WEAPON_TEARS, player)
 	Isaac.DestroyWeapon(weapon)
 	player:EnableWeaponType(WeaponType.WEAPON_TEARS, true)
@@ -116,7 +117,7 @@ end
 ---Used to add some interactions to Judas' Birthright effect
 ---@param p EntityPlayer
 function player.IsJudasWithBirthright(p)
-	return p:GetPlayerType() == PlayerType.PLAYER_JUDAS and mod.PlayerHasBirthright(p)
+	return p:GetPlayerType() == PlayerType.PLAYER_JUDAS and player.PlayerHasBirthright(p)
 end
 
 return player

@@ -5,6 +5,7 @@ local game, sfx = utils.Game, utils.SFX
 local items = enums.CollectibleType
 local modules = mod.Modules
 local ModRNG = modules.RNG
+local Maths = modules.MATHS
 local Helpers = modules.HELPERS
 local FOTU = {}
 
@@ -13,7 +14,7 @@ local FOTU = {}
 ---@param flag UseFlag
 ---@return boolean?
 function FOTU:OnFatefulUse(_, rng, player, flag)
-    if mod.HasBitFlags(flag, UseFlag.USE_CARBATTERY) then return end
+    if Maths.HasBitFlags(flag, UseFlag.USE_CARBATTERY) then return end
     local Hascarbattery = player:HasCollectible(CollectibleType.COLLECTIBLE_CAR_BATTERY) 
     local playerPos = player.Position
 
@@ -22,7 +23,7 @@ function FOTU:OnFatefulUse(_, rng, player, flag)
         ent:AddBrimstoneMark(EntityRef(player), Hascarbattery and 180 or 90)
 
         if playerPos:Distance(ent.Position) > 50 then goto Break end
-        mod.TriggerPush(ent, player, 20, 5, false)
+        Helpers.TriggerPush(ent, player, 20)
         ::Break::
     end
 

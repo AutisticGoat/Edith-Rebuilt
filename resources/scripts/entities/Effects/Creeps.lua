@@ -45,7 +45,7 @@ local function SaltCreepUpdate(effect)
     local effectData = data(effect)
     local spawnType = effectData.SpawnType ---@cast spawnType SaltTypes
     local player = effect.SpawnerEntity:ToPlayer() 
-    local isSaltShakerSalt = mod.When(spawnType, SaltShakerSalts, false)
+    local isSaltShakerSalt = Helpers.When(spawnType, SaltShakerSalts, false)
 
     if not player then return end
 
@@ -65,7 +65,7 @@ local function SaltCreepUpdate(effect)
 
     for _, entity in pairs(Isaac.FindInRadius(effect.Position, 20 * effect.SpriteScale.X, EntityPartition.ENEMY)) do
 
-        if mod.IsVestigeChallenge() then
+        if Helpers.IsVestigeChallenge() then
             entity:AddFear(EntityRef(player), 120)
         else
             StatusEffects.SetStatusEffect(enums.EdithStatusEffects.SALTED, entity, SaltedTimes[spawnType], player)

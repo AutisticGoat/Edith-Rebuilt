@@ -3,6 +3,8 @@ local enums = mod.Enums
 local trinkets = enums.TrinketType
 local modules = mod.Modules
 local ModRNG = modules.RNG
+local Helpers = modules.HELPERS
+local Maths = modules.MATHS
 local Geode = {}
 local NonDestroyFlags = DamageFlag.DAMAGE_INVINCIBLE | DamageFlag.DAMAGE_NO_PENALTIES | DamageFlag.DAMAGE_CURSED_DOOR
 
@@ -11,7 +13,7 @@ local NonDestroyFlags = DamageFlag.DAMAGE_INVINCIBLE | DamageFlag.DAMAGE_NO_PENA
 function Geode:SpawnOnKill(npc, source)
 	if source.Type == 0 then return end
 
-	local player = mod.GetPlayerFromRef(source)
+	local player = Helpers.GetPlayerFromRef(source)
 
 	if not player then return end
 	if not player:HasTrinket(trinkets.TRINKET_GEODE) then return end
@@ -35,7 +37,7 @@ mod:AddCallback(ModCallbacks.MC_POST_ENTITY_KILL, Geode.SpawnOnKill)
 ---@param flags DamageFlag
 function Geode:DestroyGeode(player, _, flags)
 	if not player:HasTrinket(trinkets.TRINKET_GEODE) then return end
-	if mod.HasBitFlags(flags, NonDestroyFlags) then return end
+	if Maths.HasBitFlags(flags, NonDestroyFlags) then return end
 
 	local rng = player:GetTrinketRNG(trinkets.TRINKET_GEODE)
 	local trinketMult = player:GetTrinketMultiplier(trinkets.TRINKET_GEODE)

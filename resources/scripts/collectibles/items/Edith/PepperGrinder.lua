@@ -2,7 +2,7 @@ local mod = EdithRebuilt
 local enums = mod.Enums
 local sfx = enums.Utils.SFX
 local modules = mod.Modules
-local herlpers = modules.HELPERS
+local helpers = modules.HELPERS
 local ModRNG = modules.RNG
 local StatusEffects = modules.STATUS_EFFECTS
 local PepperGrinder = {}
@@ -17,7 +17,7 @@ function PepperGrinder:UsePepperGrinder(_, RNG, player, flag)
 	local frames = hasCarBattery and 120 or 60
 
 	for _, enemy in ipairs(Isaac.FindInRadius(playerPos, 100, EntityPartition.ENEMY)) do
-		herlpers.TriggerPush(enemy, player, 20)
+		helpers.TriggerPush(enemy, player, 20)
 		StatusEffects.SetStatusEffect(enums.EdithStatusEffects.PEPPERED, enemy, frames, player)
 	end
 	
@@ -34,7 +34,7 @@ function PepperGrinder:UsePepperGrinder(_, RNG, player, flag)
 
 	PepperCloud.SpriteScale = PepperCloud.SpriteScale * Vector(X, Y)
 
-	mod:ChangeColor(PepperCloud, 0.4, 0.4, 0.4)
+	helpers.ChangeColor(PepperCloud, 0.4, 0.4, 0.4)
 	sfx:Play(mod.Enums.SoundEffect.SOUND_PEPPER_GRINDER, 10, 0, false, ModRNG.RandomFloat(RNG, 0.9, 1.1))
 	return true
 end

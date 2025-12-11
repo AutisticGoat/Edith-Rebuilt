@@ -14,7 +14,7 @@ function BurntSalt:SaltTearShoot(tear)
     if not player then return end
     if not player:HasTrinket(trinket.TRINKET_BURNT_SALT) then return end
     if not ModRNG.RandomBoolean(player:GetTrinketRNG(trinket.TRINKET_BURNT_SALT)) then return end 
-    mod.ForceSaltTear(tear, true)
+    Helpers.ForceSaltTear(tear, true)
     data(tear).BurntSaltTear = true
     tear.CollisionDamage = tear.CollisionDamage * 1.25
 end
@@ -25,7 +25,7 @@ mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, BurntSalt.SaltTearShoot)
 function BurntSalt:OnKill(npc, source)
     if source.Type == 0 then return end
 
-    local player = mod.GetPlayerFromRef(source)
+    local player = Helpers.GetPlayerFromRef(source)
     local tear = source.Entity:ToTear()
 
     if not player or not tear then return end 
@@ -48,7 +48,7 @@ function BurntSalt:OnKill(npc, source)
         ):ToTear()  
         
         if not burntSaltTear then return end
-        mod.ForceSaltTear(burntSaltTear, true)
+        Helpers.ForceSaltTear(burntSaltTear, true)
     end
 end
 mod:AddCallback(ModCallbacks.MC_POST_ENTITY_KILL, BurntSalt.OnKill)

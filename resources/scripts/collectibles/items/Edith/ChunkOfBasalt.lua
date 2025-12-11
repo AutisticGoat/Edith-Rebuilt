@@ -1,8 +1,9 @@
 local mod = EdithRebuilt
 local enums = mod.Enums
-local misc = enums.Misc
 local items = enums.CollectibleType
 local utils = enums.Utils
+local Helpers = mod.Modules.HELPERS
+local EdithMod = mod.Modules.EDITH
 local ChunkOfBasalt = {}
 local data = mod.CustomDataWrapper.getData
 
@@ -21,13 +22,13 @@ function ChunkOfBasalt:TriggerBasaltDash(player)
         player:CreateAfterimage(5, player.Position)
     end
 
-    if not mod:IsKeyStompTriggered(player) then return end
+    if not Helpers.IsKeyStompTriggered(player) then return end
     if playerData.IsBasaltDassh then return end
 
     if playerData.BasaltCount > 0 then return end
     playerData.BasaltCount = 60
     utils.SFX:Play(SoundEffect.SOUND_SHELLGAME)
-    mod.EdithDash(player, player:GetMovementInput():Normalized(), 60, 2)
+    EdithMod.EdithDash(player, player:GetMovementInput():Normalized(), 60, 2)
     playerData.IsBasaltDassh = true
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, ChunkOfBasalt.TriggerBasaltDash)
@@ -68,7 +69,7 @@ function ChunkOfBasalt:OnCollidingWithEnemy(player, collider)
 
         if not tear then return end
 
-        mod.ForceSaltTear(tear, true)
+        Helpers.ForceSaltTear(tear, true)
     end
 
     player:SetMinDamageCooldown(20)

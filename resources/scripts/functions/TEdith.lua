@@ -13,7 +13,6 @@ local helpers = require("resources.scripts.functions.Helpers")
 local Player = require("resources.scripts.functions.Player")
 local StatusEffects = require("resources.scripts.functions.StatusEffects")
 local Land = require("resources.scripts.functions.Land")
-local Floor = require("resources.scripts.functions.Floor")
 local TEdith = {}
 
 ---@class TEdithHopParryParams
@@ -145,7 +144,7 @@ end
 ---@param BRMult number
 function TEdith.AddHopDashCharge(player, charge, BRMult)
 	local HopParams = TEdith.GetHopParryParams(player)
-	local shouldAddToBrCharge = mod.PlayerHasBirthright(player) and HopParams.HopMoveCharge >= 100
+	local shouldAddToBrCharge = Player.PlayerHasBirthright(player) and HopParams.HopMoveCharge >= 100
 
 	HopParams.HopMoveCharge = maths.Clamp(HopParams.HopMoveCharge + charge, 0, 100)
 	HopParams.HopStaticCharge = maths.Clamp(HopParams.HopStaticCharge + charge, 0, 100)
@@ -244,7 +243,7 @@ function TEdith.InitTaintedEdithParryJump(player, tag)
 	local jumpSpeed = 2.5
 	local room = game:GetRoom()
 	local RoomWater = room:HasWater()
-	local isChap4 = Floor.IsChap4()
+	local isChap4 = helpers.IsChap4()
 	local variant = RoomWater and EffectVariant.BIG_SPLASH or (isChap4 and EffectVariant.POOF02 or EffectVariant.POOF01)
 	local subType = RoomWater and 1 or (isChap4 and 66 or 1)
 	
@@ -313,7 +312,7 @@ function TEdith.ParryLandManager(player, IsTaintedEdith)
 	local BirthrightMult = hasBirthright and 1.25 or 1
 	local hasBirthcake = BirthcakeRebaked and player:HasTrinket(BirthcakeRebaked.Birthcake.ID) or false
 	local DamageFormula = (rawFormula * BirthrightMult) * (hasBirthcake and 1.15 or 1)
-	local shouldTriggerFireJets = IsTaintedEdith and hasBirthright or mod.IsJudasWithBirthright(player)
+	local shouldTriggerFireJets = IsTaintedEdith and hasBirthright or Player.IsJudasWithBirthright(player)
 	local spawner, targetEnt, proj
 
 	if IsTaintedEdith then
@@ -321,7 +320,7 @@ function TEdith.ParryLandManager(player, IsTaintedEdith)
 		DamageFormula = DamageFormula * damageIncrease
 	end
 
-	local tearsMult = (mod.GetTPS(player) / 2.73) 
+	local tearsMult = (Player.GetplayerTears(player) / 2.73) 
 	local CinderTime = maths.SecondsToFrames((4 * tearsMult))
 
 	for _, ent in pairs(Isaac.FindInCapsule(ImpreciseParryCapsule, misc.ParryPartitions)) do

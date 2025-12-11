@@ -2,6 +2,7 @@ local mod = EdithRebuilt
 local enums = mod.Enums 
 local modules = mod.Modules
 local ModRNG = modules.RNG
+local Helpers = modules.HELPERS
 local trinket = enums.TrinketType
 local Paprika = {}
 
@@ -11,7 +12,7 @@ local Paprika = {}
 function Paprika:OnKilling(entity, source, _, amount)
     if source.Type == 0 then return end
 
-    local player = mod.GetPlayerFromRef(source)
+    local player = Helpers.GetPlayerFromRef(source)
 
     if not player then return end
     if not player:HasTrinket(trinket.TRINKET_PAPRIKA) then return end
@@ -27,7 +28,7 @@ function Paprika:OnKilling(entity, source, _, amount)
         Vector.Zero,
         nil
     )
-    mod:ChangeColor(Paprikacloud, 0.8, 0.2, 0, 1)
+    Helpers.ChangeColor(Paprikacloud, 0.8, 0.2, 0, 1)
 
     for _, Ent in ipairs(Isaac.FindInCapsule(Capsule(entPos, Vector.One, 0, 40), EntityPartition.ENEMY)) do
         Ent:TakeDamage(amount * (0.25 * ((0.05 * paprikaMult) - 0.05)), 0, source, 0)

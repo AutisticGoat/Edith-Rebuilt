@@ -6,6 +6,7 @@ local game = utils.Game
 local modules = mod.Modules
 local Player = modules.PLAYER
 local Helpers = modules.HELPERS
+local TargetArrow = modules.TARGET_ARROW
 local costumes = enums.NullItemID
 
 ---@param entity Entity
@@ -30,8 +31,8 @@ mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(_, player, cacheFlag)
     if cacheFlag == CacheFlag.CACHE_DAMAGE then
         player.Damage = player.Damage * 1.5
     elseif cacheFlag == CacheFlag.CACHE_RANGE then
-        local Range = (mod.IsVestigeChallenge() and player:GetPlayerType() == enums.PlayerType.PLAYER_EDITH) and 4.25 or 2.5
-        player.TearRange = mod.rangeUp(player.TearRange, Range)
+        local Range = (Helpers.IsVestigeChallenge() and player:GetPlayerType() == enums.PlayerType.PLAYER_EDITH) and 4.25 or 2.5
+        player.TearRange = Player.rangeUp(player.TearRange, Range)
     end
 end)
 
@@ -92,9 +93,9 @@ mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, function(_, tear)
     if not Player.IsAnyEdith(player) then return end
 
     local isTainted = Player.IsEdith(player, true)
-    local target = mod.GetEdithTarget(player)
+    local target = TargetArrow.GetEdithTarget(player)
 
-	mod.ForceSaltTear(tear, isTainted)
+	Helpers.ForceSaltTear(tear, isTainted)
 
     if isTainted then return end
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED) then return end	
