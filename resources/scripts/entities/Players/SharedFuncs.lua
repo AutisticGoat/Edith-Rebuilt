@@ -6,6 +6,7 @@ local game = utils.Game
 local modules = mod.Modules
 local Player = modules.PLAYER
 local Helpers = modules.HELPERS
+local Maths = modules.MATHS
 local TargetArrow = modules.TARGET_ARROW
 local costumes = enums.NullItemID
 
@@ -83,7 +84,7 @@ mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG, function(_, player, _, flag
     local roomType = game:GetRoom():GetType()
 
     if not Player.IsAnyEdith(player) then return end
-	if mod.HasBitFlags(flags, DamageFlag.DAMAGE_ACID) or (roomType ~= RoomType.ROOM_SACRIFICE and mod.HasBitFlags(flags, DamageFlag.DAMAGE_SPIKES)) then return false end
+	if Maths.HasBitFlags(flags, DamageFlag.DAMAGE_ACID) or (roomType ~= RoomType.ROOM_SACRIFICE and Maths.HasBitFlags(flags, DamageFlag.DAMAGE_SPIKES)) then return false end
 end)
 
 mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, function(_, tear)

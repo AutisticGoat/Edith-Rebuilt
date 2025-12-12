@@ -110,7 +110,7 @@ local Chests = {
 ---@param pickup EntityPickup
 ---@return boolean
 function IsKeyRequiredChest(pickup)
-	return mod.When(pickup.Variant, KeyRequiredChests, false)
+	return Helpers.When(pickup.Variant, KeyRequiredChests, false)
 end
 
 ---@param pickup EntityPickup

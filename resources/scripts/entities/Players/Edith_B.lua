@@ -16,6 +16,7 @@ local Player = modules.PLAYER
 local TargetArrow = modules.TARGET_ARROW
 local TEdithMod = modules.TEDITH
 local Helpers = modules.HELPERS
+local Maths = modules.MATHS
 local data = mod.CustomDataWrapper.getData
 local TEdith = {}
 
@@ -43,7 +44,6 @@ function mod:TaintedEdithUpdate(player)
 	local colorChange = math.min((HopParams.HopStaticCharge) / 100, 1) * 0.5
 	local colorBRChange = math.min(HopParams.HopStaticBRCharge / 100, 1) * 0.1
 
-
 	if isArrowMoving then
 		TargetArrow.SpawnEdithTarget(player, true)
 	end
@@ -58,17 +58,7 @@ function mod:TaintedEdithUpdate(player)
 		player:SetColor(Color(1, 1, 1, 1, colorChange, colorBRChange, 0), 5, 100, true, false)
 	end
 
-	if HopParams.ParryCooldown > 0 then
-		if isTaintedEdithJump(player) ~= true then
-			HopParams.ParryCooldown = HopParams.ParryCooldown - 1
-		end
-
-		if HopParams.ParryCooldown == 1 and player.FrameCount > 20 then
-			player:SetColor(Color(1, 1, 1, 1, 0.5 + colorChange), 5, 100, true, false)
-			sfx:Play(SoundEffect.SOUND_STONE_IMPACT)
-			playerData.ParryReadyGlowCount = 0
-		end
-	end
+	TEdithMod.ParryCooldownManager(player, HopParams)
 
 	playerData.ParryReadyGlowCount = (
 		not isTaintedEdithJump(player) and
@@ -96,23 +86,11 @@ function mod:EdithPlayerUpdate(player)
 
 	Player.ManageEdithWeapons(player)
 
-	local playerData = data(player)
-	local HopParams = TEdithMod.GetHopParryParams(player)
 	local IsJumping = JumpLib:GetData(player).Jumping
 	local arrow = TargetArrow.GetEdithTarget(player, true)
-	local input = {
-		up = Input.GetActionValue(ButtonAction.ACTION_UP, player.ControllerIndex),
-		down = Input.GetActionValue(ButtonAction.ACTION_DOWN, player.ControllerIndex),
-		left = Input.GetActionValue(ButtonAction.ACTION_LEFT, player.ControllerIndex),
-		right = Input.GetActionValue(ButtonAction.ACTION_RIGHT, player.ControllerIndex),
-	}
+	local HopParams = TEdithMod.GetHopParryParams(player)
 
-	HopParams.IsParryJump = HopParams.IsParryJump or false
-
-	local MovX = (((input.left > 0.3 and -input.left) or (input.right > 0.3 and input.right)) or 0) * (game:GetRoom():IsMirrorWorld() and -1 or 1)
-	local MovY = (input.up > 0.3 and -input.up) or (input.down > 0.3 and input.down) or 0
-
-	playerData.movementVector = Vector(MovX, MovY):Normalized() 
+	TEdithMod.ArrowMovementManager(player, HopParams)
 
 	if Helpers.IsKeyStompTriggered(player) then
 		if HopParams.ParryCooldown == 0 and not isTaintedEdithJump(player) and not HopParams.IsParryJump then
@@ -123,16 +101,16 @@ function mod:EdithPlayerUpdate(player)
 		end
 	end
 
-	if HopParams.IsHoping == true then
-		TEdithMod.ResetHopDashCharge(player, false, true)
-	else
-		playerData.MoveBrCharge = playerData.BirthrightCharge
-		playerData.MoveCharge = playerData.ImpulseCharge
+	-- if HopParams.IsHoping == true then
+	-- 	TEdithMod.ResetHopDashCharge(player, false, true)
+	-- else
+	-- 	playerData.MoveBrCharge = playerData.BirthrightCharge
+	-- 	playerData.MoveCharge = playerData.ImpulseCharge
 
-		if not IsJumping then
-			player:MultiplyFriction(0.5)
-		end
-	end
+	-- 	if not IsJumping then
+	-- 		player:MultiplyFriction(0.5)
+	-- 	end
+	-- end
 
 	if Player.IsPlayerShooting(player) then return end
 
@@ -164,7 +142,7 @@ local jets = 4
 local ndegree = 360/jets
 local damageBase = 3.5
 ---@param player EntityPlayer
-function mod:EdithHopLanding(player)	
+function TEdith:TEdithHopLanding(player)	
 	local HopParams = TEdithMod.GetHopParryParams(player)
 	local tearRange = player.TearRange / 40
 	local Knockbackbase = (player.ShotSpeed * 10) + 2
@@ -178,17 +156,12 @@ function mod:EdithHopLanding(player)
 	player:SpawnWaterImpactEffects(player.Position, Vector(1, 1), 1)	
 	land.LandFeedbackManager(player, land.GetLandSoundTable(true), misc.BurntSaltColor)
 	land.TaintedEdithHop(player, HopParams.HopRadius, HopParams.HopDamage, HopParams.HopKnockback)
-	
-	-- if BRCharge <= 0 then return end
-	-- for i = 1, jets do
-	-- 	mod.SpawnFireJet(player ,player.Position + Vector(20, 0):Rotated(ndegree*i), HopParams.HopDamage, false, 0.8)
-	-- end
 end
-mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, mod.EdithHopLanding, jumpParams.TEdithHop)
+mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, TEdith.TEdithHopLanding, jumpParams.TEdithHop)
 
 ---@param player EntityPlayer
-function TEdith:EdithParryJump(player)
-	if TargetArrow.GetEdithTarget(player, true) then 
+function TEdith:TEdithParryLanding(player)
+	if TargetArrow.GetEdithTarget(player, true) then
 		TEdithMod.ResetHopDashCharge(player, true, true)
 	end
 
@@ -200,7 +173,7 @@ function TEdith:EdithParryJump(player)
 	if not parryAdd then return end
 	TEdithMod.AddHopDashCharge(player, parryAdd, 0.75)
 end
-mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, TEdith.EdithParryJump, jumpParams.TEdithJump)
+mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, TEdith.TEdithParryLanding, jumpParams.TEdithJump)
 
 ---@param player EntityPlayer
 ---@param flags DamageFlag
@@ -210,7 +183,7 @@ function TEdith:TaintedEdithDamageManager(player, _, flags)
 
 	if not Player.IsEdith(player, true) then return end
 	if not (HopParams.IsHoping == true and HopParams.HopMoveCharge >= 30) then return end
-	if mod.HasBitFlags(flags, DamageFlag.DAMAGE_RED_HEARTS) then return end
+	if Maths.HasBitFlags(flags, DamageFlag.DAMAGE_RED_HEARTS) then return end
 	return false
 end
 mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG, TEdith.TaintedEdithDamageManager)

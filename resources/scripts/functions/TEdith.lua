@@ -72,6 +72,21 @@ function TEdith.GetHopDashCharge(player, Static, checkBirthright)
 	return charge + (checkBirthright and chargeBR or 0)
 end
 
+---@param player EntityPlayer
+---@param HopParams TEdithHopParryParams
+function TEdith.ParryCooldownManager(player, HopParams)
+	if HopParams.ParryCooldown <= 0 then return end
+	if isTaintedEdithJump(player) ~= true then
+		HopParams.ParryCooldown = HopParams.ParryCooldown - 1
+	end
+
+	if HopParams.ParryCooldown == 1 and player.FrameCount > 20 then
+		player:SetColor(Color(1, 1, 1, 1, 0.5 + colorChange), 5, 100, true, false)
+		sfx:Play(SoundEffect.SOUND_STONE_IMPACT)
+		playerData.ParryReadyGlowCount = 0
+	end
+end
+
 ---Reset both Tainted Edith's Move charge and Birthright charge
 ---@param player EntityPlayer
 ---@param Move boolean Resets both `HopMoveCharge` and HopMoveBRCharge
@@ -88,6 +103,25 @@ function TEdith.ResetHopDashCharge(player, Move, Static)
 		hopParams.HopStaticCharge = 0
 		hopParams.HopStaticBRCharge = 0
 	end
+end
+
+---@param player EntityPlayer
+---@param HopParams TEdithHopParryParams
+function TEdith.ArrowMovementManager(player, HopParams)
+	local playerData = data(player)
+	local input = {
+		up = Input.GetActionValue(ButtonAction.ACTION_UP, player.ControllerIndex),
+		down = Input.GetActionValue(ButtonAction.ACTION_DOWN, player.ControllerIndex),
+		left = Input.GetActionValue(ButtonAction.ACTION_LEFT, player.ControllerIndex),
+		right = Input.GetActionValue(ButtonAction.ACTION_RIGHT, player.ControllerIndex),
+	}
+
+	HopParams.IsParryJump = HopParams.IsParryJump or false
+
+	local MovX = (((input.left > 0.3 and -input.left) or (input.right > 0.3 and input.right)) or 0) * (game:GetRoom():IsMirrorWorld() and -1 or 1)
+	local MovY = (input.up > 0.3 and -input.up) or (input.down > 0.3 and input.down) or 0
+
+	playerData.movementVector = Vector(MovX, MovY):Normalized() 
 end
 
 ---Helper function to stop Tainted Edith's hop-dash
