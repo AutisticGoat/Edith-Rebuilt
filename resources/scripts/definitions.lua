@@ -24,13 +24,14 @@ EdithRebuilt.Enums = {
 		COLLECTIBLE_DIVINE_RETRIBUTION = Isaac.GetItemIdByName("Divine Retribution"),
 		COLLECTIBLE_THE_BOOK_OF_LUKE = Isaac.GetItemIdByName("The Book Of Luke"),
 		COLLECTIBLE_HYDRARGYRUM = Isaac.GetItemIdByName("Hydrargyrum"),
-		COLLECTIBLE_CHUNK_OF_BASALT = Isaac.GetItemIdByName("Chunk of Basalt"),
+		COLLECTIBLE_SPICES_MIX = Isaac.GetItemIdByName("Spices Mix"),
 
 		--- Tainted Edith Items
 		COLLECTIBLE_BURNT_HOOD = Isaac.GetItemIdByName("Burnt Hood"),
 		COLLECTIBLE_DIVINE_WRATH = Isaac.GetItemIdByName("Divine Wrath"),
 
-		COLLECTIBLE_EFFIGY = Isaac.GetItemIdByName("Effigy")
+		COLLECTIBLE_EFFIGY = Isaac.GetItemIdByName("Effigy"),
+		COLLECTIBLE_CHUNK_OF_BASALT = Isaac.GetItemIdByName("Chunk of Basalt"),
 	},
 	TrinketType = {
 		TRINKET_GEODE = Isaac.GetTrinketIdByName("Geode"),
@@ -54,7 +55,8 @@ EdithRebuilt.Enums = {
 		EFFECT_EDITH_B_TARGET = Isaac.GetEntityVariantByName("Edith Tainted Arrow"),
 	},
 	Challenge = {
-		CHALLENGE_VESTIGE = Isaac.GetChallengeIdByName("[Edith: Rebuilt] Vestige")
+		CHALLENGE_VESTIGE = Isaac.GetChallengeIdByName("[Edith: Rebuilt] Vestige"),
+		CHALLENGE_GRUDGE = Isaac.GetChallengeIdByName("[Edith: Rebuilt] Grudge")
 	},
 	Callbacks = {
 		-- Called everytime a Perfect Parry is triggered (player: EntityPlayer, entity: Entity)
@@ -78,6 +80,12 @@ EdithRebuilt.Enums = {
 		---* params `EdithJumpStompParams`
 		OFFENSIVE_STOMP_HIT = "EdithRebuilt_OFFENSIVE_STOMP_HIT",
 
+		-- Called everytime Edith does an offensive stomp and kills at least `One` Enemy
+		---* player `EntityPlayer`
+		---* entity `Entity`
+		---* params `EdithJumpStompParams`
+		OFFENSIVE_STOMP_KILL = "EdithRebuilt_OFFENSIVE_STOMP_KILL",
+
 		-- Called everytime Edith's Target (or Tainted Edith's arrow) changes its design		
 		TARGET_SPRITE_CHANGE = "EdithRebuilt_TARGET_SPRITE_CHANGE",
 
@@ -88,6 +96,7 @@ EdithRebuilt.Enums = {
 		SALT_CREEP = Isaac.GetEntitySubTypeByName("Salt Creep"),
 		PEPPER_CREEP = Isaac.GetEntitySubTypeByName("Pepper Creep"),
 		CINDER_CREEP = Isaac.GetEntitySubTypeByName("Cinder Creep"),
+		CINDER_CREEP = Isaac.GetEntitySubTypeByName("Oregano Creep"),
 	},
 	SoundEffect = {
 		SOUND_EDITH_STOMP = Isaac.GetSoundIdByName("Edith Stomp"),
@@ -122,7 +131,7 @@ EdithRebuilt.Enums = {
 		ACHIEVEMENT_SULFURIC_FIRE = Isaac.GetAchievementIdByName("EdithRebuilt_Sulfuric Fire"),
 		ACHIEVEMENT_RUMBLING_PEBBLE = Isaac.GetAchievementIdByName("EdithRebuilt_Rumbling Pebble"),
 		ACHIEVEMENT_DIVINE_RETRIBUTION = Isaac.GetAchievementIdByName("EdithRebuilt_Divine Retribution"),
-		ACHIEVEMENT_CHUNK_OF_BASALT = Isaac.GetAchievementIdByName("EdithRebuilt_Chunk of Basalt"),
+		ACHIEVEMENT_SPICES_MIX = Isaac.GetAchievementIdByName("EdithRebuilt_SpicesMix"),
 		ACHIEVEMENT_EDITHS_HOOD = Isaac.GetAchievementIdByName("EdithRebuilt_Ediths Hood"),
 		ACHIEVEMENT_HYDRARGYRUM = Isaac.GetAchievementIdByName("EdithRebuilt_Hydrargyrum"),
 		ACHIEVEMENT_TAINTED_EDITH = Isaac.GetAchievementIdByName("EdithRebuilt_The Punished"),
@@ -137,6 +146,12 @@ EdithRebuilt.Enums = {
 		ACHIEVEMENT_SOUL_OF_EDITH = Isaac.GetAchievementIdByName("EdithRebuilt_Soul of Edith"),
 		ACHIEVEMENT_DIVINE_WRATH = Isaac.GetAchievementIdByName("EdithRebuilt_Divine Wrath"),
 		-- Tainted Edith unlocks end
+
+		ACHIEVEMENT_VESTIGE = Isaac.GetAchievementIdByName("EdithRebuilt_Vestige"),
+		ACHIEVEMENT_EFFIGY = Isaac.GetAchievementIdByName("EdithRebuilt_Effigy"),
+		ACHIEVEMENT_GRUDGE = Isaac.GetAchievementIdByName("EdithRebuilt_Grudge"),
+		ACHIEVEMENT_CHUNK_OF_BASALT = Isaac.GetAchievementIdByName("EdithRebuilt_Chunk of Basalt"),
+
 
 		ACHIEVEMENT_THANK_YOU = Isaac.GetAchievementIdByName("EdithRebuilt_Thank You"),
 	},
@@ -164,6 +179,12 @@ EdithRebuilt.Enums = {
 	EdithStatusEffects = {
 		SALTED = "Salted",
 		CINDER = "Cinder",
+		GARLIC = "Garlic",
+		OREGANO = "Oregano",
+		CUMIN = "Cumin",
+		TURMERIC = "Turmeric",
+		CINNAMON = "Cinnamon",
+		GINGER = "Ginger",
 		PEPPERED = "Peppered",
 		HYDRARGYRUM_CURSE = "HydrargyrumCurse"
 	},

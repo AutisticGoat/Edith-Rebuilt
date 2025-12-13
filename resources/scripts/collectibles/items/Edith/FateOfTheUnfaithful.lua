@@ -17,12 +17,15 @@ function FOTU:OnFatefulUse(_, rng, player, flag)
     if Maths.HasBitFlags(flag, UseFlag.USE_CARBATTERY) then return end
     local Hascarbattery = player:HasCollectible(CollectibleType.COLLECTIBLE_CAR_BATTERY) 
     local playerPos = player.Position
+    local playerRef = EntityRef(player)
+    local enemyDist 
 
     for _, ent in ipairs(Helpers.GetEnemies()) do
-        ent:AddBurn(EntityRef(player), 83, Hascarbattery and 3 or 1.5)
-        ent:AddBrimstoneMark(EntityRef(player), Hascarbattery and 180 or 90)
+        enemyDist = playerPos:Distance(ent.Position)
+        ent:AddBurn(EntityRef(player), 83, Hascarbattery and 6 or 3)
+        ent:TakeDamage((player.Damage * 1.5) * (Maths.exp(40 / enemyDist, 1, 1.2)), 0, playerRef, 0)
 
-        if playerPos:Distance(ent.Position) > 50 then goto Break end
+        if enemyDist > 50 then goto Break end
         Helpers.TriggerPush(ent, player, 20)
         ::Break::
     end

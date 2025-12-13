@@ -61,7 +61,7 @@ function ChunkOfBasalt:OnCollidingWithEnemy(player, collider)
     collider:TakeDamage(damageFormula, 0, EntityRef(player), 0)
 
     utils.SFX:Play(SoundEffect.SOUND_MEATY_DEATHS)
-    mod.TriggerPush(player, collider, 10, 1, false)
+    Helpers.TriggerPush(player, collider, 10)
 
     if collider.HitPoints > damageFormula then return end
     for _ = 1, rng:RandomInt(5, 8) do

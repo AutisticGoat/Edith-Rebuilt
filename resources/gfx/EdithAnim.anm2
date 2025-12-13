@@ -1612,7 +1612,9 @@
                 <NullAnimation NullId="6" Visible="true"/>
                 <NullAnimation NullId="7" Visible="true"/>
             </NullAnimations>
-            <Triggers/>
+            <Triggers>
+                <Trigger EventId="6" SoundId="-1" AtFrame="5"/>
+            </Triggers>
         </Animation>
         <Animation Name="BigJumpFinish" FrameNum="12" Loop="false">
             <RootAnimation>

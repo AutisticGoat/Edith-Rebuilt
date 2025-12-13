@@ -102,13 +102,13 @@
 		tags="nolostbr"
 		achievement="EdithRebuilt_Divine Retribution"
 	/>
-	<passive
+	<active
 		id="10" 
-		name="Chunk of Basalt" 
-		description="Rocky grudge" 
-		gfx="collectibles_Chunk_Of_Basalt.png"
+		name="Spices Mix" 
+		description="Mmmmh, tasty!" 
+		gfx="collectibles_Spices_Mix.png"
 		quality="2"
-		achievement="EdithRebuilt_Chunk of Basalt"
+		achievement="EdithRebuilt_SpicesMix"
 	/>
 	<passive	
 		id="11" 
@@ -132,7 +132,7 @@
 		achievement="EdithRebuilt_Rumbling Pebble"
 	/>
 	<!-- Edith unlocks end -->
-
+s
 	<!-- Tainted Edith unlocks -->
 	<active
 		id="12" 
@@ -173,7 +173,15 @@
 		name="Effigy"
 		description="A vestige of the past"
 		gfx="collectibles_Effigy.png"
-		maxcharges="4"
+		maxcharges="2"
 		achievement="EdithRebuilt_Effigy"
+	/>
+	<passive
+		id="15" 
+		name="Chunk of Basalt" 
+		description="Rocky grudge" 
+		gfx="collectibles_Chunk_Of_Basalt.png"
+		quality="2"
+		achievement="EdithRebuilt_Chunk of Basalt"
 	/>
 </items>

@@ -372,6 +372,24 @@ function Edith.ExplosionRecoil(player, params,bomb)
 	params.RocketLaunch = true
 end
 
+local function VestigeUnlockManager()
+	local pgd = Isaac.GetPersistentGameData()
+	local VestigeAch = enums.Achievements.ACHIEVEMENT_VESTIGE
+	if pgd:Unlocked(VestigeAch) then return end
+
+	local saveManager = mod.SaveManager
+	local PersistentData = saveManager.GetPersistentSave()
+
+	if not PersistentData then return end
+
+	PersistentData.StompKills = PersistentData.StompKills or 0
+	PersistentData.StompKills = PersistentData.StompKills + 1
+
+	if PersistentData.StompKills == 15 then
+		pgd:TryUnlock(VestigeAch)
+	end
+end
+
 ---@param player EntityPlayer
 ---@param jumpParams EdithJumpStompParams
 function Edith.CooldownUpdate(player, jumpParams)
@@ -426,8 +444,8 @@ function Edith.InitEdithJump(player, jumpTag, vestige)
 	local canFly = player.CanFly
 	local jumpSpeed = vestige and (3.75 + (player.MoveSpeed - 1)) or canFly and 1.3 or 1.85
 	local soundeffect = canFly and SoundEffect.SOUND_ANGEL_WING or SoundEffect.SOUND_SHELLGAME
-	local div = canFly and 25 or 15
-	local base = canFly and 15 or 13
+	local div = vestige and 1 or (canFly and 25 or 15)
+	local base = vestige and 40 or (canFly and 15 or 13)
 	local epicFetusMult = player:HasCollectible(CollectibleType.COLLECTIBLE_EPIC_FETUS) and 3 or 1
 	local jumpHeight = (base + (TargetArrow.GetEdithTargetDistance(player) / 40) / div) * epicFetusMult
 	local room = game:GetRoom()

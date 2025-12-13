@@ -272,6 +272,28 @@ local function EntityInteractHandler(ent, parent, knockback)
 	end
 end
 
+
+local function VestigeUnlockManager()
+	local pgd = Isaac.GetPersistentGameData()
+	local VestigeAch = enums.Achievements.ACHIEVEMENT_VESTIGE
+	if pgd:Unlocked(VestigeAch) then return end
+
+	local saveManager = mod.SaveManager
+	local PersistentData = saveManager.GetPersistentSave()
+
+	if not PersistentData then return end
+
+	PersistentData.StompKills = PersistentData.StompKills or 0
+	PersistentData.StompKills = PersistentData.StompKills + 1
+
+	print(PersistentData.StompKills)
+
+	if PersistentData.StompKills >= 15 then
+		pgd:TryUnlock(VestigeAch)
+		PersistentData.StompKills = 0
+	end
+end
+
 ---Custom Edith stomp Behavior
 ---@param parent EntityPlayer
 ---@param params EdithJumpStompParams
@@ -306,6 +328,10 @@ function Land.EdithStomp(parent, params, breakGrid)
 		DamageManager(parent, ent, damage, TerraMult, knockback)
 
 		if ent.HitPoints > damage then goto Break end
+		Isaac.RunCallback(callbacks.OFFENSIVE_STOMP_KILL, parent, ent, params)
+		if StatusEffect.EntHasStatusEffect(ent, enums.EdithStatusEffects.SALTED) then
+			VestigeUnlockManager()
+		end
 		EdithBirthcake(parent, isSalted)
 		Land.AddExtraGore(ent, parent)
 		::Break::
@@ -316,7 +342,7 @@ function Land.EdithStomp(parent, params, breakGrid)
 	end
 end
 
----Tainted Edith parry land behavior
+---Tainted Edith hop land behavior
 ---@param parent EntityPlayer
 ---@param radius number
 ---@param damage number

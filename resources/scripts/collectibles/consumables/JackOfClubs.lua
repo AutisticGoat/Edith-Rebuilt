@@ -3,7 +3,9 @@ local enums = mod.Enums
 local card = enums.Card
 local utils = enums.Utils
 local game = utils.Game
-local Helpers = mod.Modules.HELPERS
+local modules = mod.Modules
+local Helpers = modules.HELPERS
+local ModRNG = modules.RNG 
 local JackOfClubs = {}
 
 ---@param player EntityPlayer
@@ -13,7 +15,7 @@ function JackOfClubs:OnJackOfClubsUse(_, player)
     for _, enemy in pairs(Helpers.GetEnemies()) do
         enemyPos = enemy.Position
 
-        if not mod.RandomBoolean(rng, 0.4) then goto Break end
+        if not ModRNG.RandomBoolean(rng, 0.4) then goto Break end
         game:BombExplosionEffects(
             enemyPos,
             100,
@@ -25,7 +27,7 @@ function JackOfClubs:OnJackOfClubsUse(_, player)
             false,
             0
         )
-        if not mod.RandomBoolean(rng) then goto Break end
+        if not ModRNG.RandomBoolean(rng) then goto Break end
         Isaac.Spawn(
             EntityType.ENTITY_PICKUP,
             PickupVariant.PICKUP_BOMB,

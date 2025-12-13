@@ -12,6 +12,7 @@ local maths = require("resources.scripts.functions.Maths")
 local helpers = require("resources.scripts.functions.Helpers")
 local Player = require("resources.scripts.functions.Player")
 local StatusEffects = require("resources.scripts.functions.StatusEffects")
+local TargetArrow = require("resources.scripts.functions.TargetArrow")
 local Land = require("resources.scripts.functions.Land")
 local TEdith = {}
 
@@ -30,6 +31,7 @@ local TEdith = {}
 ---@field ParryCooldown number
 ---@field IsHoping boolean
 ---@field IsParryJump boolean
+---@field GrudgeDash boolean
 
 local DefaultHopDashParams = {
     HopDamage = 0,
@@ -46,6 +48,7 @@ local DefaultHopDashParams = {
 	ParryKnockback = 0,
 	ParryRadius = 0,
 	ParryCooldown = 0,
+	GrudgeDash = falses
 
 } --[[@as TEdithHopParryParams]]
 
@@ -75,15 +78,39 @@ end
 ---@param player EntityPlayer
 ---@param HopParams TEdithHopParryParams
 function TEdith.ParryCooldownManager(player, HopParams)
-	if HopParams.ParryCooldown <= 0 then return end
-	if isTaintedEdithJump(player) ~= true then
-		HopParams.ParryCooldown = HopParams.ParryCooldown - 1
+	local colorChange = math.min((HopParams.HopStaticCharge) / 100, 1) * 0.5
+	local colorBRChange = math.min(HopParams.HopStaticBRCharge / 100, 1) * 0.1
+	local playerData = data(player)
+	local ParryCooldown = HopParams.ParryCooldown
+	local GlowCount = playerData.ParryReadyGlowCount
+
+	playerData.ParryReadyGlowCount = GlowCount or 0
+
+	if ParryCooldown < 1 then
+		playerData.ParryReadyGlowCount = GlowCount + 1
 	end
 
-	if HopParams.ParryCooldown == 1 and player.FrameCount > 20 then
+	if GlowCount > 20 then
+		playerData.ParryReadyGlowCount = 0
+	end
+
+	if colorChange > 0 and colorChange <= 1 then
+		player:SetColor(Color(1, 1, 1, 1, colorChange, colorBRChange, 0), 5, 100, true, false)
+	end
+
+	if GlowCount == 20 and ParryCooldown == 0 then
+		sfx:Play(SoundEffect.SOUND_STONE_IMPACT, 0.5, 0, false, 1.3)
+		player:SetColor(Color(1, 1, 1, 1, colorChange + 0.3, 0, 0), 5, 100, true, false)
+	end
+	
+	if ParryCooldown == 1 and player.FrameCount > 20 then
 		player:SetColor(Color(1, 1, 1, 1, 0.5 + colorChange), 5, 100, true, false)
 		sfx:Play(SoundEffect.SOUND_STONE_IMPACT)
 		playerData.ParryReadyGlowCount = 0
+	end
+
+	if TEdith.IsTaintedEdithJump(player) ~= true then
+		HopParams.ParryCooldown = math.max(ParryCooldown - 1, 0)
 	end
 end
 
@@ -103,6 +130,10 @@ function TEdith.ResetHopDashCharge(player, Move, Static)
 		hopParams.HopStaticCharge = 0
 		hopParams.HopStaticBRCharge = 0
 	end
+end
+
+function TEdith.IsTaintedEdithJump(player)
+	return JumpLib:GetData(player).Tags["edithRebuilt_TaintedEdithJump"] or false
 end
 
 ---@param player EntityPlayer
@@ -158,19 +189,30 @@ function TEdith.HopDashMovementManager(player, hopParams)
 	local HopVec = hopParams.HopDirection
 	local isHopVecZero = HopVec.X == 0 and HopVec.Y == 0
 	local isJumping = JumpLib:GetData(player).Jumping
+	local IsGrudge = helpers.IsGrudgeChallenge()
 	local chargeMult = (TEdith.GetHopDashCharge(player, false, false) / 100)
+	local VelMult = IsGrudge and 1.2 or 1 
+
+	-- print(isHopVecZero)
 
 	if not isHopVecZero then
-		if not isJumping then
+		if not isJumping and not IsGrudge then
 			TEdith.InitTaintedEdithHop(player)
 		end
 		hopParams.IsHoping = true
 	end
 
-	if not isJumping then return end
+	-- if not isJumping then return end
 	local smoothFactor = 0.225
-	local targetVel = ((HopVec * 2) * (10 + (player.MoveSpeed - 1))) * chargeMult
+	local targetVel = (((HopVec * 2) * (10 + (player.MoveSpeed - 1))) * chargeMult) * VelMult
 	player.Velocity = player.Velocity + (targetVel - player.Velocity) * smoothFactor
+
+	hopParams.GrudgeDash = not isHopVecZero
+
+	-- if IsGrudge and not isHopVecZero then
+	-- 	game:ShakeScreen(2)
+	-- 	sfx:Play(SoundEffect.SOUND_STONE_IMPACT)
+	-- end
 end
 
 ---@param player EntityPlayer
@@ -195,14 +237,13 @@ function TEdith.HopDashChargeManager(player, arrow)
 	local posDif = arrow.Position - player.Position
 	local posDifLenght = posDif:Length()
 	local maxDist = 2.5
+	local BaseCharge = helpers.IsGrudgeChallenge() and 9.5 or 8
 	local targetframecount = arrow.FrameCount
-	local chargeAdd = 8 * maths.exp(player.MoveSpeed, 1, 1.5)
+	local chargeAdd = BaseCharge * maths.exp(player.MoveSpeed, 1, 1.5)
 	HopParams.HopDirection = posDif:Normalized()
 
 	local arrowVel = data(player).movementVector
 	local HopVec = arrowVel
-
-	
 
 	-- Calcula la velocidad objetivo (la que ya usabas)
 	local targetVel = HopVec:Resized(10)
@@ -328,6 +369,30 @@ function TEdith.InitTaintedEdithHop(player)
 	JumpLib:Jump(player, config) 
 end
 
+---@param PerfectParry boolean
+local function GrudgeUnlockManager(PerfectParry)
+	local pgd = Isaac.GetPersistentGameData()
+	local GrudgeAch = enums.Achievements.ACHIEVEMENT_GRUDGE
+	if pgd:Unlocked(GrudgeAch) then return end
+
+	local saveManager = mod.SaveManager
+	local PersistentData = saveManager.GetPersistentSave()
+
+	if not PersistentData then return end
+
+	PersistentData.ConsecutiveParries = PersistentData.ConsecutiveParries or 0
+	
+	if PerfectParry then
+		PersistentData.ConsecutiveParries = PersistentData.ConsecutiveParries + 1
+	else
+		PersistentData.ConsecutiveParries = 0
+	end
+
+	if PersistentData.ConsecutiveParries == 5 then
+		pgd:TryUnlock(GrudgeAch)
+	end
+end
+
 ---Helper function used to manage Tainted Edith and Burnt Hood's parry-lands 
 ---@param player EntityPlayer
 ---@param IsTaintedEdith? boolean 
@@ -423,6 +488,8 @@ function TEdith.ParryLandManager(player, IsTaintedEdith)
 
 	HopParams.ParryCooldown = IsTaintedEdith and (PerfectParry and (hasBirthcake and 8 or 10) or 15) or 0
 	HopParams.IsParryJump = false
+
+	GrudgeUnlockManager(PerfectParry)
 
 	return PerfectParry, EnemiesInImpreciseParry
 end

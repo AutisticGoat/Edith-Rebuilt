@@ -91,6 +91,10 @@ function Edith:OnEdithLanding(player, _, pitfall)
 		return
 	end
 
+	if helpers.IsVestigeChallenge() then
+		player:PlayExtraAnimation("BigJumpFinish")
+	end
+
 	if not IsInTrapdoor(player) then
 		Land.LandFeedbackManager(player, Land.GetLandSoundTable(false), player.Color, false)
 	end

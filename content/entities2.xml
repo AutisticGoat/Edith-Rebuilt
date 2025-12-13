@@ -14,6 +14,9 @@
     <entity anm2path="cindercreep.anm2" baseHP="0" boss="0" champion="0" collisionDamage="2" collisionMass="0" collisionRadius="1" friction="1" id="1000" name="Cinder Creep" numGridCollisionPoints="0" shadowSize="0" stageHP="0" variant="46" subtype="102">
         <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
     </entity>
+    <entity anm2path="cindercreep.anm2" baseHP="0" boss="0" champion="0" collisionDamage="2" collisionMass="0" collisionRadius="1" friction="1" id="1000" name="Oregano Creep" numGridCollisionPoints="0" shadowSize="0" stageHP="0" variant="46" subtype="103">
+        <gibs amount="0" blood="0" bone="0" eye="0" gut="0" large="0" />
+    </entity>
     <entity anm2path="Saltrocks.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="3" collisionRadius="12" friction="1" id="5" name="SaltRocks" numGridCollisionPoints="24" shadowSize="16" stageHP="0" variant="300" subtype="230">
     </entity>
     <entity anm2path="SoulOfEdith.anm2" baseHP="0" boss="0" champion="0" collisionDamage="0" collisionMass="3" collisionRadius="12" friction="1" id="5" name="SoulOfEdith" numGridCollisionPoints="24" shadowSize="16" stageHP="0" variant="300" subtype="231">

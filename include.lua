@@ -35,9 +35,11 @@ local includeFiles = {
 	col .. "items/Edith/SaltHeart",
 	col .. "items/Edith/DivineRetribution",
 	col .. "items/Edith/Hydrargyrum",
+	col .. "items/Edith/SpicesMix",
 	col .. "items/TEdith/BurntHood",
 	col .. "items/TEdith/DivineWrath",
-	col .. "items/Edith/ChunkOfBasalt",
+	col .. "items/Challenges/Effigy",
+	col .. "items/Challenges/ChunkOfBasalt",
 	-- Items fin
 
 	-- Trinkets
@@ -64,6 +66,7 @@ local includeFiles = {
 	-- Personajes fin
 
 	"challenges/Vestige",
+	"challenges/Grudge",
 
 	-- sinergias pisotones
 	-- stmpSyn .. "blackPowder",

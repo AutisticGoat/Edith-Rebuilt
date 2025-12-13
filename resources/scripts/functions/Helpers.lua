@@ -135,6 +135,10 @@ function Helpers.IsVestigeChallenge()
 	return Isaac.GetChallenge() == enums.Challenge.CHALLENGE_VESTIGE
 end
 
+function Helpers.IsGrudgeChallenge()
+	return Isaac.GetChallenge() == enums.Challenge.CHALLENGE_GRUDGE
+end
+
 ---The same as `Helpers.TriggerPush` but this accepts a `Vector` for positions instead
 ---@param pusher Entity
 ---@param pushed Entity

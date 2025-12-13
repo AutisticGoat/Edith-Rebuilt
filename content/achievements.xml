@@ -11,9 +11,9 @@
     <achievement name="EdithRebuilt_Rumbling Pebble" gfx="achievement_RumblingPebble.png" />
     <achievement name="EdithRebuilt_Sulfuric Fire" gfx="achievement_SulfuricFire.png" />
     <achievement name="EdithRebuilt_Divine Retribution" gfx="achievement_DivineRetribution.png" />
-    <achievement name="EdithRebuilt_Chunk of Basalt" gfx="achievement_ChunkOfBasalt.png" />
     <achievement name="EdithRebuilt_Ediths Hood" gfx="achievement_EdithsHood.png" />
     <achievement name="EdithRebuilt_Hydrargyrum" gfx="achievement_Hydrargyrum.png" />
+    <achievement name="EdithRebuilt_SpicesMix" gfx="achievement_SpicesMix.png" />
     <achievement name="EdithRebuilt_The Punished" gfx="achievement_TaintedEdith.png" />
 
     <!-- Tainted Edith unlocks -->
@@ -26,7 +26,10 @@
     <achievement name="EdithRebuilt_Divine Wrath" gfx="achievement_DivineWrath.png" />
 
     <!-- Challenges -->
+    <achievement name="EdithRebuilt_Vestige" gfx="achievement_Vestige.png" />
     <achievement name="EdithRebuilt_Effigy" gfx="achievement_Effigy.png" />
+    <achievement name="EdithRebuilt_Grudge" gfx="achievement_Grudfe.png" />
+    <achievement name="EdithRebuilt_Chunk of Basalt" gfx="achievement_ChunkOfBasalt.png" />
 
     <!-- Thank you-->
     <achievement name="EdithRebuilt_Thank You" gfx="achievement_ThankYou.png" />

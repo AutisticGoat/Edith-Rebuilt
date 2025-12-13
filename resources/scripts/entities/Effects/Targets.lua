@@ -81,6 +81,10 @@ local function EdithTargetManagement(effect, player)
 
 	room:GetCamera():SetFocusPosition(interpolateVector2D(playerPos, effectPos, 0.6))
 
+	if Helpers.IsVestigeChallenge() and JumpLib:GetData(player).Jumping then
+		effect.Velocity = effect.Velocity * 0.6
+	end
+
 	if room:GetType() == RoomType.ROOM_DUNGEON then
 		for _, v in pairs(teleportPoints) do
 			if (effectPos - v):Length() > 20 then break end

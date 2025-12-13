@@ -1,30 +1,17 @@
---[[
-	Vestigio:
-	- Edith se moverá muy parecido a como lo hacía en Antibirth
-	- Se mantendrán mejoras al movimiento como el botón asignado al salto y ciertas interacciones con stats
-	- Daño del pisotón buffeado
-	- Los objetos de sal aplicarán miedo en vez de salación
-	- La meta será mother
-	- Se desbloquea completando la rua de Antibirth con Edith 
-	- Desbloquea Effigy
-
-	Por hacer:
-	- Mejorar la animación de caer por la trampilla
-	- Arreglar un error donde el puntero se mueve más lento cuando Edith no está saltando
-]]
-
-
 local mod = EdithRebuilt
-local TargetArrow = mod.Modules.TARGET_ARROW
+local JumpTags = mod.Enums.Tables.JumpTags
 local data = mod.CustomDataWrapper.getData
-local Helpers = mod.Modules.HELPERS
-local EdithMod = mod.Modules.EDITH
+local modules = mod.Modules
+local TargetArrow = modules.TARGET_ARROW
+local Helpers = modules.HELPERS
+local EdithMod = modules.EDITH
+local Player = modules.PLAYER
 local Vestige = {}
 
 ---@param player EntityPlayer
 function Vestige:EdithJumpHandler(player)
     if not Helpers.IsVestigeChallenge() then return end
-	if not mod.IsEdith(player, false) then return end
+	if not Player.IsEdith(player, false) then return end
 
 	local playerData = data(player)
 	if player:IsDead() then TargetArrow.RemoveEdithTarget(player); playerData.isJumping = false return end
@@ -44,7 +31,7 @@ function Vestige:EdithJumpHandler(player)
 	end
 
     if sprite:IsEventTriggered("StartJump") and not isJumping then
-        mod.InitVestigeJump(player)
+        EdithMod.InitEdithJump(player, JumpTags.EdithJump, true)
     end
 
 	if jumpInternalData.UpdateFrame and jumpInternalData.UpdateFrame > 6 then
@@ -56,26 +43,3 @@ function Vestige:EdithJumpHandler(player)
 	end
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, Vestige.EdithJumpHandler)
-
-local NonTriggerAnimPickupVar = {
-	[PickupVariant.PICKUP_COLLECTIBLE] = true,
-	[PickupVariant.PICKUP_TRINKET] = true,
-	[PickupVariant.PICKUP_BROKEN_SHOVEL] = true,
-	[PickupVariant.PICKUP_SHOPITEM] = true,
-	[PickupVariant.PICKUP_PILL] = true,
-	[PickupVariant.PICKUP_TAROTCARD] = true,
-}
-
----@param player EntityPlayer
----@param collider Entity
-function Vestige:OnPickupColl(player, collider)
-	local pickup = collider:ToPickup()
-	local sprite = player:GetSprite()
-
-	if not pickup then return end
-	if not NonTriggerAnimPickupVar[pickup.Variant] then return end
-	if not sprite:IsPlaying("BigJumpFinish") then return end 
-
-	sprite:SetFrame(11)
-end
-mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_COLLISION, Vestige.OnPickupColl)
