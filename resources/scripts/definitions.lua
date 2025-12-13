@@ -96,7 +96,7 @@ EdithRebuilt.Enums = {
 		SALT_CREEP = Isaac.GetEntitySubTypeByName("Salt Creep"),
 		PEPPER_CREEP = Isaac.GetEntitySubTypeByName("Pepper Creep"),
 		CINDER_CREEP = Isaac.GetEntitySubTypeByName("Cinder Creep"),
-		CINDER_CREEP = Isaac.GetEntitySubTypeByName("Oregano Creep"),
+		OREGANO_CREEP = Isaac.GetEntitySubTypeByName("Oregano Creep"),
 	},
 	SoundEffect = {
 		SOUND_EDITH_STOMP = Isaac.GetSoundIdByName("Edith Stomp"),

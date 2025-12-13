@@ -181,11 +181,16 @@ end
 ---@param npc EntityNPC
 local function OnPepperedUpdate(npc)
     if not StatusEffects.EntHasStatusEffect(npc, effects.PEPPERED) then return end
-    npc:MultiplyFriction(0.8)
+    -- npc:MultiplyFriction(0.8)
+    -- local npcData = data(npc)
 
-    local player = SEL:GetStatusEffectData(npc, Flags.Peppered).Source.Entity:ToPlayer() ---@cast player EntityPlayer 
-    if SEL:GetStatusEffectCountdown(npc, Flags.Peppered) % 10 ~= 0 then return end
-    Creeps.SpawnPepperCreep(player, npc.Position, 0.5, 3)
+    -- npc.Velocity = npc.Velocity + (RandomVector() * 2)
+
+    -- npcData.PepperSneezeCD = npcData.PepperSneezeCD or 0
+
+    -- local player = SEL:GetStatusEffectData(npc, Flags.Peppered).Source.Entity:ToPlayer() ---@cast player EntityPlayer 
+    -- if SEL:GetStatusEffectCountdown(npc, Flags.Peppered) % 10 ~= 0 then return end
+    -- Creeps.SpawnPepperCreep(player, npc.Position, 0.5, 3)
 end
 
 ---@param npc EntityNPC
@@ -309,13 +314,55 @@ local function OnDamagincTurmericEnemy(_, entity, amount, flags, source, Cooldow
 end
 mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, OnDamagincTurmericEnemy)
 
-local function OnDamagincTurmericEnemy(_, entity, amount, flags, source, Cooldown)
+local PepperFlag = false
+---@param entity EntityNPC
+local function OnKillingPepperEnemy(_, entity)
+    if not StatusEffects.EntHasStatusEffect(entity, effects.PEPPERED) then return end
+
+    data(entity).Hits = data(entity).Hits or 0
+    local hits = data(entity).Hits
+
+    data(entity).Hits = hits + 1
+
+    if hits % 2 ~= 0 then return end
+
+    local RNG = entity:GetDropRNG()
+    local Puff = Isaac.Spawn(
+        EntityType.ENTITY_EFFECT,
+        EffectVariant.POOF02,
+        2,
+        entity.Position,
+        Vector.Zero,
+        entity
+    )
+
+    Puff:GetSprite().PlaybackSpeed = ModRNG.RandomFloat(RNG, 0.9, 1.1)
+
+    local X = ModRNG.RandomFloat(RNG, 0.85, 1.15)
+    local Y = ModRNG.RandomFloat(RNG, 0.85, 1.15)
+
+    Puff.Color = Effects.Peppered.Color
+    Puff.SpriteScale = Vector(X, Y)
+
+    local Peppers = 10
+    local degree = 360/Peppers
+    local Vec = Vector(0, 30)
+
+    for i = 1, 15 do
+        Vec.Y = Vec.Y * ModRNG.RandomFloat(RNG, 0.7, 1.4)
+        Creeps.SpawnPepperCreep(entity, entity.Position + Vec:Rotated(i * degree), 4, 8)
+    end
+end
+mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, OnKillingPepperEnemy)
+mod:AddCallback(PRE_NPC_KILL.ID, OnKillingPepperEnemy)
+
+
+local function OnDamagincTurmericEnemy(_, entity)
     if not StatusEffects.EntHasStatusEffect(entity, effects.CUMIN) then return end
     if dmgFlags.Cumin == true then return end
     data(entity).CuminStopCountdown = 5
 end
 mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, OnDamagincTurmericEnemy)
-
 
 local function OnDamagincGingerEnemy(_, entity, amount, flags, source, Cooldown)
     if not StatusEffects.EntHasStatusEffect(entity, effects.GINGER) then return end

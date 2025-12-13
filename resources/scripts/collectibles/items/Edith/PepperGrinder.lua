@@ -14,11 +14,13 @@ function PepperGrinder:UsePepperGrinder(_, RNG, player, flag)
 	if flag & UseFlag.USE_CARBATTERY == UseFlag.USE_CARBATTERY then return end
     local hasCarBattery = player:HasCollectible(CollectibleType.COLLECTIBLE_CAR_BATTERY) 
 	local playerPos = player.Position
-	local frames = hasCarBattery and 120 or 60
+	local frames = hasCarBattery and 180 or 90
+	local playerRef = EntityRef(player)
 
 	for _, enemy in ipairs(Isaac.FindInRadius(playerPos, 100, EntityPartition.ENEMY)) do
 		helpers.TriggerPush(enemy, player, 20)
 		StatusEffects.SetStatusEffect(enums.EdithStatusEffects.PEPPERED, enemy, frames, player)
+		enemy:TakeDamage((player.Damage * 0.25) + (player.Damage / 3.5), 0, playerRef, 0)
 	end
 	
 	local PepperCloud = Isaac.Spawn(
