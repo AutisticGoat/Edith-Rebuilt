@@ -14,8 +14,6 @@ function MoltenCore:MoltenCoreStats(player)
 end
 mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, MoltenCore.MoltenCoreStats, CacheFlag.CACHE_DAMAGE)
 
-mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, MoltenCore.OnFiringTears)
-
 ---@param player EntityPlayer
 function MoltenCore:MoltenCoreUpdate(player)
 	if not player:HasCollectible(items.COLLECTIBLE_MOLTEN_CORE) then return end
