@@ -23,7 +23,7 @@ function MoltenCore:MoltenCoreUpdate(player)
 		data(enemy).IsInCoreRadius = true
 
 		local CoreCount = data(enemy).CoreCount
-		local Formula = math.min(player.Damage * (CoreCount / 75), player.Damage * 2)
+		local Formula = math.min(player.Damage * (CoreCount / 50), player.Damage * 2)
 		
 		if Formula < player.Damage * 2 then
 			local Red = 0.5 * CoreCount / 125

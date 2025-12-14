@@ -229,27 +229,62 @@ local function OnCuminUpdate(npc)
     print(data(npc).CuminStopCountdown)
 end
 
+local baseRange = 6.5
+local baseHeight = -23.45
+local baseMultiplier = -70 / baseRange
+local function ShootMercuryTear(player, position, rng)
+	local tear
+	local fallSpeedVar
+
+    -- for _ = 1, rng:RandomInt(minTears, maxTears) do
+        tear = Isaac.Spawn(EntityType.ENTITY_TEAR, 0, 0, position, rng:RandomVector():Resized(20), player):ToTear()
+
+        if not tear then return end
+
+        fallSpeedVar = ModRNG.RandomFloat(rng, 1.8, 2.2)
+
+		Helpers.ForceSaltTear(tear, false)
+		tear.Height = baseHeight * 3
+        tear.Velocity = tear.Velocity * ModRNG.RandomFloat(rng, 0.2, 0.6)
+        tear.FallingAcceleration = (ModRNG.RandomFloat(rng, 0.7, 1.6)) * 3
+        tear.FallingSpeed = (baseMultiplier * (fallSpeedVar)) 
+        tear.CollisionDamage = tear.CollisionDamage * rng:RandomInt(8, 12) / 10
+		tear.Scale = tear.CollisionDamage/3.5
+        tear:ChangeVariant(TearVariant.METALLIC)
+        tear:AddTearFlags(TearFlags.TEAR_PIERCING)
+
+		data(tear).IsHydrargyrumTear = true
+    -- end
+end
+
 ---@param npc EntityNPC
 local function OnHydrargyrumCurseUpdate(npc)
     if not StatusEffects.EntHasStatusEffect(npc, effects.HYDRARGYRUM_CURSE) then return end
     if SEL:GetStatusEffectCountdown(npc, Flags.HydrargyrumCurse) % 15 ~= 0 then return end
 
-    local player = SEL:GetStatusEffectData(npc, Flags.HydrargyrumCurse).Source.Entity:ToPlayer() ---@cast player EntityPlayer 
+    local player = Helpers.GetPlayerFromRef(SEL:GetStatusEffectData(npc, Flags.HydrargyrumCurse).Source) 
     if not player then return end
 
-    local randTear = Isaac.Spawn(
-        EntityType.ENTITY_TEAR,
-        TearVariant.METALLIC,
-        0,
-        npc.Position,
-        RandomVector():Resized(player.ShotSpeed * 10),
-        player
-    ):ToTear()
-
-    if not randTear then return end
-    randTear.CollisionDamage = randTear.CollisionDamage * 0.1
-    randTear:AddTearFlags(TearFlags.TEAR_PIERCING)
+    ShootMercuryTear(player, npc.Position, enums.Utils.RNG)
 end
+
+---@param tear EntityTear
+local function OnMercuryTearDeath(_, tear)
+    if not data(tear).IsHydrargyrumTear then return end
+
+    local player = Helpers.GetPlayerFromTear(tear)
+    if not player then return end
+    local weapon = player:GetWeapon(1)
+    if not weapon then return end
+
+    local tearHits = player:GetTearHitParams(weapon:GetWeaponType())
+    tearHits.TearFlags = TearFlags.TEAR_NORMAL | TearFlags.TEAR_BURN
+
+    local Creep = player:SpawnAquariusCreep(tearHits)
+    Creep.Position = tear.Position
+    Creep.Color = Color(0, 0, 0, 1, 0.6, 0.6, 0.6)
+end
+mod:AddCallback(ModCallbacks.MC_POST_TEAR_DEATH, OnMercuryTearDeath)
 
 ---@param npc EntityNPC
 local function OnNpcUpdate(_, npc)
