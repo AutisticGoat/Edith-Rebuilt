@@ -10,58 +10,64 @@ local data = mod.CustomDataWrapper.getData
 function MoltenCore:MoltenCoreStats(player)
 	local MoltenCoreCount = player:GetCollectibleNum(items.COLLECTIBLE_MOLTEN_CORE)
 	if MoltenCoreCount < 1 then return end
-	player.Damage = player.Damage + (0.5 * MoltenCoreCount)
+	player.Damage = player.Damage + (1 * MoltenCoreCount)
 end
 mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, MoltenCore.MoltenCoreStats, CacheFlag.CACHE_DAMAGE)
 
----@param tear EntityTear
-function MoltenCore:OnFiringTears(tear)
-	local player = Helpers.GetPlayerFromTear(tear)
-
-	if not player then return end 
-	if not player:HasCollectible(items.COLLECTIBLE_MOLTEN_CORE) then return end
-
-	tear:ChangeVariant(TearVariant.FIRE_MIND)
-	Helpers.ChangeColor(tear, 0.8, 0.5, 0.4)
-	data(tear).MoltenCoreTear = true
-end
-
 mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, MoltenCore.OnFiringTears)
 
+---@param player EntityPlayer
+function MoltenCore:MoltenCoreUpdate(player)
+	if not player:HasCollectible(items.COLLECTIBLE_MOLTEN_CORE) then return end
+
+	for _, enemy in ipairs(Isaac.FindInRadius(player.Position, 60, EntityPartition.ENEMY)) do
+		if not Helpers.IsEnemy(enemy) then goto continue end
+		data(enemy).IsInCoreRadius = true
+
+		local CoreCount = data(enemy).CoreCount
+		local Formula = math.min(player.Damage * (CoreCount / 75), player.Damage * 2)
+		
+		if Formula < player.Damage * 2 then
+			local Red = 0.5 * CoreCount / 125
+			local Green = 0.125 * CoreCount / 125 
+			enemy.Color = Color(1, 1, 1, 1, Red, Green)
+		end
+
+		if CoreCount % 15 ~= 0 then goto continue end
+
+		enemy:TakeDamage(Formula, DamageFlag.DAMAGE_FIRE, EntityRef(player), 0)
+		::continue::
+	end 
+end	
+mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, MoltenCore.MoltenCoreUpdate)
+
+---@param npc EntityNPC
+function MoltenCore:NPCUpdate(npc)
+	local npcData = data(npc)
+
+	if not npcData.IsInCoreRadius then 
+		npcData.CoreCount = 0 
+		npc.Color = Color.Default
+		return
+	end
+
+	npcData.CoreCount = npcData.CoreCount or 0
+	npcData.CoreCount = npcData.CoreCount + 1
+	npcData.IsInCoreRadius = false
+end
+mod:AddCallback(ModCallbacks.MC_NPC_UPDATE, MoltenCore.NPCUpdate)
+
 ---@param entity Entity
----@param amount number
 ---@param source EntityRef
-function MoltenCore:KillingSalEnemy(entity, amount, _, source)
-	local Ent = source.Entity
-	if not Ent or Ent.Type == 0 then return end
+function MoltenCore:KillingSalEnemy(entity, source)
 	local player = Helpers.GetPlayerFromRef(source)
+	local entData = data(entity)
 
 	if not player then return end
 	if not player:HasCollectible(items.COLLECTIBLE_MOLTEN_CORE) then return end
 	if not Helpers.IsEnemy(entity) then return end
+	if not entData.IsInCoreRadius then return end
 
-	entity:AddBurn(source, 120, 1)
-
-	if entity.HitPoints > amount then return end
-
-	local nearEnemies = Isaac.FindInRadius(entity.Position, 60, EntityPartition.ENEMY)
-	local Jet
-	for _, enemies in pairs(nearEnemies) do
-		Jet = Isaac.Spawn(
-			EntityType.ENTITY_EFFECT,
-			EffectVariant.FIRE_JET,
-			0,
-			enemies.Position,
-			Vector.Zero,
-			player
-		)
-
-		Jet.CollisionDamage = player.Damage
-		enemies:AddBurn(source, 120, 1)
-
-		if #nearEnemies >= 5 then
-			game:ShakeScreen(10)
-		end
-	end
+	Helpers.SpawnFireJet(player, entity.Position, player.Damage * 2.5, 1, 1)
 end
-mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, MoltenCore.KillingSalEnemy)
+mod:AddCallback(PRE_NPC_KILL.ID, MoltenCore.KillingSalEnemy)
