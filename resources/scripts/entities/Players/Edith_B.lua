@@ -113,7 +113,7 @@ function mod:EdithPlayerUpdate(player)
 		player:MultiplyFriction(0.5)
 	end
 
-	if HopParams.GrudgeDash and player.Velocity:Length() > 0.15 then
+	if Helpers.IsGrudgeChallenge() and HopParams.GrudgeDash and player.Velocity:Length() > 0.15 then
 		game:ShakeScreen(2)
 		sfx:Play(SoundEffect.SOUND_STONE_IMPACT, 0.3, 0, false, 1.2)
 	end

@@ -82,9 +82,10 @@ function TEdith.ParryCooldownManager(player, HopParams)
 	local colorBRChange = math.min(HopParams.HopStaticBRCharge / 100, 1) * 0.1
 	local playerData = data(player)
 	local ParryCooldown = HopParams.ParryCooldown
-	local GlowCount = playerData.ParryReadyGlowCount
 
-	playerData.ParryReadyGlowCount = GlowCount or 0
+	playerData.ParryReadyGlowCount = playerData.ParryReadyGlowCount or 0
+
+	local GlowCount = playerData.ParryReadyGlowCount
 
 	if ParryCooldown < 1 then
 		playerData.ParryReadyGlowCount = GlowCount + 1
