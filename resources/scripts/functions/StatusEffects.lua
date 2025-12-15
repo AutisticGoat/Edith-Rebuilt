@@ -5,6 +5,7 @@ local effects = enums.EdithStatusEffects
 local ModRNG = require("resources.scripts.functions.RNG")
 local Creeps = require("resources.scripts.functions.Creeps")
 local Helpers = require("resources.scripts.functions.Helpers")
+local Player  = require("resources.scripts.functions.Player")
 local data = mod.CustomDataWrapper.getData
 local StatusEffects = {}
 
@@ -451,18 +452,12 @@ local ndegrees = 360/CinderCreeps
 local function OnCinderParry(_, player, ent)
     if not StatusEffects.EntHasStatusEffect(ent, effects.CINDER) then return end
 
+    local HasBirthright = Player.PlayerHasBirthright(player)
+    local damage = HasBirthright and 1.25 or 0.75
+
     for i = 1, CinderCreeps do
-		Creeps.SpawnCinderCreep(player, player.Position + Vector(0, 40):Rotated(i * ndegrees), 0.5, 6)
+		Creeps.SpawnCinderCreep(player, player.Position + Vector(0, 40):Rotated(i * ndegrees), damage, 6)
 	end
-
-    -- for i = 1, maxCreep do
-	-- 	mod:SpawnSaltCreep(player, player.Position + Vector(0, 30):Rotated(saltDegrees*i), 0.1, 5, 1, 3, saltTypes.EDITHS_HOOD)
-	-- end
-
-    -- mod.SpawnFireJet(player, ent.Position, player.Damage, true, 0.7)
-
-    -- local capsule = Capsule(ent.Position, Vector.One, 0, enums.Misc.ImpreciseParryRadius + 15)
-    -- DebugRenderer.Get(1, true):Capsule(capsule)
 end
 mod:AddCallback(enums.Callbacks.PERFECT_PARRY, OnCinderParry)
 

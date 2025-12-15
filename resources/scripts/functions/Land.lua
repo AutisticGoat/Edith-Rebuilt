@@ -344,15 +344,20 @@ end
 
 ---Tainted Edith hop land behavior
 ---@param parent EntityPlayer
----@param radius number
----@param damage number
----@param knockback number
-function Land.TaintedEdithHop(parent, radius, damage, knockback)
-	local capsule = Capsule(parent.Position, Vector.One, 0, radius)
-	
+---@param HopParams TEdithHopParryParams
+function Land.TaintedEdithHop(parent, HopParams)
+	local capsule = Capsule(parent.Position, Vector.One, 0, HopParams.HopRadius)
+	local BRCharge = HopParams.HopMoveBRCharge / 100
+	local burnDamage, burnDuration = BRCharge * parent.Damage / 2, math.ceil(BRCharge * 123)
+	local PlayerRef = EntityRef(parent)
+
 	for _, ent in ipairs(Isaac.FindInCapsule(capsule)) do
-		Land.HandleEntityInteraction(ent, parent, knockback)
-		Land.LandDamage(ent, parent, damage, knockback)
+		Land.HandleEntityInteraction(ent, parent, HopParams.HopKnockback)
+		Land.LandDamage(ent, parent, HopParams.HopDamage, HopParams.HopKnockback)
+	
+		if BRCharge > 0 then
+			ent:AddBurn(PlayerRef, burnDuration, burnDamage)
+		end
 	end
 end
 

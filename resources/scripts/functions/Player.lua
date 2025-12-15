@@ -1,9 +1,29 @@
 local mod = EdithRebuilt
 local enums = mod.Enums
+local challenges = enums.Challenge
+local misc = enums.Misc
 local players = enums.PlayerType
 local maths = require("resources.scripts.functions.Maths")
 local Helpers = require("resources.scripts.functions.Helpers")
 local player = {}
+
+---@param player EntityPlayer
+---@param challenge Challenge
+function player.SetChallengeSprite(player, challenge)
+	if challenge == Challenge.CHALLENGE_NULL then return end
+
+	local sprite = challenge == challenges.CHALLENGE_GRUDGE and misc.GrudgeSpritePath or challenge == challenges.CHALLENGE_VESTIGE and misc.VestigeSpritePath
+
+	if not sprite then return end
+
+	for i = 0, 14 do
+		player:GetSprite():ReplaceSpritesheet(i, sprite, true)
+	end
+
+	print(player:GetSprite():GetLayer(1):GetSpritesheetPath())
+	print(sprite)
+end
+
 
 ---Checks if player is Edith
 ---@param player EntityPlayer

@@ -8,6 +8,7 @@ local misc = enums.Misc
 local tables = enums.Tables
 local JumpTags = tables.JumpTags
 local jumpFlags = tables.JumpFlags
+local challenges = enums.Challenge
 local Player = require("resources.scripts.functions.Player")
 local Math = require("resources.scripts.functions.Maths")
 local VecDir = require("resources.scripts.functions.VecDir")
@@ -96,15 +97,6 @@ function Edith.JumpTriggerManager(player, params, keyStomp, jumping, vestige)
 
 	if params.Cooldown == 0 and params.Jumps > 0 and commonConditional then
 		Edith.InitEdithJump(player, JumpTags.EdithJump, vestige)	
-	end
-end
-
----@param player EntityPlayer
----@param isVestige boolean
-function Edith.SetVestigeSprite(player, isVestige)
-	if not isVestige then return end
-	for i = 0, 14 do
-		player:GetSprite():ReplaceSpritesheet(i, "gfx/characters/costumes/characterEdithVestige.png", true)
 	end
 end
 
@@ -370,24 +362,6 @@ function Edith.ExplosionRecoil(player, params,bomb)
 
 	player.Velocity = velTarget:Resized(15)
 	params.RocketLaunch = true
-end
-
-local function VestigeUnlockManager()
-	local pgd = Isaac.GetPersistentGameData()
-	local VestigeAch = enums.Achievements.ACHIEVEMENT_VESTIGE
-	if pgd:Unlocked(VestigeAch) then return end
-
-	local saveManager = mod.SaveManager
-	local PersistentData = saveManager.GetPersistentSave()
-
-	if not PersistentData then return end
-
-	PersistentData.StompKills = PersistentData.StompKills or 0
-	PersistentData.StompKills = PersistentData.StompKills + 1
-
-	if PersistentData.StompKills == 15 then
-		pgd:TryUnlock(VestigeAch)
-	end
 end
 
 ---@param player EntityPlayer

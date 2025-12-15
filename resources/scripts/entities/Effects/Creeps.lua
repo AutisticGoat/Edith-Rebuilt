@@ -6,6 +6,7 @@ local saltTypes = enums.SaltTypes
 local modules = mod.Modules
 local StatusEffects = modules.STATUS_EFFECTS
 local Helpers = modules.HELPERS
+local Player = modules.PLAYER
 local data = mod.CustomDataWrapper.getData
 
 local ModCreeps = {
@@ -99,14 +100,31 @@ local function CinderCreepUpdate(effect)
     local player = effect.SpawnerEntity:ToPlayer()
 
     if not player then return end
+    if not Player.PlayerHasBirthright(player) then return end
 
     for _, entity in pairs(Isaac.FindInRadius(effect.Position, 20 * effect.SpriteScale.X, EntityPartition.ENEMY)) do
-        -- if entity.FrameCount % 15 ~= 0 then goto continue end
-        -- Helpers.SpawnFireJet(player, entity.Position, 3.5, 1, 0.2)
-
-        ::continue::
+        data(entity).IsInCinderCreep = true
     end
 end
+
+---@param npc EntityNPC
+mod:AddCallback(ModCallbacks.MC_NPC_UPDATE, function(_, npc)
+	local npcData = data(npc)
+
+	if not npcData.IsInCinderCreep then 
+		npcData.CindeerCount = 0 
+		return
+	end
+
+	npcData.CindeerCount = npcData.CindeerCount or 0
+	npcData.CindeerCount = npcData.CindeerCount + 1
+    
+    if npcData.CindeerCount % 15 == 0 then
+        Helpers.SpawnFireJet(npc.Position, 5, 1, 0.7)
+    end
+
+	npcData.IsInCinderCreep = false
+end)
 
 mod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, effect)
     SaltCreepUpdate(effect)

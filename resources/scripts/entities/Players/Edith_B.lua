@@ -4,6 +4,7 @@ local enums = mod.Enums
 local utils = enums.Utils
 local game = utils.Game
 local sfx = utils.SFX
+local costumes = enums.NullItemID
 local tables = enums.Tables
 local jumpTags = tables.JumpTags
 local jumpParams = tables.JumpParams
@@ -24,7 +25,12 @@ local TEdith = {}
 function TEdith:TaintedEdithInit(player)
 	if not Player.IsEdith(player, true) then return end
 	Player.SetNewANM2(player, "gfx/EdithTaintedAnim.anm2")
-	player:AddNullCostume(enums.NullItemID.ID_EDITH_B_SCARF)
+
+	local isGrudge = Helpers.IsGrudgeChallenge()
+	local costume = isGrudge and costumes.ID_EDITH_B_GRUDGE_SCARF or costumes.ID_EDITH_B_SCARF
+
+	player:AddNullCostume(costume)
+	Player.SetChallengeSprite(player, Isaac.GetChallenge())
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, TEdith.TaintedEdithInit)
 
@@ -153,13 +159,14 @@ function mod:EdithHopLanding(player)
 	local Charge = TEdithMod.GetHopDashCharge(player, false, true)
 	local BRCharge = HopParams.HopMoveBRCharge
 
+	--- Pendiente de rehacer
 	HopParams.HopDamage = (((damageBase + player.Damage) / 3.5) * (Charge + BRCharge) / 100) * (Charge / 100) 
 	HopParams.HopKnockback = Knockbackbase * maths.exp(Charge / 100, 1, 1.5)
 	HopParams.HopRadius = math.min((30 + (tearRange - 9)), 35)
 
 	player:SpawnWaterImpactEffects(player.Position, Vector(1, 1), 1)	
 	land.LandFeedbackManager(player, land.GetLandSoundTable(true), misc.BurntSaltColor)
-	land.TaintedEdithHop(player, HopParams.HopRadius, HopParams.HopDamage, HopParams.HopKnockback)
+	land.TaintedEdithHop(player, HopParams)
 end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, mod.EdithHopLanding, jumpParams.TEdithHop)
 

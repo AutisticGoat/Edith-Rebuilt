@@ -414,6 +414,7 @@ function TEdith.ParryLandManager(player, IsTaintedEdith)
 	local DamageFormula = (rawFormula * BirthrightMult) * (hasBirthcake and 1.15 or 1)
 	local shouldTriggerFireJets = IsTaintedEdith and hasBirthright or Player.IsJudasWithBirthright(player)
 	local spawner, targetEnt, proj
+	local damageFlag = Player.PlayerHasBirthright(player) and DamageFlag.DAMAGE_FIRE or 0
 
 	if IsTaintedEdith then
 		local damageIncrease = 1 + (HopParams.HopStaticCharge + HopParams.HopStaticBRCharge) / 400
@@ -464,12 +465,15 @@ function TEdith.ParryLandManager(player, IsTaintedEdith)
 			if tear then
 				helpers.BoostTear(tear, 20, 1.5 + ((HopParams.HopStaticCharge + HopParams.HopStaticBRCharge) / 100))
 
-				if Player.PlayerHasBirthright(player) and HopParams.HopStaticBRCharge > 0 then
+				if hasBirthright then
 					tear:AddTearFlags(TearFlags.TEAR_BURN)
 				end
 			end
 
-			ent:TakeDamage(DamageFormula, 0, EntityRef(player), 0)
+			ent:TakeDamage(DamageFormula, damageFlag, EntityRef(player), 0)
+			if hasBirthright then
+				ent:AddBurn(EntityRef(player), 123, 5)				
+			end
 			sfx:Play(SoundEffect.SOUND_MEATY_DEATHS)
 
 			if ent.Type == EntityType.ENTITY_FIREPLACE and ent.Variant ~= 4 then

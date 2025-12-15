@@ -81,4 +81,23 @@ function Creeps.SpawnCinderCreep(parent, position, damage, timeout)
 	pepper:SetTimeout(Maths.SecondsToFrames(timeout) or 30)
 end
 
+---Spawns Pepper creep, used for Pepper Grinder
+---@param parent Entity
+---@param position Vector
+---@param damage number
+---@param timeout number
+function Creeps.SpawnOreganoCreep(parent, position, damage, timeout)
+	local pepper = Isaac.Spawn(
+		EntityType.ENTITY_EFFECT, 
+		EffectVariant.PLAYER_CREEP_RED, 
+		enums.SubTypes.OREGANO_CREEP,
+		position,
+		Vector.Zero,
+		parent
+	):ToEffect() ---@cast pepper EntityEffect
+
+	pepper.CollisionDamage = damage or 0
+	pepper:SetTimeout(Maths.SecondsToFrames(timeout) or 30)
+end
+
 return Creeps

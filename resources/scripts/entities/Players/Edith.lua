@@ -22,7 +22,7 @@ function Edith:EdithInit(player)
 	local costume = isVestige and costumes.ID_EDITH_VESTIGE_SCARF or costumes.ID_EDITH_SCARF
 
 	player:AddNullCostume(costume)
-	EdithMod.SetVestigeSprite(player, isVestige)
+	Player.SetChallengeSprite(player, Isaac.GetChallenge())
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, Edith.EdithInit)
 

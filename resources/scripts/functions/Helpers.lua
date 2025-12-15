@@ -310,19 +310,18 @@ function Helpers.IsInTrapdoor(player)
 end	
 
 ---Function used to spawn Tainted Edith's birthright fire jets
----@param player EntityPlayer
 ---@param position Vector
 ---@param damage number
 ---@param mult number
 ---@param scale number
-function Helpers.SpawnFireJet(player, position, damage, mult, scale)
+function Helpers.SpawnFireJet(position, damage, mult, scale)
 	local Fire = Isaac.Spawn(
 		EntityType.ENTITY_EFFECT,
 		EffectVariant.FIRE_JET,
 		0,
 		position,
 		Vector.Zero,
-		player
+		nil
 	)
 	Fire.SpriteScale = Fire.SpriteScale * (scale or 1)
 	Fire.CollisionDamage = damage * mult

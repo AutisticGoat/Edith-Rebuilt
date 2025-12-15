@@ -66,6 +66,6 @@ function MoltenCore:KillingSalEnemy(entity, source)
 	if not Helpers.IsEnemy(entity) then return end
 	if not entData.IsInCoreRadius then return end
 
-	Helpers.SpawnFireJet(player, entity.Position, player.Damage * 2.5, 1, 1)
+	Helpers.SpawnFireJet(entity.Position, player.Damage * 2.5, 1, 1)
 end
 mod:AddCallback(PRE_NPC_KILL.ID, MoltenCore.KillingSalEnemy)
