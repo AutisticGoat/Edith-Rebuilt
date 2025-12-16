@@ -1,19 +1,21 @@
 local mod = EdithRebuilt
-local funcs = require("resources.scripts.stompSynergies.Funcs")
-local EdithJump = require("resources.scripts.stompSynergies.JumpData")
+local callbacks = mod.Enums.Callbacks
+local data = mod.CustomDataWrapper.getData
+local Creeps = mod.Modules.CREEPS
 
 ---@param player EntityPlayer
-function mod:BlackPowderStomp(player)
-	if funcs.DefensiveStomp(player) then return end
+---@param params EdithJumpStompParams
+function mod:BlackPowderStomp(player, params)
+	if params.IsDefensiveStomp then return end
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_BLACK_POWDER) then return end	
 	if player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_BLACK_POWDER):RandomInt(1, 3) ~= 1 then return end
 	local distance = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and 90 or 70
-	mod:SpawnBlackPowder(player, 20, player.Position, distance)
+	Creeps.SpawnBlackPowder(player, 20, player.Position, distance)
 end
-mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, mod.BlackPowderStomp, EdithJump)
+mod:AddCallback(callbacks.OFFENSIVE_STOMP, mod.BlackPowderStomp)
 
 function mod:Stuff(effect)
-	if funcs.GetData(effect).CustomSpawn == true then return end
+	if data(effect).CustomSpawn == true then return end
 	effect.Visible = false
 	effect:Remove()
 end

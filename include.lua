@@ -69,16 +69,16 @@ local includeFiles = {
 	"challenges/Grudge",
 
 	-- sinergias pisotones
-	-- stmpSyn .. "blackPowder",
-	-- stmpSyn .. "brimstone",
-	-- stmpSyn .. "techX",
-	-- stmpSyn .. "MomsKnife",
-	-- stmpSyn .. "Rockwaves",
-	-- stmpSyn .. "SpiritSword",
-	-- stmpSyn .. "EpicFetus",
-	-- stmpSyn .. "StatusEffects",
-	-- stmpSyn .. "GodHead",
-	-- stmpSyn .. "Technology",
+	stmpSyn .. "blackPowder",
+	stmpSyn .. "brimstone",
+	stmpSyn .. "techX",
+	stmpSyn .. "MomsKnife",
+	stmpSyn .. "Rockwaves",
+	stmpSyn .. "SpiritSword",
+	stmpSyn .. "EpicFetus",
+	stmpSyn .. "StatusEffects",
+	stmpSyn .. "GodHead",
+	stmpSyn .. "Technology",
 
 	parrySyn .. "Brimstone",
 }

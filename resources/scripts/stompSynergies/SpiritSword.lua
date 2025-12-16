@@ -1,10 +1,11 @@
 local mod = EdithRebuilt
-local funcs = require("resources.scripts.stompSynergies.Funcs")
-local EdithJump = require("resources.scripts.stompSynergies.JumpData")
+local callbacks = mod.Enums.Callbacks
+local data = mod.CustomDataWrapper.getData
 
 ---@param player EntityPlayer
-function mod:SwordStomp(player)
-	if funcs.DefensiveStomp(player) then return end
+---@param params EdithJumpStompParams
+function mod:SwordStomp(player, params)
+	if params.IsDefensiveStomp then return end
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_SPIRIT_SWORD) then return end
 
     local knife = player:FireKnife(
@@ -15,7 +16,7 @@ function mod:SwordStomp(player)
         KnifeVariant.SPIRIT_SWORD
     )
 
-    local knifeData = funcs.GetData(knife)
+    local knifeData = data(knife)
     local knifeSprite = knife:GetSprite()
 
     knifeSprite:Play("SpinDown", true)
@@ -43,11 +44,11 @@ function mod:SwordStomp(player)
     knifeData.StompSword = true
     knife.CollisionDamage = formula
 end
-mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, mod.SwordStomp, EdithJump)
+mod:AddCallback(callbacks.OFFENSIVE_STOMP, mod.SwordStomp)
 
 function mod:RemoveStompKnife(knife)
     local knifeSprite = knife:GetSprite()
-    local knifeData = funcs.GetData(knife)
+    local knifeData = data(knife)
 	
     if knife.Variant ~= KnifeVariant.SPIRIT_SWORD or not knifeData.StompSword then return end
     if not (knifeSprite:GetAnimation() == "SpinDown" and knifeSprite:IsFinished()) then return end

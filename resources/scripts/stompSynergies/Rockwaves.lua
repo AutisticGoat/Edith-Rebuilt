@@ -1,10 +1,10 @@
 local mod = EdithRebuilt
-local funcs = require("resources.scripts.stompSynergies.Funcs")
-local EdithJump = require("resources.scripts.stompSynergies.JumpData")
+local callbacks = mod.Enums.Callbacks
 
 ---@param player EntityPlayer
-function mod:RockStomp(player)
-	if funcs.DefensiveStomp(player) then return end
+---@param params EdithJumpStompParams
+function mod:RockStomp(player, params)
+	if params.IsDefensiveStomp then return end
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_TERRA) then return end
 	local hasBirthright = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT)
 	local totalrocks = hasBirthright and 8 or 6
@@ -26,4 +26,4 @@ function mod:RockStomp(player)
 		end
 	end
 end
-mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, mod.RockStomp, EdithJump)
+mod:AddCallback(callbacks.OFFENSIVE_STOMP, mod.RockStomp)

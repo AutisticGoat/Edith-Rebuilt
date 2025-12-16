@@ -100,4 +100,38 @@ function Creeps.SpawnOreganoCreep(parent, position, damage, timeout)
 	pepper:SetTimeout(Maths.SecondsToFrames(timeout) or 30)
 end
 
+---Custom black powder spawn (Used for Edith's black powder stomp synergy)
+---@param parent Entity
+---@param quantity number
+---@param position Vector
+---@param distance number
+function Creeps.SpawnBlackPowder(parent, quantity, position, distance)
+	quantity = quantity or 20
+	local degrees = 360 / quantity
+	local blackPowder
+	for i = 1, quantity do
+		blackPowder = Isaac.Spawn(
+			EntityType.ENTITY_EFFECT,
+			EffectVariant.PLAYER_CREEP_BLACKPOWDER, 
+			0, 
+			position + Vector(0, distance or 60):Rotated(degrees * i),
+			Vector.Zero, 
+			parent
+		)
+		if not blackPowder then return end
+		data(blackPowder).CustomSpawn = true
+	end
+
+	local Pentagram = Isaac.Spawn(
+		EntityType.ENTITY_EFFECT,
+		EffectVariant.PENTAGRAM_BLACKPOWDER, 
+		0, 
+		position, 
+		Vector.Zero, 
+		nil
+	):ToEffect() ---@cast Pentagram EntityEffect
+
+	Pentagram.Scale = distance + distance / 2	
+end
+
 return Creeps

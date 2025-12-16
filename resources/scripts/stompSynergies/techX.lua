@@ -1,10 +1,10 @@
 local mod = EdithRebuilt
-local funcs = require("resources.scripts.stompSynergies.Funcs")
-local EdithJump = require("resources.scripts.stompSynergies.JumpData")
+local callbacks = mod.Enums.Callbacks
 
 ---@param player EntityPlayer
-function mod:TechXStomp(player)
-	if funcs.DefensiveStomp(player) then return end
+---@param params EdithJumpStompParams
+function mod:TechXStomp(player, params)
+	if params.IsDefensiveStomp then return end
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_TECH_X) then return end
 	local techXDistance = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and 65 or 50
 	local LaserDamage = (techXDistance/100) + 0.25
@@ -13,4 +13,4 @@ function mod:TechXStomp(player)
 	techX.DisableFollowParent = true
 	techX:SetTimeout(17) 
 end
-mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, mod.TechXStomp, EdithJump)
+mod:AddCallback(callbacks.OFFENSIVE_STOMP, mod.TechXStomp)

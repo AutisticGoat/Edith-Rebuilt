@@ -5,7 +5,10 @@ local Maths = mod.Modules.MATHS
 
 ---@param player EntityPlayer
 ---@param entity Entity
-mod:AddCallback(Callbacks.OFFENSIVE_STOMP, function(_, player, entity)
+---@param params EdithJumpStompParams
+mod:AddCallback(Callbacks.OFFENSIVE_STOMP_HIT, function(_, player, entity, params)
+    if not params.IsDefensiveStomp then return end
+    
     local playerRef = EntityRef(player)
     local tearEffects = {
         [TearFlags.TEAR_SLOW] = function()

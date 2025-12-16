@@ -1,11 +1,12 @@
 local mod = EdithRebuilt
+local callbacks = mod.Enums.Callbacks
 local helpers = mod.Modules.HELPERS
-local funcs = require("resources.scripts.stompSynergies.Funcs")
-local EdithJump = require("resources.scripts.stompSynergies.JumpData")
+local data = mod.CustomDataWrapper.getData
 
 ---@param player EntityPlayer
-function mod:GodHeadStomp(player)
-	if funcs.DefensiveStomp(player) then return end
+---@param params EdithJumpStompParams
+function mod:GodHeadStomp(player, params)
+	if params.IsDefensiveStomp then return end
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_GODHEAD) then return end		
 	
     local godTear = player:FireTear(player.Position, Vector.Zero)
@@ -15,14 +16,14 @@ function mod:GodHeadStomp(player)
     godTear.Height = -10
     godTear:AddTearFlags(TearFlags.TEAR_GLOW | TearFlags.TEAR_SPECTRAL | TearFlags.TEAR_PIERCING)
 
-    funcs.GetData(godTear).IsStompGodTear = true
+    data(godTear).IsStompGodTear = true
     helpers.ChangeColor(godTear, nil, nil, nil, 0)
 end
-mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, mod.GodHeadStomp, EdithJump)
+mod:AddCallback(callbacks.OFFENSIVE_STOMP, mod.GodHeadStomp)
 
 ---@param tear EntityTear  
 function mod:RemoveKnife(tear)	
-    if not funcs.GetData(tear).IsStompGodTear then return end
+    if not data(tear).IsStompGodTear then return end
     tear.Height = -10
     tear.Position = (tear.Parent or tear.SpawnerEntity).Position
 
@@ -30,10 +31,3 @@ function mod:RemoveKnife(tear)
     tear:Remove()
 end
 mod:AddCallback(ModCallbacks.MC_POST_TEAR_UPDATE, mod.RemoveKnife)
-
----@param player EntityPlayer
----@param ent Entity
-function mod:OnStatusEffectLand(player, ent)
-    print("Hola")
-end
-mod:AddCallback(mod.Enums.Callbacks.OFFENSIVE_STOMP, mod.OnStatusEffectLand, EdithJump)

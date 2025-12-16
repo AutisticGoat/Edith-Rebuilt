@@ -1,12 +1,13 @@
 local mod = EdithRebuilt
-local funcs = require("resources.scripts.stompSynergies.Funcs")
-local EdithJump = require("resources.scripts.stompSynergies.JumpData")
+local callbacks = mod.Enums.Callbacks
+local data = mod.CustomDataWrapper.getData
 
 ---@param player EntityPlayer
-function mod:KnifeStomp(player)
-	if funcs.DefensiveStomp(player) then return end
+---@param params EdithJumpStompParams
+function mod:KnifeStomp(player, params)
+	if params.IsDefensiveStomp then return end
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_MOMS_KNIFE) then return end		
-	
+
 	local knifeEntities = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and 8 or 4
 	local degrees = 360/knifeEntities
 	local knife		
@@ -14,16 +15,16 @@ function mod:KnifeStomp(player)
 	for i = 1, knifeEntities do
 		knife = player:FireKnife(player, degrees * i, true, 0, 0)
 		knife:Shoot(1, player.TearRange / 3)
-		funcs.GetData(knife).StompKnife = true			
+		data(knife).StompKnife = true			
 	end
 end
-mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, mod.KnifeStomp, EdithJump)
+mod:AddCallback(callbacks.OFFENSIVE_STOMP, mod.KnifeStomp)
 
 ---@param knife EntityKnife
 function mod:RemoveKnife(knife)	
-	if funcs.GetData(knife).StompKnife ~= true then return end
+	if not data(knife).StompKnife then return end
 	if knife:IsFlying() then return end 
-	
+
 	knife:Remove()
 end
 mod:AddCallback(ModCallbacks.MC_POST_KNIFE_UPDATE, mod.RemoveKnife)
