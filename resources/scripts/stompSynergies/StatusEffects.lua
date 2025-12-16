@@ -7,10 +7,12 @@ local Maths = mod.Modules.MATHS
 ---@param entity Entity
 ---@param params EdithJumpStompParams
 mod:AddCallback(Callbacks.OFFENSIVE_STOMP_HIT, function(_, player, entity, params)
-    if not params.IsDefensiveStomp then return end
+    if params.IsDefensiveStomp then return end
     if not entity:IsEnemy() then return end
-    ---@cast entity EntityNPC
+
+    local ent = entity:ToNPC()
+    ---@cast ent EntityNPC
 
     -- Man how tf can this be so fucking easier I LOVE REPENTOGON
-    entity:ApplyTearflagEffects(entity.Position, player.TearFlags, player, player.Damage)
+    ent:ApplyTearflagEffects(ent.Position, player.TearFlags, player, player.Damage)
 end)
