@@ -200,6 +200,13 @@ function Land.HandleEntityInteraction(ent, parent, knockback)
         [EntityType.ENTITY_FAMILIAR] = function()
             if not Helpers.When(var, tables.PhysicsFamiliar, false) then return end
             Helpers.TriggerPush(ent, parent, knockback)
+
+			local fam = ent:ToFamiliar() 
+			if not fam then return end
+
+			if fam.Variant == FamiliarVariant.CUBE_BABY then
+				fam:Shoot()
+			end
         end,
         [EntityType.ENTITY_BOMB] = function()
 			if Player.IsEdith(parent, true) then return end
@@ -286,8 +293,6 @@ local function VestigeUnlockManager()
 	PersistentData.StompKills = PersistentData.StompKills or 0
 	PersistentData.StompKills = PersistentData.StompKills + 1
 
-	print(PersistentData.StompKills)
-
 	if PersistentData.StompKills >= 15 then
 		pgd:TryUnlock(VestigeAch)
 		PersistentData.StompKills = 0
@@ -300,11 +305,10 @@ end
 ---@param breakGrid boolean
 function Land.EdithStomp(parent, params, breakGrid)
 	local isDefStomp = params.IsDefensiveStomp
-	local damage, knockback, radius = params.Damage, params.Knockback, params.Radius
 	local HasTerra = parent:HasCollectible(CollectibleType.COLLECTIBLE_TERRA)
 	local TerraRNG = parent:GetCollectibleRNG(CollectibleType.COLLECTIBLE_TERRA)
 	local TerraMult = HasTerra and mod.RandomFloat(TerraRNG, 0.5, 2) or 1	
-	local capsule = Capsule(parent.Position, Vector.One, 0, radius)
+	local capsule = Capsule(parent.Position, Vector.One, 0, params.Radius)
 	local SaltedTime = Math.Round(Math.Clamp(120 * (Player.GetplayerTears(parent) / 2.73), 60, 360))
 	local isSalted
 
@@ -315,7 +319,7 @@ function Land.EdithStomp(parent, params, breakGrid)
 	--- Pendiente de reducir
 	for _, ent in ipairs(params.StompedEntities) do
 		if GetPtrHash(parent) == GetPtrHash(ent) then goto Break end
-		EntityInteractHandler(ent, parent, knockback)
+		EntityInteractHandler(ent, parent, params.Knockback)
 		SaltEnemyManager(parent, ent, isDefStomp, SaltedTime)
 
 		if not Helpers.IsEnemy(ent) then goto Break end
@@ -325,9 +329,9 @@ function Land.EdithStomp(parent, params, breakGrid)
 			sfx:Play(SoundEffect.SOUND_MEATY_DEATHS)
 		end
 
-		DamageManager(parent, ent, damage, TerraMult, knockback)
+		DamageManager(parent, ent, params.Damage, TerraMult, params.Knockback)
 
-		if ent.HitPoints > damage then goto Break end
+		if ent.HitPoints > params.Damage then goto Break end
 		Isaac.RunCallback(callbacks.OFFENSIVE_STOMP_KILL, parent, ent, params)
 		if StatusEffect.EntHasStatusEffect(ent, enums.EdithStatusEffects.SALTED) then
 			VestigeUnlockManager()
@@ -510,6 +514,17 @@ function Land.TriggerLandenemyJump(params, height, speed)
 		})	
 		end
 	end
+end
+
+---@param player EntityPlayer
+function Land.TriggerFlatStoneMiniJumps(player, height, speed)
+	if not player:ToPlayer() then return end
+
+	JumpLib:TryJump(player, {
+		Height = height,
+		Speed = speed,
+		Tags = "EdithRebuilt_FlatStoneLand"
+	})	
 end
 
 return Land

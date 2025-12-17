@@ -79,8 +79,23 @@ local includeFiles = {
 	stmpSyn .. "StatusEffects",
 	stmpSyn .. "GodHead",
 	stmpSyn .. "Technology",
+	stmpSyn .. "Neptunus",
+	stmpSyn .. "ChocolateMilk",
+	stmpSyn .. "Damage",
+	stmpSyn .. "HeadOfTheKeeper",
+	stmpSyn .. "FlatStone",
+	stmpSyn .. "JacobsLadder",
+	stmpSyn .. "GodsFlesh",
+	stmpSyn .. "PlaydoughCookie",
+	stmpSyn .. "OcularRift",
 
 	parrySyn .. "Brimstone",
+	parrySyn .. "GodHead",
+	parrySyn .. "StatusEffects",
+	parrySyn .. "Rockwaves",
+	parrySyn .. "SpiritSword",
+	parrySyn .. "TechX",
+	parrySyn .. "Technology",
 }
 
 for _, v in ipairs(includeFiles) do

@@ -208,12 +208,7 @@ EdithRebuilt.Enums = {
 		},
 		ArrowSuffix = {
 			[1] = "_arrow",
-			[2] = "_arrow_pointy",
-			[3] = "_triangle_line",
-			[4] = "_triangle_full",
-			[5] = "_chevron_line",
-			[6] = "_chevron_full",
-			[7] = "_grudge",
+			[2] = "_grudge",
 		},
 		TargetSuffix = {
 			[1] = "",
@@ -342,11 +337,6 @@ EdithRebuilt.Enums = {
 			}, 	
 			ArrowDesign = {
 				"Arrow", 
-				"Arrow (pointy)", 
-				"Triangle (line)",
-				"Triangle (full)",
-				"Chevron (line)", 
-				"Chevron (full)", 
 				"Grudge", 
 			},
 			TrailDesign = {

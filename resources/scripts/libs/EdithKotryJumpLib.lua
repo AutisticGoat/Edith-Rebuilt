@@ -1,3 +1,4 @@
+---@diagnostic disable: need-check-nil
 --[[
     Jump Library by Kerkel
     Version 1.3.7

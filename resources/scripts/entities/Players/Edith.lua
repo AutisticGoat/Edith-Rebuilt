@@ -41,7 +41,7 @@ function Edith:OnEdithUpdate(player)
 	local IsVestige = helpers.IsVestigeChallenge() 
 	local jumpParams = params(player)
 
-	if player.FrameCount > 0 and (isMoving or isKeyStompPressed or (hasMarked and isShooting)) and not isPitfall then
+	if player.FrameCount > 0 and (isMoving or isKeyStompPressed or (hasMarked and isShooting)) and not isPitfall and not jumpData.Tags.EdithRebuilt_FlatStoneLand then
 		TargetArrow.SpawnEdithTarget(player)
 	end
 
@@ -84,7 +84,6 @@ function Edith:OnEdithLanding(player, _, pitfall)
 	local jumpParams = params(player)
 
 	if not edithTarget then return end
-	jumpParams.Jumps = math.max(jumpParams.Jumps - 1, 0)
 
 	if pitfall then
 		TargetArrow.RemoveEdithTarget(player)
@@ -103,17 +102,20 @@ function Edith:OnEdithLanding(player, _, pitfall)
 	EdithMod.StompKnockbackManager(player, jumpParams)
 	EdithMod.StompRadiusManager(player, jumpParams)
 	EdithMod.StompCooldownManager(player, jumpParams)
-	EdithMod.StompTargetRemover(player, jumpParams)
 	EdithMod.BombStompManager(player, jumpParams)
+
+	edithTarget:GetSprite():Play("Idle")
 
 	player:SetMinDamageCooldown(25)
 	player:MultiplyFriction(0.1)
 
 	Land.EdithStomp(player, jumpParams, true)
-	Land.TriggerLandenemyJump(jumpParams, 10, 1.8)
+	Land.TriggerLandenemyJump(jumpParams, 8, 2)
 
+	jumpParams.Jumps = math.max(jumpParams.Jumps - 1, 0)
 	jumpParams.RocketLaunch = false	
-	edithTarget:GetSprite():Play("Idle")
+
+	EdithMod.StompTargetRemover(player, jumpParams)
 end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, Edith.OnEdithLanding, JumpParams.EdithJump)
 

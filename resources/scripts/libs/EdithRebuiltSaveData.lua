@@ -141,8 +141,6 @@ end
 ---
 --- Acts as a localized version to avoid incompatibilities with
 --- other mods.
----@param entity Entity
----@return table
 function library.getData(entity)
 	local hash = GetPtrHash(entity)
 	TEMPORARY_DATA[hash] = TEMPORARY_DATA[hash] or {}
@@ -198,6 +196,11 @@ function script:onExitSave()
 end
 
 function script:resetTemporaryData(entity)
+	if entity:ToPlayer() then
+		
+		print("Reset data for Hash:", GetPtrHash(entity))
+	end
+
 	local hash = tostring(GetPtrHash(entity))
 	TEMPORARY_DATA[hash] = nil
 end
@@ -289,5 +292,4 @@ function script:preGlowingHourglassLoad(slot)
 	-- Custom Health API automatically handles Glowing Hourglass
 end
 
-EdithRebuilt.CustomDataWrapper = library
 return library

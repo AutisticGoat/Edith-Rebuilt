@@ -29,6 +29,7 @@ function TEdith:TaintedEdithInit(player)
 	local isGrudge = Helpers.IsGrudgeChallenge()
 	local costume = isGrudge and costumes.ID_EDITH_B_GRUDGE_SCARF or costumes.ID_EDITH_B_SCARF
 
+	TargetArrow.RemoveEdithTarget(player, true)
 	player:AddNullCostume(costume)
 	Player.SetChallengeSprite(player, Isaac.GetChallenge())
 end
@@ -48,9 +49,16 @@ function mod:TaintedEdithUpdate(player)
 	local isArrowMoving = TargetArrow.IsEdithTargetMoving(player)
 	local arrow = TargetArrow.GetEdithTarget(player, true)
 
+	-- print("=================================")
+	-- for k, v in pairs(HopParams) do
+	-- 	print(k, v)
+	-- end
+
 	if isArrowMoving then
 		TargetArrow.SpawnEdithTarget(player, true)
 	end
+
+	-- print("Arrow:", arrow)
 
 	if arrow then
 		TEdithMod.HopDashChargeManager(player, arrow)
@@ -63,6 +71,11 @@ function mod:TaintedEdithUpdate(player)
 	if (player:CollidesWithGrid() and HopParams.IsHoping == true) and not isJumping or Helpers.IsDogmaAppearCutscene() then
 		TEdithMod.StopTEdithHops(player, 20, true, not playerData.TaintedEdithTarget)
 	end
+
+	-- if not (HopParams.HopDirection.X == 0 and HopParams.HopDirection.Y == 0) then
+	-- 	print("aaaaaaaaaaa")
+	-- 	HopParams.HopDirection = Vector.Zero
+	-- end
 
 	if not isArrowMoving and arrow then
 		TargetArrow.RemoveEdithTarget(player, true)

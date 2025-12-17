@@ -38,13 +38,6 @@ mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(_, player, cacheFlag)
 end)
 
 local whiteListCostumes = {
-	[CollectibleType.COLLECTIBLE_MEGA_MUSH] = true,
-	[CollectibleType.COLLECTIBLE_BOOK_OF_SHADOWS] = true,
-    [CollectibleType.COLLECTIBLE_PONY] = true,
-    [CollectibleType.COLLECTIBLE_WHITE_PONY] = true,
-    [CollectibleType.COLLECTIBLE_GODHEAD] = true,
-    [CollectibleType.COLLECTIBLE_TRANSCENDENCE] = true,
-    [CollectibleType.COLLECTIBLE_FATE] = true,
 	[costumes.ID_EDITH_SCARF] = true,
 	[costumes.ID_EDITH_B_SCARF] = true,
 }
@@ -53,18 +46,9 @@ local whiteListCostumes = {
 ---@param player EntityPlayer
 ---@return boolean?
 mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_ADD_COSTUME, function(_, itemconfig, player)
-    -- print(itemconfig.Costume.ID)
-
-    
-    if itemconfig.Costume.ID == 80 then
-        print("a[osjdaosjdoj]")
-        -- player:RemoveCostume(itemconfig)
-        -- player:AddNullCostume(CustomPactCostume)
-    end
-
-    -- if not mod:IsAnyEdith(player) then return end
-    -- if mod.When(itemconfig.Costume.ID, whiteListCostumes, false) then return end
-    -- return true
+    if not Player.IsAnyEdith(player) then return end
+    if Helpers.When(itemconfig.Costume.ID, whiteListCostumes, false) then return end
+    return true
 end)
 
 mod:AddCallback(ModCallbacks.MC_POST_TEAR_UPDATE, function(_, tear)
