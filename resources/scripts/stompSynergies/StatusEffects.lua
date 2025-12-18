@@ -7,9 +7,6 @@ local Callbacks = enums.Callbacks
 mod:AddCallback(Callbacks.OFFENSIVE_STOMP_HIT, function(_, player, entity)
     if not entity:IsEnemy() then return end
 
-    local ent = entity:ToNPC()
-    ---@cast ent EntityNPC
-
-    -- Man how tf can this be so fucking easier I LOVE REPENTOGON
+    local ent = entity:ToNPC() ---@cast ent EntityNPC    
     ent:ApplyTearflagEffects(ent.Position, player.TearFlags, player, player.Damage)
 end)

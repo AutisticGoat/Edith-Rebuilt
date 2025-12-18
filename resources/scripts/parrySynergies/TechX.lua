@@ -1,8 +1,7 @@
 local mod = EdithRebuilt
 local callbacks = mod.Enums.Callbacks
 
----@param player EntityPlayer
-function mod:TechXStomp(player)
+mod:AddCallback(callbacks.PERFECT_PARRY, function(_, player)
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_TECH_X) then return end
 	local techXDistance = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and 65 or 50
 	local LaserDamage = (techXDistance/100) + 0.25
@@ -10,5 +9,4 @@ function mod:TechXStomp(player)
 
 	techX.DisableFollowParent = true
 	techX:SetTimeout(17) 
-end
-mod:AddCallback(callbacks.PERFECT_PARRY, mod.TechXStomp)
+end)

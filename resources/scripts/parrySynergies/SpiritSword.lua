@@ -3,8 +3,8 @@ local callbacks = mod.Enums.Callbacks
 local data = mod.CustomDataWrapper.getData
 
 ---@param player EntityPlayer
-function mod:SwordStomp(player)
-    if not player:HasCollectible(CollectibleType.COLLECTIBLE_SPIRIT_SWORD) then return end
+mod:AddCallback(callbacks.OFFENSIVE_STOMP, function(_, player)
+        if not player:HasCollectible(CollectibleType.COLLECTIBLE_SPIRIT_SWORD) then return end
 
     local knife = player:FireKnife(
         player,
@@ -41,9 +41,9 @@ function mod:SwordStomp(player)
     knife.SpriteScale = knife.SpriteScale * 1.7
     knifeData.ParrySword = true
     knife.CollisionDamage = formula
-end
-mod:AddCallback(callbacks.PERFECT_PARRY, mod.SwordStomp)
+end)
 
+---@param knife EntityKnife
 function mod:RemoveStompKnife(knife)
     local knifeSprite = knife:GetSprite()
     local knifeData = data(knife)

@@ -4,9 +4,8 @@ local helpers = mod.Modules.HELPERS
 local data = mod.CustomDataWrapper.getData
 
 ---@param player EntityPlayer
----@param params EdithJumpStompParams
-function mod:GodHeadParry(player, params)
-	if not player:HasCollectible(CollectibleType.COLLECTIBLE_GODHEAD) then return end		
+mod:AddCallback(callbacks.OFFENSIVE_STOMP, function(_, player)
+    if not player:HasCollectible(CollectibleType.COLLECTIBLE_GODHEAD) then return end		
 	
     local godTear = player:FireTear(player.Position, Vector.Zero)
     
@@ -17,11 +16,10 @@ function mod:GodHeadParry(player, params)
 
     data(godTear).IsParryGodTear = true
     helpers.ChangeColor(godTear, nil, nil, nil, 0)
-end
-mod:AddCallback(callbacks.PERFECT_PARRY_KILL, mod.GodHeadParry)
+end)
 
 ---@param tear EntityTear  
-function mod:RemoveParryGodheadTear(tear)	
+function mod:RemoveKnife(tear)	
     if not data(tear).IsParryGodTear then return end
     tear.Height = -10
     tear.Position = (tear.Parent or tear.SpawnerEntity).Position
@@ -29,4 +27,4 @@ function mod:RemoveParryGodheadTear(tear)
     if tear.FrameCount < 12 then return end
     tear:Remove()
 end
-mod:AddCallback(ModCallbacks.MC_POST_TEAR_UPDATE, mod.RemoveParryGodheadTear)
+mod:AddCallback(ModCallbacks.MC_POST_TEAR_UPDATE, mod.RemoveKnife)

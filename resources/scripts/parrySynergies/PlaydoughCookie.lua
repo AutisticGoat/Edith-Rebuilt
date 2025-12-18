@@ -7,7 +7,7 @@ local Callbacks = enums.Callbacks
 ---@param player EntityPlayer
 ---@param ent Entity
 ---@param params EdithJumpStompParams
-function mod:PlaydoughCookieStomp(player, ent, params)
+mod:AddCallback(Callbacks.OFFENSIVE_STOMP_HIT, function(_, player, ent, params)
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE) then return end
     local Itemrng = player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE)
     local Effects = {
@@ -42,5 +42,4 @@ function mod:PlaydoughCookieStomp(player, ent, params)
     }
 
     Helpers.WhenEval(Itemrng:RandomInt(1, 7), Effects)
-end
-mod:AddCallback(Callbacks.OFFENSIVE_STOMP_HIT, mod.PlaydoughCookieStomp)
+end)
