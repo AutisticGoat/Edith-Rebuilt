@@ -3,9 +3,7 @@ local callbacks = mod.Enums.Callbacks
 local data = mod.CustomDataWrapper.getData
 
 ---@param player EntityPlayer
----@param params EdithJumpStompParams
-function mod:SwordStomp(player, params)
-	if params.IsDefensiveStomp then return end
+function mod:SwordStomp(player)
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_SPIRIT_SWORD) then return end
 
     local knife = player:FireKnife(

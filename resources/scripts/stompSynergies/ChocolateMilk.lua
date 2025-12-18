@@ -1,13 +1,11 @@
 local mod = EdithRebuilt
 local callbacks = mod.Enums.Callbacks
 local Player = mod.Modules.PLAYER
-local EdithMod = mod.Modules.EDITH
 local data = mod.CustomDataWrapper.getData
 
 ---@param player EntityPlayer
 ---@param params EdithJumpStompParams
 mod:AddCallback(callbacks.OFFENSIVE_STOMP, function(_, player, params)
-    if params.IsDefensiveStomp then return end
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_CHOCOLATE_MILK) then return end
 
     local ChocoMult = data(player).ChocoMult

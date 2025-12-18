@@ -1,7 +1,6 @@
 
 local mod = EdithRebuilt
 local enums = mod.Enums
-local ModRNG = mod.Modules.RNG
 local Helpers = mod.Modules.HELPERS
 local Callbacks = enums.Callbacks
 
@@ -9,7 +8,6 @@ local Callbacks = enums.Callbacks
 ---@param ent Entity
 ---@param params EdithJumpStompParams
 function mod:PlaydoughCookieStomp(player, ent, params)
-    if params.IsDefensiveStomp then return end
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE) then return end
     local Itemrng = player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_PLAYDOUGH_COOKIE)
     local Effects = {

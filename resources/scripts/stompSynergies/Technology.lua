@@ -4,9 +4,7 @@ local callbacks = mod.Enums.Callbacks
 
 ---@param player EntityPlayer
 ---@param ent Entity
----@param params EdithJumpStompParams
-function mod:TechnologyLand(player, ent, params)
-    if params.IsDefensiveStomp then return end
+function mod:TechnologyLand(player, ent)
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_TECHNOLOGY) then return end    
     if not Helpers.IsEnemy(ent) then return end 
 

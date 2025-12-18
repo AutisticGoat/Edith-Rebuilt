@@ -88,6 +88,7 @@ local includeFiles = {
 	stmpSyn .. "GodsFlesh",
 	stmpSyn .. "PlaydoughCookie",
 	stmpSyn .. "OcularRift",
+	stmpSyn .. "HolyLight",
 
 	parrySyn .. "Brimstone",
 	parrySyn .. "GodHead",

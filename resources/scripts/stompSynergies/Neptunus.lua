@@ -4,7 +4,6 @@ local callbacks = mod.Enums.Callbacks
 ---@param player EntityPlayer
 ---@param params EdithJumpStompParams
 mod:AddCallback(callbacks.OFFENSIVE_STOMP, function(_, player, params)
-    if params.IsDefensiveStomp then return end
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_NEPTUNUS) then return end
 
     local weapon = player:GetWeapon(1)

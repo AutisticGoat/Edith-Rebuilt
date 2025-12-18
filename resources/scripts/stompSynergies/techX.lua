@@ -2,9 +2,7 @@ local mod = EdithRebuilt
 local callbacks = mod.Enums.Callbacks
 
 ---@param player EntityPlayer
----@param params EdithJumpStompParams
-function mod:TechXStomp(player, params)
-	if params.IsDefensiveStomp then return end
+function mod:TechXStomp(player)
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_TECH_X) then return end
 	local techXDistance = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and 65 or 50
 	local LaserDamage = (techXDistance/100) + 0.25

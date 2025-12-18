@@ -6,7 +6,6 @@ local data = mod.CustomDataWrapper.getData
 ---@param player EntityPlayer
 ---@param params EdithJumpStompParams
 function mod:GodHeadStomp(player, params)
-	if params.IsDefensiveStomp then return end
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_GODHEAD) then return end		
 	
     local godTear = player:FireTear(player.Position, Vector.Zero)

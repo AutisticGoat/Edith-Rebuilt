@@ -2,9 +2,7 @@ local mod = EdithRebuilt
 local callbacks = mod.Enums.Callbacks
 
 ---@param player EntityPlayer
----@param params EdithJumpStompParams
-function mod:RockStomp(player, params)
-	if params.IsDefensiveStomp then return end
+function mod:RockStomp(player)
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_TERRA) then return end
 	local hasBirthright = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT)
 	local totalrocks = hasBirthright and 8 or 6

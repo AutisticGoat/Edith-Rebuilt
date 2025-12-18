@@ -3,9 +3,7 @@ local callbacks = mod.Enums.Callbacks
 local data = mod.CustomDataWrapper.getData
 
 ---@param player EntityPlayer
----@param params EdithJumpStompParams
-function mod:BrimStomp(player, params)
-	if params.IsDefensiveStomp then return end
+function mod:BrimStomp(player)
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE) then return end
 
 	local totalRays = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and 6 or 4

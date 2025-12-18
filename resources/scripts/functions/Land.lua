@@ -314,7 +314,9 @@ function Land.EdithStomp(parent, params, breakGrid)
 
 	params.StompedEntities = Isaac.FindInCapsule(capsule)
 
-	Isaac.RunCallback(callbacks.OFFENSIVE_STOMP, parent, params)
+	if not isDefStomp then
+		Isaac.RunCallback(callbacks.OFFENSIVE_STOMP, parent, params)
+	end
 
 	--- Pendiente de reducir
 	for _, ent in ipairs(params.StompedEntities) do
@@ -323,9 +325,9 @@ function Land.EdithStomp(parent, params, breakGrid)
 		SaltEnemyManager(parent, ent, isDefStomp, SaltedTime)
 
 		if not Helpers.IsEnemy(ent) then goto Break end
-		Isaac.RunCallback(callbacks.OFFENSIVE_STOMP_HIT, parent, ent, params)
 		
 		if not params.IsDefensiveStomp then
+			Isaac.RunCallback(callbacks.OFFENSIVE_STOMP_HIT, parent, ent, params)
 			sfx:Play(SoundEffect.SOUND_MEATY_DEATHS)
 		end
 

@@ -6,9 +6,7 @@ local Callbacks = enums.Callbacks
 
 ---@param player EntityPlayer
 ---@param ent Entity
----@param params EdithJumpStompParams
-function mod:StompDamageAdders(player, ent, params)
-    if params.IsDefensiveStomp then return end
+function mod:StompDamageAdders(player, ent)
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_GODS_FLESH) then return end
     if not Helpers.IsEnemy(ent) then return end
 

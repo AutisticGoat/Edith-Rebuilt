@@ -3,9 +3,7 @@ local callbacks = mod.Enums.Callbacks
 local data = mod.CustomDataWrapper.getData
 
 ---@param player EntityPlayer
----@param params EdithJumpStompParams
-function mod:KnifeStomp(player, params)
-	if params.IsDefensiveStomp then return end
+function mod:KnifeStomp(player)
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_MOMS_KNIFE) then return end		
 
 	local knifeEntities = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and 8 or 4
