@@ -28,7 +28,7 @@
     <!-- Challenges -->
     <achievement name="EdithRebuilt_Vestige" gfx="achievement_Vestige.png" />
     <achievement name="EdithRebuilt_Effigy" gfx="achievement_Effigy.png" />
-    <achievement name="EdithRebuilt_Grudge" gfx="achievement_Grudfe.png" />
+    <achievement name="EdithRebuilt_Grudge" gfx="achievement_Grudge.png" />
     <achievement name="EdithRebuilt_Chunk of Basalt" gfx="achievement_ChunkOfBasalt.png" />
 
     <!-- Thank you-->
