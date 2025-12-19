@@ -9,6 +9,7 @@ local Player = modules.PLAYER
 ---@param JumpData JumpData
 function mod:FLatStoneStomp(player, JumpData)
     if not player:ToPlayer() then return end
+    if not Player.IsEdith(player, false) then return end
 
     local params = EdithMod.GetJumpStompParams(player)
 
@@ -26,11 +27,12 @@ mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, mod.FLatStoneStomp, mod.Enums.Tab
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, function(_, ent, data, pitfall)
     local player = ent:ToPlayer()
     if not player then return end
+    if not Player.IsEdith(player, false) then return end
 
     local params = EdithMod.GetJumpStompParams(player)
     local Mult = Player.PlayerHasBirthright(player) and 0.9 or 0.75
 
-    params.Damage = params.Damage * Player
+    params.Damage = params.Damage * Mult
     Land.LandFeedbackManager(player, Land.GetLandSoundTable(false, false), player.Color)
     Land.EdithStomp(player, params, true)
     Land.TriggerLandenemyJump(params, 6, 1.5)
