@@ -3,8 +3,8 @@ local callbacks = mod.Enums.Callbacks
 local data = mod.CustomDataWrapper.getData
 
 ---@param player EntityPlayer
-mod:AddCallback(callbacks.OFFENSIVE_STOMP, function(_, player)
-        if not player:HasCollectible(CollectibleType.COLLECTIBLE_SPIRIT_SWORD) then return end
+mod:AddCallback(callbacks.PERFECT_PARRY, function(_, player)
+    if not player:HasCollectible(CollectibleType.COLLECTIBLE_SPIRIT_SWORD) then return end
 
     local knife = player:FireKnife(
         player,
