@@ -162,6 +162,12 @@ function StatusEffects.SetStatusEffect(status, ent, dur, src)
     SEL:AddStatusEffect(ent, Flags[status], dur, EntityRef(src))
 end
 
+---@param ent Entity
+---@param status EdithStatusEffects
+function StatusEffects.GetStatusEffectCountdown(ent, status)
+    return SEL:GetStatusEffectCountdown(ent, Flags[status])
+end
+
 ---@param npc EntityNPC
 local function OnSaltedUpdate(npc)
     if not StatusEffects.EntHasStatusEffect(npc, effects.SALTED) then return end
@@ -350,7 +356,6 @@ local function OnDamagincTurmericEnemy(_, entity, amount, flags, source, Cooldow
 end
 mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, OnDamagincTurmericEnemy)
 
-local PepperFlag = false
 ---@param entity EntityNPC
 local function OnKillingPepperEnemy(_, entity)
     if not StatusEffects.EntHasStatusEffect(entity, effects.PEPPERED) then return end
@@ -391,7 +396,6 @@ local function OnKillingPepperEnemy(_, entity)
 end
 mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, OnKillingPepperEnemy)
 mod:AddCallback(PRE_NPC_KILL.ID, OnKillingPepperEnemy)
-
 
 local function OnDamagincTurmericEnemy(_, entity)
     if not StatusEffects.EntHasStatusEffect(entity, effects.CUMIN) then return end
@@ -437,12 +441,6 @@ mod:AddCallback(ModCallbacks.MC_POST_PROJECTILE_INIT, StatusProjInit)
 mod:AddCallback(SEL.Callbacks.ID.PRE_REMOVE_ENTITY_STATUS_EFFECT, function(_, entity)
     data(entity).SaltType = nil
 end, Flags.Salted)
-
-
--- Los enemigos con cenizas pueden recibir daño de los parrys imprecisos (el daño es menor)
--- Dañar a un enemigo con cenizas con un parry impreciso puede cargar el hopdash en un 5%
--- Matar a un enemigo con cenizas usando un parry perfecto soltará creep de ceniza alrededor de Edith, como si fuera el salero pero a menor rango
--- El creep de ceniza hará el efecto que hace actualmente el perfect parry con un enemigo de ceniza, o sea, crear jets de fuego que dañan al enemigo
 
 local CinderCreeps = 10
 local ndegrees = 360/CinderCreeps

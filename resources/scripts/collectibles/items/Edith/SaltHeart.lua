@@ -10,6 +10,7 @@ local StsEffects = modules.STATUS_EFFECTS
 local Helpers = modules.HELPERS
 local Creeps = modules.CREEPS
 local Maths = modules.MATHS
+local effects = enums.EdithStatusEffects
 local SaltedFlag = StatusEffectLibrary.StatusFlag.EDITH_REBUILT_SALTED
 local SaltHeart = {}
 
@@ -46,8 +47,8 @@ mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, SaltHeart.GettingDamage)
 
 ---@param player EntityPlayer
 function SaltHeart:SpawnSaltCreep(player)
-    if not StsEffects.EntHasStatusEffect(player, StsEffects.SALTED) then return end
-    if StatusEffectLibrary:GetStatusEffectCountdown(player, SaltedFlag) % 5 ~= 0 then return end
+    if not StsEffects.EntHasStatusEffect(player, effects.SALTED) then return end
+    if StsEffects.GetStatusEffectCountdown(player, effects.SALTED) % 5 ~= 0 then return end
     
     Creeps.SpawnSaltCreep(player, player.Position, 0, 5, 2, 3, saltTypes.SALT_HEART, true, true)
 end
@@ -67,7 +68,7 @@ function SaltHeart:OnSaltedDeath(npc, source)
     local player = Helpers.GetPlayerFromRef(source)
 
     if not player then return end
-    if not StsEffects.EntHasStatusEffect(player, StsEffects.SALTED) then return end
+    if not StsEffects.EntHasStatusEffect(player, effects.SALTED) then return end
     if saltedType ~= saltTypes.SALT_HEART then return end
     if not ModRNG.RandomBoolean(player:GetCollectibleRNG(items.COLLECTIBLE_SALT_HEART), 0.25) then return end
 
