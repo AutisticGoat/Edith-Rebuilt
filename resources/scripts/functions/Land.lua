@@ -222,7 +222,9 @@ function Land.HandleEntityInteraction(ent, parent, knockback)
 
 			if not Player.IsEdith(parent, false) then return end
 
-			Land.PickupManager(parent, pickup)
+			if Helpers.IsVestigeChallenge() then
+				Land.PickupManager(parent, pickup)
+			end
 
             if not (var == PickupVariant.PICKUP_BOMBCHEST and Player.IsEdith(parent, false)) then return end
 			pickup:TryOpenChest(parent)
