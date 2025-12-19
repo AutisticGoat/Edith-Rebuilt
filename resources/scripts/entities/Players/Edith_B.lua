@@ -29,7 +29,6 @@ function TEdith:TaintedEdithInit(player)
 	local isGrudge = Helpers.IsGrudgeChallenge()
 	local costume = isGrudge and costumes.ID_EDITH_B_GRUDGE_SCARF or costumes.ID_EDITH_B_SCARF
 
-	TargetArrow.RemoveEdithTarget(player, true)
 	player:AddNullCostume(costume)
 	Player.SetChallengeSprite(player, Isaac.GetChallenge())
 end
@@ -48,11 +47,6 @@ function mod:TaintedEdithUpdate(player)
 	local HopParams = TEdithMod.GetHopParryParams(player)
 	local isArrowMoving = TargetArrow.IsEdithTargetMoving(player)
 	local arrow = TargetArrow.GetEdithTarget(player, true)
-
-	-- print("=================================")
-	-- for k, v in pairs(HopParams) do
-	-- 	print(k, v)
-	-- end
 
 	if isArrowMoving then
 		TargetArrow.SpawnEdithTarget(player, true)

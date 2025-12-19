@@ -12,16 +12,16 @@ local player = {}
 function player.SetChallengeSprite(player, challenge)
 	if challenge == Challenge.CHALLENGE_NULL then return end
 
-	local sprite = challenge == challenges.CHALLENGE_GRUDGE and misc.GrudgeSpritePath or challenge == challenges.CHALLENGE_VESTIGE and misc.VestigeSpritePath
+	local sprite = (
+		challenge == challenges.CHALLENGE_GRUDGE and misc.GrudgeSpritePath or 
+		challenge == challenges.CHALLENGE_VESTIGE and misc.VestigeSpritePath
+	)
 
 	if not sprite then return end
 
 	for i = 0, 14 do
 		player:GetSprite():ReplaceSpritesheet(i, sprite, true)
 	end
-
-	print(player:GetSprite():GetLayer(1):GetSpritesheetPath())
-	print(sprite)
 end
 
 

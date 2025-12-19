@@ -40,6 +40,8 @@ end)
 local whiteListCostumes = {
 	[costumes.ID_EDITH_SCARF] = true,
 	[costumes.ID_EDITH_B_SCARF] = true,
+    [costumes.ID_EDITH_B_GRUDGE_SCARF] = true,
+    [costumes.ID_EDITH_VESTIGE_SCARF] = true,
 }
 
 ---@param itemconfig ItemConfigItem

@@ -50,7 +50,6 @@ EdithRebuilt.Enums = {
 		ID_EDITH_B_SCARF = Isaac.GetCostumeIdByPath("gfx/characters/EdithTaintedHood.anm2"),
 		ID_EDITH_VESTIGE_SCARF = Isaac.GetCostumeIdByPath("gfx/characters/EdithVestigeHood.anm2"),
 		ID_EDITH_B_GRUDGE_SCARF = Isaac.GetCostumeIdByPath("gfx/characters/EdithTaintedGrudgeHood.anm2"),
-
 	},
 	EffectVariant = {
 		EFFECT_EDITH_TARGET = Isaac.GetEntityVariantByName("Edith Target"),
