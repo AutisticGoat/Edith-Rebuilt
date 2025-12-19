@@ -334,8 +334,6 @@ function Edith.StompCooldownManager(player, params)
         params.IsDefensiveStomp and math.max(Cooldown - 5, 10) or
         ((params.Jumps > 1 and 5 * (Cooldown / 20)) or Cooldown)
     )
-
-	print(params.Cooldown)
 end
 
 ---@param player EntityPlayer
