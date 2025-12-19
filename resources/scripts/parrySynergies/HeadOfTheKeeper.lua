@@ -9,7 +9,7 @@ mod:AddCallback(Callbacks.PERFECT_PARRY, function(_, player, ent)
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_HEAD_OF_THE_KEEPER) then return end
     local rng = player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_HEAD_OF_THE_KEEPER)
 
-    if not ModRNG(rng, 0.05) then return end
+    if not ModRNG.RandomBoolean(rng, 0.05) then return end
     local RandomVel = ModRNG.RandomFloat(rng, 1.5, 3.5)
 
     Isaac.Spawn(
