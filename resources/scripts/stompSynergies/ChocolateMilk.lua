@@ -8,9 +8,10 @@ local data = mod.CustomDataWrapper.getData
 mod:AddCallback(callbacks.OFFENSIVE_STOMP, function(_, player, params)
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_CHOCOLATE_MILK) then return end
 
+    local baseMult = Player.PlayerHasBirthright(player) and 2.5 or 2
     local ChocoMult = data(player).ChocoMult
 
-    params.Damage = params.Damage * (2 * ChocoMult)
+    params.Damage = params.Damage * (baseMult * ChocoMult)
 end)
 
 ---@param player EntityPlayer

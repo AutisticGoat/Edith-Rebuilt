@@ -8,7 +8,7 @@ function mod:KnifeStomp(player)
 
 	local knifeEntities = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and 8 or 4
 	local degrees = 360/knifeEntities
-	local knife		
+	local knife
 
 	for i = 1, knifeEntities do
 		knife = player:FireKnife(player, degrees * i, true, 0, 0)

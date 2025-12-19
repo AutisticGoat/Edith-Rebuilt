@@ -1,11 +1,12 @@
 local mod = EdithRebuilt
 local callbacks = mod.Enums.Callbacks
 local helpers = mod.Modules.HELPERS
+local Player = mod.Modules.PLAYER
+local Helpers = mod.Modules.HELPERS
 local data = mod.CustomDataWrapper.getData
 
 ---@param player EntityPlayer
----@param params EdithJumpStompParams
-function mod:GodHeadStomp(player, params)
+function mod:GodHeadStomp(player)
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_GODHEAD) then return end		
 	
     local godTear = player:FireTear(player.Position, Vector.Zero)
@@ -26,7 +27,9 @@ function mod:RemoveKnife(tear)
     tear.Height = -10
     tear.Position = (tear.Parent or tear.SpawnerEntity).Position
 
-    if tear.FrameCount < 12 then return end
+    local Count = Player.PlayerHasBirthright(Helpers.GetPlayerFromTear(tear) --[[@as EntityPlayer]]) and 24 or 12
+
+    if tear.FrameCount < Count then return end
     tear:Remove()
 end
 mod:AddCallback(ModCallbacks.MC_POST_TEAR_UPDATE, mod.RemoveKnife)

@@ -168,6 +168,7 @@ function TEdith.StopTEdithHops(player, cooldown, useQuitJump, resetChrg)
 
 	HopParams.IsHoping = false
 	HopParams.HopDirection = Vector.Zero
+
 	player:MultiplyFriction(0.5)
 
 	cooldown = cooldown or 0
@@ -278,11 +279,6 @@ local function PerfectParryMisc(player, IsTaintedEdith, isenemy)
 
     local playerData = data(player)
     local hasBirthright = Player.PlayerHasBirthright(player)
-	-- playerData.ImpulseCharge = playerData.ImpulseCharge + 20
-
-	-- if playerData.ImpulseCharge >= 100 and hasBirthright then
-	-- 	playerData.BirthrightCharge = playerData.BirthrightCharge + 15
-	-- end
 end
 
 ---@param ent Entity
@@ -420,6 +416,8 @@ function TEdith.ParryLandManager(player, IsTaintedEdith)
 		local damageIncrease = 1 + (HopParams.HopStaticCharge + HopParams.HopStaticBRCharge) / 400
 		DamageFormula = DamageFormula * damageIncrease
 	end
+
+	HopParams.ParryDamage = DamageFormula
 
 	local tearsMult = (Player.GetplayerTears(player) / 2.73) 
 	local CinderTime = maths.SecondsToFrames((4 * tearsMult))

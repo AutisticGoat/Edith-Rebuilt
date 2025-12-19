@@ -2,6 +2,7 @@
 local mod = EdithRebuilt
 local callbacks = mod.Enums.Callbacks
 local ModRNG = mod.Modules.RNG
+local Player = mod.Modules.PLAYER
 
 ---@param player EntityPlayer
 ---@param entity Entity
@@ -15,7 +16,9 @@ mod:AddCallback(callbacks.OFFENSIVE_STOMP_HIT, function(_, player, entity)
 
     local rift = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.RIFT, 0, entity.Position, Vector.Zero,
     player):ToEffect() ---@cast rift EntityEffect
+    local Damage = Player.PlayerHasBirthright(player) and player.Damage or player.Damage/2
 
-    rift.CollisionDamage = player.Damage / 2
+
+    rift.CollisionDamage = Damage
     rift:SetTimeout(60)
 end)

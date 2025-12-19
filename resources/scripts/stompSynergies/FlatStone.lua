@@ -3,6 +3,7 @@ local modules = mod.Modules
 local Land = modules.LAND
 local EdithMod = modules.EDITH
 local TargetArrow = modules.TARGET_ARROW
+local Player = modules.PLAYER
 
 ---@param player EntityPlayer
 ---@param JumpData JumpData
@@ -27,8 +28,9 @@ mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, function(_, ent, data, pitfall)
     if not player then return end
 
     local params = EdithMod.GetJumpStompParams(player)
+    local Mult = Player.PlayerHasBirthright(player) and 0.9 or 0.75
 
-    params.Damage = params.Damage * 0.75
+    params.Damage = params.Damage * Player
     Land.LandFeedbackManager(player, Land.GetLandSoundTable(false, false), player.Color)
     Land.EdithStomp(player, params, true)
     Land.TriggerLandenemyJump(params, 6, 1.5)

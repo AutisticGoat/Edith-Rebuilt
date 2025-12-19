@@ -2,6 +2,7 @@ local mod = EdithRebuilt
 local enums = mod.Enums
 local ModRNG = mod.Modules.RNG
 local Helpers = mod.Modules.HELPERS
+local Player = mod.Modules.PLAYER
 local Callbacks = enums.Callbacks
 
 ---@param player EntityPlayer
@@ -11,8 +12,10 @@ function mod:StompDamageAdders(player, ent)
     if not Helpers.IsEnemy(ent) then return end
 
     local rng = player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_GODS_FLESH)
+    local chance = Player.PlayerHasBirthright(player) and 0.4 or 0.2
 
-    if not ModRNG.RandomBoolean(rng, 0.2) then return end
+
+    if not ModRNG.RandomBoolean(rng, chance) then return end
 
     ent:AddShrink(EntityRef(player), 150)
 end

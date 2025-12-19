@@ -2,6 +2,7 @@ local mod = EdithRebuilt
 local enums = mod.Enums
 local ModRNG = mod.Modules.RNG
 local Callbacks = enums.Callbacks
+local Player = mod.Modules.PLAYER
 
 ---@param player EntityPlayer
 ---@param ent Entity
@@ -14,7 +15,10 @@ function mod:StompDamageAdders(player, ent, params)
 
     if not ModRNG.RandomBoolean(rng, formula) then return end
     
+    local DamageMult = Player.PlayerHasBirthright(player) and 4 or 3
+
+
     Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.CRACK_THE_SKY, 10, ent.Position, Vector.Zero, player)
-    ent:TakeDamage(params.Damage * 3, DamageFlag.DAMAGE_LASER, EntityRef(player), 0)
+    ent:TakeDamage(params.Damage * DamageMult, DamageFlag.DAMAGE_LASER, EntityRef(player), 0)
 end
 mod:AddCallback(Callbacks.OFFENSIVE_STOMP_HIT, mod.StompDamageAdders)
