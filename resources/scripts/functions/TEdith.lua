@@ -437,7 +437,7 @@ function TEdith.ParryLandManager(player, IsTaintedEdith)
 	end
 
 	for _, ent in pairs(Isaac.FindInCapsule(PerfectParryCapsule, misc.ParryPartitions)) do
-		Isaac.RunCallback(enums.Callbacks.PERFECT_PARRY, player, ent)
+		Isaac.RunCallback(enums.Callbacks.PERFECT_PARRY, player, ent, HopParams)
 		proj = ent:ToProjectile()
 		 
 		if proj then
@@ -468,7 +468,7 @@ function TEdith.ParryLandManager(player, IsTaintedEdith)
 				end
 			end
 
-			ent:TakeDamage(DamageFormula, damageFlag, EntityRef(player), 0)
+			ent:TakeDamage(HopParams.ParryDamage, damageFlag, EntityRef(player), 0)
 			if hasBirthright then
 				ent:AddBurn(EntityRef(player), 123, 5)				
 			end
@@ -478,7 +478,7 @@ function TEdith.ParryLandManager(player, IsTaintedEdith)
 				ent:Kill()
 			end
 
-			if ent.HitPoints <= DamageFormula then
+			if ent.HitPoints <= HopParams.ParryDamage then
 				Isaac.RunCallback(enums.Callbacks.PERFECT_PARRY_KILL, player, ent)
 				Land.AddExtraGore(ent, player)
 			end

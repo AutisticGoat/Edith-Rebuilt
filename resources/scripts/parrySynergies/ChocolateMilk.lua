@@ -5,25 +5,29 @@ local data = mod.CustomDataWrapper.getData
 
 -- Pendiente de rehacer
 
--- ---@param player EntityPlayer
--- ---@param params EdithJumpStompParams
--- mod:AddCallback(callbacks.OFFENSIVE_STOMP, function(_, player, params)
---     if not player:HasCollectible(CollectibleType.COLLECTIBLE_CHOCOLATE_MILK) then return end
+---@param player EntityPlayer
+---@param params TEdithHopParryParams
+mod:AddCallback(callbacks.PERFECT_PARRY, function(_, player, _, params)
+    if not player:HasCollectible(CollectibleType.COLLECTIBLE_CHOCOLATE_MILK) then return end
 
---     local ChocoMult = data(player).ChocoMult
+    local ChocoMult = data(player).ParryChocoMult
 
---     params.Damage = params.Damage * (2 * ChocoMult)
--- end)
+    if ChocoMult > 0 then
+        params.ParryDamage = params.ParryDamage * (2 * ChocoMult)
+    end
 
--- ---@param player EntityPlayer
--- mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
---     if JumpLib:GetData(player).Jumping then return end
---     if not Player.IsPlayerShooting(player) then return end
+    data(player).ParryChocoMult = 0
+end)
 
---     local weapon = player:GetWeapon(1)
+---@param player EntityPlayer
+mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
+    if JumpLib:GetData(player).Jumping then return end
+    if not Player.IsPlayerShooting(player) then return end
 
---     if not weapon then return end
---     local chargePercent = weapon:GetCharge() / weapon:GetMaxCharge()
+    local weapon = player:GetWeapon(1)
 
---     data(player).ChocoMult = chargePercent
--- end)
+    if not weapon then return end
+    local chargePercent = weapon:GetCharge() / weapon:GetMaxCharge()
+
+    data(player).ParryChocoMult = chargePercent
+end)
