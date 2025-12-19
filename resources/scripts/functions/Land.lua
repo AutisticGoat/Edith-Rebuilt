@@ -125,8 +125,16 @@ local function ShouldConsumeKeys(player)
 	return (player:GetNumKeys() > 0 and not player:HasGoldenKey())
 end
 
+---@param player EntityPlayer
+---@return boolean
+local function CanUseKey(player)
+	return (player:GetNumKeys() > 0 or player:HasGoldenKey())
+end
+
 ---@param pickup EntityPickup
 local function MegaChestManager(player, pickup)
+	if not CanUseKey(player) then return end
+	if pickup.SubType == 0 then return end
 	local sprite = pickup:GetSprite()
 	sprite:Play("Idle")
 
@@ -163,19 +171,20 @@ function Land.PickupManager(player, pickup)
 		player:StopExtraAnimation()
 	end
 
-	if IsChest(pickup) then
-		if room:GetType() == RoomType.ROOM_CHALLENGE then
-			player:StopExtraAnimation()
-			pickup.Position = player.Position
-			pickup.Velocity = Vector(0, 0)
-		elseif IsMegaChest then
-			MegaChestManager(player, pickup)
-		else
-			if IsKeyRequiredChest(pickup) and ShouldConsumeKeys(player) then
-				player:TryUseKey()
-			end
-			pickup:TryOpenChest()
+	if not IsChest(pickup) then return end
+	if room:GetType() == RoomType.ROOM_CHALLENGE then
+		player:StopExtraAnimation()
+		pickup.Position = player.Position
+		pickup.Velocity = Vector(0, 0)
+	elseif IsMegaChest then
+		MegaChestManager(player, pickup)
+	elseif IsKeyRequiredChest(pickup) then
+		if CanUseKey(player) then
+			player:TryUseKey()
+			pickup:TryOpenChest(player)
 		end
+	else
+		pickup:TryOpenChest()
 	end
 end
 
@@ -217,14 +226,14 @@ function Land.HandleEntityInteraction(ent, parent, knockback)
             local isFlavorTextPickup = Helpers.When(var, tables.BlacklistedPickupVariants, false)
             local IsLuckyPenny = var == PickupVariant.PICKUP_COIN and ent.SubType == CoinSubType.COIN_LUCKYPENNY
 
+			if Helpers.IsVestigeChallenge() then
+				Land.PickupManager(parent, pickup)
+			end
+
             if isFlavorTextPickup or IsLuckyPenny then return end
 			parent:ForceCollide(pickup, true)
 
 			if not Player.IsEdith(parent, false) then return end
-
-			if Helpers.IsVestigeChallenge() then
-				Land.PickupManager(parent, pickup)
-			end
 
             if not (var == PickupVariant.PICKUP_BOMBCHEST and Player.IsEdith(parent, false)) then return end
 			pickup:TryOpenChest(parent)
@@ -337,9 +346,11 @@ function Land.EdithStomp(parent, params, breakGrid)
 
 		if ent.HitPoints > params.Damage then goto Break end
 		Isaac.RunCallback(callbacks.OFFENSIVE_STOMP_KILL, parent, ent, params)
+
 		if StatusEffect.EntHasStatusEffect(ent, enums.EdithStatusEffects.SALTED) then
 			VestigeUnlockManager()
 		end
+
 		EdithBirthcake(parent, isSalted)
 		Land.AddExtraGore(ent, parent)
 		::Break::
