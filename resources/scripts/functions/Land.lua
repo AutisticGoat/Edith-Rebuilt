@@ -346,7 +346,7 @@ function Land.EdithStomp(parent, params, breakGrid)
 	end
 
 	if breakGrid then
-		Helpers.DestroyGrid(parent, radius)
+		Helpers.DestroyGrid(parent)
 	end
 end
 
