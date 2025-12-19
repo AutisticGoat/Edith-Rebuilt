@@ -225,3 +225,12 @@ function mod:HiddenCloset()
     end
 end
 mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, mod.HiddenCloset)
+
+---@param player EntityPlayer
+mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(_, player)
+    local PGD = Isaac.GetPersistentGameData()
+
+    if PGD:Unlocked(achievements.ACHIEVEMENT_EDITH) then return end
+    if player:GetNumBombs() < 25 then return end
+    PGD:TryUnlock(achievements.ACHIEVEMENT_EDITH)
+end)

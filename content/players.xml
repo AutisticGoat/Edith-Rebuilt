@@ -11,6 +11,7 @@
 		birthright="Super Stomps"
 		items="Salt Shaker"
 		noshake="true"
+		achievement="EdithRebuilt_Edith"
 	/>
 	<player 
 		bSkinParent="Edith​​​" 

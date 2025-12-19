@@ -1,4 +1,6 @@
 <achievements gfxroot="gfx/ui/achievements/">
+    <achievement name="EdithRebuilt_Edith" gfx="achievement_Edith.png" />
+
     <!-- Edith unlocks -->
     <achievement name="EdithRebuilt_Salt Shaker" gfx="achievement_saltshaker.png" />
     <achievement name="EdithRebuilt_Pepper Grinder" gfx="achievement_peppergrinder.png" />

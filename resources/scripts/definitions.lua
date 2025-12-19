@@ -63,6 +63,7 @@ EdithRebuilt.Enums = {
 		-- Called everytime a Perfect Parry is triggered (player: EntityPlayer, entity: Entity)
 		---* player `EntityPlayer`
 		---* entity `Entity`
+		---* params `TEdithHopParryParams`
 		PERFECT_PARRY = "EdithRebuilt_PERFECT_PARRY",
 
 		-- Called everytime an enemy is killed by a Perfect Parry is triggered
@@ -121,6 +122,7 @@ EdithRebuilt.Enums = {
 	},
 	Achievements = {
 		-- Edith unlocks
+		ACHIEVEMENT_EDITH = Isaac.GetAchievementIdByName("EdithRebuilt_Edith"),
 		ACHIEVEMENT_SALT_SHAKER = Isaac.GetAchievementIdByName("EdithRebuilt_Salt Shaker"),
 		ACHIEVEMENT_PEPPER_GRINDER = Isaac.GetAchievementIdByName("EdithRebuilt_Pepper Grinder"),
 		ACHIEVEMENT_SAL = Isaac.GetAchievementIdByName("EdithRebuilt_Sal"),
