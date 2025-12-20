@@ -18,6 +18,8 @@ local TargetArrow = modules.TARGET_ARROW
 local TEdithMod = modules.TEDITH
 local Helpers = modules.HELPERS
 local Maths = modules.MATHS
+local Creeps = modules.CREEPS
+local ModRNG = modules.RNG
 local data = mod.CustomDataWrapper.getData
 local TEdith = {}
 
@@ -28,6 +30,10 @@ function TEdith:TaintedEdithInit(player)
 
 	local isGrudge = Helpers.IsGrudgeChallenge()
 	local costume = isGrudge and costumes.ID_EDITH_B_GRUDGE_SCARF or costumes.ID_EDITH_B_SCARF
+	local HopParams = TEdithMod.GetHopParryParams(player)
+
+	data(player).movementVector = Vector.Zero
+	HopParams.HopDirection = Vector.Zero
 
 	player:AddNullCostume(costume)
 	Player.SetChallengeSprite(player, Isaac.GetChallenge())
@@ -51,8 +57,6 @@ function mod:TaintedEdithUpdate(player)
 	if isArrowMoving then
 		TargetArrow.SpawnEdithTarget(player, true)
 	end
-
-	-- print("Arrow:", arrow)
 
 	if arrow then
 		TEdithMod.HopDashChargeManager(player, arrow)
@@ -166,10 +170,17 @@ function mod:EdithHopLanding(player)
 	local Charge = TEdithMod.GetHopDashCharge(player, false, true)
 	local BRCharge = HopParams.HopMoveBRCharge
 
+	local rng = player:GetDropRNG()
+
 	--- Pendiente de rehacer
 	HopParams.HopDamage = (((damageBase + player.Damage) / 3.5) * (Charge + BRCharge) / 100) * (Charge / 100) 
 	HopParams.HopKnockback = Knockbackbase * maths.exp(Charge / 100, 1, 1.5)
 	HopParams.HopRadius = math.min((30 + (tearRange - 9)), 35)
+
+	if Charge >= 100 and ModRNG.RandomBoolean(rng, 0.75) then
+		local Cinder = Creeps.SpawnCinderCreep(player, player.Position, 0.5, 4)
+		Cinder.SpriteScale = Vector(2, 2)
+	end
 
 	player:SpawnWaterImpactEffects(player.Position, Vector(1, 1), 1)	
 	land.LandFeedbackManager(player, land.GetLandSoundTable(true), misc.BurntSaltColor)
