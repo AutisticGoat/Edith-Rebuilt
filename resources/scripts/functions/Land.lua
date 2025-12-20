@@ -238,6 +238,13 @@ function Land.HandleEntityInteraction(ent, parent, knockback)
             if not (var == PickupVariant.PICKUP_BOMBCHEST and Player.IsEdith(parent, false)) then return end
 			pickup:TryOpenChest(parent)
         end,
+		[EntityType.ENTITY_SLOT] = function ()
+			parent:ForceCollide(ent, true)
+			if var == SlotVariant.BLOOD_DONATION_MACHINE or var == SlotVariant.DEVIL_BEGGAR then
+				print("aaaaaaaaaaaaaa")
+				parent:TakeDamage(1, 0, EntityRef(ent), 0)
+			end
+		end,
         [EntityType.ENTITY_SHOPKEEPER] = function()
 			if Player.IsEdith(parent, true) then return end
             ent:Kill()
