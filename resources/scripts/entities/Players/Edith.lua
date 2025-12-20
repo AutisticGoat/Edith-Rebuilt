@@ -9,6 +9,7 @@ local modules = mod.Modules
 local EdithMod = modules.EDITH
 local Land = modules.LAND
 local TargetArrow = modules.TARGET_ARROW
+local effects = modules.STATUS_EFFECTS
 local helpers = modules.HELPERS
 local Player = modules.PLAYER
 local params = EdithMod.GetJumpStompParams
@@ -124,6 +125,7 @@ local function OnNPCUpdate(_, npc)
 	local jumpData = JumpLib:GetData(npc)
 
 	if not jumpData.Jumping then return end
+	if not effects.EntHasStatusEffect(npc, "Salted") and npc.HitPoints <= 0 then return end
 	if jumpData.Tags.EdithRebuilt_EnemyJump then return true end
 end
 mod:AddCallback(ModCallbacks.MC_PRE_NPC_UPDATE, OnNPCUpdate)
