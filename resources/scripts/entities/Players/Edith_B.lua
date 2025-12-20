@@ -177,9 +177,10 @@ function mod:EdithHopLanding(player)
 	HopParams.HopKnockback = Knockbackbase * maths.exp(Charge / 100, 1, 1.5)
 	HopParams.HopRadius = math.min((30 + (tearRange - 9)), 35)
 
-	if Charge >= 100 and ModRNG.RandomBoolean(rng, 0.75) then
-		local Cinder = Creeps.SpawnCinderCreep(player, player.Position, 0.5, 4)
-		Cinder.SpriteScale = Vector(2, 2)
+	if Charge >= 100 and ModRNG.RandomBoolean(rng) then
+		for i = 1, 5 do
+			Creeps.SpawnCinderCreep(player, player.Position + Vector(0, 20):Rotated(i * (360/5)), damage, 6)
+		end
 	end
 
 	player:SpawnWaterImpactEffects(player.Position, Vector(1, 1), 1)	
