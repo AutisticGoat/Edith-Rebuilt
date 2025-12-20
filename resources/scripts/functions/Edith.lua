@@ -347,7 +347,9 @@ end
 ---@param player EntityPlayer
 ---@param params EdithJumpStompParams
 ---@param bomb? EntityBomb
-function Edith.ExplosionRecoil(player, params,bomb)
+function Edith.ExplosionRecoil(player, params, bomb)
+	if not JumpLib:GetData(player).Jumping then return end
+
 	JumpLib:Jump(player, {
 		Height = 10,
 		Speed = 1.5,
