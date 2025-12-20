@@ -442,7 +442,7 @@ function TEdith.ParryLandManager(player, IsTaintedEdith)
 		 
 		if proj then
 			spawner = proj.Parent or proj.SpawnerEntity
-			targetEnt = spawner or mod.GetNearestEnemy(player) or proj
+			targetEnt = spawner or helpers.GetNearestEnemy(player) or proj
 
 			proj.FallingAccel = -0.1
 			proj.FallingSpeed = 0

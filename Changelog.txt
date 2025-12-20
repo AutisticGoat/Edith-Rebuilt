@@ -1,2 +1,5 @@
 v1.0.0
 - Initial mod release
+
+v1.0.1
+- Fixed Tainted Edith's projectile parry not working at all
