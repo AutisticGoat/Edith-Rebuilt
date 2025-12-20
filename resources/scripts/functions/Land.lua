@@ -318,7 +318,7 @@ function Land.EdithStomp(parent, params, breakGrid)
 	local isDefStomp = params.IsDefensiveStomp
 	local HasTerra = parent:HasCollectible(CollectibleType.COLLECTIBLE_TERRA)
 	local TerraRNG = parent:GetCollectibleRNG(CollectibleType.COLLECTIBLE_TERRA)
-	local TerraMult = HasTerra and mod.RandomFloat(TerraRNG, 0.5, 2) or 1	
+	local TerraMult = HasTerra and modRNG.RandomFloat(TerraRNG, 0.5, 2) or 1	
 	local capsule = Capsule(parent.Position, Vector.One, 0, params.Radius)
 	local SaltedTime = Math.Round(Math.Clamp(120 * (Player.GetplayerTears(parent) / 2.73), 60, 360))
 	local isSalted
