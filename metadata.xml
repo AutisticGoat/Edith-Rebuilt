@@ -1,12 +1,78 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <metadata>
     <name>Edith: Rebuilt</name>
-    <directory>Edith (kotrybuild)</directory>
-    <id>0</id>
+    <directory>edith (kotrybuild)</directory>
+    <id>3627265249</id>
     <description>
-        pending description
+        [h1] WARNING: THIS MOD REQUIRES [url=https://repentogon.com/]REPENTOGON[/url] TO WORK [/h1]
+[h2] A whole rework and expansion of the cut classic from Antibirth: Edith [/h2]
+Edith: Rebuilt is a mod that brings back Edith, the cut character from Antibirth, with a complete rework that resembles the classic Antibirth gameplay style, a full set of unlocks, and a Tainted counterpart
+
+[h3][b]Main Feautures[/b][/h3]
+[list]
+[*][b]Reworked gameplay:[/b] Enjoy a refined character experience, without feeling too different from Antibirth's experience
+[*][b]Over 25 unlocks:[/b] Over 15 items, 4 trinkets, 2 challenges, and more, including an unlock method even for Edith and a Tainted counterpart
+[/list]
+
+[h3][b]Rebuilt Edith:[/b][/h3]
+[list]
+[*][b]Controled jump:[/b] Now Edith's jump is controlled by a button instead of being automatic, giving her more control
+[*][b]Two types of stomps:[/b] Protect yourself with defensive stomps (by holding the jump button) and counterattack with classic ofensive stomps
+[*][b]Salt the enemies:[/b] Use defensive stomps to apply a brand new status effect  which slows enemies and weakens them
+[*][b]Take advantage of stats:[/b] Now stats have more interaction with stomping, Reduce stomp cooldown with high speed, increase stomp radius with range, and stomp's knockback with shotspeed
+[*][b]Only tears:[/b] Edith is unable to use other weapons rather than tears (this means no brimstone, no mom's knife, no spirit sword, etc), but this can be circumvented with...
+[*][b]Stomp Synergies:[/b] Over 20 stomp synergies and more to come with updates
+[*][b]Birthright effect:[/b] Enhance stomps and their synergies with Edith's birthright effect, Super Stomps
+[/list]
+
+[h3][b]Tainted Edith:[/b][/h3]
+You know, i don't think it would be good if i explain how does Tainted Edith works, go to unlock her and discover it by yourself, i [url=https://youtu.be/EUJOp8AdBkg][b]hop[/b]e [/url] you enjoy playing with her as much as i did designing here
+
+[h3][b]Mod Compatibility:[/b][/h3]
+Mod compatibility isn't as great as I expected to be on release, but this will be worked on, current supported mods are:
+- Birthcake: Rebaked
+
+
+[h3]Possible questions:[/h3]
+
+[b]Where are the costumes?[/b]
+This mod was made by a pretty small team, where the 90% of the stuff was made by only 1 person (the coder), if we manage to get more help, there will be an updated exclusively dedicated to costumes
+
+[b]Why is mod support so poor?[/b]
+Once again, this mod was almost enterily made by 1 person, which isn't exactly the best in mental stability, but don't worry, i'll improve mod support with future updates
+
+[b]What will happen to Edith: Vestige?[/b]
+Edith Vestige will remain on the workshop as a demo for this mod, i don't think i will update it again tho, but i won't take it down
+
+[b]Why another Edith, aren't there like already 5?[/b]
+Yeah, i know there are a lot of Ediths, but i've been working on this since september 2022 and wanted to release it, sorry for 
+
+[b]Why did you decide to make this mod?[/b]
+While working on the challenge, I noticed that the way the character was controlled was somewhere between the rework done for Rebuilt and the work done in Antibirth, so I decided to do this as an experiment.
+
+[b]There will be a Tarnished Edith?[/b]
+Yes! I already have an raw idea of  how Tarnished Edith will behave, but she will be added in the future
+
+
+A GitHub mirror can be found [url=https://github.com/AutisticGoat/Edith-Rebuilt]here[/url]
+
+This is the greatest work of my life, i hope you enjoy it the same way i did working on it.
+
+Team:
+- Kotry: Director and coder
+- Pattowolf: Spriter
+- gigamouse: Spriter 
+
+Notable Contributors:
+- Jozin: Thumbnail art
+- Yuls Bolt: Tainted Edith's sprite revision
+- Sr Kalaka: Edith's sprite
+
+Special Thanks:
+- JJ: For making her own [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2785782570]Edith interpretation[/url], which was the base of this mod
+- D!Edith team: For releasing [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3281491787]D!Edith[/url] and [url=https://github.com/drpandacat/JumpLib]JumpLib[/url], which were a great inspiration to resume this project
     </description>
-    <version>1.0</version>
+    <version>1.0.2</version>
     <visibility>Public</visibility>
     <tag id="Lua"/>
     <tag id="Items"/>

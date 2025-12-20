@@ -3,3 +3,6 @@ v1.0.0
 
 v1.0.1
 - Fixed Tainted Edith's projectile parry not working at all
+- Potentially fixed an error that doesn't trigger effect room transition (needs more testing)
+- Now Edith won't take damage when pitfalling
+- Now Tainted Edith has a chance to spawn Cinder creep when hop-landing
