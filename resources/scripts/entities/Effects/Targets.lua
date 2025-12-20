@@ -165,9 +165,10 @@ end
 mod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, effect)
 	if not IsAnyEdithTarget(effect) then return end
 	local player = effect.SpawnerEntity:ToPlayer()
+	local radius = effect.Variant == Vars.EFFECT_EDITH_TARGET and 28 or 20
 
     if not player then return end
-	targetArrow.TargetDoorManager(effect, player, effect.Variant == Vars.EFFECT_EDITH_TARGET and 28 or 20)
+	targetArrow.TargetDoorManager(effect, player, radius)
     EdithTargetManagement(effect, player)
 end)
 

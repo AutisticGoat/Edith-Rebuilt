@@ -111,6 +111,7 @@ function targetArrow.TargetDoorManager(effect, player, triggerDistance)
 		if not door then goto Break end
 		local sprite = door:GetSprite()
 		local doorSpritePath = sprite:GetLayer(0):GetSpritesheetPath()
+		if not doorSpritePath then goto Break end
 		local MausoleumRoomCheck = string.find(doorSpritePath, "mausoleum") ~= nil
 		local StrangeDoorCheck = string.find(doorSpritePath, "mausoleum_alt") ~= nil
 		local ShouldMoveToStrangeDoorPos = StrangeDoorCheck and sprite:WasEventTriggered("FX")
