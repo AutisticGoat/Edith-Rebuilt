@@ -200,7 +200,7 @@ function Land.HandleEntityInteraction(ent, parent, knockback)
             if not tear then return end
 			if Player.IsEdith(parent, true) then return end
 
-			mod.BoostTear(tear, 25, 1.5)
+			Helpers.BoostTear(tear, 25, 1.5)
         end,
         [EntityType.ENTITY_FIREPLACE] = function()
             if var == 4 then return end
