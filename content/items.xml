@@ -8,7 +8,7 @@
 		quality="3" 
 		chargetype="timed"
 		maxcharges="360"
-		tags=""
+		tags="offensive"
 		achievement="EdithRebuilt_Salt Shaker"
 	/>
 	<active
@@ -19,6 +19,7 @@
 		quality="2" 
 		maxcharges="1"
 		achievement="EdithRebuilt_Pepper Grinder"
+		tags="offensive"
 	/>
 	<active
 		id="2" 
@@ -29,6 +30,7 @@
 		chargetype="timed"
 		maxcharges="360"
 		achievement="EdithRebuilt_Sulfuric Fire"
+		tags="offensive"
 	/>	
 	<passive
 		id="3" 
@@ -37,7 +39,7 @@
 		gfx="collectibles_EdithsHood.png"
 		quality="2"
 		cache="firedelay damage"
-		tags="offensive"
+		tags="offensive tearsup summonable"
 		achievement="EdithRebuilt_Ediths Hood"
 	/>
 	<passive
@@ -46,7 +48,7 @@
 		description="Salt shedding" 
 		gfx="collectibles_Sal.png"
 		quality="2"
-		tags="summonable"
+		tags="offensive summonable"
 		achievement="EdithRebuilt_Sal"
 	/>
 	<passive
@@ -66,7 +68,7 @@
 		cache="damage"
 		gfx="collectibles_Molten_Core.png"
 		quality="3"
-		tags="offensive"
+		tags="offensive summonable"
 		achievement="EdithRebuilt_Molten Core"
 	/>
 	<active
@@ -87,7 +89,7 @@
 		cache="damage"
 		gfx="collectibles_Salt_Heart.png"
 		quality="2"
-		tags="nolostbr"
+		tags="nolostbr summonable"
 		achievement="EdithRebuilt_Salt Heart"
 	/>
 	<active
@@ -108,6 +110,7 @@
 		description="Mmmmh, tasty!" 
 		gfx="collectibles_Spices_Mix.png"
 		quality="2"
+		tags="offensive"
 		achievement="EdithRebuilt_SpicesMix"
 	/>
 	<passive	
@@ -117,6 +120,7 @@
 		cache="damage"
 		gfx="collectibles_Hydrargyrum.png"
 		quality="2"
+		tags="offensive summonable"
 		achievement="EdithRebuilt_Hydrargyrum"
 	/>
 	<trinket 
@@ -142,6 +146,7 @@ s
 		gfx="collectibles_Divine_Wrath.png"
 		quality="2"
 		maxcharges="4"
+		tags="offensive"
 		achievement="EdithRebuilt_Divine Wrath"
 	/>	
 	<active
@@ -182,6 +187,7 @@ s
 		description="Rocky grudge" 
 		gfx="collectibles_Chunk_Of_Basalt.png"
 		quality="2"
+		tags="offensive summonable"
 		achievement="EdithRebuilt_Chunk of Basalt"
 	/>
 </items>
