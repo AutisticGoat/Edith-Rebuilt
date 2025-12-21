@@ -13,6 +13,7 @@ local TEdith = modules.TEDITH
 local Helpers = modules.HELPERS
 local targetArrow = modules.TARGET_ARROW
 local data = mod.DataHolder.GetEntityData
+
 local teleportPoints = {
 	Vector(110, 135),
 	Vector(595, 385),
@@ -87,8 +88,10 @@ local function EdithTargetManagement(effect, player)
 
 	if room:GetType() == RoomType.ROOM_DUNGEON then
 		for _, v in pairs(teleportPoints) do
-			if (effectPos - v):Length() > 20 then break end
+			print(v, effectPos)
+			if (effectPos - v):Length() > 20 then goto continue end
 			player.Position = effectPos + effect.Velocity:Normalized():Resized(25)
+		    ::continue::
 		end
 	end
 
