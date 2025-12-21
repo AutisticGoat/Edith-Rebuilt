@@ -7,7 +7,7 @@ local modules = mod.Modules
 local StatusEffects = modules.STATUS_EFFECTS
 local Helpers = modules.HELPERS
 local Player = modules.PLAYER
-local data = mod.CustomDataWrapper.getData
+local data = mod.DataHolder.GetEntityData
 
 local ModCreeps = {
     [subtype.CINDER_CREEP] = true,

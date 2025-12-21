@@ -5,7 +5,7 @@ local utils = enums.Utils
 local game = utils.Game
 local MoltenCore = {}
 local Helpers = mod.Modules.HELPERS
-local data = mod.CustomDataWrapper.getData
+local data = mod.DataHolder.GetEntityData
 
 function MoltenCore:MoltenCoreStats(player)
 	local MoltenCoreCount = player:GetCollectibleNum(items.COLLECTIBLE_MOLTEN_CORE)

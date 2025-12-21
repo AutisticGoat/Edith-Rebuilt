@@ -7,7 +7,7 @@ local function Log(str)
     Isaac.DebugString(str)
 end
 
-local data = EdithRebuilt.CustomDataWrapper.getData -- Can be changed
+local data = EdithRebuilt.DataHolder.GetEntityData -- Can be changed
 
 local function load()
 	CustomShockwaveAPI = RegisterMod("Custom Shockwave", 1)

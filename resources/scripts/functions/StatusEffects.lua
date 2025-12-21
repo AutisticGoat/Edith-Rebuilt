@@ -6,7 +6,7 @@ local ModRNG = require("resources.scripts.functions.RNG")
 local Creeps = require("resources.scripts.functions.Creeps")
 local Helpers = require("resources.scripts.functions.Helpers")
 local Player  = require("resources.scripts.functions.Player")
-local data = mod.CustomDataWrapper.getData
+local data = mod.DataHolder.GetEntityData
 local StatusEffects = {}
 
 -- All commented sprites will get done later

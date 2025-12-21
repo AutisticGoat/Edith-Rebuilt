@@ -7,7 +7,7 @@ local callbacks = enums.Callbacks
 local achievements = enums.Achievements
 local RenderMenu = true
 local SaveManager = mod.SaveManager
-local data = mod.CustomDataWrapper.getData
+local data = mod.DataHolder.GetEntityData
 
 ---@class EdithData
 ---@field TargetDesign number

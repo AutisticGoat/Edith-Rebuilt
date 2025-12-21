@@ -1,8 +1,8 @@
 EdithRebuilt = RegisterMod("Edith: Rebuilt", 1)
 local mod = EdithRebuilt
 
-EdithRebuilt.CustomDataWrapper = require("resources.scripts.libs.EdithRebuiltSaveData")
-EdithRebuilt.CustomDataWrapper.init(mod)
+EdithRebuilt.DataHolder = include("resources.scripts.libs.DataHolder")
+EdithRebuilt.CustomDataWrapper = include("resources.scripts.libs.EdithRebuiltSaveData")
 EdithRebuilt.SaveManager = require("resources.scripts.libs.EdithRebuiltSaveManager")
 EdithRebuilt.SaveManager.Init(mod)
 EdithRebuilt.Hsx = require("resources.scripts.libs.lhsx")
@@ -27,6 +27,7 @@ EdithRebuilt.Modules = {
 	TEDITH = include("resources.scripts.functions.TEdith"),
 	STATUS_EFFECTS = include("resources.scripts.functions.StatusEffects"),
 	CREEPS = include("resources.scripts.functions.Creeps"),
+	-- DATA_HOLDER = include("resources.scripts.functions.DataHolder")
 }
 
 include("include")

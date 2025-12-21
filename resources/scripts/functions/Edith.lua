@@ -15,7 +15,7 @@ local VecDir = require("resources.scripts.functions.VecDir")
 local TargetArrow = require("resources.scripts.functions.TargetArrow")
 local modRNG = require("resources.scripts.functions.RNG")
 local Helpers = require("resources.scripts.functions.Helpers")
-local data = mod.CustomDataWrapper.getData
+local data = mod.DataHolder.GetEntityData
 local Edith = {}
 
 ---@class EdithJumpStompParams

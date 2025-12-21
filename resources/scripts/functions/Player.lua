@@ -68,7 +68,6 @@ function player.SetNewANM2(player, FilePath)
 	playerSprite:Update()
 end
 
-
 ---Helper function for Edith's cooldown color manager
 ---@param player EntityPlayer
 ---@param intensity number

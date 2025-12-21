@@ -9,7 +9,7 @@ local tables = enums.Tables
 local sounds = enums.SoundEffect
 local callbacks = enums.Callbacks
 local status = enums.EdithStatusEffects
-local data = mod.CustomDataWrapper.getData
+local data = mod.DataHolder.GetEntityData
 local Math = require("resources.scripts.functions.Maths")
 local Helpers = require("resources.scripts.functions.Helpers")
 local modRNG = require("resources.scripts.functions.RNG")
@@ -239,6 +239,7 @@ function Land.HandleEntityInteraction(ent, parent, knockback)
 			pickup:TryOpenChest(parent)
         end,
 		[EntityType.ENTITY_SLOT] = function ()
+			-- parent:ForceCollide(ent, false)
 			if var == SlotVariant.BLOOD_DONATION_MACHINE or var == SlotVariant.DEVIL_BEGGAR then
 				parent:ForceCollide(ent, false)
 				parent:TakeDamage(1, 0, EntityRef(ent), 0)

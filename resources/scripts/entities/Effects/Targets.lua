@@ -12,7 +12,7 @@ local Edith = modules.EDITH
 local TEdith = modules.TEDITH
 local Helpers = modules.HELPERS
 local targetArrow = modules.TARGET_ARROW
-local data = mod.CustomDataWrapper.getData
+local data = mod.DataHolder.GetEntityData
 local teleportPoints = {
 	Vector(110, 135),
 	Vector(595, 385),

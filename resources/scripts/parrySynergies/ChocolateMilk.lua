@@ -1,7 +1,7 @@
 local mod = EdithRebuilt
 local callbacks = mod.Enums.Callbacks
 local Player = mod.Modules.PLAYER
-local data = mod.CustomDataWrapper.getData
+local data = mod.DataHolder.GetEntityData
 
 -- Pendiente de rehacer
 

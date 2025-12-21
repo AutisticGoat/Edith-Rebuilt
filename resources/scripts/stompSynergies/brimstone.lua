@@ -1,7 +1,6 @@
 local mod = EdithRebuilt
 local callbacks = mod.Enums.Callbacks
-local data = mod.CustomDataWrapper.getData
-
+local data = mod.DataHolder.GetEntityData
 ---@param player EntityPlayer\
 mod:AddCallback(callbacks.OFFENSIVE_STOMP, function(_, player)
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE) then return end

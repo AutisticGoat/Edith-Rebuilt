@@ -1,6 +1,6 @@
 local mod = EdithRebuilt
 local callbacks = mod.Enums.Callbacks
-local data = mod.CustomDataWrapper.getData
+local data = mod.DataHolder.GetEntityData
 
 -- I need to think about something different
 

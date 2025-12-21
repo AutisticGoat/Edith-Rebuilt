@@ -5,7 +5,7 @@ local utils = enums.Utils
 local Helpers = mod.Modules.HELPERS
 local EdithMod = mod.Modules.EDITH
 local ChunkOfBasalt = {}
-local data = mod.CustomDataWrapper.getData
+local data = mod.DataHolder.GetEntityData
 
 ---@param player EntityPlayer
 function ChunkOfBasalt:TriggerBasaltDash(player)

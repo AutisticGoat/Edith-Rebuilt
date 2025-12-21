@@ -6,7 +6,7 @@ local misc = enums.Misc
 local tables = enums.Tables
 local ConfigDataTypes = enums.ConfigDataTypes
 local saveManager = mod.SaveManager
-local data = mod.CustomDataWrapper.getData
+local data = mod.DataHolder.GetEntityData
 
 local Helpers = {}
 
@@ -523,5 +523,4 @@ function Helpers.RenderAreaOfEffect(pos, AreaSize, AreaColor) -- Took from Melee
         LINE_SPRITE:Render(renderPosition)
     end
 end
-
 return Helpers

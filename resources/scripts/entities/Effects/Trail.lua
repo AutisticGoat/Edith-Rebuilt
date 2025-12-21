@@ -5,7 +5,7 @@ local misc = enums.Misc
 local Trail = {}
 local SaveManager = mod.SaveManager
 local Helpers = mod.Modules.HELPERS
-local data = mod.CustomDataWrapper.getData
+local data = mod.DataHolder.GetEntityData
 
 function Trail.ResetTEdithTrail(player)
 	local playerData = data(player)

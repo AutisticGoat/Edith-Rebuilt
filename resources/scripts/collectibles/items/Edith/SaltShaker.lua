@@ -15,7 +15,7 @@ local StsEffects = modules.STATUS_EFFECTS
 local Helpers = modules.HELPERS
 local Creeps = modules.CREEPS
 local degree = 360 / SaltQuantity
-local data = mod.CustomDataWrapper.getData
+local data = mod.DataHolder.GetEntityData
 local SaltShaker = {}
 
 local DespawnSaltTypes = {

@@ -1,0 +1,65 @@
+-- Script taken from Isaac Blue Prints (https://isaacblueprints.com/tutorials/concepts/entity_data/)
+local mod = EdithRebuilt
+local dataHolder = {}
+
+-- We will store the data within its own table in the data holder for easy access
+dataHolder.Data = {}
+
+---@param entity any
+---@return table
+function dataHolder.GetEntityData(entity)
+    local ptrHash = GetPtrHash(entity)
+
+    if not dataHolder.Data[ptrHash] then
+        dataHolder.Data[ptrHash] = {}
+        local entityData = dataHolder.Data[ptrHash]
+        entityData.Pointer = EntityPtr(entity)
+    end
+
+    return dataHolder.Data[ptrHash]
+end
+
+local ClearDataCallbacks = {
+    ModCallbacks.MC_POST_NPC_INIT,
+    ModCallbacks.MC_POST_PLAYER_INIT,
+    ModCallbacks.MC_POST_TEAR_INIT,
+    ModCallbacks.MC_POST_LASER_INIT,
+    ModCallbacks.MC_POST_BOMB_INIT,
+    ModCallbacks.MC_POST_KNIFE_INIT,
+    ModCallbacks.MC_POST_PICKUP_INIT,
+    ModCallbacks.MC_POST_EFFECT_INIT,
+    ModCallbacks.MC_POST_SLOT_INIT,
+    ModCallbacks.MC_POST_PROJECTILE_INIT,
+    ModCallbacks.MC_FAMILIAR_INIT,
+    ModCallbacks.MC_POST_ENTITY_REMOVE,
+    ModCallbacks.MC_POST_NPC_DEATH,
+}
+
+local function ClearEntityData(_, ent)
+    local ptrHash = GetPtrHash(ent)
+    dataHolder.Data[ptrHash] = nil
+end
+
+for _, callback in ipairs(ClearDataCallbacks) do
+    mod:AddCallback(callback, ClearEntityData)
+end
+
+mod:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT, function()
+    dataHolder.Data = {}
+end)
+
+---test
+---@param player EntityPlayer
+mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
+    local playerData = dataHolder.GetEntityData(player)
+
+    playerData.CountPress = playerData.CountPress or 0
+
+    if Input.IsButtonTriggered(Keyboard.KEY_H, player.ControllerIndex) then
+        playerData.CountPress = playerData.CountPress + 1
+    end
+
+    -- print(playerData.CountPress)
+end)
+
+return dataHolder

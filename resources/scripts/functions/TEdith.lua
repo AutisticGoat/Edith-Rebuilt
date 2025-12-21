@@ -5,16 +5,15 @@ local misc = enums.Misc
 local utils = enums.Utils
 local game = utils.Game
 local sfx = utils.SFX
-local data = mod.CustomDataWrapper.getData
 local jumpFlags = enums.Tables.JumpFlags
 local jumpTags = enums.Tables.JumpTags
 local maths = require("resources.scripts.functions.Maths")
 local helpers = require("resources.scripts.functions.Helpers")
 local Player = require("resources.scripts.functions.Player")
 local StatusEffects = require("resources.scripts.functions.StatusEffects")
-local TargetArrow = require("resources.scripts.functions.TargetArrow")
 local Land = require("resources.scripts.functions.Land")
 local TEdith = {}
+local data = mod.DataHolder.GetEntityData
 
 ---@class TEdithHopParryParams
 ---@field HopDamage number
@@ -33,28 +32,27 @@ local TEdith = {}
 ---@field IsParryJump boolean
 ---@field GrudgeDash boolean
 
-local DefaultHopDashParams = {
-    HopDamage = 0,
-    HopRadius = 0,
-    HopKnockback = 0,
-	HopDirection = Vector.Zero,
-	IsHoping = false,
-	IsParryJump = false,
-	HopMoveCharge = 0,
-	HopMoveBRCharge = 0,
-	HopStaticCharge = 0,
-	HopStaticBRCharge = 0,
-	ParryDamage = 0,
-	ParryKnockback = 0,
-	ParryRadius = 0,
-	ParryCooldown = 0,
-	GrudgeDash = falses
-
-} --[[@as TEdithHopParryParams]]
-
 ---@param player EntityPlayer
 ---@return TEdithHopParryParams
 function TEdith.GetHopParryParams(player)
+	local DefaultHopDashParams = {
+		HopDamage = 0,
+		HopRadius = 0,
+		HopKnockback = 0,
+		HopDirection = Vector.Zero,
+		IsHoping = false,
+		IsParryJump = false,
+		HopMoveCharge = 0,
+		HopMoveBRCharge = 0,
+		HopStaticCharge = 0,
+		HopStaticBRCharge = 0,
+		ParryDamage = 0,
+		ParryKnockback = 0,
+		ParryRadius = 0,
+		ParryCooldown = 0,
+		GrudgeDash = falses
+
+	} --[[@as TEdithHopParryParams]]
 	local playerData = data(player)
     playerData.HopDashParams = playerData.HopDashParams or DefaultHopDashParams
     local params = playerData.HopDashParams ---@cast params TEdithHopParryParams
@@ -243,6 +241,8 @@ function TEdith.HopDashChargeManager(player, arrow)
 	local targetframecount = arrow.FrameCount
 	local chargeAdd = BaseCharge * maths.exp(player.MoveSpeed, 1, 1.5)
 	HopParams.HopDirection = posDif:Normalized()
+
+	print(data(player).movementVector)
 
 	local arrowVel = data(player).movementVector
 	local HopVec = arrowVel

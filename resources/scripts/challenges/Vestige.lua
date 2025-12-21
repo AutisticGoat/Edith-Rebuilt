@@ -1,6 +1,6 @@
 local mod = EdithRebuilt
 local JumpTags = mod.Enums.Tables.JumpTags
-local data = mod.CustomDataWrapper.getData
+local data = mod.DataHolder.GetEntityData
 local modules = mod.Modules
 local TargetArrow = modules.TARGET_ARROW
 local Helpers = modules.HELPERS

@@ -5,7 +5,7 @@ local helpers = Modules.HELPERS
 local Player = Modules.PLAYER
 local Maths = Modules.MATHS
 local Helpers = Modules.HELPERS
-local data = mod.CustomDataWrapper.getData
+local data = mod.DataHolder.GetEntityData
 
 ---@param player EntityPlayer
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, function (_, player)

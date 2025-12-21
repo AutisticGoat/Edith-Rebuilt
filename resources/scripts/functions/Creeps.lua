@@ -2,7 +2,7 @@ local mod = EdithRebuilt
 local enums = mod.Enums
 local SubTypes = enums.SubTypes
 local Creeps = {}
-local data = mod.CustomDataWrapper.getData
+local data = mod.DataHolder.GetEntityData
 local Helpers = require("resources.scripts.functions.Helpers")
 local Maths = require("resources.scripts.functions.Maths")
 

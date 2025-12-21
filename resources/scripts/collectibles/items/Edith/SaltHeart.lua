@@ -1,7 +1,7 @@
 local mod = EdithRebuilt
 local enums = mod.Enums
 local items = enums.CollectibleType
-local data = mod.CustomDataWrapper.getData
+local data = mod.DataHolder.GetEntityData
 local saltTypes = enums.SaltTypes
 local invalidDamageFlags = DamageFlag.DAMAGE_SPIKES | DamageFlag.DAMAGE_INVINCIBLE | DamageFlag.DAMAGE_NO_MODIFIERS | DamageFlag.DAMAGE_NO_PENALTIES
 local modules = mod.Modules

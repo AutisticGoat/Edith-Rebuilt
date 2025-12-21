@@ -14,7 +14,7 @@ local Edith = modules.EDITH
 local Land = modules.LAND
 local Creeps = modules.CREEPS
 local sfx = enums.Utils.SFX
-local data = mod.CustomDataWrapper.getData
+local data = mod.DataHolder.GetEntityData
 local EdithsHood = {}
 
 ---@param tear EntityTear

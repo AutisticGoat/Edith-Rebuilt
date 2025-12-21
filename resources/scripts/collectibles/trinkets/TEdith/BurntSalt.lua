@@ -4,7 +4,7 @@ local modules = mod.Modules
 local ModRNG = modules.RNG
 local Helpers = modules.HELPERS
 local trinket = enums.TrinketType
-local data = mod.CustomDataWrapper.getData
+local data = mod.DataHolder.GetEntityData
 local BurntSalt = {}
 
 ---@param tear EntityTear

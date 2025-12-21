@@ -20,7 +20,7 @@ local Helpers = modules.HELPERS
 local Maths = modules.MATHS
 local Creeps = modules.CREEPS
 local ModRNG = modules.RNG
-local data = mod.CustomDataWrapper.getData
+local data = mod.DataHolder.GetEntityData
 local TEdith = {}
 
 ---@param player EntityPlayer
@@ -53,6 +53,11 @@ function mod:TaintedEdithUpdate(player)
 	local HopParams = TEdithMod.GetHopParryParams(player)
 	local isArrowMoving = TargetArrow.IsEdithTargetMoving(player)
 	local arrow = TargetArrow.GetEdithTarget(player, true)
+
+	print("==============================")
+	for k, v in pairs(HopParams) do
+		print(k, v)
+	end
 
 	if isArrowMoving then
 		TargetArrow.SpawnEdithTarget(player, true)
@@ -102,7 +107,11 @@ function mod:EdithPlayerUpdate(player)
 	local MovX = (((input.left > 0.3 and -input.left) or (input.right > 0.3 and input.right)) or 0) * (game:GetRoom():IsMirrorWorld() and -1 or 1)
 	local MovY = (input.up > 0.3 and -input.up) or (input.down > 0.3 and input.down) or 0
 
+	-- print(Vector(MovX, MovY):Normalized())
+
 	playerData.movementVector = Vector(MovX, MovY):Normalized() 
+
+	-- print(playerData.movementVector)
 
 	HopParams.IsParryJump = HopParams.IsParryJump or false
 

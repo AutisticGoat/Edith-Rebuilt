@@ -7,7 +7,7 @@ local sfx = utils.SFX
 local rng = utils.RNG
 local jumpFlags = enums.Tables.JumpFlags
 local Helpers = mod.Modules.HELPERS
-local data = mod.CustomDataWrapper.getData
+local data = mod.DataHolder.GetEntityData
 local damageBase = 13.5
 local SoulOfEdith = {}
 

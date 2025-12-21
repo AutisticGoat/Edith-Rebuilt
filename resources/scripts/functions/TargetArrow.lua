@@ -5,7 +5,7 @@ local game = enums.Utils.Game
 local level = enums.Utils.Level
 local helpers = require("resources.scripts.functions.Helpers")
 local Player = require("resources.scripts.functions.Player")
-local data = mod.CustomDataWrapper.getData
+local data = mod.DataHolder.GetEntityData
 local targetArrow = {}
 
 ---Function to get Edith's Target, setting `tainted` to `true` will return Tainted Edith's Arrow

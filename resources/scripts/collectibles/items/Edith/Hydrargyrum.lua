@@ -3,7 +3,7 @@ local enums = mod.Enums
 local items = enums.CollectibleType
 local StatusEffects = mod.Modules.STATUS_EFFECTS
 local Helpers = mod.Modules.HELPERS
-local data = mod.CustomDataWrapper.getData
+local data = mod.DataHolder.GetEntityData
 local Hydrargyrum = {}
 
 ---@param ent Entity
