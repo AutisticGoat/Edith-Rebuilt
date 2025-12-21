@@ -104,8 +104,6 @@ function targetArrow.TargetDoorManager(effect, player, triggerDistance)
 	local MirrorRoomCheck = roomName == "Mirror Room" and player:HasInstantDeathCurse()
 	local playerHasPhoto = (player:HasCollectible(CollectibleType.COLLECTIBLE_POLAROID) or player:HasCollectible(CollectibleType.COLLECTIBLE_NEGATIVE))
 
-	if not room:IsClear() then return end
-
 	for i = 0, DoorSlot.DOWN1 do
 		local door = room:GetDoor(i)
 		if not door then goto Break end
@@ -131,20 +129,24 @@ function targetArrow.TargetDoorManager(effect, player, triggerDistance)
 		if door:IsOpen() or MirrorRoomCheck or ShouldMoveToStrangeDoorPos then
 			player.Position = doorPos
 			targetArrow.RemoveEdithTarget(player, isTainted)
-		elseif StrangeDoorCheck then
-			if not playerHasPhoto then goto Break end
-			door:TryUnlock(player)
-		elseif MausoleumRoomCheck then
-			if not sprite:IsPlaying("KeyOpen") then
-				sprite:Play("KeyOpen")
-			end
-
-			if sprite:IsFinished("KeyOpen") then
-				door:TryUnlock(player, true)
-			end
 		else
-			helpers.ChangeColor(player, 1, 1, 1, 1)
-			door:TryUnlock(player)
+			if room:IsClear() then
+				if StrangeDoorCheck then
+					if not playerHasPhoto then goto Break end
+					door:TryUnlock(player)
+				elseif MausoleumRoomCheck then
+					if not sprite:IsPlaying("KeyOpen") then
+						sprite:Play("KeyOpen")
+					end
+
+					if sprite:IsFinished("KeyOpen") then
+						door:TryUnlock(player, true)
+					end
+				else
+					helpers.ChangeColor(player, 1, 1, 1, 1)
+					door:TryUnlock(player)
+				end
+			end
 		end
 		::Break::
 	end
