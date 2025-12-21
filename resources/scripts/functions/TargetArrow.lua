@@ -104,8 +104,6 @@ function targetArrow.TargetDoorManager(effect, player, triggerDistance)
 	local MirrorRoomCheck = roomName == "Mirror Room" and player:HasInstantDeathCurse()
 	local playerHasPhoto = (player:HasCollectible(CollectibleType.COLLECTIBLE_POLAROID) or player:HasCollectible(CollectibleType.COLLECTIBLE_NEGATIVE))
 
-	local Level = game:GetLevel()
-
 	if not room:IsClear() then return end
 
 	for i = 0, DoorSlot.DOWN1 do
