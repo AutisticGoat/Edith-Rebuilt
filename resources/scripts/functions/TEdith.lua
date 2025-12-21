@@ -355,6 +355,8 @@ local JumpHeightParams = {
 ---@param player any
 function TEdith.InitTaintedEdithHop(player)
 	local charge = TEdith.GetHopDashCharge(player, false, false)
+	if not charge or charge <= 0 then return end
+
 	local jumpHeight = maths.HopHeightCalc(6, charge, JumpHeightParams)
 	local jumpSpeed = 3 * maths.Log(charge, 100)
 	local config = {
