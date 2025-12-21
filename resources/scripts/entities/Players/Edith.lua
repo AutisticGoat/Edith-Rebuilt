@@ -12,6 +12,7 @@ local TargetArrow = modules.TARGET_ARROW
 local effects = modules.STATUS_EFFECTS
 local helpers = modules.HELPERS
 local Player = modules.PLAYER
+local ModRNG = modules.RNG
 local params = EdithMod.GetJumpStompParams
 local Edith = {}
 
@@ -74,7 +75,7 @@ function Edith:OnStartingJump(player)
 
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_LUMP_OF_COAL) then return end
 	local rng = player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_LUMP_OF_COAL)
-	jumpParams.CoalBonus = mod.RandomFloat(rng, 0.5, 0.6) * TargetArrow.GetEdithTargetDistance(player) / 40
+	jumpParams.CoalBonus = ModRNG.RandomFloat(rng, 0.5, 0.6) * TargetArrow.GetEdithTargetDistance(player) / 40
 end
 mod:AddCallback(JumpLib.Callbacks.POST_ENTITY_JUMP, Edith.OnStartingJump, JumpParams.EdithJump)
 
