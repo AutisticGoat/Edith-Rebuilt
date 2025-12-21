@@ -73,6 +73,7 @@ mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG, function(_, player, _, flag
 	if Maths.HasBitFlags(flags, DamageFlag.DAMAGE_ACID) or (roomType ~= RoomType.ROOM_SACRIFICE and Maths.HasBitFlags(flags, DamageFlag.DAMAGE_SPIKES)) then return false end
 end)
 
+---@param tear EntityTear
 mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, function(_, tear)
     local player = Helpers.GetPlayerFromTear(tear)
 
@@ -87,5 +88,6 @@ mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, function(_, tear)
     if isTainted then return end
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_MARKED) then return end	
 	if not target then return end
-	tear.Velocity = mod.ChangeVelToTarget(tear, target, player.ShotSpeed * 10)
+
+    tear.Velocity = -((tear.Position - target.Position):Normalized()):Resized(player.ShotSpeed * 10)
 end)
