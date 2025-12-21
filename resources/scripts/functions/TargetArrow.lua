@@ -104,14 +104,20 @@ function targetArrow.TargetDoorManager(effect, player, triggerDistance)
 	local MirrorRoomCheck = roomName == "Mirror Room" and player:HasInstantDeathCurse()
 	local playerHasPhoto = (player:HasCollectible(CollectibleType.COLLECTIBLE_POLAROID) or player:HasCollectible(CollectibleType.COLLECTIBLE_NEGATIVE))
 
+	local Level = game:GetLevel()
+
 	if not room:IsClear() then return end
 
-	for i = 0, 7 do
+	for i = 0, DoorSlot.DOWN1 do
 		local door = room:GetDoor(i)
 		if not door then goto Break end
+
 		local sprite = door:GetSprite()
+		local layer = sprite:GetLayer(0)
+
+		if not layer then goto Break end
+
 		local doorSpritePath = sprite:GetLayer(0):GetSpritesheetPath()
-		if not doorSpritePath then goto Break end
 		local MausoleumRoomCheck = string.find(doorSpritePath, "mausoleum") ~= nil
 		local StrangeDoorCheck = string.find(doorSpritePath, "mausoleum_alt") ~= nil
 		local ShouldMoveToStrangeDoorPos = StrangeDoorCheck and sprite:WasEventTriggered("FX")
