@@ -239,8 +239,8 @@ function Land.HandleEntityInteraction(ent, parent, knockback)
 			pickup:TryOpenChest(parent)
         end,
 		[EntityType.ENTITY_SLOT] = function ()
-			parent:ForceCollide(ent, true)
 			if var == SlotVariant.BLOOD_DONATION_MACHINE or var == SlotVariant.DEVIL_BEGGAR then
+				parent:ForceCollide(ent, false)
 				parent:TakeDamage(1, 0, EntityRef(ent), 0)
 			end
 		end,
