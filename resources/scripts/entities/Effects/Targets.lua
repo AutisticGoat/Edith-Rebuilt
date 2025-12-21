@@ -148,7 +148,7 @@ local function TaintedEdithArrowRender(effect, player, saveData)
 	effectData.RGBState = effectData.RGBState or 0
 	effect.Visible = effect.FrameCount > 1
 
-	if saveData.ArrowDesign ~= 2 then
+	if saveData.ArrowDesign ~= 2 or Helpers.IsGrudgeChallenge() then
 		effect:GetSprite().Rotation = TEdith.GetHopParryParams(player).HopDirection:GetAngleDegrees() 
 	end
 
