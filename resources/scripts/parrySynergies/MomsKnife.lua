@@ -20,10 +20,9 @@ mod:AddCallback(callbacks.PERFECT_PARRY, function(_, player)
 end)
 
 ---@param knife EntityKnife
-function mod:RemoveKnife(knife)	
+mod:AddCallback(ModCallbacks.MC_POST_KNIFE_UPDATE, function(_, knife)
 	if not data(knife).ParryKnife then return end
 	if knife:IsFlying() then return end 
 
 	knife:Remove()
-end
-mod:AddCallback(ModCallbacks.MC_POST_KNIFE_UPDATE, mod.RemoveKnife)
+end)

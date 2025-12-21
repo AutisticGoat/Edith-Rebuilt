@@ -7,7 +7,7 @@ local Callbacks = enums.Callbacks
 
 ---@param player EntityPlayer
 ---@param params TEdithHopParryParams
-function mod:StompDamageAdders(player, _, params)
+mod:AddCallback(Callbacks.PERFECT_PARRY, function (_, player, _, params)
     local adders = {
         ---@param rng RNG
         [CollectibleType.COLLECTIBLE_APPLE] = function(rng)
@@ -42,5 +42,4 @@ function mod:StompDamageAdders(player, _, params)
     end
 
     print(params.ParryDamage)
-end
-mod:AddCallback(Callbacks.PERFECT_PARRY, mod.StompDamageAdders)
+end)

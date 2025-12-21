@@ -5,8 +5,8 @@ local Callbacks = enums.Callbacks
 
 ---@param player EntityPlayer
 ---@param params EdithJumpStompParams
-function mod:StompDamageAdders(player, params)
-    local adders = {
+mod:AddCallback(Callbacks.OFFENSIVE_STOMP, function (_, player, params)
+     local adders = {
         ---@param rng RNG
         [CollectibleType.COLLECTIBLE_APPLE] = function(rng)
             if not ModRNG.RandomBoolean(rng, 1 / math.max(15 - player.Luck, 1)) then return end
@@ -38,5 +38,4 @@ function mod:StompDamageAdders(player, params)
         funct(player:GetCollectibleRNG(item))
         ::Continue::
     end
-end
-mod:AddCallback(Callbacks.OFFENSIVE_STOMP, mod.StompDamageAdders)
+end)

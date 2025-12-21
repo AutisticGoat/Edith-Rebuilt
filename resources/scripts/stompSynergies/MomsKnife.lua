@@ -3,7 +3,7 @@ local callbacks = mod.Enums.Callbacks
 local data = mod.CustomDataWrapper.getData
 
 ---@param player EntityPlayer
-function mod:KnifeStomp(player)
+mod:AddCallback(callbacks.OFFENSIVE_STOMP, function(_, player)
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_MOMS_KNIFE) then return end		
 
 	local knifeEntities = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and 8 or 4
@@ -15,14 +15,13 @@ function mod:KnifeStomp(player)
 		knife:Shoot(1, player.TearRange / 3)
 		data(knife).StompKnife = true			
 	end
-end
-mod:AddCallback(callbacks.OFFENSIVE_STOMP, mod.KnifeStomp)
+end)
 
 ---@param knife EntityKnife
-function mod:RemoveKnife(knife)	
+mod:AddCallback(ModCallbacks.MC_POST_KNIFE_UPDATE, function(_, knife)
+	
 	if not data(knife).StompKnife then return end
 	if knife:IsFlying() then return end 
 
 	knife:Remove()
-end
-mod:AddCallback(ModCallbacks.MC_POST_KNIFE_UPDATE, mod.RemoveKnife)
+end)

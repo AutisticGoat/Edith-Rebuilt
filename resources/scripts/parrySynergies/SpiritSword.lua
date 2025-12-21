@@ -44,7 +44,7 @@ mod:AddCallback(callbacks.PERFECT_PARRY, function(_, player)
 end)
 
 ---@param knife EntityKnife
-function mod:RemoveStompKnife(knife)
+mod:AddCallback(ModCallbacks.MC_POST_KNIFE_UPDATE, function(_, knife)
     local knifeSprite = knife:GetSprite()
     local knifeData = data(knife)
 	
@@ -52,5 +52,4 @@ function mod:RemoveStompKnife(knife)
     if not (knifeSprite:GetAnimation() == "SpinDown" and knifeSprite:IsFinished()) then return end
 
     knife:Remove()
-end
-mod:AddCallback(ModCallbacks.MC_POST_KNIFE_UPDATE, mod.RemoveStompKnife)
+end)

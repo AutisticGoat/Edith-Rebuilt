@@ -7,6 +7,8 @@ EdithRebuilt.SaveManager = require("resources.scripts.libs.EdithRebuiltSaveManag
 EdithRebuilt.SaveManager.Init(mod)
 EdithRebuilt.Hsx = require("resources.scripts.libs.lhsx")
 
+EdithRebuilt.Version = "v1.0.2"
+
 include("resources.scripts.libs.prenpckillcallback")
 include("resources.scripts.libs.EdithKotryJumpLib").Init()
 include("resources.scripts.definitions")
@@ -33,3 +35,6 @@ local utils = mod.Enums.Utils
 mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, function()
 	utils.RNG:SetSeed(utils.Game:GetSeeds():GetStartSeed())
 end)
+
+Isaac.DebugString("Edith Rebuilt " .. EdithRebuilt.Version .. " loaded correctly")
+print("Edith Rebuilt " .. EdithRebuilt.Version .. " loaded correctly")

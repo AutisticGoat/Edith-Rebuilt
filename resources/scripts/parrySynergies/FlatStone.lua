@@ -10,7 +10,6 @@ local Player = modules.PLAYER
 function mod:FLatStoneStomp(player, JumpData)
     if not player:ToPlayer() then return end
     if not Player.IsEdith(player, true) then return end
-
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_FLAT_STONE) then return end
     if JumpData.Tags.EdithRebuilt_FlatStoneLand then return end
     Land.TriggerFlatStoneMiniJumps(player, 7, 1.6)
@@ -26,12 +25,7 @@ mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, function(_, ent, data, pitfall)
     if not player then return end
     if not Player.IsEdith(player, true) then return end
 
-    local params = TEdithMod.GetHopParryParams(player)
-
-    params.ParryDamage = params.ParryDamage * 0.75
     Land.LandFeedbackManager(player, Land.GetLandSoundTable(true, true), player.Color)
     TEdithMod.ParryLandManager(player, true)
-    -- Land.TriggerLandenemyJump(params, 6, 1.5)
     player:MultiplyFriction(0.05)
-
 end, {tag = "EdithRebuilt_FlatStoneLand"})

@@ -7,16 +7,14 @@ local Callbacks = enums.Callbacks
 
 ---@param player EntityPlayer
 ---@param ent Entity
-function mod:StompDamageAdders(player, ent)
+mod:AddCallback(Callbacks.OFFENSIVE_STOMP_HIT, function(_, player, ent)
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_GODS_FLESH) then return end
     if not Helpers.IsEnemy(ent) then return end
 
     local rng = player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_GODS_FLESH)
     local chance = Player.PlayerHasBirthright(player) and 0.4 or 0.2
 
-
     if not ModRNG.RandomBoolean(rng, chance) then return end
 
     ent:AddShrink(EntityRef(player), 150)
-end
-mod:AddCallback(Callbacks.OFFENSIVE_STOMP_HIT, mod.StompDamageAdders)
+end)
