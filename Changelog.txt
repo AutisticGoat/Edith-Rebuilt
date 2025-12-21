@@ -5,4 +5,14 @@ v1.0.1
 - Fixed Tainted Edith's projectile parry not working at all
 - Potentially fixed an error that doesn't trigger effect room transition (needs more testing)
 - Now Edith won't take damage when pitfalling
-- Now Tainted Edith has a chance to spawn Cinder creep when hop-landing
+- Now Tainted Edith has a chance to spawn Cinder creep when hop-landing (only at 100%)
+- Now Edith can correctly interact with beggars and slots
+
+v1.0.2
+- Removed a leftover console print when stomping slots and beggars
+- Fixed Edith's Marked interactions
+- Fixed Edith's lump of coal interaction not working at all
+- Now T.Edith's arrow will always have grudge design when playing Grudge challenge
+- Now all stomp and parry synergies' functions are anonymous functions 
+- Fixed Edith shooting godhead stomp tears
+- Second attempt to fix Target doors issue (hopefully it works now)
