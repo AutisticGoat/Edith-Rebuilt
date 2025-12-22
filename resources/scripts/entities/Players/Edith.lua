@@ -188,6 +188,7 @@ mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Edith.DamageStuff)
 function Edith:EdithRender(player)
 	local sprite = player:GetSprite()
 
+	if not helpers.IsVestigeChallenge() then return end
 	if not Player.IsEdith(player, false) then return end
 	if not IsInTrapdoor(player) then return end
 	if not sprite:IsPlaying("Trapdoor") then return end
