@@ -80,17 +80,20 @@ local Elements = {
 			Settings = Prefixes.Menu .. "Settings",
 			Credits = Prefixes.Menu .. "Credits",
 			Progress = Prefixes.Menu .. "Progress",
+			Changelog = Prefixes.Menu .. "Changelog",
 		},
 		Windows = {
 			Settings = Prefixes.Window .. "Settings",
 			Credits = Prefixes.Window .. "Credits",
 			Progress = Prefixes.Window .. "Progress",
+			Changelog = Prefixes.Window .. "Changelog",
 		},
 		TabBars = {
 			Settings = Prefixes.TabBar .. "Settings",
 			Edith = Prefixes.TabBar .. "Edith",
 			TEdith = Prefixes.TabBar .. "Tainted_Edith",
-			Credits = Prefixes.TabBar .. "Credits"
+			Credits = Prefixes.TabBar .. "Credits",
+			Changelog = Prefixes.TabBar .. "Changelog"
 		},
 		Tabs = {
 			Edith = {
@@ -113,7 +116,7 @@ local Elements = {
 				Contributors = Prefixes.Tab .. "Contributors",
 				Testers = Prefixes.Tab .. "Testers",
 				Team = Prefixes.Tab .. "Team"
-			}
+			},
 		},
 		Separator = {
 			Edith = {
@@ -226,7 +229,8 @@ end
 local MenuElements = {
     { name = Menu.SubMenu.Settings, title = "Settings" },
     { name = Menu.SubMenu.Credits, title = "Credits" },
-    { name = Menu.SubMenu.Progress, title = "Progress" }
+    { name = Menu.SubMenu.Progress, title = "Progress" },
+    { name = Menu.SubMenu.Changelog, title = "Changelog" }
 }
 
 for _, Menu in ipairs(MenuElements) do
@@ -237,6 +241,7 @@ local windows = {
     { name = Menu.Windows.Settings, title = "Settings" },
     { name = Menu.Windows.Credits, title = "Credits" },
 	{ name = Menu.Windows.Progress, title = "Progress"},
+	{ name = Menu.Windows.Changelog, title = "Changelog"},
 }
 
 for _, window in ipairs(windows) do
@@ -248,6 +253,7 @@ local links = {
 	{ window = Menu.Windows.Settings, menu = Menu.SubMenu.Settings },
 	{ window = Menu.Windows.Credits, menu = Menu.SubMenu.Credits },
 	{ window = Menu.Windows.Progress, menu = Menu.SubMenu.Progress },
+	{ window = Menu.Windows.Changelog, menu = Menu.SubMenu.Changelog },
 }
 
 for _, link in ipairs(links) do
@@ -769,6 +775,68 @@ local function AddProgressBars()
 	end
 end
 
+local function AddChangelogs()
+	ImGui.AddTabBar(Menu.Windows.Changelog, Menu.TabBars.Changelog)
+
+	ImGui.AddTab(Menu.TabBars.Changelog, "EdithRebuilt_v1.0.0", "v1.0.0")
+	ImGui.AddText("EdithRebuilt_v1.0.0", 
+	[[
+- Initial mod release
+	]], true)
+
+	ImGui.AddTab(Menu.TabBars.Changelog, "EdithRebuilt_v1.0.1", "v1.0.1")
+	ImGui.AddText("EdithRebuilt_v1.0.1", 
+	[[
+- Fixed Tainted Edith's projectile parry not working at all
+- Potentially fixed an error that doesn't trigger effect room transition (needs more testing)
+- Now Edith won't take damage when pitfalling
+- Now Tainted Edith has a chance to spawn Cinder creep when hop-landing (only at 100% hop charge)
+- Now Edith can correctly interact with beggars and slots
+	]], true)
+
+	ImGui.AddTab(Menu.TabBars.Changelog, "EdithRebuilt_v1.0.2", "v1.0.2")
+	ImGui.AddText("EdithRebuilt_v1.0.2", 
+	[[
+- Removed a leftover console print when stomping slots and beggars
+- Fixed Edith's Marked interactions
+- Fixed Edith's lump of coal interaction not working at all
+- Now T.Edith's arrow will always have grudge design when playing Grudge challenge
+- Now all stomp and parry synergies' functions are anonymous functions
+- Fixed Edith shooting godhead stomp tears
+- Second attempt to fix Target doors issue (hopefully it works now)
+	]], true)
+
+	ImGui.AddTab(Menu.TabBars.Changelog, "EdithRebuilt_v1.1.0", "v1.1.0")
+	ImGui.AddText("EdithRebuilt_v1.1.0", 
+	[[
+- Reimplemented mod's data structure (big change that justified going to 1.1.0)
+- (Hopefully) Fixed a rare and hard to reproduce error where Tainted Edith was unable to spawn her arrow
+- Now Tainted Edith's hop-parry params are properly reset when starting a new run
+- Now Edith's jump-stomp params are properly reset when starting a new run
+- Fixed Edith triggering beggars and donation machines everytime
+- Fixed Edith not getting damage when stomping devil beggars and blood donation machines
+- Fixed a potential error regarding Tainted Edith trying to hop at nil charge
+- Now target door manager will let you go trough open doors in uncleared rooms
+- Fixed Edith being unable to go to black markets
+- Fixed Edith going to error room in Rotgut's maggot phase 
+	]], true)
+
+	ImGui.AddTab(Menu.TabBars.Changelog, "EdithRebuilt_v1.2.0", "v1.2.0")
+	ImGui.AddText("EdithRebuilt_v1.2.0", 
+	[[
+- Reimplemented mod's data structure (big change that justified going to 1.1.0)
+- (Hopefully) Fixed a rare and hard to reproduce error where Tainted Edith was unable to spawn her arrow
+- Now Tainted Edith's hop-parry params are properly reset when starting a new run
+- Now Edith's jump-stomp params are properly reset when starting a new run
+- Fixed Edith triggering beggars and donation machines everytime
+- Fixed Edith not getting damage when stomping devil beggars and blood donation machines
+- Fixed a potential error regarding Tainted Edith trying to hop at nil charge
+- Now target door manager will let you go trough open doors in uncleared rooms
+- Fixed Edith being unable to go to black markets
+- Fixed Edith going to error room in Rotgut's maggot phase 
+	]], true)
+end
+
 -- ---@param enabled boolean
 -- local function DisplayTrainingOptions(enabled)
 -- 	if not SaveManager.IsLoaded() then return end
@@ -805,6 +873,7 @@ local function OptionsUpdate()
 	AddMiscOptions()
 	AddContributors()
 	AddProgressBars()
+	AddChangelogs()
 	mod:UpdateImGuiData()
 	RenderMenu = false
 end
