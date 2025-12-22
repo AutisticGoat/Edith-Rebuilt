@@ -22,7 +22,6 @@ EdithRebuilt.Enums = {
 		COLLECTIBLE_FATE_OF_THE_UNFAITHFUL = Isaac.GetItemIdByName("Fate of the unfaithful"),
 		COLLECTIBLE_SALT_HEART = Isaac.GetItemIdByName("Salt Heart"),
 		COLLECTIBLE_DIVINE_RETRIBUTION = Isaac.GetItemIdByName("Divine Retribution"),
-		COLLECTIBLE_THE_BOOK_OF_LUKE = Isaac.GetItemIdByName("The Book Of Luke"),
 		COLLECTIBLE_HYDRARGYRUM = Isaac.GetItemIdByName("Hydrargyrum"),
 		COLLECTIBLE_SPICES_MIX = Isaac.GetItemIdByName("Spices Mix"),
 
