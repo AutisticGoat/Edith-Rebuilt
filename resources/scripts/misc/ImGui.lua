@@ -835,6 +835,28 @@ local function AddChangelogs()
 - Fixed Edith being unable to go to black markets
 - Fixed Edith going to error room in Rotgut's maggot phase 
 	]], true)
+
+	ImGui.AddTab(Menu.TabBars.Changelog, "EdithRebuilt_v1.2.0", "v1.2.0")
+	ImGui.AddText("EdithRebuilt_v1.2.0", 
+	[[
+- Fixed Salt rocks not triggering salted effect to enemies
+- Fixed Edith not being able to go to void trough Mega Satan's portal
+- Fixed bomb stomp consuming bombs when having dr fetus or epic fetus
+- Fixed Salt creep being able to use a nil value to asign salted effect duration
+- Fixed Edith being unable to play on Confessionals
+- Fixed Tainted Edith's body dissapearing when having flight
+- Fixed Edith's Hood not triggering its Landing effect
+- Fixed Edith being unable to trigger enemy waves in challenge rooms when stomping stone chests
+- Added The Future support
+- Added EID support
+- Added ingame changelogs
+- Increased Edith's defensive stomp window frames (9 > 15)
+- Now Defensive stomp frame window can be configured in ImGui Menu 
+- Now Pepper creep wont spawn far away from peppered entity
+- Now Tainted Edith can consistently interact with blood donation machines, devil beggars and confessionals
+- Removed a unused item entry
+- Removed leftover prints
+	]], true)
 end
 
 -- ---@param enabled boolean
