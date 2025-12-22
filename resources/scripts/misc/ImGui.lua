@@ -23,6 +23,7 @@ local data = mod.DataHolder.GetEntityData
 ---@field DropKey2Jump boolean
 ---@field TrainingMode boolean
 ---@field CustomStompDmgMult number
+---@field DefensiveStompWindow number
 
 ---@class TEdithData
 ---@field ArrowDesign number
@@ -126,6 +127,7 @@ local Elements = {
 					Cooldown = Prefixes.Separator .. "Edith_Sounds_Cooldown"
 				},
 				Gameplay = {
+					Misc = Prefixes.Separator .. "Edith_Gameplay_Misc",
 					Inputs = Prefixes.Separator .. "Edith_Gameplay_Inputs",
 					Training = Prefixes.Separator .. "Edith_GameplayTraining"
 				}
@@ -177,6 +179,7 @@ local Elements = {
 		Gameplay = {
 			EnableDropKey2Jump = Prefixes.Edith.Gameplay .. "EnableDropKey2Jump",
 			EnableTrainingMode = Prefixes.Edith.Gameplay .. "EnableTrainingMode",
+			DefensiveStompWindow = Prefixes.Edith.Gameplay .. "DefensiveStompWindow",
 		}
 	},
 	TEdith = {
@@ -282,6 +285,7 @@ local function ResetSaveData(isTainted)
 		EdithData.RGBSpeed = 0.005
 		EdithData.TargetLine = false
 		EdithData.JumpCooldownSound = 1
+		EdithData.DefensiveStompWindow = 15
 	end
 
 	mod:UpdateImGuiData()
@@ -350,9 +354,11 @@ function mod:UpdateImGuiData()
 		[EdithOptions.Sounds.SetJumpCooldownSound] = (EdithData.JumpCooldownSound - 1) or 0,
 		[EdithOptions.Gameplay.EnableDropKey2Jump] = EdithData.DropKey2Jump or false,
 		[EdithOptions.Gameplay.EnableTrainingMode] = EdithData.TrainingMode or false,
+		[EdithOptions.Gameplay.DefensiveStompWindow] = EdithData.DefensiveStompWindow or 15,
 
 		-- [MiscOptions.CustomActionKey] = MiscData.CustomActionKey or Keyboard.KEY_Z,
 		[MiscOptions.EnableShakescreen] = MiscData.EnableShakescreen or false,
+		
 	}
 
 	if isTaintedEdithUnlocked() then
@@ -511,6 +517,13 @@ local function AddEdithOptions()
 -- Sounds end
 
 -- Gameplay
+	ImGui.AddElement(EdithGameplay, Separator.Gameplay.Misc, ImGuiElement.SeparatorText, "Misc")
+	ImGui.AddSliderInteger(EdithGameplay, OptionGameplay.DefensiveStompWindow, "Change Edith's defensive stomp window",
+		function(val)
+			EdithData.DefensiveStompWindow = val
+		end,
+	15, 5, 25)
+
 	ImGui.AddElement(EdithGameplay, Separator.Gameplay.Inputs, ImGuiElement.SeparatorText, "Inputs")
 	ImGui.AddCheckbox(EdithGameplay, OptionGameplay.EnableDropKey2Jump, "Enable Drop key to jump", 
 		function(check)
@@ -909,6 +922,7 @@ local function InitSaveData()
 	EdithData.RGBMode = EdithData.RGBMode or false
 	EdithData.RGBSpeed = EdithData.RGBSpeed or 0.5
 	EdithData.TargetLine = EdithData.TargetLine or false
+	EdithData.DefensiveStompWindow = EdithData.DefensiveStompWindow or 15
 	
 	TEdithData.ArrowColor = TEdithData.ArrowColor or {Red = 1, Green = 0, Blue = 0}
 	TEdithData.ArrowDesign = TEdithData.ArrowDesign or 1

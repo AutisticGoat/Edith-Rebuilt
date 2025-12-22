@@ -176,8 +176,13 @@ end
 ---@param jumpIntData InternalJumpData
 ---@param jumpParams EdithJumpStompParams
 function Edith.DefensiveStompManager(player, jumpIntData, jumpParams)
+
+	local config = Helpers.GetConfigData("EdithData")
+
+	if not config then return end
+
     if not Helpers.IsKeyStompPressed(player) then return end
-	if jumpIntData.UpdateFrame ~= 15 then return end
+	if jumpIntData.UpdateFrame ~= config.DefensiveStompWindow then return end
 	if Helpers.IsVestigeChallenge() then return end
 
 	local CanFly = player.CanFly
