@@ -193,8 +193,6 @@ function TEdith.HopDashMovementManager(player, hopParams)
 	local chargeMult = (TEdith.GetHopDashCharge(player, false, false) / 100)
 	local VelMult = IsGrudge and 1.2 or 1 
 
-	-- print(isHopVecZero)
-
 	if not isHopVecZero then
 		if not isJumping and not IsGrudge then
 			TEdith.InitTaintedEdithHop(player)
@@ -202,17 +200,11 @@ function TEdith.HopDashMovementManager(player, hopParams)
 		hopParams.IsHoping = true
 	end
 
-	-- if not isJumping then return end
 	local smoothFactor = 0.225
 	local targetVel = (((HopVec * 2) * (10 + (player.MoveSpeed - 1))) * chargeMult) * VelMult
 	player.Velocity = player.Velocity + (targetVel - player.Velocity) * smoothFactor
 
 	hopParams.GrudgeDash = not isHopVecZero
-
-	-- if IsGrudge and not isHopVecZero then
-	-- 	game:ShakeScreen(2)
-	-- 	sfx:Play(SoundEffect.SOUND_STONE_IMPACT)
-	-- end
 end
 
 ---@param player EntityPlayer
@@ -241,8 +233,6 @@ function TEdith.HopDashChargeManager(player, arrow)
 	local targetframecount = arrow.FrameCount
 	local chargeAdd = BaseCharge * maths.exp(player.MoveSpeed, 1, 1.5)
 	HopParams.HopDirection = posDif:Normalized()
-
-	print(data(player).movementVector)
 
 	local arrowVel = data(player).movementVector
 	local HopVec = arrowVel

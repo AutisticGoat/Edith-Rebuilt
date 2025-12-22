@@ -70,11 +70,6 @@ function mod:TaintedEdithUpdate(player)
 		TEdithMod.StopTEdithHops(player, 20, true, not playerData.TaintedEdithTarget)
 	end
 
-	-- if not (HopParams.HopDirection.X == 0 and HopParams.HopDirection.Y == 0) then
-	-- 	print("aaaaaaaaaaa")
-	-- 	HopParams.HopDirection = Vector.Zero
-	-- end
-
 	if not isArrowMoving and arrow then
 		TargetArrow.RemoveEdithTarget(player, true)
 	end
@@ -211,10 +206,12 @@ mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, TEdith.EdithParryJump, jumpParams
 
 ---@param player EntityPlayer
 ---@param flags DamageFlag
+---@param source EntityRef
 ---@return boolean?
-function TEdith:TaintedEdithDamageManager(player, _, flags)
+function TEdith:TaintedEdithDamageManager(player, _, flags, source)
 	local HopParams = TEdithMod.GetHopParryParams(player)
 
+	if source.Type == EntityType.ENTITY_SLOT then return end
 	if not Player.IsEdith(player, true) then return end
 	if not (HopParams.IsHoping == true and HopParams.HopMoveCharge >= 30) then return end
 	if Maths.HasBitFlags(flags, DamageFlag.DAMAGE_RED_HEARTS) then return end

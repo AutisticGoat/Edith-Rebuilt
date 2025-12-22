@@ -40,6 +40,4 @@ mod:AddCallback(Callbacks.PERFECT_PARRY, function (_, player, _, params)
         funct(player:GetCollectibleRNG(item))
         ::Continue::
     end
-
-    print(params.ParryDamage)
 end)
