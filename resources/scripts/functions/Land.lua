@@ -237,11 +237,9 @@ function Land.HandleEntityInteraction(ent, parent, knockback)
 			if not Player.IsEdith(parent, false) then return end
 
             if not (var == PickupVariant.PICKUP_BOMBCHEST and Player.IsEdith(parent, false)) then return end
-			print("Stone chest")
 			pickup:TryOpenChest(parent)
 
 			if room:GetType() == RoomType.ROOM_CHALLENGE then
-				print("ambush")
 				Ambush.StartChallenge()
 			end
         end,
