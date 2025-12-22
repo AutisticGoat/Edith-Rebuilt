@@ -20,6 +20,8 @@ v1.0.2
 v1.1.0
 - Reimplemented mod's data structure (big change that justified going to 1.1.0)
 - (Hopefully) Fixed a rare and hard to reproduce error where Tainted Edith was unable to spawn her arrow 
+- Now Tainted Edith's hop-parry params are properly reset when starting a new run
+- Now Edith's jump-stomp params are properly reset when starting a new run
 - Fixed Edith triggering beggars and donation machines everytime
 - Fixed Edith not getting damage when stomping devil beggars and blood donation machines
 - Fixed a potential error regarding Tainted Edith trying to hop at nil charge
