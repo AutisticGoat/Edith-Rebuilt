@@ -219,9 +219,11 @@ function Edith.BombFall(player, jumpConfig, jumpParams)
 	if jumpParams.IsDefensiveStomp then return end
 	if not Input.IsActionTriggered(ButtonAction.ACTION_BOMB, player.ControllerIndex) then return end
 
-	local HasDrFetus = player:HasCollectible(CollectibleType.COLLECTIBLE_DR_FETUS)
-
-	if not (HasDrFetus or player:GetNumBombs() > 0 or player:HasGoldenBomb()) then return end
+	local HasBombReplaceTearItem = (
+		player:HasCollectible(CollectibleType.COLLECTIBLE_DR_FETUS) or
+		player:HasCollectible(CollectibleType.COLLECTIBLE_EPIC_FETUS)
+	)
+	if not (HasBombReplaceTearItem or player:GetNumBombs() > 0 or player:HasGoldenBomb()) then return end
 	jumpParams.BombStomp = true
 
 	if player:HasCollectible(CollectibleType.COLLECTIBLE_ROCKET_IN_A_JAR) then 
@@ -229,7 +231,7 @@ function Edith.BombFall(player, jumpConfig, jumpParams)
 		local bomb = Isaac.Spawn(EntityType.ENTITY_BOMB, BombVariant.BOMB_ROCKET, 0, player.Position, Vector.Zero, player):ToBomb() ---@cast bomb EntityBomb
 		bomb:SetRocketAngle(TargetAnglev)
 		bomb:SetRocketSpeed(40)
-		local ShouldKeepBomb = HasDrFetus or player:HasGoldenBomb()
+		local ShouldKeepBomb = HasBombReplaceTearItem or player:HasGoldenBomb()
 
 		if not ShouldKeepBomb then
 			player:AddBombs(-1)
@@ -400,7 +402,13 @@ end
 ---@param params EdithJumpStompParams
 function Edith.BombStompManager(player, params)
     if not params.BombStomp then return end
-    if player:GetNumBombs() > 0 and not player:HasGoldenBomb() and not player:HasCollectible(CollectibleType.COLLECTIBLE_ROCKET_IN_A_JAR) then
+
+	local HasBombReplaceTearItem = (
+		player:HasCollectible(CollectibleType.COLLECTIBLE_DR_FETUS) or
+		player:HasCollectible(CollectibleType.COLLECTIBLE_EPIC_FETUS)
+	)
+
+    if not HasBombReplaceTearItem and (player:GetNumBombs() > 0 and not player:HasGoldenBomb()) and not player:HasCollectible(CollectibleType.COLLECTIBLE_ROCKET_IN_A_JAR) then
         player:AddBombs(-1)
     end
 
