@@ -225,6 +225,7 @@ function Land.HandleEntityInteraction(ent, parent, knockback)
             local pickup = ent:ToPickup() ---@cast pickup EntityPickup
             local isFlavorTextPickup = Helpers.When(var, tables.BlacklistedPickupVariants, false)
             local IsLuckyPenny = var == PickupVariant.PICKUP_COIN and ent.SubType == CoinSubType.COIN_LUCKYPENNY
+			local room = game:GetRoom()
 
 			if Helpers.IsVestigeChallenge() then
 				Land.PickupManager(parent, pickup)
@@ -236,7 +237,13 @@ function Land.HandleEntityInteraction(ent, parent, knockback)
 			if not Player.IsEdith(parent, false) then return end
 
             if not (var == PickupVariant.PICKUP_BOMBCHEST and Player.IsEdith(parent, false)) then return end
+			print("Stone chest")
 			pickup:TryOpenChest(parent)
+
+			if room:GetType() == RoomType.ROOM_CHALLENGE then
+				print("ambush")
+				Ambush.StartChallenge()
+			end
         end,
 		[EntityType.ENTITY_SLOT] = function ()
 			-- parent:ForceCollide(ent, false)
