@@ -54,11 +54,6 @@ function mod:TaintedEdithUpdate(player)
 	local isArrowMoving = TargetArrow.IsEdithTargetMoving(player)
 	local arrow = TargetArrow.GetEdithTarget(player, true)
 
-	print("==============================")
-	for k, v in pairs(HopParams) do
-		print(k, v)
-	end
-
 	if isArrowMoving then
 		TargetArrow.SpawnEdithTarget(player, true)
 	end
