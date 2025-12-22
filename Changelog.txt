@@ -16,3 +16,13 @@ v1.0.2
 - Now all stomp and parry synergies' functions are anonymous functions 
 - Fixed Edith shooting godhead stomp tears
 - Second attempt to fix Target doors issue (hopefully it works now)
+
+v1.1.0
+- Reimplemented mod's data structure (big change that justified going to 1.1.0)
+- (Hopefully) Fixed a rare and hard to reproduce error where Tainted Edith was unable to spawn her arrow 
+- Fixed Edith triggering beggars and donation machines everytime
+- Fixed Edith not getting damage when stomping devil beggars and blood donation machines
+- Fixed a potential error regarding Tainted Edith trying to hop at nil charge
+- Now target door manager will let you go trough open doors in uncleared rooms
+- Fixed Edith being unable to go to black markets
+- Fixed Edith going to error room in Rotgut's maggot phase 
