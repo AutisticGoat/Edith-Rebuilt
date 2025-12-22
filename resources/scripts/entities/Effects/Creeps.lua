@@ -69,7 +69,7 @@ local function SaltCreepUpdate(effect)
         if Helpers.IsVestigeChallenge() then
             entity:AddFear(EntityRef(player), 120)
         else
-            StatusEffects.SetStatusEffect(enums.EdithStatusEffects.SALTED, entity, SaltedTimes[spawnType], player)
+            StatusEffects.SetStatusEffect(enums.EdithStatusEffects.SALTED, entity, SaltedTimes[spawnType] or 120, player)
         end
 
         data(entity).SaltType = spawnType
