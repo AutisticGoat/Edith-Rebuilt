@@ -2,6 +2,7 @@ local mod = EdithRebuilt
 local enums = mod.Enums
 local Vars = enums.EffectVariant 
 local game = enums.Utils.Game
+local level = enums.Utils.Level
 local misc = enums.Misc
 local tables = enums.Tables
 local Hsx = mod.Hsx
@@ -76,6 +77,7 @@ local function EdithTargetManagement(effect, player)
 	local effectPos = effect.Position
 	local room = game:GetRoom()
 	local params = Edith.GetJumpStompParams(player)
+	local RoomName = level:GetCurrentRoomDesc().Data.Name
 
 	local anim = (Helpers.IsKeyStompPressed(player) or params.Jumps > 0 and params.Cooldown == 0) and "Blink" or "Idle" 
 	effect:GetSprite():Play(anim)
@@ -88,8 +90,8 @@ local function EdithTargetManagement(effect, player)
 
 	if room:GetType() == RoomType.ROOM_DUNGEON then
 		for _, v in pairs(teleportPoints) do
-			print(v, effectPos)
 			if (effectPos - v):Length() > 20 then goto continue end
+			if RoomName == "Rotgut Maggot" and (v.X == 595 and v.Y == 385) then goto continue end
 			player.Position = effectPos + effect.Velocity:Normalized():Resized(25)
 		    ::continue::
 		end
@@ -102,6 +104,19 @@ local function EdithTargetManagement(effect, player)
 	markedTarget.Velocity = Vector.Zero
 	markedTarget.Visible = false
 end
+
+mod:AddCallback(ModCallbacks.MC_NPC_UPDATE, function (_, npc)
+	if npc.Variant ~= 1 then return end
+	local capsule = npc:GetCollisionCapsule()
+
+	for _, ent in ipairs(Isaac.FindInCapsule(capsule, EntityPartition.EFFECT)) do
+		if ent.Variant ~= Vars.EFFECT_EDITH_TARGET then goto continue end		
+		local player = ent.SpawnerEntity:ToPlayer()
+		if not player then goto continue end
+		ent.Velocity = (player.Position - npc.Position):Resized(20)
+		::continue::
+	end
+end, EntityType.ENTITY_ROTGUT)
 
 local currentDate = os.date("*t") -- converts the current date to a table
 local isTDOV = (currentDate.month == 3 and currentDate.day == 31)

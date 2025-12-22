@@ -62,6 +62,7 @@ function targetArrow.SpawnEdithTarget(player, tainted)
 		playerData.TaintedEdithTarget = target
 	else
 		target.GridCollisionClass = GridCollisionClass.COLLISION_SOLID
+		target.EntityCollisionClass = EntityCollisionClass.ENTCOLL_PLAYERONLY
 		playerData.EdithTarget = target
 	end
 end
