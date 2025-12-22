@@ -186,21 +186,6 @@ local function OnGarlicUpdate(npc)
 end
 
 ---@param npc EntityNPC
-local function OnPepperedUpdate(npc)
-    if not StatusEffects.EntHasStatusEffect(npc, effects.PEPPERED) then return end
-    -- npc:MultiplyFriction(0.8)
-    -- local npcData = data(npc)
-
-    -- npc.Velocity = npc.Velocity + (RandomVector() * 2)
-
-    -- npcData.PepperSneezeCD = npcData.PepperSneezeCD or 0
-
-    -- local player = SEL:GetStatusEffectData(npc, Flags.Peppered).Source.Entity:ToPlayer() ---@cast player EntityPlayer 
-    -- if SEL:GetStatusEffectCountdown(npc, Flags.Peppered) % 10 ~= 0 then return end
-    -- Creeps.SpawnPepperCreep(player, npc.Position, 0.5, 3)
-end
-
----@param npc EntityNPC
 local function OnCinnamonUpdate(npc)
     if not StatusEffects.EntHasStatusEffect(npc, effects.CINNAMON) then return end
     npc:MultiplyFriction(0.8)
@@ -296,7 +281,6 @@ mod:AddCallback(ModCallbacks.MC_POST_TEAR_DEATH, OnMercuryTearDeath)
 ---@param npc EntityNPC
 local function OnNpcUpdate(_, npc)
     OnSaltedUpdate(npc)
-    OnPepperedUpdate(npc)
     OnHydrargyrumCurseUpdate(npc)
     OnGarlicUpdate(npc)
     OnCinnamonUpdate(npc)
@@ -387,11 +371,10 @@ local function OnKillingPepperEnemy(_, entity)
 
     local Peppers = 10
     local degree = 360/Peppers
-    local Vec = Vector(0, 30)
 
     for i = 1, 15 do
-        Vec.Y = Vec.Y * ModRNG.RandomFloat(RNG, 0.7, 1.4)
-        Creeps.SpawnPepperCreep(entity, entity.Position + Vec:Rotated(i * degree), 4, 8)
+        local y = 30 * ModRNG.RandomFloat(RNG, 0.7, 1.4)
+        Creeps.SpawnPepperCreep(entity, entity.Position + Vector(0, y):Rotated(i * degree), 4, 8)
     end
 end
 mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, OnKillingPepperEnemy)
