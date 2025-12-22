@@ -11,9 +11,10 @@ local effects = "StatusEffects/"
 
 local includeFiles = {
 	-- Cosas necesarias
-	-- compat .. "EID",
+	compat .. "EID",
 	compat .. "Birthcake",
 	compat .. "RunicTablet",
+	compat .. "TheFuture",
 	libs .. "prenpckillcallback",
 	libs .. "CustomShockwaveAPI",
 	libs .. "lhsx",
