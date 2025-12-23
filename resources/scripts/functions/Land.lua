@@ -244,13 +244,14 @@ function Land.HandleEntityInteraction(ent, parent, knockback)
 			end
         end,
 		[EntityType.ENTITY_SLOT] = function ()
-			-- parent:ForceCollide(ent, false)
+			local slot = ent:ToSlot() ---@cast slot EntitySlot
 			local TriggerDamageSlots = {
 				[SlotVariant.BLOOD_DONATION_MACHINE] = true,
 				[SlotVariant.DEVIL_BEGGAR] = true,
 				[SlotVariant.CONFESSIONAL] = true,
 			}
 
+			if slot:GetState() == SlotState.DESTROYED then return end
 			if not Helpers.When(var, TriggerDamageSlots, false) then return end
 			parent:ForceCollide(ent, false)
 			parent:TakeDamage(1, 0, EntityRef(ent), 0)
