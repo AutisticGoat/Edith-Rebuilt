@@ -9,6 +9,7 @@ local Helpers = modules.HELPERS
 local Maths = modules.MATHS
 local TargetArrow = modules.TARGET_ARROW
 local costumes = enums.NullItemID
+local PlayerType = enums.PlayerType
 
 ---@param entity Entity
 ---@param input InputHook
@@ -44,14 +45,12 @@ local whiteListCostumes = {
     [costumes.ID_EDITH_VESTIGE_SCARF] = true,
 }
 
----@param itemconfig ItemConfigItem
----@param player EntityPlayer
----@return boolean?
-mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_ADD_COSTUME, function(_, itemconfig, player)
+local function CostumeManager(_, itemconfig, player)
     if not Player.IsAnyEdith(player) then return end
     if Helpers.When(itemconfig.Costume.ID, whiteListCostumes, false) then return end
     return true
-end)
+end
+mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_REMOVE_COSTUME, CostumeManager)
 
 mod:AddCallback(ModCallbacks.MC_POST_TEAR_UPDATE, function(_, tear)
     local player = Helpers.GetPlayerFromTear(tear)
@@ -90,4 +89,35 @@ mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, function(_, tear)
 	if not target then return end
 
     tear.Velocity = -((tear.Position - target.Position):Normalized()):Resized(player.ShotSpeed * 10)
+end)
+
+---@param player EntityPlayer
+---@return NullItemID?
+local function GetEdithCostume(player)
+    local Vestige = Helpers.IsVestigeChallenge()
+    local Grudge = Helpers.IsGrudgeChallenge()
+
+    local isEdith = Player.IsEdith
+
+    return (
+        (isEdith(player, false) and (Vestige and costumes.ID_EDITH_VESTIGE_SCARF or costumes.ID_EDITH_SCARF)) or
+        (isEdith(player, true) and (Grudge and costumes.ID_EDITH_B_GRUDGE_SCARF or costumes.ID_EDITH_B_SCARF)) --[[@as NullItemID]]
+    )
+end
+
+
+local ReloadCostumeItem = {
+    [CollectibleType.COLLECTIBLE_D4] = true,
+    [CollectibleType.COLLECTIBLE_D100] = true,
+}
+
+
+---@param ID CollectibleType
+---@param player EntityPlayer
+mod:AddCallback(ModCallbacks.MC_USE_ITEM, function(_, ID, _, player)
+    if not ReloadCostumeItem[ID] then return end
+
+    local Costume = GetEdithCostume(player)    
+    if not Costume then return end
+    player:AddNullCostume(Costume)
 end)
