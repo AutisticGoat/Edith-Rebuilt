@@ -187,10 +187,19 @@ mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, Edith.DamageStuff)
 ---@param player EntityPlayer
 function Edith:EdithRender(player)
 	local sprite = player:GetSprite()
+	local grid = game:GetRoom():GetGridEntityFromPos(player.Position)
 
-	if not helpers.IsVestigeChallenge() then return end
+	if not grid then return end
+
+	local trapdoor = grid:ToTrapDoor()
+
+	if not trapdoor then return end
+
+	local trapdoorSprite = trapdoor:GetSprite():GetLayer(0):GetSpritesheetPath()
+	IsFleshTrapdoor = string.find(trapdoorSprite, "womb") ~= nil or string.find(trapdoorSprite, "corpse") ~= nil
+
+	if not IsFleshTrapdoor then return end
 	if not Player.IsEdith(player, false) then return end
-	if not IsInTrapdoor(player) then return end
 	if not sprite:IsPlaying("Trapdoor") then return end
 	if sprite:GetFrame() ~= 8 then return end
 
