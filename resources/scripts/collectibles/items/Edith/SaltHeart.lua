@@ -47,6 +47,7 @@ mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, SaltHeart.GettingDamage)
 
 ---@param player EntityPlayer
 function SaltHeart:SpawnSaltCreep(player)
+    if not player:HasCollectible(items.COLLECTIBLE_SALT_HEART) then return end
     if not StsEffects.EntHasStatusEffect(player, effects.SALTED) then return end
     if StsEffects.GetStatusEffectCountdown(player, effects.SALTED) % 5 ~= 0 then return end
     
