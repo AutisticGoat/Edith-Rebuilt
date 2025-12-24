@@ -355,9 +355,11 @@ function Land.EdithStomp(parent, params, breakGrid)
 
 		if not Helpers.IsEnemy(ent) then goto Break end
 		
+		local volume = Math.exp(Edith.GetNumTears(parent), 1, 1.4)
+
 		if not params.IsDefensiveStomp then
 			Isaac.RunCallback(callbacks.OFFENSIVE_STOMP_HIT, parent, ent, params)
-			sfx:Play(SoundEffect.SOUND_MEATY_DEATHS)
+			sfx:Play(SoundEffect.SOUND_MEATY_DEATHS, volume)
 		end
 
 		for _ = 1, Edith.GetNumTears(parent) do

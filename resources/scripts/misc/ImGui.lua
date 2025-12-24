@@ -544,7 +544,7 @@ local function AddEdithOptions()
 		end
 	, {"Main" , "Pocket"}, EdithData.SaltShakerSlot or 0, true)
 
-	ImGui.SetHelpmarker(OptionGameplay.SaltShakerSlot, "\u{21} This will only work in a new run")
+	ImGui.SetHelpmarker(OptionGameplay.SaltShakerSlot, "\u{21} This will only work when starting a new run")
 
 	-- ImGui.AddElement(EdithGameplay, Separator.Gameplay.Training, ImGuiElement.SeparatorText, "Training")
 	-- ImGui.AddCheckbox(EdithGameplay, OptionGameplay.EnableTrainingMode, "Enable Training Mode", 
