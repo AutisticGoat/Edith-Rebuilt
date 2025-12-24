@@ -32,7 +32,6 @@ mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, Edith.EdithInit)
 local function EdithTeleportManager(player)
 	if not player:GetSprite():IsPlaying("TeleportDown") then return end
 	JumpLib:QuitJump(player)
-	-- params.Cooldown
 	TargetArrow.RemoveEdithTarget(player, false)
 end
 
@@ -40,6 +39,11 @@ end
 function Edith:OnEdithUpdate(player)
 	if not Player.IsEdith(player, false) then return end
 	if player:IsDead() then TargetArrow.RemoveEdithTarget(player) return end
+
+	if player.FrameCount == 0 and helpers.GetConfigData("EdithData").SaltShakerSlot == 1 then
+		player:RemoveCollectible(enums.CollectibleType.COLLECTIBLE_SALTSHAKER)
+		player:SetPocketActiveItem(enums.CollectibleType.COLLECTIBLE_SALTSHAKER, ActiveSlot.SLOT_POCKET, false)
+	end
 
 	local isMoving = TargetArrow.IsEdithTargetMoving(player)
 	local isKeyStompPressed = helpers.IsKeyStompPressed(player)

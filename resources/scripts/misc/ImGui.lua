@@ -25,6 +25,7 @@ local data = mod.DataHolder.GetEntityData
 ---@field CustomStompDmgMult number
 ---@field DefensiveStompWindow number
 ---@field CustomJumpButton Keyboard|integer
+---@field SaltShakerSlot integer
 
 ---@class TEdithData
 ---@field ArrowDesign number
@@ -295,6 +296,7 @@ local function ResetSaveData(isTainted)
 		EdithData.TargetLine = false
 		EdithData.JumpCooldownSound = 1
 		EdithData.DefensiveStompWindow = 15
+		EdithData.SaltShakerSlot = 0
 	end
 
 	mod:UpdateImGuiData()
@@ -367,6 +369,7 @@ function mod:UpdateImGuiData()
 		[EdithOptions.Gameplay.EnableDropKey2Jump] = EdithData.DropKey2Jump or false,
 		[EdithOptions.Gameplay.EnableTrainingMode] = EdithData.TrainingMode or false,
 		[EdithOptions.Gameplay.DefensiveStompWindow] = EdithData.DefensiveStompWindow or 15,
+		[EdithOptions.Gameplay.SaltShakerSlot] = EdithData.SaltShakerSlot or 0,
 	}
 
 	if isTaintedEdithUnlocked() then
@@ -534,13 +537,14 @@ local function AddEdithOptions()
 		end,
 	15, 5, 25)
 
-	ImGui.AddElement(EdithGameplay, Separator.Gameplay.Inputs, ImGuiElement.SeparatorText, "Inputs")
+	ImGui.AddElement(EdithGameplay, Separator.Gameplay.Salt_Shaker, ImGuiElement.SeparatorText, "Salt Shaker")
+	ImGui.AddCombobox(EdithGameplay, OptionGameplay.SaltShakerSlot, "Salt Shaker's slot", 
+		function(option)
+			EdithData.SaltShakerSlot = option
+		end
+	, {"Main" , "Pocket"}, EdithData.SaltShakerSlot or 0, true)
 
-	ImGui.AddCheckbox(EdithGameplay, OptionGameplay.EnableDropKey2Jump, "Enable Drop key to jump", 
-		function(check)
-			EdithData.DropKey2Jump = check
-		end,
-	true)
+	ImGui.SetHelpmarker(OptionGameplay.SaltShakerSlot, "\u{21} This will only work in a new run")
 
 	-- ImGui.AddElement(EdithGameplay, Separator.Gameplay.Training, ImGuiElement.SeparatorText, "Training")
 	-- ImGui.AddCheckbox(EdithGameplay, OptionGameplay.EnableTrainingMode, "Enable Training Mode", 
@@ -1020,6 +1024,7 @@ local function InitSaveData()
 	EdithData.RGBSpeed = EdithData.RGBSpeed or 0.5
 	EdithData.TargetLine = EdithData.TargetLine or false
 	EdithData.DefensiveStompWindow = EdithData.DefensiveStompWindow or 15
+	EdithData.SaltShakerSlot = EdithData.SaltShakerSlot or 0 
 	
 	TEdithData.ArrowColor = TEdithData.ArrowColor or {Red = 1, Green = 0, Blue = 0}
 	TEdithData.ArrowDesign = TEdithData.ArrowDesign or 1
