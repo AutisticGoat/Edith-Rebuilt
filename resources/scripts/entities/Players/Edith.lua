@@ -29,6 +29,14 @@ end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, Edith.EdithInit)
 
 ---@param player EntityPlayer
+local function EdithTeleportManager(player)
+	if not player:GetSprite():IsPlaying("TeleportDown") then return end
+	JumpLib:QuitJump(player)
+	params(player).Jumps = 0
+	TargetArrow.RemoveEdithTarget(player, false)
+end
+
+---@param player EntityPlayer
 function Edith:OnEdithUpdate(player)
 	if not Player.IsEdith(player, false) then return end
 	if player:IsDead() then TargetArrow.RemoveEdithTarget(player) return end
@@ -47,6 +55,7 @@ function Edith:OnEdithUpdate(player)
 		TargetArrow.SpawnEdithTarget(player)
 	end
 
+	EdithTeleportManager(player)
 	Player.ManageEdithWeapons(player)
 	EdithMod.CustomDropBehavior(player, jumpData)
 	EdithMod.DashItemBehavior(player)
