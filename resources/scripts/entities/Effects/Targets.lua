@@ -79,7 +79,7 @@ local function EdithTargetManagement(effect, player)
 	local params = Edith.GetJumpStompParams(player)
 	local RoomName = level:GetCurrentRoomDesc().Data.Name
 
-	local anim = (Helpers.IsKeyStompPressed(player) or params.Jumps > 0 and params.Cooldown == 0) and "Blink" or "Idle" 
+	local anim = (Helpers.IsKeyStompPressed(player) or Edith.IsJumping(player) and params.Cooldown == 0) and "Blink" or "Idle" 
 	effect:GetSprite():Play(anim)
 
 	room:GetCamera():SetFocusPosition(interpolateVector2D(playerPos, effectPos, 0.6))

@@ -22,7 +22,7 @@ local Edith = {}
 ---@field Damage number
 ---@field Radius number
 ---@field Knockback number
----@field Jumps integer
+---@field CanJump false
 ---@field Cooldown integer
 ---@field JumpStartPos Vector
 ---@field JumpStartDist number
@@ -38,7 +38,7 @@ function Edith.GetJumpStompParams(player)
 		Damage = 0,
 		Radius = 0,
 		Knockback = 0,
-		Jumps = 0,
+		CanJump = false,
 		Cooldown = 0,
 		JumpStartPos = Vector(0, 0),
 		JumpStartDist = 0,
@@ -66,12 +66,6 @@ function Edith.EdithDash(player, dir, dist, div)
 	player.Velocity = player.Velocity + dir * dist / div
 end
 
----@param player EntityPlayer
----@param jumps integer
-function Edith.SetJumps(player, jumps)
-	params(player).Jumps = jumps
-end
-
 ---@param velocidad number
 ---@return integer
 function Edith.GetStompCooldown(velocidad)
@@ -91,11 +85,8 @@ end
 ---@param vestige boolean
 function Edith.JumpTriggerManager(player, params, keyStomp, jumping, vestige)
 	local commonConditional = not jumping and not vestige
-    if params.Cooldown == 0 and keyStomp and commonConditional then
-		Edith.SetJumps(player, Edith.GetNumTears(player))
-	end
 
-	if params.Cooldown == 0 and params.Jumps > 0 and commonConditional then
+	if keyStomp and params.Cooldown == 0 and params.CanJump and commonConditional then
 		Edith.InitEdithJump(player, JumpTags.EdithJump, vestige)	
 	end
 end
@@ -300,7 +291,7 @@ end
 function Edith.StompDamageManager(player, params)
     local chapter = math.ceil(level:GetStage() / 2)
     local mults = {
-        MultiShot = Math.Round(Math.exp(Edith.GetNumTears(player), 1, 0.68), 2),
+        MultiShot = Math.Round(Math.exp(Edith.GetNumTears(player), 1, 0.5), 2),
         Birthtight = Player.PlayerHasBirthright(player) and 1.2 or 1,
         BloodClot = player:HasCollectible(CollectibleType.COLLECTIBLE_BLOOD_CLOT) and 1.1 or 1,
         Flight = Player.CanFly and 1.25 or 1,
@@ -337,17 +328,14 @@ end
 function Edith.StompCooldownManager(player, params)
     local Cooldown = Edith.GetStompCooldown(player.MoveSpeed)
     
-    params.Cooldown = (
-        params.IsDefensiveStomp and math.max(Cooldown - 5, 10) or
-        ((params.Jumps > 1 and 5 * (Cooldown / 20)) or Cooldown)
-    )
+    params.Cooldown = (params.IsDefensiveStomp and math.max(Cooldown - 5, 10) or Cooldown)
 end
 
 ---@param player EntityPlayer
 ---@param params EdithJumpStompParams
 function Edith.StompTargetRemover(player, params)
     if Helpers.IsKeyStompPressed(player) or TargetArrow.IsEdithTargetMoving(player) then return end
-    if params.Jumps > 0 then return end
+    -- if params.CanJump then return end
     TargetArrow.RemoveEdithTarget(player)
 end 
 
@@ -377,6 +365,8 @@ end
 ---@param jumpParams EdithJumpStompParams
 function Edith.CooldownUpdate(player, jumpParams)
     jumpParams.Cooldown = math.max(jumpParams.Cooldown - 1, 0)
+
+	jumpParams.CanJump = jumpParams.Cooldown == 0
 
 	if not (jumpParams.Cooldown == 1 and player.FrameCount > 20) then return end
     Player.SetColorCooldown(player, 0.6, 5)

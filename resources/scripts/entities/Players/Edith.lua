@@ -32,7 +32,7 @@ mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, Edith.EdithInit)
 local function EdithTeleportManager(player)
 	if not player:GetSprite():IsPlaying("TeleportDown") then return end
 	JumpLib:QuitJump(player)
-	params(player).Jumps = 0
+	-- params.Cooldown
 	TargetArrow.RemoveEdithTarget(player, false)
 end
 
@@ -123,7 +123,6 @@ function Edith:OnEdithLanding(player, _, pitfall)
 	player:SetMinDamageCooldown(25)
 	player:MultiplyFriction(0.1)
 
-	jumpParams.Jumps = math.max(jumpParams.Jumps - 1, 0)
 	jumpParams.RocketLaunch = false	
 
 	EdithMod.StompTargetRemover(player, jumpParams)
@@ -168,7 +167,7 @@ function Edith:EdithOnNewRoom()
 		if not Player.IsEdith(player, false) then goto Break end
 		helpers.ChangeColor(player, _, _, _, 1)
 		TargetArrow.RemoveEdithTarget(player)
-		EdithMod.SetJumps(player, 0)
+		params(player).CanJump = false
 		::Break::
 	end
 end

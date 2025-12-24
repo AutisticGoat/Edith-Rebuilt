@@ -360,7 +360,9 @@ function Land.EdithStomp(parent, params, breakGrid)
 			sfx:Play(SoundEffect.SOUND_MEATY_DEATHS)
 		end
 
-		DamageManager(parent, ent, params.Damage, TerraMult, params.Knockback)
+		for _ = 1, Edith.GetNumTears(parent) do
+			DamageManager(parent, ent, params.Damage, TerraMult, params.Knockback)
+		end
 
 		if ent.HitPoints > params.Damage then goto Break end
 		Isaac.RunCallback(callbacks.OFFENSIVE_STOMP_KILL, parent, ent, params)
