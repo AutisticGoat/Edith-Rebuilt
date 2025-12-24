@@ -186,6 +186,10 @@ end
 ---@param player EntityPlayer
 ---@param hopParams TEdithHopParryParams
 function TEdith.HopDashMovementManager(player, hopParams)
+	local charge = TEdith.GetHopDashCharge(player, false, false)
+
+	if charge < 10 then return end
+
 	local HopVec = hopParams.HopDirection
 	local isHopVecZero = HopVec.X == 0 and HopVec.Y == 0
 	local isJumping = JumpLib:GetData(player).Jumping

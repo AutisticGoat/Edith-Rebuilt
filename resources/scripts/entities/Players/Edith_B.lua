@@ -58,10 +58,21 @@ function mod:TaintedEdithUpdate(player)
 		TargetArrow.SpawnEdithTarget(player, true)
 	end
 
+	print("===================================")
+	for param, value in pairs(HopParams) do
+		print(param, value)
+	end
+
 	if arrow then
 		TEdithMod.HopDashChargeManager(player, arrow)
 	else
 		TEdithMod.HopDashMovementManager(player, HopParams)
+
+		if TEdithMod.GetHopDashCharge(player, false, true) < 10 then
+			HopParams.HopMoveCharge = 0
+			HopParams.HopStaticCharge = 0
+			HopParams.HopDirection = Vector.Zero
+		end
 	end
 
 	TEdithMod.ParryCooldownManager(player, HopParams)
@@ -97,11 +108,7 @@ function mod:EdithPlayerUpdate(player)
 	local MovX = (((input.left > 0.3 and -input.left) or (input.right > 0.3 and input.right)) or 0) * (game:GetRoom():IsMirrorWorld() and -1 or 1)
 	local MovY = (input.up > 0.3 and -input.up) or (input.down > 0.3 and input.down) or 0
 
-	-- print(Vector(MovX, MovY):Normalized())
-
 	playerData.movementVector = Vector(MovX, MovY):Normalized() 
-
-	-- print(playerData.movementVector)
 
 	HopParams.IsParryJump = HopParams.IsParryJump or false
 
@@ -112,6 +119,7 @@ function mod:EdithPlayerUpdate(player)
 			end
 			if not IsGrudge then
 				TEdithMod.InitTaintedEdithParryJump(player, jumpTags.TEdithJump)
+				-- TargetArrow.RemoveEdithTarget(player, true)
 			else
 				local PerfectParry, _ = TEdithMod.ParryLandManager(player, true)
 				land.LandFeedbackManager(player, land.GetLandSoundTable(true, true), misc.BurntSaltColor, true)
