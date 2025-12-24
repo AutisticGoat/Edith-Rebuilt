@@ -323,8 +323,10 @@ end
 ---@param player EntityPlayer
 ---@return boolean
 function Helpers.IsKeyStompPressed(player)
+	local customButtom = Helpers.GetConfigData(ConfigDataTypes.MISC).CustomActionKey
+
 	local k_stomp =
-		Input.IsButtonPressed(Keyboard.KEY_Z, player.ControllerIndex) or
+		Input.IsButtonPressed(customButtom, player.ControllerIndex) or
         Input.IsButtonPressed(Keyboard.KEY_LEFT_SHIFT, player.ControllerIndex) or
         Input.IsButtonPressed(Keyboard.KEY_RIGHT_SHIFT, player.ControllerIndex) or
 		Input.IsButtonPressed(Keyboard.KEY_RIGHT_CONTROL, player.ControllerIndex) or
@@ -337,8 +339,10 @@ end
 ---@param player EntityPlayer
 ---@return boolean
 function Helpers.IsKeyStompTriggered(player)
+	local customButtom = Helpers.GetConfigData(ConfigDataTypes.MISC).CustomActionKey
+
 	local k_stomp =
-		Input.IsButtonTriggered(Keyboard.KEY_Z, player.ControllerIndex) or
+		Input.IsButtonTriggered(customButtom, player.ControllerIndex) or
         Input.IsButtonTriggered(Keyboard.KEY_LEFT_SHIFT, player.ControllerIndex) or
         Input.IsButtonTriggered(Keyboard.KEY_RIGHT_SHIFT, player.ControllerIndex) or
 		Input.IsButtonTriggered(Keyboard.KEY_RIGHT_CONTROL, player.ControllerIndex) or

@@ -24,6 +24,7 @@ local data = mod.DataHolder.GetEntityData
 ---@field TrainingMode boolean
 ---@field CustomStompDmgMult number
 ---@field DefensiveStompWindow number
+---@field CustomJumpButton Keyboard|integer
 
 ---@class TEdithData
 ---@field ArrowDesign number
@@ -130,9 +131,9 @@ local Elements = {
 					Cooldown = Prefixes.Separator .. "Edith_Sounds_Cooldown"
 				},
 				Gameplay = {
-					Misc = Prefixes.Separator .. "Edith_Gameplay_Misc",
+					Stomp = Prefixes.Separator .. "Edith_Gameplay_Misc",
 					Inputs = Prefixes.Separator .. "Edith_Gameplay_Inputs",
-					Training = Prefixes.Separator .. "Edith_GameplayTraining"
+					Salt_Shaker = Prefixes.Separator .. "Edith_Gameplay_Salt_Shaker",
 				}
 			},
 			TEdith = {
@@ -181,7 +182,9 @@ local Elements = {
 		},
 		Gameplay = {
 			EnableDropKey2Jump = Prefixes.Edith.Gameplay .. "EnableDropKey2Jump",
-			EnableTrainingMode = Prefixes.Edith.Gameplay .. "EnableTrainingMode",
+			CustomJumpKey = Prefixes.Edith.Gameplay .. "CustomJumpKey",
+			SaltShakerSlot = Prefixes.Edith.Gameplay .. "SaltShaker",
+			-- EnableTrainingMode = Prefixes.Edith.Gameplay .. "EnableTrainingMode",
 			DefensiveStompWindow = Prefixes.Edith.Gameplay .. "DefensiveStompWindow",
 		}
 	},
@@ -336,19 +339,22 @@ end
 function mod:UpdateImGuiData()
 	if not SaveManager.IsLoaded() then return end
 	local saveData = SaveManager.GetSettingsSave()
-
+	
 	if not saveData then return end
 	if not mod:CheckImGuiIntegrity() then return end
-
+	
 	local EdithData = saveData.EdithData ---@cast EdithData EdithData
 	local TEdithData = saveData.TEdithData ---@cast TEdithData TEdithData
-	local MiscData = saveData.MiscData
+	local MiscData = saveData.MiscData ---@cast MiscData MiscData
 	local Options = Elements.Options
 	local EdithOptions = Options.Edith
 	local TEdithOptions = Options.TEdith
 	local MiscOptions = Options.Misc
 
 	local data = {
+		[MiscOptions.CustomActionKey] = MiscData.CustomActionKey or Keyboard.KEY_Z,
+		[MiscOptions.EnableShakescreen] = MiscData.EnableShakescreen or false,
+
 		[EdithOptions.Visuals.TargetDesign] = (EdithData.TargetDesign - 1) or 0,
 		[EdithOptions.Visuals.TargetLine] = EdithData.TargetLine or false,
 		[EdithOptions.Visuals.SetRGBMode] = EdithData.RGBMode or false,
@@ -361,10 +367,6 @@ function mod:UpdateImGuiData()
 		[EdithOptions.Gameplay.EnableDropKey2Jump] = EdithData.DropKey2Jump or false,
 		[EdithOptions.Gameplay.EnableTrainingMode] = EdithData.TrainingMode or false,
 		[EdithOptions.Gameplay.DefensiveStompWindow] = EdithData.DefensiveStompWindow or 15,
-
-		-- [MiscOptions.CustomActionKey] = MiscData.CustomActionKey or Keyboard.KEY_Z,
-		[MiscOptions.EnableShakescreen] = MiscData.EnableShakescreen or false,
-		
 	}
 
 	if isTaintedEdithUnlocked() then
@@ -405,6 +407,8 @@ function mod:UpdateImGuiData()
 	for option, newValue in pairs(data) do
 		ImGui.UpdateData(option, ImGuiData.Value, newValue)
 	end
+
+	ImGui.UpdateData(MiscOptions.CustomActionKey, ImGuiData.Value, MiscData.CustomActionKey)
 
 	local targetColor = EdithData.TargetColor
 
@@ -523,7 +527,7 @@ local function AddEdithOptions()
 -- Sounds end
 
 -- Gameplay
-	ImGui.AddElement(EdithGameplay, Separator.Gameplay.Misc, ImGuiElement.SeparatorText, "Misc")
+	ImGui.AddElement(EdithGameplay, Separator.Gameplay.Stomp, ImGuiElement.SeparatorText, "Stomp")
 	ImGui.AddSliderInteger(EdithGameplay, OptionGameplay.DefensiveStompWindow, "Change Edith's defensive stomp window",
 		function(val)
 			EdithData.DefensiveStompWindow = val
@@ -531,20 +535,21 @@ local function AddEdithOptions()
 	15, 5, 25)
 
 	ImGui.AddElement(EdithGameplay, Separator.Gameplay.Inputs, ImGuiElement.SeparatorText, "Inputs")
+
 	ImGui.AddCheckbox(EdithGameplay, OptionGameplay.EnableDropKey2Jump, "Enable Drop key to jump", 
 		function(check)
 			EdithData.DropKey2Jump = check
 		end,
 	true)
 
-	ImGui.AddElement(EdithGameplay, Separator.Gameplay.Training, ImGuiElement.SeparatorText, "Training")
-	ImGui.AddCheckbox(EdithGameplay, OptionGameplay.EnableTrainingMode, "Enable Training Mode", 
-		function(check)
-			EdithData.TrainingMode = check
-			-- DisplayTrainingOptions(check)
-		end,
-	false)
-	ImGui.SetHelpmarker(OptionGameplay.EnableTrainingMode, "Enable Edith's training mode, making it able to adjust some values \n\u{21} Mod's achievements will be unobtainable in the run")
+	-- ImGui.AddElement(EdithGameplay, Separator.Gameplay.Training, ImGuiElement.SeparatorText, "Training")
+	-- ImGui.AddCheckbox(EdithGameplay, OptionGameplay.EnableTrainingMode, "Enable Training Mode", 
+	-- 	function(check)
+	-- 		EdithData.TrainingMode = check
+	-- 		-- DisplayTrainingOptions(check)
+	-- 	end,
+	-- false)
+	-- ImGui.SetHelpmarker(OptionGameplay.EnableTrainingMode, "Enable Edith's training mode, making it able to adjust some values \n\u{21} Mod's achievements will be unobtainable in the run")
 -- Gameplay end
 end
 
@@ -668,11 +673,12 @@ local function AddMiscOptions()
 	local MiscData = SaveManager:GetSettingsSave().MiscData --[[@as MiscData]]
 
 	ImGui.AddElement(MiscTab, Separator.Input, ImGuiElement.SeparatorText, "Inputs")
+	
 	ImGui.AddInputKeyboard(MiscTab, MiscOptions.CustomActionKey, "Set custom action key", 
 		function(ID)
 			MiscData.CustomActionKey = ID
 		end, 
-	Keyboard.KEY_Z)
+	MiscData.CustomActionKey or Keyboard.KEY_Z)
 
 	ImGui.AddElement(MiscTab, Separator.ResetData, ImGuiElement.SeparatorText, "Reset Data")
 	ImGui.AddButton(MiscTab, MiscOptions.ResetEdithData, "Reset Edith Settings", 
@@ -764,7 +770,7 @@ local function AddContributors()
 	- Kotry: Project leader, coder, unlock sheets sprite
 	]],
 	true)
-end	
+end
 
 local function AddProgressBars()
 	ImGui.AddProgressBar(Menu.Windows.Progress, Menu.ProgressBar.General, "General unlocks progress", 0)
@@ -1028,6 +1034,7 @@ local function InitSaveData()
 	TEdithData.TrailDesign = TEdithData.TrailDesign or 1
 
 	MiscData.EnableShakescreen = MiscData.EnableShakescreen or true
+	MiscData.CustomActionKey = MiscData.CustomActionKey or Keyboard.KEY_Z
 	
 	mod:DestroyImGuiOptions()
 end
