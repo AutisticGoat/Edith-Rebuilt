@@ -14,89 +14,72 @@ local UnlockTable = {
         [CompletionType.MOMS_HEART] = {
             Unlock = achievements.ACHIEVEMENT_GEODE,
             Difficulty = Difficulty.DIFFICULTY_HARD,
-            Trinket = trinkets.TRINKET_GEODE
         },
         [CompletionType.ISAAC] = {
             Unlock = achievements.ACHIEVEMENT_SALT_SHAKER,
             Difficulty = Difficulty.DIFFICULTY_HARD,
-            Item = items.COLLECTIBLE_SALTSHAKER,
         },
         [CompletionType.SATAN] = {
             Unlock = achievements.ACHIEVEMENT_SULFURIC_FIRE,
             Difficulty = Difficulty.DIFFICULTY_HARD,
-            Item = items.COLLECTIBLE_SULFURIC_FIRE,
         },
         [CompletionType.BOSS_RUSH] = {
             Unlock = achievements.ACHIEVEMENT_RUMBLING_PEBBLE,
             Difficulty = Difficulty.DIFFICULTY_HARD,
-            Trinket = trinkets.TRINKET_RUMBLING_PEBBLE
         },
         [CompletionType.BLUE_BABY] = {
             Unlock = achievements.ACHIEVEMENT_PEPPER_GRINDER,
             Difficulty = Difficulty.DIFFICULTY_HARD,
-            Item = items.COLLECTIBLE_PEPPERGRINDER
         },
         [CompletionType.LAMB] = {
             Unlock = achievements.ACHIEVEMENT_FAITH_OF_THE_UNFAITHFUL,
             Difficulty = Difficulty.DIFFICULTY_HARD,
-            Item = items.COLLECTIBLE_FATE_OF_THE_UNFAITHFUL
         },
         [CompletionType.MEGA_SATAN] = {
             Unlock = achievements.ACHIEVEMENT_MOLTEN_CORE,
             Difficulty = Difficulty.DIFFICULTY_HARD,
-            Item = items.COLLECTIBLE_MOLTEN_CORE,
         },
         [CompletionType.ULTRA_GREED] = {
             Unlock = achievements.ACHIEVEMENT_HYDRARGYRUM,
             Difficulty = Difficulty.DIFFICULTY_GREED,
-            Item = items.COLLECTIBLE_HYDRARGYRUM,
         },
         [CompletionType.HUSH] = {
             Unlock = achievements.ACHIEVEMENT_SAL,
             Difficulty = Difficulty.DIFFICULTY_HARD,
-            Item = items.COLLECTIBLE_SAL,
         },
         [CompletionType.ULTRA_GREEDIER] = {
             Unlock = achievements.ACHIEVEMENT_GILDED_STONE,
             Difficulty = Difficulty.DIFFICULTY_GREEDIER,
-            Item = items.COLLECTIBLE_GILDED_STONE,
         },
         [CompletionType.DELIRIUM] = {
-            Unlock = achievements.ACHIEVEMENT_CHUNK_OF_BASALT,
+            Unlock = achievements.ACHIEVEMENT_SPICES_MIX,
             Difficulty = Difficulty.DIFFICULTY_HARD,
-            Item = items.COLLECTIBLE_CHUNK_OF_BASALT,
         },
         [CompletionType.MOTHER] = {
             Unlock = achievements.ACHIEVEMENT_DIVINE_RETRIBUTION,
             Difficulty = Difficulty.DIFFICULTY_HARD,
-            Item = items.COLLECTIBLE_DIVINE_RETRIBUTION,
         },
         [CompletionType.BEAST] = {
             Unlock = achievements.ACHIEVEMENT_EDITHS_HOOD,
             Difficulty = Difficulty.DIFFICULTY_HARD,
-            Item = items.COLLECTIBLE_EDITHS_HOOD,
         },
     },
     TEdith = {
         [CompletionType.MEGA_SATAN] = {
             Unlock = achievements.ACHIEVEMENT_SALT_ROCKS,
             Difficulty = Difficulty.DIFFICULTY_HARD,
-            Card = enums.Card.CARD_SALT_ROCKS,
         },
         [CompletionType.MOTHER] = {
             Unlock = achievements.ACHIEVEMENT_PAPRIKA,
             Difficulty = Difficulty.DIFFICULTY_HARD,
-            Trinket = trinkets.TRINKET_PAPRIKA
         },
         [CompletionType.DELIRIUM] = {
             Unlock = achievements.ACHIEVEMENT_BURNT_HOOD,
             Difficulty = Difficulty.DIFFICULTY_HARD,
-            Item = items.COLLECTIBLE_BURNT_HOOD,
         },
         [CompletionType.BEAST] = {
             Unlock = achievements.ACHIEVEMENT_DIVINE_WRATH,
             Difficulty = Difficulty.DIFFICULTY_HARD,
-            Item = items.COLLECTIBLE_DIVINE_WRATH,
         },
     }
 }
