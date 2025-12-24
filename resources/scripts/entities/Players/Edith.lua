@@ -215,6 +215,16 @@ function Edith:OnActiveItemRemoveTarget(ID, _, player)
 end
 mod:AddCallback(ModCallbacks.MC_PRE_USE_ITEM, Edith.OnActiveItemRemoveTarget)
 
+---@param ID CollectibleType
+---@param player EntityPlayer
+mod:AddCallback(ModCallbacks.MC_PRE_USE_ITEM, function (_, ID, _, player)
+	if ID ~= CollectibleType.COLLECTIBLE_KAMIKAZE then return end
+	if not Player.IsEdith(player, false) then return end
+	if not EdithMod.IsJumping(player) then return end
+
+	return true
+end)
+
 ---@param bomb EntityBomb
 function Edith:OnBombExplode(bomb)
 	if not bomb:GetSprite():IsPlaying("Explode") then return end
