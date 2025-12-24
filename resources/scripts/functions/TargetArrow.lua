@@ -5,16 +5,24 @@ local game = enums.Utils.Game
 local level = enums.Utils.Level
 local helpers = require("resources.scripts.functions.Helpers")
 local Player = require("resources.scripts.functions.Player")
-local data = mod.DataHolder.GetEntityData
 local targetArrow = {}
+
+---@param player EntityPlayer
+---@return table
+local function getTargetData(player)
+	local data = player:GetData()
+	data.EdithRebuiltTargetData = data.EdithRebuiltTargetData or {} 
+
+	return data.EdithRebuiltTargetData
+end
 
 ---Function to get Edith's Target, setting `tainted` to `true` will return Tainted Edith's Arrow
 ---@param player EntityPlayer
 ---@param tainted boolean?
 ---@return EntityEffect
 function targetArrow.GetEdithTarget(player, tainted)
-	local playerData = data(player)
-	return tainted and playerData.TaintedEdithTarget or playerData.EdithTarget
+	local Data = getTargetData(player)
+	return tainted and Data.TaintedEdithTarget or Data.EdithTarget
 end
 
 ---Checks if Edith's target is moving
@@ -45,7 +53,7 @@ function targetArrow.SpawnEdithTarget(player, tainted)
 	if helpers.IsDogmaAppearCutscene() then return end
 	if targetArrow.GetEdithTarget(player, tainted or false) then return end 
 
-	local playerData = data(player)
+	local Data = getTargetData(player)
 	local TargetVariant = tainted and variants.EFFECT_EDITH_B_TARGET or variants.EFFECT_EDITH_TARGET
 	local target = Isaac.Spawn(	
 		EntityType.ENTITY_EFFECT,
@@ -59,11 +67,11 @@ function targetArrow.SpawnEdithTarget(player, tainted)
 	target.SortingLayer = SortingLayer.SORTING_NORMAL
 	
 	if tainted then
-		playerData.TaintedEdithTarget = target
+		Data.TaintedEdithTarget = target
 	else
 		target.GridCollisionClass = GridCollisionClass.COLLISION_SOLID
 		target.EntityCollisionClass = EntityCollisionClass.ENTCOLL_PLAYERONLY
-		playerData.EdithTarget = target
+		Data.EdithTarget = target
 	end
 end
 
@@ -76,11 +84,11 @@ function targetArrow.RemoveEdithTarget(player, tainted)
 	if not target then return end
 	target:Remove()
 
-	local playerData = data(player)
+	local Data = getTargetData(player)
 	if tainted then
-		playerData.TaintedEdithTarget = nil
+		Data.TaintedEdithTarget = nil
 	else
-		playerData.EdithTarget = nil
+		Data.EdithTarget = nil
 	end
 end
 
@@ -90,6 +98,8 @@ end
 ---@return Vector
 function targetArrow.GetEdithTargetDirection(player, tainted)
 	local target = targetArrow.GetEdithTarget(player, tainted or false)
+	if not target then return Vector.Zero end
+
 	return (target.Position - player.Position):Normalized()
 end
 
