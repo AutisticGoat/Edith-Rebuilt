@@ -5,6 +5,7 @@ local misc = enums.Misc
 local Trail = {}
 local SaveManager = mod.SaveManager
 local Helpers = mod.Modules.HELPERS
+local Player = mod.Modules.PLAYER
 local data = mod.DataHolder.GetEntityData
 
 function Trail.ResetTEdithTrail(player)
@@ -12,6 +13,7 @@ function Trail.ResetTEdithTrail(player)
 
     if not playerData.Trail then return end
 
+    playerData.Trail.Visible = false
 	playerData.Trail:Remove()
 	playerData.Trail = nil
 end
@@ -51,21 +53,21 @@ function Trail.SpawnTEdithTrail(player)
 end
 
 function Trail:TrailManagement(player)
-    if not mod.IsEdith(player, true) then return end
+    if not Player.IsEdith(player, true) then return end
     if not SaveManager then return end
-    
-    local Settings = SaveManager:GetSettingsSave()
-    if not Settings then return end
 
-    local TEdithSettings = Settings.TEdithData
-    
-    if TEdithSettings.EnableTrail then
+
+    local TEdithSettings = Helpers.GetConfigData("TEdithData")    
+
+    if not TEdithSettings then return end
+
+    if TEdithSettings.EnableHopdashTrail then
         Trail.SpawnTEdithTrail(player)
     else
         Trail.ResetTEdithTrail(player)
     end
 end
--- mod:AddCallback(ModCallbacks.MC_POST_PLAYER_RENDER, Trail.TrailManagement)
+mod:AddCallback(ModCallbacks.MC_POST_PLAYER_RENDER, Trail.TrailManagement)
 
 function Trail:OnTrailSpriteChange(trail)
     if not trail then return end
@@ -81,3 +83,13 @@ function Trail:OnTrailSpriteChange(trail)
     trail:GetSprite():ReplaceSpritesheet(0, misc.TrailPath .. trailParams.Suffix .. ".png", true)
 end
 mod:AddCallback(enums.Callbacks.TRAIL_SPRITE_CHANGE, Trail.OnTrailSpriteChange)
+
+function Trail:OnNewRoom()
+    for _, player in ipairs(PlayerManager.GetPlayers()) do
+        if not Player.IsEdith(player, true) then goto continue end
+        Trail.ResetTEdithTrail(player)
+
+        ::continue::
+    end 
+end
+mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, Trail.OnNewRoom)
