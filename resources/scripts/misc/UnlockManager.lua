@@ -134,14 +134,9 @@ end
 local function TriggerTEdithUnlocks(mark, player, pgd, difficulty)
     if player ~= players.PLAYER_EDITH_B then return end
 
-    local tableRef = UnlockTable.TEdith
-    local unlock = Helpers.When(mark, tableRef, nil)
-
     if difficulty == Difficulty.DIFFICULTY_GREEDIER then
         pgd:TryUnlock(achievements.ACHIEVEMENT_JACK_OF_CLUBS)
     end
-
-    if not unlock then return end
 
     if Isaac.AllTaintedCompletion(players.PLAYER_EDITH_B, TaintedMarksGroup.SOULSTONE) == 2 then
         pgd:TryUnlock(achievements.ACHIEVEMENT_SOUL_OF_EDITH)
@@ -150,6 +145,11 @@ local function TriggerTEdithUnlocks(mark, player, pgd, difficulty)
     if Isaac.AllTaintedCompletion(players.PLAYER_EDITH_B, TaintedMarksGroup.POLAROID_NEGATIVE) == 2 then
         pgd:TryUnlock(achievements.ACHIEVEMENT_BURNT_SALT)
     end
+
+    local tableRef = UnlockTable.TEdith
+    local unlock = Helpers.When(mark, tableRef, nil)
+
+    if not unlock then return end
 
     if difficulty ~= unlock.Difficulty then return end
     pgd:TryUnlock(unlock.Unlock)
