@@ -845,21 +845,6 @@ local function AddChangelogs()
 	ImGui.AddTab(Menu.TabBars.Changelog, "EdithRebuilt_v1.2.0", "v1.2.0")
 	ImGui.AddText("EdithRebuilt_v1.2.0", 
 	[[
-- Reimplemented mod's data structure (big change that justified going to 1.1.0)
-- (Hopefully) Fixed a rare and hard to reproduce error where Tainted Edith was unable to spawn her arrow
-- Now Tainted Edith's hop-parry params are properly reset when starting a new run
-- Now Edith's jump-stomp params are properly reset when starting a new run
-- Fixed Edith triggering beggars and donation machines everytime
-- Fixed Edith not getting damage when stomping devil beggars and blood donation machines
-- Fixed a potential error regarding Tainted Edith trying to hop at nil charge
-- Now target door manager will let you go trough open doors in uncleared rooms
-- Fixed Edith being unable to go to black markets
-- Fixed Edith going to error room in Rotgut's maggot phase 
-	]], true)
-
-	ImGui.AddTab(Menu.TabBars.Changelog, "EdithRebuilt_v1.2.0", "v1.2.0")
-	ImGui.AddText("EdithRebuilt_v1.2.0", 
-	[[
 - Fixed Salt rocks not triggering salted effect to enemies
 - Fixed Edith not being able to go to void trough Mega Satan's portal
 - Fixed bomb stomp consuming bombs when having dr fetus or epic fetus
@@ -877,6 +862,32 @@ local function AddChangelogs()
 - Now Tainted Edith can consistently interact with blood donation machines, devil beggars and confessionals
 - Removed a unused item entry
 - Removed leftover prints
+	]], true)
+
+	ImGui.AddTab(Menu.TabBars.Changelog, "EdithRebuilt_v1.3.0", "v1.3.0")
+	ImGui.AddText("EdithRebuilt_v1.3.0", 
+	[[
+- Fixed Edith and Tainted Edith losing their costumes when using D4 or D100
+- Fixed Edith getting damage from blood donation machines, devil beggars and confessionals when they're destroyed
+- Fixed Edith being unable to go to womb, corpse, blue womb, and such
+- Fixed Edith not moving to her target when loading the mod with luamod console command
+- Fixed an issue were ImGui options weren't properly updated
+- Fixed Tainted Edith not unlocking her Greedier unlock
+- Improved Edith's grid teleporter interaction
+- Removed a trailing char in items.xml
+- Removed Gnawed Leaf and Night Light from item pools when playing with Edith
+- Properly added Spices Mix unlock
+- Now Edith can't use Kamikaze while jumping
+- Now players who doesn't have Salt Heart won't get salted status effect
+- Now Tainted Edith can hopdsah if the charge is below 10%
+- Now custom action key from ImGui's menu works
+-- Now it allows to set a custom action button rather than Z
+- Now Edith's Salt Shaker can be a pocket active (option added to Imgui Menu)
+- Now Tainted Edith's trail options works
+- Reworked Multishot stomp synergy
+-- Now Edith will jump once, but stomp will deal damage multiple times
+-- Increased Stomp's damage reduction from multishot
+-- Enemy's damaged sound effect's volume will be higher the more times is dealt damage
 	]], true)
 end
 
