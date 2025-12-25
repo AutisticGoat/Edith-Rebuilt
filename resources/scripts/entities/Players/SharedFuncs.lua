@@ -43,15 +43,14 @@ local whiteListCostumes = {
 	[costumes.ID_EDITH_B_SCARF] = true,
     [costumes.ID_EDITH_B_GRUDGE_SCARF] = true,
     [costumes.ID_EDITH_VESTIGE_SCARF] = true,
-    -- [NullItemID.HOLY]
 }
 
 local function CostumeManager(_, itemconfig, player)
     if not Player.IsAnyEdith(player) then return end
-    if Helpers.When(itemconfig.Costume.ID, whiteListCostumes, false) then return end
+    if not Helpers.When(itemconfig.Costume.ID, whiteListCostumes, false) then return end
     return true
 end
-mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_ADD_COSTUME, CostumeManager)
+mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_REMOVE_COSTUME, CostumeManager)
 
 mod:AddCallback(ModCallbacks.MC_POST_TEAR_UPDATE, function(_, tear)
     local player = Helpers.GetPlayerFromTear(tear)
