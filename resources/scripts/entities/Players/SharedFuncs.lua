@@ -43,6 +43,7 @@ local whiteListCostumes = {
 	[costumes.ID_EDITH_B_SCARF] = true,
     [costumes.ID_EDITH_B_GRUDGE_SCARF] = true,
     [costumes.ID_EDITH_VESTIGE_SCARF] = true,
+    -- [NullItemID.HOLY]
 }
 
 local function CostumeManager(_, itemconfig, player)
@@ -50,7 +51,7 @@ local function CostumeManager(_, itemconfig, player)
     if Helpers.When(itemconfig.Costume.ID, whiteListCostumes, false) then return end
     return true
 end
-mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_REMOVE_COSTUME, CostumeManager)
+mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_ADD_COSTUME, CostumeManager)
 
 mod:AddCallback(ModCallbacks.MC_POST_TEAR_UPDATE, function(_, tear)
     local player = Helpers.GetPlayerFromTear(tear)
@@ -105,12 +106,10 @@ local function GetEdithCostume(player)
     )
 end
 
-
 local ReloadCostumeItem = {
     [CollectibleType.COLLECTIBLE_D4] = true,
     [CollectibleType.COLLECTIBLE_D100] = true,
 }
-
 
 ---@param ID CollectibleType
 ---@param player EntityPlayer
@@ -120,4 +119,17 @@ mod:AddCallback(ModCallbacks.MC_USE_ITEM, function(_, ID, _, player)
     local Costume = GetEdithCostume(player)    
     if not Costume then return end
     player:AddNullCostume(Costume)
+end)
+
+
+mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, function()
+	local pool = game:GetItemPool()
+
+	for _, player in ipairs(PlayerManager.GetPlayers()) do
+		if Player.IsAnyEdith(player) then		
+			pool:RemoveCollectible(CollectibleType.COLLECTIBLE_GNAWED_LEAF)
+			pool:RemoveCollectible(CollectibleType.COLLECTIBLE_NIGHT_LIGHT)
+			pool:RemoveCollectible(CollectibleType.COLLECTIBLE_MONTEZUMAS_REVENGE)
+		end
+	end
 end)
