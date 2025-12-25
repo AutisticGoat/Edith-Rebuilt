@@ -48,18 +48,4 @@ mod:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT, function()
     dataHolder.Data = {}
 end)
 
----test
----@param player EntityPlayer
-mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
-    local playerData = dataHolder.GetEntityData(player)
-
-    playerData.CountPress = playerData.CountPress or 0
-
-    if Input.IsButtonTriggered(Keyboard.KEY_H, player.ControllerIndex) then
-        playerData.CountPress = playerData.CountPress + 1
-    end
-
-    -- print(playerData.CountPress)
-end)
-
 return dataHolder
