@@ -58,11 +58,6 @@ function mod:TaintedEdithUpdate(player)
 		TargetArrow.SpawnEdithTarget(player, true)
 	end
 
-	print("===================================")
-	for param, value in pairs(HopParams) do
-		print(param, value)
-	end
-
 	if arrow then
 		TEdithMod.HopDashChargeManager(player, arrow)
 	else
