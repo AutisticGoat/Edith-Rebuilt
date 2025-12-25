@@ -147,6 +147,7 @@ end
 ---@param ent Entity
 ---@return number
 function Helpers.GetPushFactor(ent)
+	print(ent.Mass)
 	return math.max(0.01, 1 + (5 - ent.Mass) * 1/250)
 end	
 
@@ -155,10 +156,10 @@ end
 ---@param pusher Entity
 ---@param strength number
 function Helpers.TriggerPush(pushed, pusher, strength)
-	local PushFactor = Helpers.GetPushFactor(pushed)
-	local dir = ((pusher.Position - pushed.Position) * -1):Resized(strength) * PushFactor
+	-- local PushFactor = Helpers.GetPushFactor(pushed)
+	local dir = ((pusher.Position - pushed.Position) * -1):Resized(strength)-- * PushFactor
 	pushed.Velocity = dir
-	pushed:AddKnockback(EntityRef(pusher), dir, 2, false)
+	-- pushed:AddKnockback(EntityRef(pusher), dir, 2, false)
 end
 
 ---Changes `Entity` velocity so now it goes to `Target`'s Position, `strenght` determines how fast it'll go
