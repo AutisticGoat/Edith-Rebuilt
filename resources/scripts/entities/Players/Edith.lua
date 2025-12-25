@@ -208,7 +208,8 @@ function Edith:EdithRender(player)
 	if not trapdoor then return end
 
 	local trapdoorSprite = trapdoor:GetSprite():GetLayer(0):GetSpritesheetPath()
-	IsFleshTrapdoor = string.find(trapdoorSprite, "womb") ~= nil or string.find(trapdoorSprite, "corpse") ~= nil
+
+	IsFleshTrapdoor = string.find(trapdoorSprite, "womb") ~= nil or string.find(trapdoorSprite, "corpse") ~= nil and not string.find(trapdoorSprite, "corpse_big")
 
 	if not IsFleshTrapdoor then return end
 	if not Player.IsEdith(player, false) then return end
