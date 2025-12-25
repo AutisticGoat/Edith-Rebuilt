@@ -264,87 +264,22 @@ for _, link in ipairs(links) do
 	ImGui.LinkWindowToElement(link.window, link.menu)
 end
 
-local function ResetSaveData(isTainted)
-	local SaveManager = mod.SaveManager
-	if not SaveManager then return end
-	local menuData = SaveManager.GetSettingsSave()
-	if not menuData then return end
+local function UpdateImGuiData()
+	-- print("Loaded function")
 
-	local EdithData = menuData.EdithData ---@cast EdithData EdithData
-	local TEdithData = menuData.TEdithData ---@cast TEdithData TEdithData
-
-	if isTainted then
-		TEdithData.ArrowColor = {Red = 1, Green = 0, Blue = 0}
-		TEdithData.TrailColor = {Red = 1, Green = 0, Blue = 0}
-		TEdithData.ArrowDesign = 1
-		TEdithData.HopSound = 1
-		TEdithData.Volume = 100
-		TEdithData.ParrySound = 1
-		TEdithData.RGBMode = false
-		TEdithData.EnableExtraGore = false
-		TEdithData.RGBSpeed = 0.005
-		TEdithData.TrailDesign = 1
-	else
-		EdithData.TargetColor = {Red = 1, Green = 1, Blue = 1}
-		EdithData.StompSound = 1
-		EdithData.StompVolume = 100
-		EdithData.EnableExtraGore = false
-		EdithData.TargetDesign = 1
-		EdithData.DisableSaltGibs = false
-		EdithData.RGBMode = false
-		EdithData.RGBSpeed = 0.005
-		EdithData.TargetLine = false
-		EdithData.JumpCooldownSound = 1
-		EdithData.DefensiveStompWindow = 15
-		EdithData.SaltShakerSlot = 0
-	end
-
-	mod:UpdateImGuiData()
-
-	RenderMenu = true
-end
-
-local TEdithOptions = {}
-
----@param tabla table
----@param prefijo? string
-local function recorrerTablaImGui(tabla, prefijo)
-    prefijo = prefijo or ""
-    for clave, valor in pairs(tabla) do
-        if type(valor) == "table" then
-            recorrerTablaImGui(valor, prefijo .. clave .. ".")
-        else
-			if not ImGui.ElementExists(valor) then
-				if not string.find(valor, "Tainted") then 
-					elementTab[clave] = valor
-				end
-			end
-        end
-    end
-end
-recorrerTablaImGui(Elements)
-
-local function AddTEdithOptionsToElements()
-	if not isTaintedEdithUnlocked() then return end
-	for k, v in pairs(TEdithOptions) do
-		elementTab[k] = v
-	end
-end
-
-function mod:CheckImGuiIntegrity()
-	for _, ID in pairs(elementTab) do
-		if not ImGui.ElementExists(ID) then return false end
-	end
-	return true
-end
-
-function mod:UpdateImGuiData()
 	if not SaveManager.IsLoaded() then return end
 	local saveData = SaveManager.GetSettingsSave()
 	
+	-- print("Loaded Save Manager")
+
 	if not saveData then return end
-	if not mod:CheckImGuiIntegrity() then return end
+
+	-- print("Loaded save data")
+
+	-- if not mod:CheckImGuiIntegrity() then return end
 	
+	
+
 	local EdithData = saveData.EdithData ---@cast EdithData EdithData
 	local TEdithData = saveData.TEdithData ---@cast TEdithData TEdithData
 	local MiscData = saveData.MiscData ---@cast MiscData MiscData
@@ -366,8 +301,6 @@ function mod:UpdateImGuiData()
 		[EdithOptions.Sounds.SetStompSound] = (EdithData.StompSound - 1) or 0,
 		[EdithOptions.Sounds.SetStompVolume] = EdithData.StompVolume or 100,
 		[EdithOptions.Sounds.SetJumpCooldownSound] = (EdithData.JumpCooldownSound - 1) or 0,
-		[EdithOptions.Gameplay.EnableDropKey2Jump] = EdithData.DropKey2Jump or false,
-		[EdithOptions.Gameplay.EnableTrainingMode] = EdithData.TrainingMode or false,
 		[EdithOptions.Gameplay.DefensiveStompWindow] = EdithData.DefensiveStompWindow or 15,
 		[EdithOptions.Gameplay.SaltShakerSlot] = EdithData.SaltShakerSlot or 0,
 	}
@@ -421,6 +354,84 @@ function mod:UpdateImGuiData()
 		targetColor.Green,
 		targetColor.Blue,
 	})
+end
+
+local function ResetSaveData(isTainted)
+	local SaveManager = mod.SaveManager
+	if not SaveManager then return end
+	local menuData = SaveManager.GetSettingsSave()
+	if not menuData then return end
+
+	local EdithData = menuData.EdithData ---@cast EdithData EdithData
+	local TEdithData = menuData.TEdithData ---@cast TEdithData TEdithData
+
+	if isTainted then
+		TEdithData.ArrowColor = {Red = 1, Green = 0, Blue = 0}
+		TEdithData.TrailColor = {Red = 1, Green = 0, Blue = 0}
+		TEdithData.ArrowDesign = 1
+		TEdithData.HopSound = 1
+		TEdithData.Volume = 100
+		TEdithData.ParrySound = 1
+		TEdithData.RGBMode = false
+		TEdithData.EnableExtraGore = false
+		TEdithData.RGBSpeed = 0.005
+		TEdithData.TrailDesign = 1
+	else
+		EdithData.TargetColor = {Red = 1, Green = 1, Blue = 1}
+		EdithData.StompSound = 1
+		EdithData.StompVolume = 100
+		EdithData.EnableExtraGore = false
+		EdithData.TargetDesign = 1
+		EdithData.DisableSaltGibs = false
+		EdithData.RGBMode = false
+		EdithData.RGBSpeed = 0.005
+		EdithData.TargetLine = false
+		EdithData.JumpCooldownSound = 1
+		EdithData.DefensiveStompWindow = 15
+		EdithData.SaltShakerSlot = 0
+	end
+
+	UpdateImGuiData()
+
+	RenderMenu = true
+end
+
+local TEdithOptions = {}
+
+mod:AddCallback(ModCallbacks.MC_POST_UPDATE, function()
+	UpdateImGuiData()
+end)
+
+---@param tabla table
+---@param prefijo? string
+local function recorrerTablaImGui(tabla, prefijo)
+    prefijo = prefijo or ""
+    for clave, valor in pairs(tabla) do
+        if type(valor) == "table" then
+            recorrerTablaImGui(valor, prefijo .. clave .. ".")
+        else
+			if not ImGui.ElementExists(valor) then
+				if not string.find(valor, "Tainted") then 
+					elementTab[clave] = valor
+				end
+			end
+        end
+    end
+end
+recorrerTablaImGui(Elements)
+
+local function AddTEdithOptionsToElements()
+	if not isTaintedEdithUnlocked() then return end
+	for k, v in pairs(TEdithOptions) do
+		elementTab[k] = v
+	end
+end
+
+function mod:CheckImGuiIntegrity()
+	for _, ID in pairs(elementTab) do
+		if not ImGui.ElementExists(ID) then return false end
+	end
+	return true
 end
 
 -- local TrainingOptions = {
@@ -544,7 +555,7 @@ local function AddEdithOptions()
 		end
 	, {"Main" , "Pocket"}, EdithData.SaltShakerSlot or 0, true)
 
-	ImGui.SetHelpmarker(OptionGameplay.SaltShakerSlot, "\u{21} This will only work when starting a new run")
+	ImGui.SetHelpmarker(OptionGameplay.SaltShakerSlot, "\u{21} This will only work  a new run")
 
 	-- ImGui.AddElement(EdithGameplay, Separator.Gameplay.Training, ImGuiElement.SeparatorText, "Training")
 	-- ImGui.AddCheckbox(EdithGameplay, OptionGameplay.EnableTrainingMode, "Enable Training Mode", 
@@ -906,7 +917,7 @@ local function OptionsUpdate()
 	AddContributors()
 	AddProgressBars()
 	AddChangelogs()
-	mod:UpdateImGuiData()
+	UpdateImGuiData()
 	RenderMenu = false
 end
 
