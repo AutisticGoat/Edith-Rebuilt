@@ -461,16 +461,11 @@ end
 ---@param familiar EntityFamiliar
 function Edith:MoveBloodClotsToEdith(familiar)
 	local player = familiar.Player
-	local famPos = familiar.Position
-	local playerPos = player.Position
 
-
-	if famPos:Distance(playerPos) > 20 then
-		familiar.Velocity = (player.Position - familiar.Position):Normalized():Resized(3)
-	end
-
+	if not Edith.IsJumping(player) then return end
+	familiar.Velocity = player.Velocity	
 end
-mod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, Edith.MoveBloodClotsToEdith)
+mod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, Edith.MoveBloodClotsToEdith, 254)
 
 ---@param player EntityPlayer
 function Edith.IsJumping(player)
