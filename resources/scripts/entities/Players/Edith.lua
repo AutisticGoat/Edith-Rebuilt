@@ -250,14 +250,3 @@ function Edith:OnBombExplode(bomb)
 	end
 end
 mod:AddCallback(ModCallbacks.MC_POST_BOMB_UPDATE, Edith.OnBombExplode)
-
-mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, function()
-	local pool = game:GetItemPool()
-
-	for _, player in ipairs(PlayerManager.GetPlayers()) do
-		if Player.IsAnyEdith(player) then		
-			pool:RemoveCollectible(CollectibleType.COLLECTIBLE_GNAWED_LEAF)
-			pool:RemoveCollectible(CollectibleType.COLLECTIBLE_NIGHT_LIGHT)
-		end
-	end
-end)
