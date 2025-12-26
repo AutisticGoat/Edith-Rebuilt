@@ -465,7 +465,7 @@ function Edith:MoveBloodClotsToEdith(familiar)
 	if not Edith.IsJumping(player) then return end
 	familiar.Velocity = player.Velocity	
 end
-mod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, Edith.MoveBloodClotsToEdith, 254)
+mod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, Edith.MoveBloodClotsToEdith, FamiliarVariant.BLOOD_BABY)
 
 ---@param player EntityPlayer
 function Edith.IsJumping(player)
