@@ -2,7 +2,7 @@ local mod = EdithRebuilt
 local callbacks = mod.Enums.Callbacks
 
 ---@param player EntityPlayer
-mod:AddCallback(callbacks.OFFENSIVE_STOMP, function(_, player)
+mod:AddCallback(callbacks.PERFECT_PARRY, function(_, player)
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_JUPITER) then return end		
 
     local smokeCloud = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.SMOKE_CLOUD, 0, player.Position, Vector.Zero, player):ToEffect() ---@cast smokeCloud EntityEffect
