@@ -30,5 +30,3 @@ function Grudge:OnTaintedEdithGrudgeCollision(player, collider)
     collider:TakeDamage(Damage, DamageFlag.DAMAGE_CRUSH, EntityRef(player), 0)
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_COLLISION, Grudge.OnTaintedEdithGrudgeCollision)
-
--- l print(EdithRebuilt.Enums.NullItemID.ID_EDITH_B_GRUDGE_SCARF)
