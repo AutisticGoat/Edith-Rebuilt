@@ -458,6 +458,20 @@ function Edith.InitEdithJump(player, jumpTag, vestige)
 	JumpLib:Jump(player, config)
 end
 
+---@param familiar EntityFamiliar
+function Edith:MoveBloodClotsToEdith(familiar)
+	local player = familiar.Player
+	local famPos = familiar.Position
+	local playerPos = player.Position
+
+
+	if famPos:Distance(playerPos) > 20 then
+		familiar.Velocity = (player.Position - familiar.Position):Normalized():Resized(3)
+	end
+
+end
+mod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, Edith.MoveBloodClotsToEdith)
+
 ---@param player EntityPlayer
 function Edith.IsJumping(player)
     return JumpLib:GetData(player).Jumping
