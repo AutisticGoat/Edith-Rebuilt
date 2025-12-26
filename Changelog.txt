@@ -61,7 +61,6 @@ v1.3.0
 - Properly added Spices Mix unlock
 - Now Edith can't use Kamikaze while jumping
 - Now players who doesn't have Salt Heart won't get salted status effect
--- Enemy's damaged sound effect's volume will be higher the more times is dealt damage
 - Now Tainted Edith can hopdsah if the charge is below 10%
 - Now custom action key from ImGui's menu works
 -- Now it allows to set a custom action button rather than Z
@@ -70,3 +69,19 @@ v1.3.0
 - Reworked Multishot stomp synergy
 -- Now Edith will jump once, but stomp will deal damage multiple times
 -- Increased Stomp's damage reduction from multishot
+-- Enemy's damaged sound effect's volume will be higher the more times is dealt damage
+
+v1.4.0
+- Fixed Edith being unable to go Mother's fight
+- Fixed Edith's target teleporting Edith to specific points when going trough them in best fight
+- Fixed Tainted Edith unlocks in general (im really sorry for that)
+- Fixed Costumes not working at all
+- Fixed an issue with Helpers.BoostTear()
+- Fixed a softlock in rotgut's second phase
+- Fixed Grudge Tainted Edith not being able to dash when colliding with a wall
+- Added Jupiter's stomp synergy
+- Added Jupiter's perfect parry synergy
+- Removed Montezuma's Revenge from pools when playing with Edith
+- Removed an already unused test from Data Holder script
+- Now massive enemies can be pushed
+- Now blood clots will follow Edith when she jumps

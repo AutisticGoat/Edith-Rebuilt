@@ -889,6 +889,23 @@ local function AddChangelogs()
 -- Increased Stomp's damage reduction from multishot
 -- Enemy's damaged sound effect's volume will be higher the more times is dealt damage
 	]], true)
+	ImGui.AddTab(Menu.TabBars.Changelog, "EdithRebuilt_v1.4.0", "v1.4.0")
+	ImGui.AddText("EdithRebuilt_v1.4.0", 
+	[[
+- Fixed Edith being unable to go Mother's fight
+- Fixed Edith's target teleporting Edith to specific points when going trough them in best fight
+- Fixed Tainted Edith unlocks in general (im really sorry for that)
+- Fixed Costumes not working at all
+- Fixed an issue with Helpers.BoostTear()
+- Fixed a softlock in rotgut's second phase
+- Fixed Grudge Tainted Edith not being able to dash when colliding with a wall
+- Added Jupiter's stomp synergy
+- Added Jupiter's perfect parry synergy
+- Removed Montezuma's Revenge from pools when playing with Edith
+- Removed an already unused test from Data Holder script
+- Now massive enemies can be pushed
+- Now blood clots will follow Edith when she jumps
+	]], true)
 end
 
 -- ---@param enabled boolean

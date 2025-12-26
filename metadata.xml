@@ -7,7 +7,7 @@
 [h2] A whole rework and expansion of the cut classic from Antibirth: Edith [/h2]
 Edith: Rebuilt is a mod that brings back Edith, the cut character from Antibirth, with a complete rework that resembles the classic Antibirth gameplay style, a full set of unlocks, and a Tainted counterpart
 
-[h3][b]Main Feautures[/b][/h3]
+[h3][b]Main Features[/b][/h3]
 [list]
 [*][b]Reworked gameplay:[/b] Enjoy a refined character experience, without feeling too different from Antibirth's experience
 [*][b]Over 25 unlocks:[/b] Over 15 items, 4 trinkets, 2 challenges, and more, including an unlock method even for Edith and a Tainted counterpart
@@ -70,7 +70,7 @@ Special Thanks:
 - JJ: For making her own [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2785782570]Edith interpretation[/url], which was the base of this mod
 - D!Edith team: For releasing [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3281491787]D!Edith[/url] and [url=https://github.com/drpandacat/JumpLib]JumpLib[/url], which were a great inspiration to resume this project
     </description>
-    <version>1.3.1</version>
+    <version>1.4.1</version>
     <visibility>Public</visibility>
     <tag id="Lua"/>
     <tag id="Items"/>
