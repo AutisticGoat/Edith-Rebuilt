@@ -60,6 +60,9 @@ end
 ---@param dmgMult number
 function Helpers.BoostTear(tear, speed, dmgMult)
 	local player = Helpers.GetPlayerFromTear(tear) ---@cast player EntityPlayer	
+
+	if not player then return end
+
 	local nearEnemy = Helpers.GetNearestEnemy(player)
 
 	if nearEnemy then
