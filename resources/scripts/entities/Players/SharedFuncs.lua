@@ -50,22 +50,30 @@ local whiteListCostumes = {
 	[costumes.ID_EDITH_B_SCARF] = true,
     [costumes.ID_EDITH_B_GRUDGE_SCARF] = true,
     [costumes.ID_EDITH_VESTIGE_SCARF] = true,
-    [313] = true,
+    [CollectibleType.COLLECTIBLE_HOLY_MANTLE] = true,
+    [CollectibleType.COLLECTIBLE_FATE] = true,
+    [CollectibleType.COLLECTIBLE_BOOK_OF_SHADOWS] = true,
+    [CollectibleType.COLLECTIBLE_GAMEKID] = true,
+    -- [CollectibleType.] = true,
 }
 
-local function CostumeManagerTwo(_, itemconfig, player)
+local function OnAddCostume(_, itemconfig, player)
+    print("Added costume")
+    print(PickupVariant.PICKUP_COLLECTIBLE)
     if not Player.IsAnyEdith(player) then return end
-    if Helpers.When(itemconfig.Costume.ID, whiteListCostumes, false) then return end
+    if Helpers.When(itemconfig.Costume.ID, ModCostumes, false) then return end
     return true
 end
-mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_REMOVE_COSTUME, CostumeManagerTwo)
+mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_ADD_COSTUME, OnAddCostume)
 
-local function CostumeManager(_, itemconfig, player)
+local function OnRemoveCostume(_, itemconfig, player)
+    print("Removed costume")
+
     if not Player.IsAnyEdith(player) then return end
-    if not Helpers.When(itemconfig.Costume.ID, ModCostumes, false) then return end
+    if not Helpers.When(itemconfig.Costume.ID, whiteListCostumes, false) then return end
     return true
 end
-mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_REMOVE_COSTUME, CostumeManager)
+mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_REMOVE_COSTUME, OnRemoveCostume)
 
 mod:AddCallback(ModCallbacks.MC_POST_TEAR_UPDATE, function(_, tear)
     local player = Helpers.GetPlayerFromTear(tear)
