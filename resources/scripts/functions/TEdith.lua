@@ -12,6 +12,7 @@ local helpers = require("resources.scripts.functions.Helpers")
 local Player = require("resources.scripts.functions.Player")
 local StatusEffects = require("resources.scripts.functions.StatusEffects")
 local Land = require("resources.scripts.functions.Land")
+local VecDir = require("resources.scripts.functions.VecDir")
 local TEdith = {}
 local data = mod.DataHolder.GetEntityData
 
@@ -165,6 +166,7 @@ function TEdith.StopTEdithHops(player, cooldown, useQuitJump, resetChrg)
 	local HopParams = TEdith.GetHopParryParams(player)
 
 	HopParams.IsHoping = false
+	HopParams.GrudgeDash = false
 	HopParams.HopDirection = Vector.Zero
 
 	player:MultiplyFriction(0.5)
@@ -194,7 +196,8 @@ function TEdith.HopDashMovementManager(player, hopParams)
 	local isHopVecZero = HopVec.X == 0 and HopVec.Y == 0
 	local isJumping = JumpLib:GetData(player).Jumping
 	local IsGrudge = helpers.IsGrudgeChallenge()
-	local chargeMult = (TEdith.GetHopDashCharge(player, false, false) / 100)
+	local charge = TEdith.GetHopDashCharge(player, false, false)
+	local chargeMult = (charge / 100)
 	local VelMult = IsGrudge and 1.2 or 1 
 
 	if not isHopVecZero then
@@ -208,7 +211,7 @@ function TEdith.HopDashMovementManager(player, hopParams)
 	local targetVel = (((HopVec * 2) * (10 + (player.MoveSpeed - 1))) * chargeMult) * VelMult
 	player.Velocity = player.Velocity + (targetVel - player.Velocity) * smoothFactor
 
-	hopParams.GrudgeDash = not isHopVecZero
+	hopParams.GrudgeDash = (IsGrudge and charge > 10 and not VecDir.VectorEquals(HopVec, Vector.Zero))
 end
 
 ---@param player EntityPlayer

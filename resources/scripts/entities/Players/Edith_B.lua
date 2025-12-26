@@ -72,9 +72,9 @@ function mod:TaintedEdithUpdate(player)
 
 	TEdithMod.ParryCooldownManager(player, HopParams)
 
-	if (player:CollidesWithGrid() and HopParams.IsHoping == true) and not isJumping or Helpers.IsDogmaAppearCutscene() then
-		TEdithMod.StopTEdithHops(player, 20, true, not playerData.TaintedEdithTarget)
-	end
+	-- if (player:CollidesWithGrid() and HopParams.IsHoping == true) and not isJumping or Helpers.IsDogmaAppearCutscene() then
+	-- 	TEdithMod.StopTEdithHops(player, 20, true, not playerData.TaintedEdithTarget)
+	-- end
 
 	if not isArrowMoving and arrow then
 		TargetArrow.RemoveEdithTarget(player, true)
@@ -88,6 +88,8 @@ function mod:EdithPlayerUpdate(player)
 
 	Player.ManageEdithWeapons(player)
 
+
+	
 	local playerData = data(player)
 	local HopParams = TEdithMod.GetHopParryParams(player)
 	local IsJumping = JumpLib:GetData(player).Jumping
@@ -102,6 +104,8 @@ function mod:EdithPlayerUpdate(player)
 
 	local MovX = (((input.left > 0.3 and -input.left) or (input.right > 0.3 and input.right)) or 0) * (game:GetRoom():IsMirrorWorld() and -1 or 1)
 	local MovY = (input.up > 0.3 and -input.up) or (input.down > 0.3 and input.down) or 0
+
+	print(HopParams.GrudgeDash)
 
 	playerData.movementVector = Vector(MovX, MovY):Normalized() 
 
@@ -251,3 +255,18 @@ HudHelper.RegisterHUDElement({
 		HudHelper.RenderChargeBar(playerData.BRChargeBar, dashBRCharge, 100, playerpos + misc.ChargeBarrightVector)
 	end
 }, HudHelper.HUDType.EXTRA)
+
+
+---@param player EntityPlayer
+---@param grid GridEntity
+mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_GRID_COLLISION, function(_, player, _, grid)
+	if not grid then return end
+	if not Player.IsEdith(player, true) then return end
+
+	local playerData = data(player)
+	local params = TEdithMod.GetHopParryParams(player)
+
+	if not params.IsHoping or not params.GrudgeDash then return end
+
+	TEdithMod.StopTEdithHops(player, 20, true, not playerData.TaintedEdithTarget)
+end)
