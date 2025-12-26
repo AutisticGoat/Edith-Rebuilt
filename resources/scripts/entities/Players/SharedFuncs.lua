@@ -38,16 +38,31 @@ mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(_, player, cacheFlag)
     end
 end)
 
-local whiteListCostumes = {
-	[costumes.ID_EDITH_SCARF] = true,
+local ModCostumes = {
+    [costumes.ID_EDITH_SCARF] = true,
 	[costumes.ID_EDITH_B_SCARF] = true,
     [costumes.ID_EDITH_B_GRUDGE_SCARF] = true,
     [costumes.ID_EDITH_VESTIGE_SCARF] = true,
 }
 
+local whiteListCostumes = {
+    [costumes.ID_EDITH_SCARF] = true,
+	[costumes.ID_EDITH_B_SCARF] = true,
+    [costumes.ID_EDITH_B_GRUDGE_SCARF] = true,
+    [costumes.ID_EDITH_VESTIGE_SCARF] = true,
+    [313] = true,
+}
+
+local function CostumeManagerTwo(_, itemconfig, player)
+    if not Player.IsAnyEdith(player) then return end
+    if Helpers.When(itemconfig.Costume.ID, whiteListCostumes, false) then return end
+    return true
+end
+mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_REMOVE_COSTUME, CostumeManagerTwo)
+
 local function CostumeManager(_, itemconfig, player)
     if not Player.IsAnyEdith(player) then return end
-    if not Helpers.When(itemconfig.Costume.ID, whiteListCostumes, false) then return end
+    if not Helpers.When(itemconfig.Costume.ID, ModCostumes, false) then return end
     return true
 end
 mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_REMOVE_COSTUME, CostumeManager)
