@@ -105,8 +105,6 @@ function mod:EdithPlayerUpdate(player)
 	local MovX = (((input.left > 0.3 and -input.left) or (input.right > 0.3 and input.right)) or 0) * (game:GetRoom():IsMirrorWorld() and -1 or 1)
 	local MovY = (input.up > 0.3 and -input.up) or (input.down > 0.3 and input.down) or 0
 
-	print(HopParams.GrudgeDash)
-
 	playerData.movementVector = Vector(MovX, MovY):Normalized() 
 
 	HopParams.IsParryJump = HopParams.IsParryJump or false

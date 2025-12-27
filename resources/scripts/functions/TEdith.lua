@@ -309,7 +309,7 @@ end
 ---@param tag string
 function TEdith.InitTaintedEdithParryJump(player, tag)
 	local jumpHeight = 8
-	local jumpSpeed = 3.5
+	local jumpSpeed = 3.25
 	local room = game:GetRoom()
 	local RoomWater = room:HasWater()
 	local isChap4 = helpers.IsChap4()
@@ -389,6 +389,84 @@ local function GrudgeUnlockManager(PerfectParry)
 	end
 end
 
+---@param ent Entity
+---@param HopParams TEdithHopParryParams
+local function ParryTearManager(ent, HopParams)
+	local tear = ent:ToTear() ---@cast tear EntityTear
+
+	helpers.BoostTear(tear, 20, 1.5 + ((HopParams.HopStaticCharge + HopParams.HopStaticBRCharge) / 100))
+
+	if hasBirthright then
+		tear:AddTearFlags(TearFlags.TEAR_BURN)
+	end
+end
+
+---@param player EntityPlayer
+---@param ent Entity
+---@param HopParams TEdithHopParryParams
+---@param ImpreciseParryCapsule Capsule
+---@param PerfectParryCapsule Capsule
+local function ImpreciseParryManager(player, ent, HopParams, ImpreciseParryCapsule, PerfectParryCapsule)
+	if ent:ToTear() then return  end
+	local pushMult = StatusEffects.EntHasStatusEffect(ent, enums.EdithStatusEffects.CINDER) and 1.5 or 1
+	helpers.TriggerPush(ent, player, 20 * pushMult)
+
+	if not helpers.IsEnemy(ent) then return end
+	if IsEntInTwoCapsules(ent, ImpreciseParryCapsule, PerfectParryCapsule) then return end
+
+	ent:TakeDamage(HopParams.ParryDamage * 0.25, 0, EntityRef(player), 0)
+	StatusEffects.SetStatusEffect(enums.EdithStatusEffects.CINDER, ent, CinderTime, player)
+	EnemiesInImpreciseParry = true
+end
+
+---@param player EntityPlayer
+---@param ent Entity
+---@param HopParams TEdithHopParryParams
+---@param IsTaintedEdith any
+local function PerfectParryManager(player, ent, HopParams, IsTaintedEdith)
+	local damageFlag = Player.PlayerHasBirthright(player) and DamageFlag.DAMAGE_FIRE or 0
+	local proj = ent:ToProjectile()
+	local tear = ent:ToTear()
+	local shouldTriggerFireJets = IsTaintedEdith and hasBirthright or Player.IsJudasWithBirthright(player)
+
+	Isaac.RunCallback(enums.Callbacks.PERFECT_PARRY, player, ent, HopParams)
+
+	if tear then return end
+	if proj then
+		local spawner = proj.Parent or proj.SpawnerEntity
+		local targetEnt = spawner or helpers.GetNearestEnemy(player) or proj
+
+		proj.FallingAccel = -0.1
+		proj.FallingSpeed = 0
+		proj.Height = -23
+		proj:AddProjectileFlags(misc.NewProjectilFlags)
+		proj:AddKnockback(EntityRef(player), (targetEnt.Position - player.Position):Resized(25), 5, false)
+
+		if shouldTriggerFireJets then
+			proj:AddProjectileFlags(ProjectileFlags.FIRE_SPAWN)
+		end
+	else
+		if ent.Type == EntityType.ENTITY_STONEY then
+			ent:ToNPC().State = NpcState.STATE_SPECIAL
+		end
+
+		ent:TakeDamage(HopParams.ParryDamage, damageFlag, EntityRef(player), 0)
+		if helpers.IsEnemy(ent) and hasBirthright then
+			ent:AddBurn(EntityRef(player), 123, 5)				
+		end
+		sfx:Play(SoundEffect.SOUND_MEATY_DEATHS)
+
+		if ent.Type == EntityType.ENTITY_FIREPLACE and ent.Variant ~= 4 then
+			ent:Kill()
+		end
+
+		if ent.HitPoints <= HopParams.ParryDamage then
+			Isaac.RunCallback(enums.Callbacks.PERFECT_PARRY_KILL, player, ent)
+			Land.AddExtraGore(ent, player)
+		end
+	end
+end
+
 ---Helper function used to manage Tainted Edith and Burnt Hood's parry-lands 
 ---@param player EntityPlayer
 ---@param IsTaintedEdith? boolean 
@@ -403,16 +481,14 @@ function TEdith.ParryLandManager(player, IsTaintedEdith)
 	local EnemiesInImpreciseParry = false
 	local ImpreciseParryCapsule = Capsule(player.Position, Vector.One, 0, misc.ImpreciseParryRadius)	
 	local PerfectParryCapsule = Capsule(player.Position, Vector.One, 0, misc.PerfectParryRadius)
+	local TearParryCapsule = Capsule(player.Position, Vector.One, 0, misc.TearParryRadius)
 	local hasBirthright = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT)
 	local BirthrightMult = hasBirthright and 1.25 or 1
 	local hasBirthcake = BirthcakeRebaked and player:HasTrinket(BirthcakeRebaked.Birthcake.ID) or false
 	local DamageFormula = (rawFormula * BirthrightMult) * (hasBirthcake and 1.15 or 1)
-	local shouldTriggerFireJets = IsTaintedEdith and hasBirthright or Player.IsJudasWithBirthright(player)
-	local spawner, targetEnt, proj
-	local damageFlag = Player.PlayerHasBirthright(player) and DamageFlag.DAMAGE_FIRE or 0
 
-	DebugRenderer.Get(1, false):Capsule(PerfectParryCapsule)
-	DebugRenderer.Get(2, false):Capsule(ImpreciseParryCapsule)
+	-- DebugRenderer.Get(1, false):Capsule(TearParryCapsule)
+	-- DebugRenderer.Get(2, false):Capsule(ImpreciseParryCapsule)
 
 	if IsTaintedEdith then
 		local damageIncrease = 1 + (HopParams.HopStaticCharge + HopParams.HopStaticBRCharge) / 400
@@ -424,68 +500,18 @@ function TEdith.ParryLandManager(player, IsTaintedEdith)
 	local tearsMult = (Player.GetplayerTears(player) / 2.73) 
 	local CinderTime = maths.SecondsToFrames((4 * tearsMult))
 
+	for _, ent in pairs(Isaac.FindInCapsule(TearParryCapsule, EntityPartition.TEAR)) do
+		ParryTearManager(ent, HopParams)
+		PerfectParry = true
+	end
+
 	for _, ent in pairs(Isaac.FindInCapsule(ImpreciseParryCapsule, misc.ParryPartitions)) do
-		if ent:ToTear() then goto continue end
-		local pushMult = StatusEffects.EntHasStatusEffect(ent, enums.EdithStatusEffects.CINDER) and 1.5 or 1
-		helpers.TriggerPush(ent, player, 20 * pushMult)
-
-		if not helpers.IsEnemy(ent) then goto continue end
-		if IsEntInTwoCapsules(ent, ImpreciseParryCapsule, PerfectParryCapsule) then goto continue end		
-
-		ent:TakeDamage(DamageFormula * 0.25, 0, EntityRef(player), 0)
-		StatusEffects.SetStatusEffect(enums.EdithStatusEffects.CINDER, ent, CinderTime, player)
-		EnemiesInImpreciseParry = true
-		::continue::
+		ImpreciseParryManager(player, ent, CinderTime, ImpreciseParryCapsule, PerfectParryCapsule)
 	end
 
 	for _, ent in pairs(Isaac.FindInCapsule(PerfectParryCapsule, misc.ParryPartitions)) do
-		Isaac.RunCallback(enums.Callbacks.PERFECT_PARRY, player, ent, HopParams)
-		proj = ent:ToProjectile()
-		 
-		if proj then
-			spawner = proj.Parent or proj.SpawnerEntity
-			targetEnt = spawner or helpers.GetNearestEnemy(player) or proj
-
-			proj.FallingAccel = -0.1
-			proj.FallingSpeed = 0
-			proj.Height = -23
-			proj:AddProjectileFlags(misc.NewProjectilFlags)
-			proj:AddKnockback(EntityRef(player), (targetEnt.Position - player.Position):Resized(25), 5, false)
-
-			if shouldTriggerFireJets then
-				proj:AddProjectileFlags(ProjectileFlags.FIRE_SPAWN)
-			end
-		else
-			local tear = ent:ToTear()
-		
-			if ent.Type == EntityType.ENTITY_STONEY then
-				ent:ToNPC().State = NpcState.STATE_SPECIAL
-			end
-
-			if tear then
-				helpers.BoostTear(tear, 20, 1.5 + ((HopParams.HopStaticCharge + HopParams.HopStaticBRCharge) / 100))
-
-				if hasBirthright then
-					tear:AddTearFlags(TearFlags.TEAR_BURN)
-				end
-			end
-
-			ent:TakeDamage(HopParams.ParryDamage, damageFlag, EntityRef(player), 0)
-			if helpers.IsEnemy(ent) and hasBirthright then
-				ent:AddBurn(EntityRef(player), 123, 5)				
-			end
-			sfx:Play(SoundEffect.SOUND_MEATY_DEATHS)
-
-			if ent.Type == EntityType.ENTITY_FIREPLACE and ent.Variant ~= 4 then
-				ent:Kill()
-			end
-
-			if ent.HitPoints <= HopParams.ParryDamage then
-				Isaac.RunCallback(enums.Callbacks.PERFECT_PARRY_KILL, player, ent)
-				Land.AddExtraGore(ent, player)
-			end
-		end
-		PerfectParry = true		
+		PerfectParryManager(player, ent, HopParams, IsTaintedEdith)
+		PerfectParry = true
 	end
 
 	player:SetMinDamageCooldown(PerfectParry and 30 or 15)

@@ -431,6 +431,7 @@ EdithRebuilt.Enums = {
 		JumpReadyColor = Color(1, 1, 1, 1, 0.5, 0.5, 0.5),
 		PerfectParryRadius = 18,
 		ImpreciseParryRadius = 45,
+		TearParryRadius = 35,
 		BurntSaltColor = Color(0.3, 0.3, 0.3),
 		ChargeBarleftVector = Vector(-8, 10),
 		ChargeBarcenterVector = Vector(0, 10),
