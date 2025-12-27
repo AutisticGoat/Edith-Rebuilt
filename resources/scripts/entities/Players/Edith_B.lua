@@ -172,6 +172,9 @@ function mod:EdithHopLanding(player)
 	local tearRange = player.TearRange / 40
 	local Knockbackbase = (player.ShotSpeed * 10) + 2
 	local Charge = TEdithMod.GetHopDashCharge(player, false, true)
+	local ChargeNoBR = TEdithMod.GetHopDashCharge(player, false)
+	local ChargeNoBRPercent = ChargeNoBR / 100
+	local ChargePercent = Charge / 100
 	local BRCharge = HopParams.HopMoveBRCharge
 
 	local rng = player:GetDropRNG()
@@ -181,9 +184,14 @@ function mod:EdithHopLanding(player)
 	HopParams.HopKnockback = Knockbackbase * maths.exp(Charge / 100, 1, 1.5)
 	HopParams.HopRadius = math.min((30 + (tearRange - 9)), 35)
 
-	if Charge >= 100 and ModRNG.RandomBoolean(rng) then
-		for i = 1, 5 do
-			Creeps.SpawnCinderCreep(player, player.Position + Vector(0, 20):Rotated(i * (360/5)), damage, 6)
+	local chanceSpawn = 0.5 * ChargeNoBRPercent
+	local maxCreeps = math.ceil(8 * ChargeNoBRPercent)
+	local degrees = 360/maxCreeps
+	local dist = 30 * ChargeNoBRPercent
+
+	if ModRNG.RandomBoolean(rng, chanceSpawn) then
+		for i = 1, maxCreeps do
+			Creeps.SpawnCinderCreep(player, player.Position + Vector(0, dist):Rotated(i * degrees), damage, 6)
 		end
 	end
 
@@ -267,25 +275,19 @@ mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_GRID_COLLISION, function(_, player, _
 	local isMoving = params.IsHoping or params.GrudgeDash
 	local rock = grid:ToRock()
 	local poop = grid:ToPoop()
-	local wall = grid:ToWall()
 	local IsJumping = JumpLib:GetData(player).Jumping
 
 	if not isMoving then return end
-
-	data(player).RockHits = data(player).RockHits or 0
-
 
 	if rock or poop then
 		if charge >= 85 then
 			grid:Destroy()
 		else
-			-- if not IsJumping then
-				TEdithMod.StopTEdithHops(player, 20, true, not playerData.TaintedEdithTarget)
-			-- end
+			TEdithMod.StopTEdithHops(player, 20, true, not playerData.TaintedEdithTarget)
 		end
-	end
-
-	if not IsJumping and wall then
-		TEdithMod.StopTEdithHops(player, 20, true, not playerData.TaintedEdithTarget)
+	else 
+		if not IsJumping then
+			TEdithMod.StopTEdithHops(player, 20, true, not playerData.TaintedEdithTarget)
+		end
 	end
 end)
