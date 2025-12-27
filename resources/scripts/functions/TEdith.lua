@@ -199,6 +199,7 @@ function TEdith.HopDashMovementManager(player, hopParams)
 	local charge = TEdith.GetHopDashCharge(player, false, false)
 	local chargeMult = (charge / 100)
 	local VelMult = IsGrudge and 1.2 or 1 
+	local speedBase = IsGrudge and 9 or 8
 
 	if not isHopVecZero then
 		if not isJumping and not IsGrudge then
@@ -208,7 +209,7 @@ function TEdith.HopDashMovementManager(player, hopParams)
 	end
 
 	local smoothFactor = 0.225
-	local targetVel = (((HopVec * 2) * (10 + (player.MoveSpeed - 1))) * chargeMult) * VelMult
+	local targetVel = (((HopVec * 2) * (speedBase + (player.MoveSpeed - 1))) * chargeMult) * VelMult
 	player.Velocity = player.Velocity + (targetVel - player.Velocity) * smoothFactor
 
 	hopParams.GrudgeDash = (IsGrudge and charge > 10 and not VecDir.VectorEquals(HopVec, Vector.Zero))
@@ -407,6 +408,9 @@ end
 ---@param ImpreciseParryCapsule Capsule
 ---@param PerfectParryCapsule Capsule
 local function ImpreciseParryManager(player, ent, HopParams, ImpreciseParryCapsule, PerfectParryCapsule)
+	local tearsMult = (Player.GetplayerTears(player) / 2.73) 
+	local CinderTime = maths.SecondsToFrames((4 * tearsMult))
+
 	if ent:ToTear() then return  end
 	local pushMult = StatusEffects.EntHasStatusEffect(ent, enums.EdithStatusEffects.CINDER) and 1.5 or 1
 	helpers.TriggerPush(ent, player, 20 * pushMult)
@@ -497,16 +501,13 @@ function TEdith.ParryLandManager(player, IsTaintedEdith)
 
 	HopParams.ParryDamage = DamageFormula
 
-	local tearsMult = (Player.GetplayerTears(player) / 2.73) 
-	local CinderTime = maths.SecondsToFrames((4 * tearsMult))
-
 	for _, ent in pairs(Isaac.FindInCapsule(TearParryCapsule, EntityPartition.TEAR)) do
 		ParryTearManager(ent, HopParams)
 		PerfectParry = true
 	end
 
 	for _, ent in pairs(Isaac.FindInCapsule(ImpreciseParryCapsule, misc.ParryPartitions)) do
-		ImpreciseParryManager(player, ent, CinderTime, ImpreciseParryCapsule, PerfectParryCapsule)
+		ImpreciseParryManager(player, ent, HopParams, ImpreciseParryCapsule, PerfectParryCapsule)
 	end
 
 	for _, ent in pairs(Isaac.FindInCapsule(PerfectParryCapsule, misc.ParryPartitions)) do
