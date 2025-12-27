@@ -263,8 +263,29 @@ mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_GRID_COLLISION, function(_, player, _
 
 	local playerData = data(player)
 	local params = TEdithMod.GetHopParryParams(player)
+	local charge = TEdithMod.GetHopDashCharge(player, false, false)
+	local isMoving = params.IsHoping or params.GrudgeDash
+	local rock = grid:ToRock()
+	local poop = grid:ToPoop()
+	local wall = grid:ToWall()
+	local IsJumping = JumpLib:GetData(player).Jumping
 
-	if not params.IsHoping or not params.GrudgeDash then return end
+	if not isMoving then return end
 
-	TEdithMod.StopTEdithHops(player, 20, true, not playerData.TaintedEdithTarget)
+	data(player).RockHits = data(player).RockHits or 0
+
+
+	if rock or poop then
+		if charge >= 85 then
+			grid:Destroy()
+		else
+			-- if not IsJumping then
+				TEdithMod.StopTEdithHops(player, 20, true, not playerData.TaintedEdithTarget)
+			-- end
+		end
+	end
+
+	if not IsJumping and wall then
+		TEdithMod.StopTEdithHops(player, 20, true, not playerData.TaintedEdithTarget)
+	end
 end)
