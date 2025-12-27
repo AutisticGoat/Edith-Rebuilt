@@ -66,7 +66,7 @@ function Helpers.BoostTear(tear, speed, dmgMult)
 	local nearEnemy = Helpers.GetNearestEnemy(player)
 
 	if nearEnemy then
-		tear.Velocity = (nearEnemy.Position - tear.Position):Normalized()
+		tear.Velocity = (nearEnemy.Position - tear.Position)
 	end
 	
 	tear.CollisionDamage = tear.CollisionDamage * dmgMult
