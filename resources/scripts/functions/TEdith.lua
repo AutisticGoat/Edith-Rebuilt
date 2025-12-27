@@ -309,7 +309,7 @@ end
 ---@param tag string
 function TEdith.InitTaintedEdithParryJump(player, tag)
 	local jumpHeight = 8
-	local jumpSpeed = 2.5
+	local jumpSpeed = 3.5
 	local room = game:GetRoom()
 	local RoomWater = room:HasWater()
 	local isChap4 = helpers.IsChap4()
@@ -411,6 +411,9 @@ function TEdith.ParryLandManager(player, IsTaintedEdith)
 	local spawner, targetEnt, proj
 	local damageFlag = Player.PlayerHasBirthright(player) and DamageFlag.DAMAGE_FIRE or 0
 
+	DebugRenderer.Get(1, false):Capsule(PerfectParryCapsule)
+	DebugRenderer.Get(2, false):Capsule(ImpreciseParryCapsule)
+
 	if IsTaintedEdith then
 		local damageIncrease = 1 + (HopParams.HopStaticCharge + HopParams.HopStaticBRCharge) / 400
 		DamageFormula = DamageFormula * damageIncrease
@@ -468,7 +471,7 @@ function TEdith.ParryLandManager(player, IsTaintedEdith)
 			end
 
 			ent:TakeDamage(HopParams.ParryDamage, damageFlag, EntityRef(player), 0)
-			if hasBirthright then
+			if helpers.IsEnemy(ent) and hasBirthright then
 				ent:AddBurn(EntityRef(player), 123, 5)				
 			end
 			sfx:Play(SoundEffect.SOUND_MEATY_DEATHS)
