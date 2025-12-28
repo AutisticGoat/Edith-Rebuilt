@@ -113,6 +113,7 @@ local includeFiles = {
 	parrySyn .. "PlaydoughCookie",
 	parrySyn .. "OcularRift",
 	parrySyn .. "HolyLight",
+	parrySyn .. "Jupiter",
 }
 
 for _, v in ipairs(includeFiles) do
