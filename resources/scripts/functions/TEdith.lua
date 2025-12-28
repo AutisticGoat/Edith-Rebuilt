@@ -167,11 +167,13 @@ function TEdith.StopTEdithHops(player, cooldown, useQuitJump, resetChrg, resetHo
 	if not Player.IsEdith(player, true) then return end
 
 	local HopParams = TEdith.GetHopParryParams(player)
-
+	
+	Land.TaintedEdithHop(player, HopParams)
+	
 	HopParams.IsHoping = false
 	HopParams.GrudgeDash = false
 	HopParams.HopDirection = Vector.Zero
-
+	
 	if resetHopcooldown then
 		HopParams.HopCooldown = 8
 	end
@@ -188,6 +190,7 @@ function TEdith.StopTEdithHops(player, cooldown, useQuitJump, resetChrg, resetHo
 	if resetChrg then
 		TEdith.ResetHopDashCharge(player, true, true)
 	end
+
 
 	player:SetMinDamageCooldown(cooldown)
 end
