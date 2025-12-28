@@ -906,6 +906,27 @@ local function AddChangelogs()
 - Now massive enemies can be pushed
 - Now blood clots will follow Edith when she jumps
 	]], true)
+	ImGui.AddTab(Menu.TabBars.Changelog, "EdithRebuilt_v1.5.0", "v1.5.0")
+	ImGui.AddText("EdithRebuilt_v1.5.0", 
+	[[
+- Tainted Edith rework:
+-- Increased Perfect Parry radius (12 > 18)
+-- Increased Imprecise Parry radius (35 > 45)
+-- Increased Parry Jump speed (now it lands faster)
+-- Added an specific parry radius for tear parry, making tear parry easier
+-- Reduced Tainted Edith's hopdash and grudgedash speed base (hopdash: 10 > 8, grudgedash: 12 > 9)
+-- Now Edith can break rocks at a hop/grudgedash of 85 percent or more 
+-- Now there's a 8 frames cooldown for tainted edith's hop (and grudge dash)
+-- Changed how hop cinder creep is spawned
+--- Now its spawn chance depends on hop charge (50% chance at 100 percent charge)
+--- Now the creep quantity depends on hop charge (8 at 100 percent)
+--- Now the distance spawn depends on hop charge (30 units at 100 percent)
+- Fixed all kind entities getting burn effect when Tainted Edith with birthright lands near them
+- Potentially fixed Edith and Tainted Edith being unable to interact with spikes in devil rooms
+- Fixed Tainted Edith getting pickup duplicates
+- Reimplemented Stomped enemies jump recoil
+-- This should fix that weird issue where enemies suddenly losing their AI
+	]], true)
 end
 
 -- ---@param enabled boolean
