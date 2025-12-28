@@ -927,6 +927,21 @@ local function AddChangelogs()
 - Reimplemented Stomped enemies jump recoil
 -- This should fix that weird issue where enemies suddenly losing their AI
 	]], true)
+	ImGui.AddTab(Menu.TabBars.Changelog, "EdithRebuilt_v1.5.1", "v1.5.1")
+	ImGui.AddText("EdithRebuilt_v1.5.1", 
+	[[
+- Fixed non-enemy entities setting on fire from T. Edith's hop lands with birthright
+- Fixed T.Edith not stoping her hops when colliding with a block
+- Fixed T.Edith not breaking rocks when having flight
+- Fixed T.Edith's chargebars not rendering correctly in mirror dimension
+- Fixed T.Edith constantly overriding her color while moving her arrow to a closed door
+- Now Tainted Edith's hop cooldown won't restart on entering a new room
+- Now Landing from a dash change direction will trigger a hop land interaction
+- Now Tained Edith can destroy TNT with her hopdash
+- Included T.Edith's jupiter Synergy's  script
+- Added T.Edith's multishot parry synergy
+-- Works exactly the same as Edith's multishot stomp synergy
+	]], true)
 end
 
 -- ---@param enabled boolean

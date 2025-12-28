@@ -94,7 +94,26 @@ v1.5.0
 -- Added an specific parry radius for tear parry, making tear parry easier
 -- Reduced Tainted Edith's hopdash and grudgedash speed base (hopdash: 10 > 8, grudgedash: 12 > 9)
 -- Now Edith can break rocks at a hop/grudgedash of 85% or more 
+-- Now there's a 8 frames cooldown for tainted edith's hop (and grudge dash)
 -- Changed how hop cinder creep is spawned
 --- Now its spawn chance depends on hop charge (50% chance at 100% charge)
 --- Now the creep quantity depends on hop charge (8 at 100%)
 --- Now the distance spawn depends on hop charge (30 units at 100%)
+- Fixed all kind entities getting burn effect when Tainted Edith with birthright lands near them
+- Potentially fixed Edith and Tainted Edith being unable to interact with spikes in devil rooms
+- Fixed Tainted Edith getting pickup duplicates
+- Reimplemented Stomped enemies jump recoil
+-- This should fix that weird issue where enemies suddenly losing their AI
+
+v1.5.1
+- Fixed non-enemy entities setting on fire from T. Edith's hop lands with birthright
+- Fixed T.Edith not stoping her hops when colliding with a block
+- Fixed T.Edith not breaking rocks when having flight
+- Fixed T.Edith's chargebars not rendering correctly in mirror dimension
+- Fixed T.Edith constantly overriding her color while moving her arrow to a closed door
+- Now Tainted Edith's hop cooldown won't restart on entering a new room
+- Now Landing from a dash change direction will trigger a hop land interaction
+- Now Tained Edith can destroy TNT with her hopdash
+- Included T.Edith's jupiter Synergy's  script
+- Added T.Edith's multishot parry synergy
+-- Works exactly the same as Edith's multishot stomp synergy
