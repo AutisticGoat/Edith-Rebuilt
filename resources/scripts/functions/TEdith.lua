@@ -32,6 +32,7 @@ local data = mod.DataHolder.GetEntityData
 ---@field IsHoping boolean
 ---@field IsParryJump boolean
 ---@field GrudgeDash boolean
+---@field HopCooldown integer
 
 ---@param player EntityPlayer
 ---@return TEdithHopParryParams
@@ -51,7 +52,8 @@ function TEdith.GetHopParryParams(player)
 		ParryKnockback = 0,
 		ParryRadius = 0,
 		ParryCooldown = 0,
-		GrudgeDash = falses
+		GrudgeDash = false,
+		HopCooldown = 0
 
 	} --[[@as TEdithHopParryParams]]
 	local playerData = data(player)
@@ -168,6 +170,7 @@ function TEdith.StopTEdithHops(player, cooldown, useQuitJump, resetChrg)
 	HopParams.IsHoping = false
 	HopParams.GrudgeDash = false
 	HopParams.HopDirection = Vector.Zero
+	HopParams.HopCooldown = 8
 
 	player:MultiplyFriction(0.5)
 
@@ -234,6 +237,9 @@ end
 ---@param arrow EntityEffect
 function TEdith.HopDashChargeManager(player, arrow)
 	local HopParams = TEdith.GetHopParryParams(player)
+
+	-- if HopParams.HopCooldown ~= 0 then return end
+
 	local posDif = arrow.Position - player.Position
 	local posDifLenght = posDif:Length()
 	local maxDist = 2.5
@@ -260,7 +266,7 @@ function TEdith.HopDashChargeManager(player, arrow)
 		Land.LandFeedbackManager(player, Land.GetLandSoundTable(true), misc.BurntSaltColor, false)
 	end
 
-	if targetframecount > 1 and (not HopParams.IsHoping and not isJumping) then
+	if targetframecount > 1 and (not HopParams.IsHoping and not isJumping) and HopParams.HopCooldown == 0 then
 		TEdith.AddHopDashCharge(player, chargeAdd, 0.5)
 	end
 end

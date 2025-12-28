@@ -53,8 +53,18 @@ function mod:TaintedEdithUpdate(player)
 	local HopParams = TEdithMod.GetHopParryParams(player)
 	local isArrowMoving = TargetArrow.IsEdithTargetMoving(player)
 	local arrow = TargetArrow.GetEdithTarget(player, true)
+	local IsMoving = HopParams.IsHoping or HopParams.GrudgeDash
 
-	if isArrowMoving then
+	if not IsMoving then
+		HopParams.HopCooldown = math.max(HopParams.HopCooldown -1, 0)
+	end
+
+	if HopParams.HopCooldown == 1 then
+		sfx:Play(SoundEffect.SOUND_STONE_IMPACT, 0.5, 0, false, 1.8)
+		player:SetColor(Color(1, 1, 1, 1, 0, 0.3, 0), 5, 100, true, false)
+	end
+
+	if isArrowMoving and HopParams.HopCooldown == 0 then
 		TargetArrow.SpawnEdithTarget(player, true)
 	end
 
@@ -72,11 +82,7 @@ function mod:TaintedEdithUpdate(player)
 
 	TEdithMod.ParryCooldownManager(player, HopParams)
 
-	-- if (player:CollidesWithGrid() and HopParams.IsHoping == true) and not isJumping or Helpers.IsDogmaAppearCutscene() then
-	-- 	TEdithMod.StopTEdithHops(player, 20, true, not playerData.TaintedEdithTarget)
-	-- end
-
-	if not isArrowMoving and arrow then
+	if arrow and not isArrowMoving then
 		TargetArrow.RemoveEdithTarget(player, true)
 	end
 end
@@ -88,8 +94,6 @@ function mod:EdithPlayerUpdate(player)
 
 	Player.ManageEdithWeapons(player)
 
-
-	
 	local playerData = data(player)
 	local HopParams = TEdithMod.GetHopParryParams(player)
 	local IsJumping = JumpLib:GetData(player).Jumping
@@ -116,7 +120,6 @@ function mod:EdithPlayerUpdate(player)
 			end
 			if not IsGrudge then
 				TEdithMod.InitTaintedEdithParryJump(player, jumpTags.TEdithJump)
-				-- TargetArrow.RemoveEdithTarget(player, true)
 			else
 				local PerfectParry, _ = TEdithMod.ParryLandManager(player, true)
 				land.LandFeedbackManager(player, land.GetLandSoundTable(true, true), misc.BurntSaltColor, true)
@@ -188,6 +191,7 @@ function mod:EdithHopLanding(player)
 	local maxCreeps = math.ceil(8 * ChargeNoBRPercent)
 	local degrees = 360/maxCreeps
 	local dist = 30 * ChargeNoBRPercent
+	local damage = 3 * ChargePercent
 
 	if ModRNG.RandomBoolean(rng, chanceSpawn) then
 		for i = 1, maxCreeps do
