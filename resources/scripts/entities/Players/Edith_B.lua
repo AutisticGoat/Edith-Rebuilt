@@ -48,12 +48,18 @@ end
 function mod:TaintedEdithUpdate(player)
 	if not Player.IsEdith(player, true) then return end
 
-	local playerData = data(player)
-	local isJumping = JumpLib:GetData(player).Jumping
 	local HopParams = TEdithMod.GetHopParryParams(player)
 	local isArrowMoving = TargetArrow.IsEdithTargetMoving(player)
 	local arrow = TargetArrow.GetEdithTarget(player, true)
 	local IsMoving = HopParams.IsHoping or HopParams.GrudgeDash
+	local charge = TEdithMod.GetHopDashCharge(player, false)
+	local effects = player:GetEffects()
+
+	if player.CanFly and charge >= 85 and not effects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_LEO) then
+		effects:AddCollectibleEffect(CollectibleType.COLLECTIBLE_LEO, false, 1)
+	else
+		effects:RemoveCollectibleEffect(CollectibleType.COLLECTIBLE_LEO, -1)
+	end
 
 	if not IsMoving then
 		HopParams.HopCooldown = math.max(HopParams.HopCooldown -1, 0)
