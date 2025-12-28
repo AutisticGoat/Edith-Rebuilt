@@ -545,13 +545,13 @@ function Land.TriggerLandenemyJump(player, params, height, speed)
 		local PushFactor = Helpers.GetPushFactor(ent)
 
 		if Helpers.IsEnemy(ent) then
+			Helpers.TriggerJumpPush(ent, player, params.Knockback * 1.5, 5)
 			JumpLib:TryJump(ent, {
-			Height = height * PushFactor,
-			Speed = speed * PushFactor,
-			Tags = "EdithRebuilt_EnemyJump",
-			-- Flags = JumpLib.Flags.
-		})	
-		Helpers.TriggerJumpPush(ent, player, params.Knockback * 1.5, 5)
+				Height = height * PushFactor,
+				Speed = speed * PushFactor,
+				Tags = "EdithRebuilt_EnemyJump",
+				-- Flags = JumpLib.Flags.
+			})	
 		end
 	end
 end
