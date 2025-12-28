@@ -397,7 +397,7 @@ function Land.TaintedEdithHop(parent, HopParams)
 		Land.HandleEntityInteraction(ent, parent, HopParams.HopKnockback)
 		Land.LandDamage(ent, parent, HopParams.HopDamage, HopParams.HopKnockback)
 	
-		if BRCharge > 0 then
+		if Helpers.IsEnemy(ent) and BRCharge > 0 then
 			ent:AddBurn(PlayerRef, burnDuration, burnDamage)
 		end
 	end
