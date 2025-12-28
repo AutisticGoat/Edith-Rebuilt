@@ -7,7 +7,7 @@ EdithRebuilt.SaveManager = require("resources.scripts.libs.EdithRebuiltSaveManag
 EdithRebuilt.SaveManager.Init(mod)
 EdithRebuilt.Hsx = require("resources.scripts.libs.lhsx")
 
-EdithRebuilt.Version = "v1.5.1"
+EdithRebuilt.Version = "v1.5.1.1"
 
 include("resources.scripts.libs.prenpckillcallback")
 include("resources.scripts.libs.EdithKotryJumpLib").Init()
@@ -39,3 +39,12 @@ end)
 
 Isaac.DebugString("Edith Rebuilt " .. EdithRebuilt.Version .. " loaded correctly")
 print("Edith Rebuilt " .. EdithRebuilt.Version .. " loaded correctly")
+
+---@param Slot LevelGeneratorRoom
+---@param RoomConfig RoomConfigRoom
+---@param Seed integer
+mod:AddCallback(ModCallbacks.MC_PRE_LEVEL_PLACE_ROOM, function (_, Slot, RoomConfig, Seed)
+	if RoomConfig.Type == RoomType.ROOM_TREASURE then
+		print("tesoro")
+	end
+end)

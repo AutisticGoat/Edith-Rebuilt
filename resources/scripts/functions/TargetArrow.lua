@@ -156,8 +156,8 @@ function targetArrow.TargetDoorManager(effect, player, triggerDistance)
 				else
 					if door:IsOpen() then
 						helpers.ChangeColor(player, 1, 1, 1, 1)
-						door:TryUnlock(player)
 					end
+					door:TryUnlock(player)
 				end
 			end
 		end
