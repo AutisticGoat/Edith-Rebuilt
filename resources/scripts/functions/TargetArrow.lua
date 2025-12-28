@@ -154,8 +154,12 @@ function targetArrow.TargetDoorManager(effect, player, triggerDistance)
 						door:TryUnlock(player, true)
 					end
 				else
-					helpers.ChangeColor(player, 1, 1, 1, 1)
-					door:TryUnlock(player)
+					if door:IsOpen() then
+						-- print(door:IsOpen())
+						-- print("intentanod entrar")
+						helpers.ChangeColor(player, 1, 1, 1, 1)
+						door:TryUnlock(player)
+					end
 				end
 			end
 		end
