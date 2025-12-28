@@ -228,8 +228,6 @@ function Land.HandleEntityInteraction(ent, parent, knockback)
 			local room = game:GetRoom()
 			local IsPickedUp = pickup:GetSprite():IsPlaying("Collect")
 
-			-- print(pickup:GetSprite():GetAnimation())
-
 			if Helpers.IsVestigeChallenge() then
 				Land.PickupManager(parent, pickup)
 			end
@@ -538,12 +536,15 @@ function Land.LandFeedbackManager(player, soundTable, GibColor, IsParryLand)
 	SfxFeedbackManager(sound, volume, IsChap4, hasWater)
 end
 
+---@param player EntityPlayer
 ---@param params EdithJumpStompParams
 ---@param height number
 ---@param speed number
-function Land.TriggerLandenemyJump(params, height, speed)
+function Land.TriggerLandenemyJump(player, params, height, speed)
 	for _, ent in ipairs(params.StompedEntities) do
 		local PushFactor = Helpers.GetPushFactor(ent)
+
+		Helpers.TriggerJumpPush(ent, player, params.Knockback * 1.5, 5)
 
 		if Helpers.IsEnemy(ent) then
 			JumpLib:TryJump(ent, {

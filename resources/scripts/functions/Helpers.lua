@@ -150,7 +150,6 @@ end
 ---@param ent Entity
 ---@return number
 function Helpers.GetPushFactor(ent)
-	print(ent.Mass)
 	return math.max(0.01, 1 + (5 - ent.Mass) * 1/250)
 end	
 
@@ -238,6 +237,15 @@ function Helpers.GetPlayerFromRef(EntityRef)
 	if not ent then return nil end
 	local familiar = ent:ToFamiliar()
 	return ent:ToPlayer() or Helpers.GetPlayerFromTear(ent) or familiar and familiar.Player 
+end
+
+---@param pushed Entity
+---@param pusher Entity
+---@param strength number
+---@param duration integer
+function Helpers.TriggerJumpPush(pushed, pusher, strength, duration)
+	local dir = ((pusher.Position - pushed.Position) * -1):Resized(strength)-- * PushFactor
+	pushed:AddKnockback(EntityRef(pusher), dir, duration, false)
 end
 
 ---Helper function to directly change `entity`'s color

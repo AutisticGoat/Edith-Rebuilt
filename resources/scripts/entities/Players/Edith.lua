@@ -122,7 +122,7 @@ function Edith:OnEdithLanding(player, _, pitfall)
 	edithTarget:GetSprite():Play("Idle")
 
 	Land.EdithStomp(player, jumpParams, true)
-	Land.TriggerLandenemyJump(jumpParams, 8, 2)
+	Land.TriggerLandenemyJump(player, jumpParams, 8, 2)
 
 	player:SetMinDamageCooldown(25)
 	player:MultiplyFriction(0.1)
@@ -132,16 +132,6 @@ function Edith:OnEdithLanding(player, _, pitfall)
 	EdithMod.StompTargetRemover(player, jumpParams)
 end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, Edith.OnEdithLanding, JumpParams.EdithJump)
-
----@param npc EntityNPC
-local function OnNPCUpdate(_, npc)
-	local jumpData = JumpLib:GetData(npc)
-
-	if not jumpData.Jumping then return end
-	if not effects.EntHasStatusEffect(npc, "Salted") and npc.HitPoints <= 0 then return end
-	if jumpData.Tags.EdithRebuilt_EnemyJump then return true end
-end
-mod:AddCallback(ModCallbacks.MC_PRE_NPC_UPDATE, OnNPCUpdate)
 
 ---@param player EntityPlayer
 function Edith:OnEdithPEffectUpdate(player)
@@ -153,6 +143,14 @@ function Edith:OnEdithPEffectUpdate(player)
 	EdithMod.JumpMovement(player)
 end
 mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, Edith.OnEdithPEffectUpdate)
+
+---@param npc EntityNPC
+local function OnNPCUpdate(_, npc)
+	if not effects.EntHasStatusEffect(npc, "Salted") then return end 
+	if npc.HitPoints > 0 then return end
+	return true
+end
+mod:AddCallback(ModCallbacks.MC_PRE_NPC_UPDATE, OnNPCUpdate)
 
 ---@param player EntityPlayer
 ---@param jumpdata JumpData
