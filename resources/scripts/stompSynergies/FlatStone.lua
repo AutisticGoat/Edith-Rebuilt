@@ -35,7 +35,7 @@ mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, function(_, ent, data, pitfall)
     params.Damage = params.Damage * Mult
     Land.LandFeedbackManager(player, Land.GetLandSoundTable(false, false), player.Color)
     Land.EdithStomp(player, params, true)
-    Land.TriggerLandenemyJump(params, 6, 1.5)
+    Land.TriggerLandenemyJump(player, params, 6, 1.5)
     player:MultiplyFriction(0.05)
 
 end, {tag = "EdithRebuilt_FlatStoneLand"})
