@@ -122,7 +122,7 @@ function mod:EdithPlayerUpdate(player)
 	if Helpers.IsKeyStompTriggered(player) then
 		if HopParams.ParryCooldown == 0 and not isTaintedEdithJump(player) and not HopParams.IsParryJump then
 			if HopParams.IsHoping then
-				TEdithMod.StopTEdithHops(player, 0, true, true)
+				TEdithMod.StopTEdithHops(player, 0, true, true, false)
 			end
 			if not IsGrudge then
 				TEdithMod.InitTaintedEdithParryJump(player, jumpTags.TEdithJump)
@@ -167,7 +167,7 @@ function mod:OnNewRoom()
 	for _, player in ipairs(PlayerManager.GetPlayers()) do
 		if not Player.IsEdith(player, true) then goto continue end
 		Helpers.ChangeColor(player, _, _, _, 1)
-		TEdithMod.StopTEdithHops(player, 0, true, true)
+		TEdithMod.StopTEdithHops(player, 0, true, true, false)
 		TargetArrow.RemoveEdithTarget(player, true)
 		::continue::
 	end
@@ -293,18 +293,18 @@ mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_GRID_COLLISION, function(_, player, _
 	if not isMoving then return end
 
 	if grid:GetType() == GridEntityType.GRID_ROCKB and not IsJumping then
-		TEdithMod.StopTEdithHops(player, 20, true, not playerData.TaintedEdithTarget)
+		TEdithMod.StopTEdithHops(player, 20, true, not playerData.TaintedEdithTarget, true)
 	end
 
 	if rock or poop then
 		if charge >= 85 then
 			grid:Destroy()
 		else
-			TEdithMod.StopTEdithHops(player, 20, true, not playerData.TaintedEdithTarget)
+			TEdithMod.StopTEdithHops(player, 20, true, not playerData.TaintedEdithTarget, true)
 		end
 	else 
 		if not IsJumping then
-			TEdithMod.StopTEdithHops(player, 20, true, not playerData.TaintedEdithTarget)
+			TEdithMod.StopTEdithHops(player, 20, true, not playerData.TaintedEdithTarget, true)
 		end
 	end
 end)

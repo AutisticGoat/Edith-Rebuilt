@@ -162,7 +162,8 @@ end
 ---@param cooldown integer
 ---@param useQuitJump boolean
 ---@param resetChrg boolean
-function TEdith.StopTEdithHops(player, cooldown, useQuitJump, resetChrg)
+---@param resetHopcooldown boolean
+function TEdith.StopTEdithHops(player, cooldown, useQuitJump, resetChrg, resetHopcooldown)
 	if not Player.IsEdith(player, true) then return end
 
 	local HopParams = TEdith.GetHopParryParams(player)
@@ -170,7 +171,10 @@ function TEdith.StopTEdithHops(player, cooldown, useQuitJump, resetChrg)
 	HopParams.IsHoping = false
 	HopParams.GrudgeDash = false
 	HopParams.HopDirection = Vector.Zero
-	HopParams.HopCooldown = 8
+
+	if resetHopcooldown then
+		HopParams.HopCooldown = 8
+	end
 
 	player:MultiplyFriction(0.5)
 
@@ -262,7 +266,7 @@ function TEdith.HopDashChargeManager(player, arrow)
 	arrow.Velocity = arrow.Velocity + (targetVel - arrow.Velocity) * smoothFactor
 
 	if targetframecount < 2 and HopParams.IsHoping == true then
-		TEdith.StopTEdithHops(player, 20, true, true)
+		TEdith.StopTEdithHops(player, 20, true, true, true)
 		Land.LandFeedbackManager(player, Land.GetLandSoundTable(true), misc.BurntSaltColor, false)
 	end
 
