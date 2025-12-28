@@ -10,6 +10,14 @@ local data = mod.DataHolder.GetEntityData
 
 local Helpers = {}
 
+function Helpers.GetScreenCenter()
+	local room = game:GetRoom()
+	local pos = room:WorldToScreenPosition(Vector(0,0)) - room:GetRenderScrollOffset() - game.ScreenShakeOffset	
+	local rx = pos.X + 60 * 26 / 40
+	local ry = pos.Y + 140 * (26 / 40)
+	return Vector(rx * 2 + 13 * 26, ry * 2 + 7 * 26) / 2
+end 
+
 --[[Perform a Switch/Case-like selection.  
     `value` is used to index `cases`.  
     When `value` is `nil`, returns `default`.  

@@ -258,6 +258,10 @@ HudHelper.RegisterHUDElement({
 		local dashBRCharge = HopParams.HopStaticBRCharge
 		local offset = misc.ChargeBarcenterVector
 
+		if game:GetRoom():IsMirrorWorld() then
+			playerpos.X = (Helpers.GetScreenCenter().X * 2 - playerpos.X)
+		end
+
 		if not dashCharge or not dashBRCharge then return end
 
 		playerData.ChargeBar = playerData.ChargeBar or Sprite("gfx/TEdithChargebar.anm2", true)
@@ -272,14 +276,11 @@ HudHelper.RegisterHUDElement({
 	end
 }, HudHelper.HUDType.EXTRA)
 
-
 ---@param player EntityPlayer
 ---@param grid GridEntity
 mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_GRID_COLLISION, function(_, player, _, grid)
 	if not grid then return end
 	if not Player.IsEdith(player, true) then return end
-
-	print(grid:GetType())
 
 	local playerData = data(player)
 	local params = TEdithMod.GetHopParryParams(player)
