@@ -58,8 +58,6 @@ local whiteListCostumes = {
 }
 
 local function OnAddCostume(_, itemconfig, player)
-    print("Added costume")
-    print(PickupVariant.PICKUP_COLLECTIBLE)
     if not Player.IsAnyEdith(player) then return end
     if Helpers.When(itemconfig.Costume.ID, ModCostumes, false) then return end
     return true
@@ -67,8 +65,6 @@ end
 mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_ADD_COSTUME, OnAddCostume)
 
 local function OnRemoveCostume(_, itemconfig, player)
-    print("Removed costume")
-
     if not Player.IsAnyEdith(player) then return end
     if not Helpers.When(itemconfig.Costume.ID, whiteListCostumes, false) then return end
     return true
