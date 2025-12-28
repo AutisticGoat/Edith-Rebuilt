@@ -88,7 +88,7 @@ mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG, function(_, player, _, flag
     local roomType = game:GetRoom():GetType()
 
     if not Player.IsAnyEdith(player) then return end
-	if Maths.HasBitFlags(flags, DamageFlag.DAMAGE_ACID) or (roomType ~= RoomType.ROOM_SACRIFICE and Maths.HasBitFlags(flags, DamageFlag.DAMAGE_SPIKES)) then return false end
+	if Maths.HasBitFlags(flags, DamageFlag.DAMAGE_ACID) or ((roomType ~= RoomType.ROOM_SACRIFICE or roomType ~= RoomType.ROOM_DEVIL) and Maths.HasBitFlags(flags, DamageFlag.DAMAGE_SPIKES)) then return false end
 end)
 
 ---@param tear EntityTear
