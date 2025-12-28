@@ -226,12 +226,15 @@ function Land.HandleEntityInteraction(ent, parent, knockback)
             local isFlavorTextPickup = Helpers.When(var, tables.BlacklistedPickupVariants, false)
             local IsLuckyPenny = var == PickupVariant.PICKUP_COIN and ent.SubType == CoinSubType.COIN_LUCKYPENNY
 			local room = game:GetRoom()
+			local IsPickedUp = pickup:GetSprite():IsPlaying("Collect")
+
+			-- print(pickup:GetSprite():GetAnimation())
 
 			if Helpers.IsVestigeChallenge() then
 				Land.PickupManager(parent, pickup)
 			end
 
-            if isFlavorTextPickup or IsLuckyPenny then return end
+            if isFlavorTextPickup or IsLuckyPenny or IsPickedUp then return end
 			parent:ForceCollide(pickup, true)
 
 			if not Player.IsEdith(parent, false) then return end
@@ -354,7 +357,7 @@ function Land.EdithStomp(parent, params, breakGrid)
 		SaltEnemyManager(parent, ent, isDefStomp, SaltedTime)
 
 		if not Helpers.IsEnemy(ent) then goto Break end
-		
+
 		local volume = Math.exp(Edith.GetNumTears(parent), 1, 1.4)
 
 		if not params.IsDefensiveStomp then
