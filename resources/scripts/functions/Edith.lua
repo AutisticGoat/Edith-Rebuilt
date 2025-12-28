@@ -73,12 +73,6 @@ function Edith.GetStompCooldown(velocidad)
 end
 
 ---@param player EntityPlayer
----@return integer
-function Edith.GetNumTears(player)
-	return player:GetMultiShotParams(WeaponType.WEAPON_TEARS):GetNumTears()
-end
-
----@param player EntityPlayer
 ---@param params EdithJumpStompParams
 ---@param keyStomp boolean
 ---@param jumping boolean
@@ -291,7 +285,7 @@ end
 function Edith.StompDamageManager(player, params)
     local chapter = math.ceil(level:GetStage() / 2)
     local mults = {
-        MultiShot = Math.Round(Math.exp(Edith.GetNumTears(player), 1, 0.5), 2),
+        MultiShot = Math.Round(Math.exp(Player.GetNumTears(player), 1, 0.5), 2),
         Birthtight = Player.PlayerHasBirthright(player) and 1.2 or 1,
         BloodClot = player:HasCollectible(CollectibleType.COLLECTIBLE_BLOOD_CLOT) and 1.1 or 1,
         Flight = Player.CanFly and 1.25 or 1,

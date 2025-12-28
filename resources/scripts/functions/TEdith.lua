@@ -241,9 +241,6 @@ end
 ---@param arrow EntityEffect
 function TEdith.HopDashChargeManager(player, arrow)
 	local HopParams = TEdith.GetHopParryParams(player)
-
-	-- if HopParams.HopCooldown ~= 0 then return end
-
 	local posDif = arrow.Position - player.Position
 	local posDifLenght = posDif:Length()
 	local maxDist = 2.5
@@ -277,16 +274,10 @@ end
 
 --- Misc function used to manage some perfect parry stuff (i made it to be able to return something in the main parry function sorry)
 ---@param player EntityPlayer
----@param IsTaintedEdith? boolean
 ---@param isenemy? boolean
-local function PerfectParryMisc(player, IsTaintedEdith, isenemy)
+local function PerfectParryMisc(player, isenemy)
 	if not isenemy then return end
 	game:MakeShockwave(player.Position, 0.035, 0.025, 2)
-
-	if not IsTaintedEdith then return end
-
-    local playerData = data(player)
-    local hasBirthright = Player.PlayerHasBirthright(player)
 end
 
 ---@param ent Entity
@@ -464,7 +455,10 @@ local function PerfectParryManager(player, ent, HopParams, IsTaintedEdith)
 			ent:ToNPC().State = NpcState.STATE_SPECIAL
 		end
 
-		ent:TakeDamage(HopParams.ParryDamage, damageFlag, EntityRef(player), 0)
+		for i = 1, Player.GetNumTears(player) do
+			ent:TakeDamage(HopParams.ParryDamage, damageFlag, EntityRef(player), 0)
+		end
+		
 		if helpers.IsEnemy(ent) and hasBirthright then
 			ent:AddBurn(EntityRef(player), 123, 5)				
 		end
@@ -499,7 +493,8 @@ function TEdith.ParryLandManager(player, IsTaintedEdith)
 	local hasBirthright = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT)
 	local BirthrightMult = hasBirthright and 1.25 or 1
 	local hasBirthcake = BirthcakeRebaked and player:HasTrinket(BirthcakeRebaked.Birthcake.ID) or false
-	local DamageFormula = (rawFormula * BirthrightMult) * (hasBirthcake and 1.15 or 1)
+	local MultishotMult = maths.Round(maths.exp(Player.GetNumTears(player), 1, 0.5), 2)
+	local DamageFormula = (rawFormula * BirthrightMult) * (hasBirthcake and 1.15 or 1) * MultishotMult
 
 	-- DebugRenderer.Get(1, false):Capsule(TearParryCapsule)
 	-- DebugRenderer.Get(2, false):Capsule(ImpreciseParryCapsule)
@@ -526,7 +521,7 @@ function TEdith.ParryLandManager(player, IsTaintedEdith)
 	end
 
 	player:SetMinDamageCooldown(PerfectParry and 30 or 15)
-	PerfectParryMisc(player, IsTaintedEdith, PerfectParry)
+	PerfectParryMisc(player, PerfectParry)
 
 	HopParams.ParryCooldown = IsTaintedEdith and (PerfectParry and (hasBirthcake and 8 or 10) or 15) or 0
 	HopParams.IsParryJump = false

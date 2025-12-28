@@ -40,6 +40,12 @@ function player.IsAnyEdith(p)
 	return player.IsEdith(p, true) or player.IsEdith(p, false)
 end
 
+---@param p EntityPlayer
+---@return integer
+function player.GetNumTears(p)
+	return p:GetMultiShotParams(WeaponType.WEAPON_TEARS):GetNumTears()
+end
+
 ---@param player EntityPlayer
 function player.PlayerHasBirthright(player)
 	return player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT)
