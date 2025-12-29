@@ -165,8 +165,14 @@ end
 ---@param resetHopcooldown boolean
 function TEdith.StopTEdithHops(player, cooldown, useQuitJump, resetChrg, resetHopcooldown)
 	if not Player.IsEdith(player, true) then return end
-
 	local HopParams = TEdith.GetHopParryParams(player)
+	local IsMoving = HopParams.IsHoping or HopParams.GrudgeDash
+
+	if not IsMoving then return end
+	
+	-- if not JumpLib:GetData(player).Jumping then return end
+
+	
 	
 	Land.TaintedEdithHop(player, HopParams)
 	
