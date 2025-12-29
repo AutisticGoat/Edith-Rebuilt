@@ -13,6 +13,7 @@ local effects = modules.STATUS_EFFECTS
 local helpers = modules.HELPERS
 local Player = modules.PLAYER
 local ModRNG = modules.RNG
+local data = mod.DataHolder.GetEntityData
 local params = EdithMod.GetJumpStompParams
 local Edith = {}
 
@@ -144,10 +145,18 @@ function Edith:OnEdithPEffectUpdate(player)
 end
 mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, Edith.OnEdithPEffectUpdate)
 
+function Edith:OnStompKill(player, ent, params)
+	data(ent).KilledByStomp = true
+end
+mod:AddCallback(enums.Callbacks.OFFENSIVE_STOMP_KILL, Edith.OnStompKill)
+
 ---@param npc EntityNPC
 local function OnNPCUpdate(_, npc)
+	if npc:IsBoss() then return end
 	if not effects.EntHasStatusEffect(npc, "Salted") then return end 
 	if npc.HitPoints > 0 then return end
+	if not data(npc).KilledByStomp then return end
+
 	return true
 end
 mod:AddCallback(ModCallbacks.MC_PRE_NPC_UPDATE, OnNPCUpdate)
