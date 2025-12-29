@@ -91,6 +91,7 @@ local includeFiles = {
 	stmpSyn .. "OcularRift",
 	stmpSyn .. "HolyLight",
 	stmpSyn .. "Jupiter",
+	stmpSyn .. "LostContact",
 
 
 	parrySyn .. "blackPowder",
