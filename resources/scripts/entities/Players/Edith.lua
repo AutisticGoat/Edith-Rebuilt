@@ -124,7 +124,7 @@ function Edith:OnEdithLanding(player, _, pitfall)
 	edithTarget:GetSprite():Play("Idle")
 
 	Land.EdithStomp(player, jumpParams, true)
-	Land.TriggerLandenemyJump(player, jumpParams, 8, 2)
+	Land.TriggerLandenemyJump(player, jumpParams.StompedEntities, jumpParams.Knockback, 8, 2)
 
 	player:SetMinDamageCooldown(25)
 	player:MultiplyFriction(0.1)

@@ -537,15 +537,18 @@ function Land.LandFeedbackManager(player, soundTable, GibColor, IsParryLand)
 end
 
 ---@param player EntityPlayer
----@param params EdithJumpStompParams
+---@param enemyTable Entity[]
+---@param knockback number
 ---@param height number
 ---@param speed number
-function Land.TriggerLandenemyJump(player, params, height, speed)
-	for _, ent in ipairs(params.StompedEntities) do
+function Land.TriggerLandenemyJump(player, enemyTable, knockback, height, speed)
+	-- local knockback = 
+
+	for _, ent in ipairs(enemyTable) do
 		local PushFactor = Helpers.GetPushFactor(ent)
 
 		if Helpers.IsEnemy(ent) then
-			Helpers.TriggerJumpPush(ent, player, params.Knockback * 1.5, 5)
+			Helpers.TriggerJumpPush(ent, player, knockback * 1.5, 5)
 			JumpLib:TryJump(ent, {
 				Height = height * PushFactor,
 				Speed = speed * PushFactor,

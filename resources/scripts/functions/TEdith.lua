@@ -29,6 +29,7 @@ local data = mod.DataHolder.GetEntityData
 ---@field ParryRadius number
 ---@field ParryKnockback number
 ---@field ParryCooldown number
+---@field ParriedEnemies Entity[]
 ---@field IsHoping boolean
 ---@field IsParryJump boolean
 ---@field GrudgeDash boolean
@@ -52,6 +53,7 @@ function TEdith.GetHopParryParams(player)
 		ParryKnockback = 0,
 		ParryRadius = 0,
 		ParryCooldown = 0,
+		ParriedEnemies = {},
 		GrudgeDash = false,
 		HopCooldown = 0
 
@@ -169,17 +171,13 @@ function TEdith.StopTEdithHops(player, cooldown, useQuitJump, resetChrg, resetHo
 	local IsMoving = HopParams.IsHoping or HopParams.GrudgeDash
 
 	if not IsMoving then return end
-	
-	-- if not JumpLib:GetData(player).Jumping then return end
 
-	
-	
 	Land.TaintedEdithHop(player, HopParams)
-	
+
 	HopParams.IsHoping = false
 	HopParams.GrudgeDash = false
 	HopParams.HopDirection = Vector.Zero
-	
+
 	if resetHopcooldown then
 		HopParams.HopCooldown = 8
 	end
@@ -196,7 +194,6 @@ function TEdith.StopTEdithHops(player, cooldown, useQuitJump, resetChrg, resetHo
 	if resetChrg then
 		TEdith.ResetHopDashCharge(player, true, true)
 	end
-
 
 	player:SetMinDamageCooldown(cooldown)
 end
@@ -514,6 +511,7 @@ function TEdith.ParryLandManager(player, IsTaintedEdith)
 	end
 
 	HopParams.ParryDamage = DamageFormula
+	HopParams.ParriedEnemies = Isaac.FindInCapsule(PerfectParryCapsule, misc.ParryPartitions)
 
 	for _, ent in pairs(Isaac.FindInCapsule(TearParryCapsule, EntityPartition.TEAR)) do
 		ParryTearManager(ent, HopParams)
@@ -524,11 +522,13 @@ function TEdith.ParryLandManager(player, IsTaintedEdith)
 		ImpreciseParryManager(player, ent, HopParams, ImpreciseParryCapsule, PerfectParryCapsule)
 	end
 
-	for _, ent in pairs(Isaac.FindInCapsule(PerfectParryCapsule, misc.ParryPartitions)) do
+	for _, ent in pairs(HopParams.ParriedEnemies) do
 		PerfectParryManager(player, ent, HopParams, IsTaintedEdith)
 		PerfectParry = true
 	end
 
+	Land.TriggerLandenemyJump(player, HopParams.ParriedEnemies, HopParams.ParryKnockback, 8, 2)
+	
 	player:SetMinDamageCooldown(PerfectParry and 30 or 15)
 	PerfectParryMisc(player, PerfectParry)
 
@@ -536,6 +536,8 @@ function TEdith.ParryLandManager(player, IsTaintedEdith)
 	HopParams.IsParryJump = false
 
 	GrudgeUnlockManager(PerfectParry)
+
+	HopParams.ParriedEnemies = {}
 
 	return PerfectParry, EnemiesInImpreciseParry
 end

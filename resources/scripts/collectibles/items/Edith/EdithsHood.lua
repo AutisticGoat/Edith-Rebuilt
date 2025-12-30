@@ -80,7 +80,7 @@ function EdithsHood:OnHoodJumpLand(player)
 
 	Land.LandFeedbackManager(player, Land.GetLandSoundTable(false), Color.Default, false)
 	Land.EdithStomp(player, params, false)
-	Land.TriggerLandenemyJump(player, params, 10, 1.8)
+	Land.TriggerLandenemyJump(player, params.StompedEntities, params.Knockback, 10, 1.8)
 
 	for i = 1, maxCreep do
 		Creeps.SpawnSaltCreep(player, player.Position + Vector(0, 30):Rotated(saltDegrees*i), 0.1, 5, 1, 3, saltTypes.EDITHS_HOOD)
