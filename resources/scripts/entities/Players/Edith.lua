@@ -13,6 +13,7 @@ local effects = modules.STATUS_EFFECTS
 local helpers = modules.HELPERS
 local Player = modules.PLAYER
 local ModRNG = modules.RNG
+local VecDir = modules.VEC_DIR
 local data = mod.DataHolder.GetEntityData
 local params = EdithMod.GetJumpStompParams
 local Edith = {}
@@ -139,22 +140,29 @@ function Edith:OnEdithPEffectUpdate(player)
 	if not Player.IsEdith(player, false) then return end
 	local jumpParams = params(player)
 
+	local room = game:GetRoom()
+	local waterCurrent = room:GetWaterCurrent()
+	local RoomHasWaterCurrent = not VecDir.VectorEquals(waterCurrent, Vector.Zero)
+
+	if not EdithMod.IsJumping(player) and RoomHasWaterCurrent then
+		player.Velocity = player.Velocity * (waterCurrent * 0.5)
+	end
+
 	if jumpParams.RocketLaunch then return end
 	EdithMod.CooldownUpdate(player, jumpParams)
 	EdithMod.JumpMovement(player)
 end
 mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, Edith.OnEdithPEffectUpdate)
 
-function Edith:OnStompKill(player, ent, params)
+---@param ent Entity
+mod:AddCallback(enums.Callbacks.OFFENSIVE_STOMP_KILL, function(_, _, ent)
 	data(ent).KilledByStomp = true
-end
-mod:AddCallback(enums.Callbacks.OFFENSIVE_STOMP_KILL, Edith.OnStompKill)
+end)
 
 ---@param npc EntityNPC
 local function OnNPCUpdate(_, npc)
 	if npc:IsBoss() then return end
 	if not effects.EntHasStatusEffect(npc, "Salted") then return end 
-	if npc.HitPoints > 0 then return end
 	if not data(npc).KilledByStomp then return end
 
 	return true
