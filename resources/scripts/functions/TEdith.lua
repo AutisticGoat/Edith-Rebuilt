@@ -440,6 +440,8 @@ local function PerfectParryManager(player, ent, HopParams, IsTaintedEdith)
 	local tear = ent:ToTear()
 	local shouldTriggerFireJets = IsTaintedEdith and hasBirthright or Player.IsJudasWithBirthright(player)
 
+	local CinderMult = StatusEffects.EntHasStatusEffect(ent, "Cinder") and 1.2 or 1
+
 	Isaac.RunCallback(enums.Callbacks.PERFECT_PARRY, player, ent, HopParams)
 
 	if tear then return end
@@ -462,7 +464,7 @@ local function PerfectParryManager(player, ent, HopParams, IsTaintedEdith)
 		end
 
 		for i = 1, Player.GetNumTears(player) do
-			ent:TakeDamage(HopParams.ParryDamage, damageFlag, EntityRef(player), 0)
+			ent:TakeDamage(HopParams.ParryDamage * CinderMult, damageFlag, EntityRef(player), 0)
 		end
 		
 		if helpers.IsEnemy(ent) and hasBirthright then
@@ -528,7 +530,7 @@ function TEdith.ParryLandManager(player, IsTaintedEdith)
 	end
 
 	Land.TriggerLandenemyJump(player, HopParams.ParriedEnemies, HopParams.ParryKnockback, 8, 2)
-	
+
 	player:SetMinDamageCooldown(PerfectParry and 30 or 15)
 	PerfectParryMisc(player, PerfectParry)
 
