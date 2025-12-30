@@ -193,11 +193,12 @@ function mod:EdithHopLanding(player)
 	HopParams.HopKnockback = Knockbackbase * maths.exp(Charge / 100, 1, 1.5)
 	HopParams.HopRadius = math.min((30 + (tearRange - 9)), 35)
 
-	local chanceSpawn = 0.5 * ChargeNoBRPercent
-	local maxCreeps = math.ceil(8 * ChargeNoBRPercent)
+	local chanceSpawn = 0.25 * ChargeNoBRPercent
+	local maxCreeps = math.ceil(6 * ChargeNoBRPercent)
 	local degrees = 360/maxCreeps
-	local dist = 30 * ChargeNoBRPercent
-	local damage = 3 * ChargePercent
+	local dist = 25 * ChargeNoBRPercent
+	local damage = 1 * ChargePercent
+	local duration = 3 * ChargePercent
 
 	if ModRNG.RandomBoolean(rng, chanceSpawn) then
 		for i = 1, maxCreeps do
