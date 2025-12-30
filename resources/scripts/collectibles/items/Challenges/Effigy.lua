@@ -31,7 +31,7 @@ function Effigy:OnEffigyLand(player)
 
     Land.EdithStomp(player, JumpParams, true)
     Land.LandFeedbackManager(player, Land.GetLandSoundTable(false, false), Color.Default, false)
-    Land.TriggerLandenemyJump(player, JumpParams, 3, 2)
+    Land.TriggerLandenemyJump(player, JumpParams, JumpParams.Knockback,3, 2)
 
     TargetArrow.RemoveEdithTarget(player, false)
 

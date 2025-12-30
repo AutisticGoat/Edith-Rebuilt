@@ -261,6 +261,9 @@ function Land.HandleEntityInteraction(ent, parent, knockback)
 			if Player.IsEdith(parent, true) then return end
             ent:Kill()
         end,
+        [EntityType.ENTITY_MOVABLE_TNT] = function()
+            ent:Kill()
+        end,
     }
 	Helpers.WhenEval(ent.Type, stompBehavior)
 end
