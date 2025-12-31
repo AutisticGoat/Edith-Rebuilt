@@ -422,16 +422,29 @@ end
 ---@param HopParams TEdithHopParryParams
 function Land.TaintedEdithHop(parent, HopParams)
 	local capsule = Capsule(parent.Position, Vector.One, 0, HopParams.HopRadius)
+	local PickupCapsule = Capsule(parent.Position, Vector.One, 0, 20)
+	local SlotCapsule = Capsule(parent.Position, Vector.One, 0, parent.Size)
 	local Charge = HopParams.HopMoveCharge / 100
 	local BRCharge = HopParams.HopMoveBRCharge / 100
 	local burnDamage, burnDuration = BRCharge * parent.Damage / 2, math.ceil(BRCharge * 123)
 	local PlayerRef = EntityRef(parent)
 	local CinderDuration = Helpers.SecondsToFrames(4 * (Charge + BRCharge))
 
+	for _, ent in ipairs(Isaac.FindInCapsule(PickupCapsule)) do
+		if ent:ToPickup() then
+			PickupLandHandler(parent, ent)
+		end
+	end
+
+	for _, ent in ipairs(Isaac.FindInCapsule(SlotCapsule)) do
+		if ent:ToSlot() then
+			SlotLandManager(parent, ent)
+		end
+	end
+
 	for _, ent in ipairs(Isaac.FindInCapsule(capsule)) do
 		Land.HandleEntityInteraction(ent, parent, HopParams.HopKnockback)
 		Land.LandDamage(ent, parent, HopParams.HopDamage, HopParams.HopKnockback)
-	
 		
 		if Helpers.IsEnemy(ent) then			
 			StatusEffect.SetStatusEffect(status.CINDER, ent, CinderDuration, parent)
@@ -677,8 +690,22 @@ end
 ---@param ImpreciseParryCapsule Capsule
 ---@param PerfectParryCapsule Capsule
 local function ImpreciseParryManager(player, ent, HopParams, ImpreciseParryCapsule, PerfectParryCapsule)
+	local PickupCapsule = Capsule(player.Position, Vector.One, 0, 20)
+	local SlotCapsule = Capsule(player.Position, Vector.One, 0, player.Size)
 	local tearsMult = (Player.GetplayerTears(player) / 2.73) 
 	local CinderTime = Math.SecondsToFrames(math.min(4 * tearsMult, 12))
+
+	for _, entity in ipairs(Isaac.FindInCapsule(PickupCapsule)) do
+		if entity:ToPickup() then
+			PickupLandHandler(player, ent)
+		end
+	end
+
+	for _, entity in ipairs(Isaac.FindInCapsule(SlotCapsule)) do
+		if entity:ToSlot() then
+			SlotLandManager(player, ent)
+		end
+	end
 
 	if ent:ToTear() then return  end
 	local pushMult = StatusEffect.EntHasStatusEffect(ent, enums.EdithStatusEffects.CINDER) and 1.5 or 1
