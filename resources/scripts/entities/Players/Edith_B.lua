@@ -117,6 +117,7 @@ function mod:EdithPlayerUpdate(player)
 	local playerData = data(player)
 	local HopParams = TEdithMod.GetHopParryParams(player)
 	local IsJumping = JumpLib:GetData(player).Jumping
+	local MiscConfig = Helpers.GetConfigData("MiscData")
 	local arrow = TargetArrow.GetEdithTarget(player, true)
 	local IsGrudge = Helpers.IsGrudgeChallenge()
 	local input = {
@@ -157,8 +158,10 @@ function mod:EdithPlayerUpdate(player)
 		player:MultiplyFriction(0.5)
 	end
 
-	if Helpers.IsGrudgeChallenge() and HopParams.GrudgeDash and player.Velocity:Length() > 0.15 then
-		game:ShakeScreen(2)
+	if Helpers.IsGrudgeChallenge() and HopParams.GrudgeDash and player.Velocity:Length() > 0.15 then		
+		if MiscConfig and MiscConfig.EnableShakescreen then
+			game:ShakeScreen(2)
+		end
 		sfx:Play(SoundEffect.SOUND_STONE_IMPACT, 0.3, 0, false, 1.2)
 	end
 
