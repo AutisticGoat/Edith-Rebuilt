@@ -189,11 +189,18 @@ function Edith.FallBehavior(player, jumpdata, jumpParams)
 	local distance = TargetArrow.GetEdithTargetDistance(player)
 
 	if jumpParams.IsDefensiveStomp then return end
-	if not (player.CanFly and ((TargetArrow.IsEdithTargetMoving(player) and distance <= 50) or distance <= 5)) then return end
+	if not player.CanFly then return end
 
-	if not (jumpdata.Fallspeed < 8.5 and JumpLib:IsFalling(player)) then return end
+	local ShouldTriggerFall = (TargetArrow.IsEdithTargetMoving(player) and distance <= 60) or distance <= 10 
+
+	if not ShouldTriggerFall then return end
+	if not JumpLib:IsFalling(player) then return end
+	player:MultiplyFriction(0.5)
+
+	JumpLib:SetSpeed(player, 15 + (jumpdata.Height / 10))
+
+	if jumpdata.Fallspeed > 9 then return end
 	sfx:Play(SoundEffect.SOUND_SHELLGAME)
-	JumpLib:SetSpeed(player, 10 + (jumpdata.Height / 10))
 end
 
 ---@param player EntityPlayer
