@@ -141,7 +141,7 @@ function mod:EdithPlayerUpdate(player)
 			if not IsGrudge then
 				TEdithMod.InitTaintedEdithParryJump(player, jumpTags.TEdithJump)
 			else
-				local PerfectParry, _ = TEdithMod.ParryLandManager(player, true)
+				local PerfectParry, _ = land.ParryLandManager(player, HopParams, true)
 				land.LandFeedbackManager(player, land.GetLandSoundTable(true, true), misc.BurntSaltColor, true)
 
 				if PerfectParry then
@@ -210,11 +210,13 @@ mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, mod.EdithHopLanding, jumpParams.T
 
 ---@param player EntityPlayer
 function TEdith:EdithParryJump(player)
+	local HopParams = TEdithMod.GetHopParryParams(player)
+
 	if TargetArrow.GetEdithTarget(player, true) then 
 		TEdithMod.ResetHopDashCharge(player, true, true)
 	end
 
-	local perfectParry, EnemiesInImpreciseParry = TEdithMod.ParryLandManager(player, true)
+	local perfectParry, EnemiesInImpreciseParry = land.ParryLandManager(player, HopParams, true)
 	local parryAdd = perfectParry and 20 or ((EnemiesInImpreciseParry and 5) or -15)
 
 	land.LandFeedbackManager(player, land.GetLandSoundTable(true, perfectParry), misc.BurntSaltColor, perfectParry)

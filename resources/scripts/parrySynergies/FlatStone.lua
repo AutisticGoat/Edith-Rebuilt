@@ -26,6 +26,6 @@ mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, function(_, ent, data, pitfall)
     if not Player.IsEdith(player, true) then return end
 
     Land.LandFeedbackManager(player, Land.GetLandSoundTable(true, true), player.Color)
-    TEdithMod.ParryLandManager(player, true)
+    Land.ParryLandManager(player, TEdithMod.GetHopParryParams(player), true)
     player:MultiplyFriction(0.05)
 end, {tag = "EdithRebuilt_FlatStoneLand"})
