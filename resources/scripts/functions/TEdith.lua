@@ -29,6 +29,7 @@ local data = mod.DataHolder.GetEntityData
 ---@field ParryRadius number
 ---@field ParryKnockback number
 ---@field ParryCooldown number
+---@field ImpreciseParriedEnemies Entity[]
 ---@field ParriedEnemies Entity[]
 ---@field IsHoping boolean
 ---@field IsParryJump boolean
@@ -54,6 +55,7 @@ function TEdith.GetHopParryParams(player)
 		ParryRadius = 0,
 		ParryCooldown = 0,
 		ParriedEnemies = {},
+		ImpreciseParriedEnemies = {},
 		GrudgeDash = false,
 		HopCooldown = 0
 
@@ -416,7 +418,7 @@ end
 ---@param PerfectParryCapsule Capsule
 local function ImpreciseParryManager(player, ent, HopParams, ImpreciseParryCapsule, PerfectParryCapsule)
 	local tearsMult = (Player.GetplayerTears(player) / 2.73) 
-	local CinderTime = maths.SecondsToFrames((4 * tearsMult))
+	local CinderTime = maths.SecondsToFrames(math.min(4 * tearsMult, 12))
 
 	if ent:ToTear() then return  end
 	local pushMult = StatusEffects.EntHasStatusEffect(ent, enums.EdithStatusEffects.CINDER) and 1.5 or 1
@@ -514,6 +516,7 @@ function TEdith.ParryLandManager(player, IsTaintedEdith)
 
 	HopParams.ParryDamage = DamageFormula
 	HopParams.ParriedEnemies = Isaac.FindInCapsule(PerfectParryCapsule, misc.ParryPartitions)
+	HopParams.ImpreciseParriedEnemies = Isaac.FindInCapsule(ImpreciseParryCapsule, misc.ParryPartitions)
 
 	for _, ent in pairs(Isaac.FindInCapsule(TearParryCapsule, EntityPartition.TEAR)) do
 		ParryTearManager(ent, HopParams)

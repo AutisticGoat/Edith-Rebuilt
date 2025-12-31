@@ -101,8 +101,7 @@ end
 
 ---Converts seconds to game update frames
 ---@param seconds number
----@return number
-function Helpers:SecondsToFrames(seconds)
+function Helpers.SecondsToFrames(seconds)
 	return math.ceil(seconds * 30)
 end
 

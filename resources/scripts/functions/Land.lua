@@ -392,16 +392,22 @@ end
 ---@param HopParams TEdithHopParryParams
 function Land.TaintedEdithHop(parent, HopParams)
 	local capsule = Capsule(parent.Position, Vector.One, 0, HopParams.HopRadius)
+	local Charge = HopParams.HopMoveCharge / 100
 	local BRCharge = HopParams.HopMoveBRCharge / 100
 	local burnDamage, burnDuration = BRCharge * parent.Damage / 2, math.ceil(BRCharge * 123)
 	local PlayerRef = EntityRef(parent)
+	local CinderDuration = Helpers.SecondsToFrames(4 * (Charge + BRCharge))
 
 	for _, ent in ipairs(Isaac.FindInCapsule(capsule)) do
 		Land.HandleEntityInteraction(ent, parent, HopParams.HopKnockback)
 		Land.LandDamage(ent, parent, HopParams.HopDamage, HopParams.HopKnockback)
 	
-		if Helpers.IsEnemy(ent) and BRCharge > 0 then
-			ent:AddBurn(PlayerRef, burnDuration, burnDamage)
+		
+		if Helpers.IsEnemy(ent) then			
+			StatusEffect.SetStatusEffect(status.CINDER, ent, CinderDuration, parent)
+			if BRCharge > 0 then
+				ent:AddBurn(PlayerRef, burnDuration, burnDamage)
+			end
 		end
 	end
 end

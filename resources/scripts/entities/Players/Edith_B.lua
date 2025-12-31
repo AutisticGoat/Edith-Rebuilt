@@ -20,6 +20,7 @@ local Helpers = modules.HELPERS
 local Maths = modules.MATHS
 local Creeps = modules.CREEPS
 local ModRNG = modules.RNG
+local effects = modules.STATUS_EFFECTS
 local data = mod.DataHolder.GetEntityData
 local TEdith = {}
 
@@ -44,6 +45,19 @@ local function isTaintedEdithJump(player)
 	return JumpLib:GetData(player).Tags["edithRebuilt_TaintedEdithJump"] or false
 end
 
+---@param ent Entity
+mod:AddCallback(enums.Callbacks.PERFECT_PARRY_KILL, function(_, _, ent)
+	data(ent).KilledByParry = true
+end)
+
+mod:AddCallback(ModCallbacks.MC_PRE_NPC_UPDATE, function(_, npc)
+	if npc:IsBoss() then return end
+	if not effects.EntHasStatusEffect(npc, "Cinder") then return end 
+	if not data(npc).KilledByParry then return end
+
+	return true
+end)
+
 ---@param player EntityPlayer	
 function mod:TaintedEdithUpdate(player)
 	if not Player.IsEdith(player, true) then return end
@@ -53,12 +67,12 @@ function mod:TaintedEdithUpdate(player)
 	local arrow = TargetArrow.GetEdithTarget(player, true)
 	local IsMoving = HopParams.IsHoping or HopParams.GrudgeDash
 	local charge = TEdithMod.GetHopDashCharge(player, false)
-	local effects = player:GetEffects()
+	local Peffects = player:GetEffects()
 
-	if player.CanFly and charge >= 85 and not effects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_LEO) then
-		effects:AddCollectibleEffect(CollectibleType.COLLECTIBLE_LEO, false, 1)
+	if player.CanFly and charge >= 85 and not Peffects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_LEO) then
+		Peffects:AddCollectibleEffect(CollectibleType.COLLECTIBLE_LEO, false, 1)
 	else
-		effects:RemoveCollectibleEffect(CollectibleType.COLLECTIBLE_LEO, -1)
+		Peffects:RemoveCollectibleEffect(CollectibleType.COLLECTIBLE_LEO, -1)
 	end
 
 	if not IsMoving then
@@ -181,30 +195,12 @@ function mod:EdithHopLanding(player)
 	local tearRange = player.TearRange / 40
 	local Knockbackbase = (player.ShotSpeed * 10) + 2
 	local Charge = TEdithMod.GetHopDashCharge(player, false, true)
-	local ChargeNoBR = TEdithMod.GetHopDashCharge(player, false)
-	local ChargeNoBRPercent = ChargeNoBR / 100
-	local ChargePercent = Charge / 100
 	local BRCharge = HopParams.HopMoveBRCharge
-
-	local rng = player:GetDropRNG()
 
 	--- Pendiente de rehacer
 	HopParams.HopDamage = (((damageBase + player.Damage) / 3.5) * (Charge + BRCharge) / 100) * (Charge / 100) 
 	HopParams.HopKnockback = Knockbackbase * maths.exp(Charge / 100, 1, 1.5)
 	HopParams.HopRadius = math.min((30 + (tearRange - 9)), 35)
-
-	local chanceSpawn = 0.25 * ChargeNoBRPercent
-	local maxCreeps = math.ceil(6 * ChargeNoBRPercent)
-	local degrees = 360/maxCreeps
-	local dist = 25 * ChargeNoBRPercent
-	local damage = 1 * ChargePercent
-	local duration = 3 * ChargePercent
-
-	if ModRNG.RandomBoolean(rng, chanceSpawn) then
-		for i = 1, maxCreeps do
-			Creeps.SpawnCinderCreep(player, player.Position + Vector(0, dist):Rotated(i * degrees), damage, 6)
-		end
-	end
 
 	player:SpawnWaterImpactEffects(player.Position, Vector(1, 1), 1)	
 	land.LandFeedbackManager(player, land.GetLandSoundTable(true), misc.BurntSaltColor)
