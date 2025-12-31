@@ -56,10 +56,33 @@ end
 
 ---Helper grid destroyer function
 ---@param entity Entity
-function Helpers.DestroyGrid(entity)
-	local grid = game:GetRoom():GetGridEntityFromPos(entity.Position)
-	if not grid then return end
-	grid:Destroy(false)
+---@param radius number
+---@param breakmirror boolean
+function Helpers.DestroyGrid(entity, radius, breakmirror)
+    local room = game:GetRoom()
+    radius = radius or 10
+    for i = 0, (room:GetGridSize()) do
+		local grid = room:GetGridEntity(i)
+
+		if not grid then goto continue end
+		if (entity.Position - grid.Position):Length() > radius then goto continue end
+
+		if (grid.Desc.Type ~= 16) then
+			grid:Destroy()
+		else
+			if grid.Desc.Variant ~= 1 or grid.Desc.State ~= 1 then
+				grid:Destroy()
+			end
+			if breakmirror then 
+				grid:Destroy() 
+			end
+		end
+
+		::continue::
+    end
+	-- local grid = game:GetRoom():GetGridEntityFromPos(entity.Position)
+	-- if not grid then return end
+	-- grid:Destroy(false)
 end
 
 ---Makes the tear to receive a boost, increasing its speed and damage

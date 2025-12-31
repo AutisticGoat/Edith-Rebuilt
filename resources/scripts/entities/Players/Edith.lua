@@ -269,15 +269,6 @@ mod:AddCallback(ModCallbacks.MC_POST_BOMB_UPDATE, Edith.OnBombExplode)
 ---@param player EntityPlayer
 mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_POCKET_ITEMS_SWAP, function(_, player)
 	if not Player.IsEdith(player, false) then return end
-	
-	if not EdithMod.IsJumping(player) then
-		return true
-	end
-
-	-- print(EdithMod.IsJumping(player))
-	
-	-- if not EdithMod.IsJumping(player) then return end
-
-	-- return true
-	-- print("swap item")
+	if EdithMod.IsJumping(player) then return end
+	return true
 end)
