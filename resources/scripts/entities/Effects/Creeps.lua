@@ -100,10 +100,9 @@ local function CinderCreepUpdate(effect)
     local player = effect.SpawnerEntity:ToPlayer()
 
     if not player then return end
-    if not Player.PlayerHasBirthright(player) then return end
+    if not Player.PlayerHasBirthright(player) then return end 
 
     for _, entity in pairs(Isaac.FindInRadius(effect.Position, 20 * effect.SpriteScale.X, EntityPartition.ENEMY)) do
-        StatusEffects.SetStatusEffect("Cinder", entity, 60, player)
         data(entity).IsInCinderCreep = true
     end
 end
