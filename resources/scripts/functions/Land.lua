@@ -363,8 +363,6 @@ function Land.EdithStomp(parent, params, breakGrid)
 
 	params.StompedEntities = Isaac.FindInCapsule(capsule)
 
-	DebugRenderer.Get(1, false):Capsule(PickupCapsule)
-
 	if not isDefStomp then
 		Isaac.RunCallback(callbacks.OFFENSIVE_STOMP, parent, params)
 	end
@@ -800,9 +798,6 @@ function Land.ParryLandManager(player, HopParams, IsTaintedEdith)
 	local hasBirthcake = BirthcakeRebaked and player:HasTrinket(BirthcakeRebaked.Birthcake.ID) or false
 	local MultishotMult = Math.Round(Math.exp(Player.GetNumTears(player), 1, 0.5), 2)
 	local DamageFormula = (rawFormula * BirthrightMult) * (hasBirthcake and 1.15 or 1) * MultishotMult
-
-	-- DebugRenderer.Get(1, false):Capsule(TearParryCapsule)
-	-- DebugRenderer.Get(2, false):Capsule(ImpreciseParryCapsule)
 
 	if IsTaintedEdith then
 		local damageIncrease = 1 + (HopParams.HopStaticCharge + HopParams.HopStaticBRCharge) / 400

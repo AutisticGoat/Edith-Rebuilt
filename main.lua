@@ -39,12 +39,3 @@ end)
 
 Isaac.DebugString("Edith Rebuilt " .. EdithRebuilt.Version .. " loaded correctly")
 print("Edith Rebuilt " .. EdithRebuilt.Version .. " loaded correctly")
-
----@param Slot LevelGeneratorRoom
----@param RoomConfig RoomConfigRoom
----@param Seed integer
-mod:AddCallback(ModCallbacks.MC_PRE_LEVEL_PLACE_ROOM, function (_, Slot, RoomConfig, Seed)
-	if RoomConfig.Type == RoomType.ROOM_TREASURE then
-		print("tesoro")
-	end
-end)
