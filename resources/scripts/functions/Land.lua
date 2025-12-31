@@ -188,6 +188,49 @@ function Land.PickupManager(player, pickup)
 	end
 end
 
+---@param parent EntityPlayer
+---@param ent EntityPickup
+local function PickupLandHandler(parent, ent)
+	local var = ent.Variant
+	local pickup = ent:ToPickup() ---@cast pickup EntityPickup
+	local isFlavorTextPickup = Helpers.When(var, tables.BlacklistedPickupVariants, false)
+	local IsLuckyPenny = var == PickupVariant.PICKUP_COIN and ent.SubType == CoinSubType.COIN_LUCKYPENNY
+	local room = game:GetRoom()
+	local IsPickedUp = pickup:GetSprite():IsPlaying("Collect")
+
+	if Helpers.IsVestigeChallenge() then
+		Land.PickupManager(parent, pickup)
+	end
+
+	if isFlavorTextPickup or IsLuckyPenny or IsPickedUp then return end
+	parent:ForceCollide(pickup, true)
+
+	if not Player.IsEdith(parent, false) then return end
+
+	if not (var == PickupVariant.PICKUP_BOMBCHEST and Player.IsEdith(parent, false)) then return end
+	pickup:TryOpenChest(parent)
+
+	if room:GetType() == RoomType.ROOM_CHALLENGE then
+		Ambush.StartChallenge()
+	end
+end
+
+---@param parent EntityPlayer
+---@param ent EntitySlot
+local function SlotLandManager(parent, ent)
+	local var = ent.Variant
+	local slot = ent:ToSlot() ---@cast slot EntitySlot
+	local TriggerDamageSlots = {
+		[SlotVariant.BLOOD_DONATION_MACHINE] = true,
+		[SlotVariant.DEVIL_BEGGAR] = true,
+		[SlotVariant.CONFESSIONAL] = true,
+	}
+
+	if slot:GetState() == SlotState.DESTROYED then return end
+	if not Helpers.When(var, TriggerDamageSlots, false) then return end
+	parent:ForceCollide(ent, false)
+	parent:TakeDamage(1, 0, EntityRef(ent), 0)
+end
 
 ---@param ent Entity
 ---@param parent EntityPlayer
@@ -221,41 +264,11 @@ function Land.HandleEntityInteraction(ent, parent, knockback)
 			if Player.IsEdith(parent, true) then return end
             Helpers.TriggerPush(ent, parent, knockback)
         end,
-        [EntityType.ENTITY_PICKUP] = function()
-            local pickup = ent:ToPickup() ---@cast pickup EntityPickup
-            local isFlavorTextPickup = Helpers.When(var, tables.BlacklistedPickupVariants, false)
-            local IsLuckyPenny = var == PickupVariant.PICKUP_COIN and ent.SubType == CoinSubType.COIN_LUCKYPENNY
-			local room = game:GetRoom()
-			local IsPickedUp = pickup:GetSprite():IsPlaying("Collect")
-
-			if Helpers.IsVestigeChallenge() then
-				Land.PickupManager(parent, pickup)
-			end
-
-            if isFlavorTextPickup or IsLuckyPenny or IsPickedUp then return end
-			parent:ForceCollide(pickup, true)
-
-			if not Player.IsEdith(parent, false) then return end
-
-            if not (var == PickupVariant.PICKUP_BOMBCHEST and Player.IsEdith(parent, false)) then return end
-			pickup:TryOpenChest(parent)
-
-			if room:GetType() == RoomType.ROOM_CHALLENGE then
-				Ambush.StartChallenge()
-			end
-        end,
+        -- [EntityType.ENTITY_PICKUP] = function()
+            
+        -- end,
 		[EntityType.ENTITY_SLOT] = function ()
-			local slot = ent:ToSlot() ---@cast slot EntitySlot
-			local TriggerDamageSlots = {
-				[SlotVariant.BLOOD_DONATION_MACHINE] = true,
-				[SlotVariant.DEVIL_BEGGAR] = true,
-				[SlotVariant.CONFESSIONAL] = true,
-			}
 
-			if slot:GetState() == SlotState.DESTROYED then return end
-			if not Helpers.When(var, TriggerDamageSlots, false) then return end
-			parent:ForceCollide(ent, false)
-			parent:TakeDamage(1, 0, EntityRef(ent), 0)
 		end,
         [EntityType.ENTITY_SHOPKEEPER] = function()
 			if Player.IsEdith(parent, true) then return end
@@ -342,13 +355,29 @@ function Land.EdithStomp(parent, params, breakGrid)
 	local TerraRNG = parent:GetCollectibleRNG(CollectibleType.COLLECTIBLE_TERRA)
 	local TerraMult = HasTerra and modRNG.RandomFloat(TerraRNG, 0.5, 2) or 1	
 	local capsule = Capsule(parent.Position, Vector.One, 0, params.Radius)
+	local PickupCapsule = Capsule(parent.Position, Vector.One, 0, 20)
+	local SlotCapsule = Capsule(parent.Position, Vector.One, 0, parent.Size)
 	local SaltedTime = Math.Round(Math.Clamp(120 * (Player.GetplayerTears(parent) / 2.73), 60, 360))
 	local isSalted
 
 	params.StompedEntities = Isaac.FindInCapsule(capsule)
 
+	DebugRenderer.Get(1, false):Capsule(PickupCapsule)
+
 	if not isDefStomp then
 		Isaac.RunCallback(callbacks.OFFENSIVE_STOMP, parent, params)
+	end
+
+	for _, ent in ipairs(Isaac.FindInCapsule(PickupCapsule, EntityPartition.PICKUP)) do
+		if ent:ToPickup() then
+			PickupLandHandler(parent, ent)
+		end
+	end
+
+	for _, ent in ipairs(Isaac.FindInCapsule(SlotCapsule)) do
+		if ent:ToSlot() then
+			SlotLandManager(parent, ent)
+		end 
 	end
 
 	--- Pendiente de reducir
