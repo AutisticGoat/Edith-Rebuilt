@@ -35,7 +35,8 @@ function Grudge:OnTaintedEdithGrudgeCollision(player, collider)
     )
 
     sfx:Play(SoundEffect.SOUND_MEATY_DEATHS)
-    Helpers.TriggerPush(collider, player, 15)
+
+    collider.Velocity = (collider.Position - player.Position):Resized(15)
     collider:TakeDamage(Damage, DamageFlag.DAMAGE_CRUSH, EntityRef(player), 0)
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_COLLISION, Grudge.OnTaintedEdithGrudgeCollision)
