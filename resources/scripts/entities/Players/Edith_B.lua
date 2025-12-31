@@ -308,3 +308,14 @@ mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_GRID_COLLISION, function(_, player, _
 		end
 	end
 end)
+
+---@param player EntityPlayer
+---@param collider Entity
+mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_COLLISION, function (_, player, collider)
+	if not Player.IsEdith(player, true) then return end
+	if collider.Type ~= EntityType.ENTITY_FIREPLACE then return end
+	if collider.Variant ~= 4 then return end
+	if player:HasInstantDeathCurse() then return end
+
+	TEdithMod.StopTEdithHops(player, 20, true, true, true)
+end)
