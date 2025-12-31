@@ -23,7 +23,7 @@ local data = mod.DataHolder.GetEntityData
 ---@field DropKey2Jump boolean
 ---@field TrainingMode boolean
 ---@field CustomStompDmgMult number
----@field DefensiveStompWindow number
+---@field DefensiveStompWindow integer
 ---@field CustomJumpButton Keyboard|integer
 ---@field SaltShakerSlot integer
 
@@ -301,7 +301,7 @@ local function UpdateImGuiData()
 		[EdithOptions.Sounds.SetStompSound] = (EdithData.StompSound - 1) or 0,
 		[EdithOptions.Sounds.SetStompVolume] = EdithData.StompVolume or 100,
 		[EdithOptions.Sounds.SetJumpCooldownSound] = (EdithData.JumpCooldownSound - 1) or 0,
-		[EdithOptions.Gameplay.DefensiveStompWindow] = EdithData.DefensiveStompWindow or 15,
+		[EdithOptions.Gameplay.DefensiveStompWindow] = EdithData.DefensiveStompWindow or 18,
 		[EdithOptions.Gameplay.SaltShakerSlot] = EdithData.SaltShakerSlot or 0,
 	}
 
@@ -387,7 +387,7 @@ local function ResetSaveData(isTainted)
 		EdithData.RGBSpeed = 0.005
 		EdithData.TargetLine = false
 		EdithData.JumpCooldownSound = 1
-		EdithData.DefensiveStompWindow = 15
+		EdithData.DefensiveStompWindow = 18
 		EdithData.SaltShakerSlot = 0
 	end
 
@@ -546,7 +546,7 @@ local function AddEdithOptions()
 		function(val)
 			EdithData.DefensiveStompWindow = val
 		end,
-	15, 5, 25)
+	18, 5, 25)
 
 	ImGui.AddElement(EdithGameplay, Separator.Gameplay.Salt_Shaker, ImGuiElement.SeparatorText, "Salt Shaker")
 	ImGui.AddCombobox(EdithGameplay, OptionGameplay.SaltShakerSlot, "Salt Shaker's slot", 
@@ -1098,7 +1098,7 @@ local function InitSaveData()
 	EdithData.RGBMode = EdithData.RGBMode or false
 	EdithData.RGBSpeed = EdithData.RGBSpeed or 0.5
 	EdithData.TargetLine = EdithData.TargetLine or false
-	EdithData.DefensiveStompWindow = EdithData.DefensiveStompWindow or 15
+	EdithData.DefensiveStompWindow = EdithData.DefensiveStompWindow or 18
 	EdithData.SaltShakerSlot = EdithData.SaltShakerSlot or 0 
 	
 	TEdithData.ArrowColor = TEdithData.ArrowColor or {Red = 1, Green = 0, Blue = 0}

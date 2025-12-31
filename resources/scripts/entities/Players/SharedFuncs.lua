@@ -54,7 +54,6 @@ local whiteListCostumes = {
     [CollectibleType.COLLECTIBLE_FATE] = true,
     [CollectibleType.COLLECTIBLE_BOOK_OF_SHADOWS] = true,
     [CollectibleType.COLLECTIBLE_GAMEKID] = true,
-    -- [CollectibleType.] = true,
 }
 
 local function OnAddCostume(_, itemconfig, player)
