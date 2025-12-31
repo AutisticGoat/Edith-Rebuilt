@@ -153,7 +153,6 @@ end
 ---@param jumpIntData InternalJumpData
 ---@param jumpParams EdithJumpStompParams
 function Edith.DefensiveStompManager(player, jumpIntData, jumpParams)
-
 	local config = Helpers.GetConfigData("EdithData")
 
 	if not config then return end
