@@ -211,7 +211,6 @@ function TEdith.HopDashMovementManager(player, hopParams)
 	local isHopVecZero = HopVec.X == 0 and HopVec.Y == 0
 	local isJumping = JumpLib:GetData(player).Jumping
 	local IsGrudge = helpers.IsGrudgeChallenge()
-	local charge = TEdith.GetHopDashCharge(player, false, false)
 	local chargeMult = (charge / 100)
 	local VelMult = IsGrudge and 1.2 or 1 
 	local speedBase = IsGrudge and 9 or 8
@@ -226,8 +225,8 @@ function TEdith.HopDashMovementManager(player, hopParams)
 	local smoothFactor = 0.225
 	local targetVel = (((HopVec * 2) * (speedBase + (player.MoveSpeed - 1))) * chargeMult) * VelMult
 	player.Velocity = player.Velocity + (targetVel - player.Velocity) * smoothFactor
-
-	hopParams.GrudgeDash = (IsGrudge and charge > 10 and not VecDir.VectorEquals(HopVec, Vector.Zero))
+	
+	hopParams.GrudgeDash = (IsGrudge and HopVec:Length() > 0)
 end
 
 ---@param player EntityPlayer
@@ -278,32 +277,6 @@ function TEdith.HopDashChargeManager(player, arrow)
 	if targetframecount > 1 and (not HopParams.IsHoping and not isJumping) and HopParams.HopCooldown == 0 then
 		TEdith.AddHopDashCharge(player, chargeAdd, 0.5)
 	end
-end
-
----@param ent Entity
----@param capsule1 Capsule
----@param capsule2 Capsule
-local function IsEntInTwoCapsules(ent, capsule1, capsule2)
-	local Capsule1Ents = Isaac.FindInCapsule(capsule1)
-	local Capsule2Ents = Isaac.FindInCapsule(capsule2)
-	local PtrHashEnt = GetPtrHash(ent)
-	local IsInsideCapsule1, IsInsideCapsule2 = false, false
-
-	for _, Entity in ipairs(Capsule1Ents) do
-		if PtrHashEnt == GetPtrHash(Entity) then
-			IsInsideCapsule1 = true
-			break
-		end
-	end
-
-	for _, Entity in ipairs(Capsule2Ents) do
-		if PtrHashEnt == GetPtrHash(Entity) then
-			IsInsideCapsule2 = true
-			break
-		end
-	end
-
-	return IsInsideCapsule1 and IsInsideCapsule2
 end
 
 ---Function used to trigger Tainted Edith and Burnt Hood's parry-jump
