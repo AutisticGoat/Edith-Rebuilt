@@ -28,7 +28,7 @@ mod:AddCallback(callbacks.OFFENSIVE_STOMP, function(_, player, params)
         player
     ):ToEffect() ---@cast water EntityEffect
 
-    water.CollisionDamage = (15 * birthrightMult) * chargePercent
+    water.CollisionDamage = (15 * birthrightMult.Damage) * chargePercent
     water.Size = water.Size * (2.5 * chargePercent)
     water.SpriteScale = water.SpriteScale * water.Size
     water:SetTimeout(math.ceil((150 * birthrightMult.Duration) * chargePercent))
