@@ -100,20 +100,12 @@ end
 ---@param jumpData JumpData
 function Edith.CustomDropBehavior(player, jumpData)
 	if not Player.IsEdith(player, false) then return end
-	local playerData = data(player)
-	playerData.ShouldDrop = playerData.ShouldDrop or false
-
-	if playerData.ShouldDrop == false then
-	---@diagnostic disable-next-line: undefined-field
-		player:SetActionHoldDrop(0)
-	end
-
-	if not jumpData.Jumping then playerData.ShouldDrop = false return end
+	local params = Edith.GetJumpStompParams(player)
 	if not Input.IsActionTriggered(ButtonAction.ACTION_DROP, player.ControllerIndex) then return end
-	if not (jumpData.Height > 10 and not JumpLib:IsFalling(player)) then return end
-	playerData.ShouldDrop = true
-	---@diagnostic disable-next-line: undefined-field
-	player:SetActionHoldDrop(119)
+
+	if params.Cooldown > 0 then
+		player:SetActionHoldDrop(119)
+	end
 end
 
 ---@param player EntityPlayer
