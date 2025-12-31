@@ -82,7 +82,9 @@ local function EdithTargetManagement(effect, player)
 	local anim = (Helpers.IsKeyStompPressed(player) or Edith.IsJumping(player) and params.Cooldown == 0) and "Blink" or "Idle" 
 	effect:GetSprite():Play(anim)
 
-	room:GetCamera():SetFocusPosition(interpolateVector2D(playerPos, effectPos, 0.6))
+	if RoomName ~= "Beast Room" then
+		room:GetCamera():SetFocusPosition(interpolateVector2D(playerPos, effectPos, 0.6))
+	end
 
 	if Helpers.IsVestigeChallenge() and JumpLib:GetData(player).Jumping then
 		effect.Velocity = effect.Velocity * 0.6
