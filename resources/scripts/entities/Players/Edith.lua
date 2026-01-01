@@ -162,7 +162,7 @@ end)
 ---@param npc EntityNPC
 local function OnNPCUpdate(_, npc)
 	if npc:IsBoss() then return end
-	if not effects.EntHasStatusEffect(npc, "Salted") then return end 
+	if not effects.EntHasStatusEffect(npc, "Salt") then return end 
 	if not data(npc).KilledByStomp then return end
 
 	return true

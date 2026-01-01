@@ -6,15 +6,25 @@ local StsEffects = modules.STATUS_EFFECTS
 local Helpers = modules.HELPERS
 local ModRNG = modules.RNG
 local SpicesMix = {}
+local data = mod.DataHolder.GetEntityData
+
+local Descriptions = {
+    [effects.SALTED] = "Slow and weakness, chance to destroy enemy's shots",
+    [effects.PEPPERED] = "Enemies sneezes every 2nd hit, leaving damaging creep",
+    [effects.GARLIC] = "The enemies retreat, scattered shots",
+    [effects.OREGANO] = "Slower enemies, slowing creep",
+    [effects.CUMIN] = "Erratic movement, damaging enemies stops them",
+    [effects.TURMERIC] = "Weaker enemies, infecting clouds on hit",
+    [effects.CINNAMON] = "Cosntant damage over time",
+    [effects.GINGER] = "More pushable enemies, infecting clouds on kill",
+}
 
 ---@param _ any
 ---@param RNG RNG
 ---@param player EntityPlayer
 function SpicesMix:OnSpicesMixUse(_, RNG, player)
     local data = StsEffects.GetRandomSpiceEffect(RNG)
-
-    RandCol = data.Color
-
+    local RandCol = data.Color
     local Puff = Isaac.Spawn(
         EntityType.ENTITY_EFFECT,
         EffectVariant.POOF02,
@@ -42,6 +52,8 @@ function SpicesMix:OnSpicesMixUse(_, RNG, player)
         StsEffects.SetStatusEffect(data.ID, enemy, data.Duration, player)
         ::continue::
     end
+
+    Game():GetHUD():ShowItemText(data.ID, Descriptions[data.ID])
 
     return true
 end 

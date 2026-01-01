@@ -8,15 +8,13 @@ local Helpers = require("resources.scripts.functions.Helpers")
 local Player  = require("resources.scripts.functions.Player")
 local data = mod.DataHolder.GetEntityData
 local StatusEffects = {}
-
--- All commented sprites will get done later
 local Effects = {
-    Salted = {
-        ID = "EDITH_REBUILT_SALTED",
+    Salt = {
+        ID = "EDITH_REBUILT_SALT",
         Sprite = Sprite("gfx/EdithRebuiltSalted.anm2", true),
         Color = Color(1, 1, 1, 1, 0.3, 0.3, 0.3)
     },
-    Peppered = {
+    Pepper = {
         ID = "EDITH_REBUILT_PEPPERED",
         Sprite = Sprite("gfx/EdithRebuiltPeppered.anm2", true),
         Color = Color(0.5, 0.5, 0.5)
@@ -64,15 +62,13 @@ local Effects = {
 }
 
 for _, Data in pairs(Effects) do
-    -- if Data.Sprite then
-        Data.Sprite:Play("Idle", true)
-    -- end
+    Data.Sprite:Play("Idle", true)
     SEL.RegisterStatusEffect(Data.ID, Data.Sprite, Data.Color)
 end
 
 local Flags = {
-    Salted = SEL.StatusFlag[Effects.Salted.ID],
-    Peppered = SEL.StatusFlag[Effects.Peppered.ID],
+    Salt = SEL.StatusFlag[Effects.Salt.ID],
+    Pepper = SEL.StatusFlag[Effects.Pepper.ID],
     Garlic = SEL.StatusFlag[Effects.Garlic.ID],
     Oregano = SEL.StatusFlag[Effects.Oregano.ID],
     Cumin = SEL.StatusFlag[Effects.Cumin.ID],
@@ -112,7 +108,7 @@ local Spices = {
     [effects.PEPPERED] = {
         ID = effects.PEPPERED,
         Duration = 120,
-        Color = Effects.Peppered.Color,
+        Color = Effects.Pepper.Color,
     },
     [effects.TURMERIC] = {
         ID = effects.TURMERIC,
@@ -217,8 +213,6 @@ local function OnCuminUpdate(npc)
         npc.Velocity = Vector.Zero
         data(npc).CuminStopCountdown = cuminCountdown - 1
     end
-
-    print(data(npc).CuminStopCountdown)
 end
 
 local baseRange = 6.5
@@ -326,11 +320,25 @@ local function OnDamagincTurmericEnemy(_, entity, amount, flags, source, Cooldow
     entity:TakeDamage(amount * 1.2, flags, source, Cooldown)
     dmgFlags.Turmeric = false
 
-    local rng = RNG(enums.Utils.Game:GetSeeds():GetStartSeed())
+    local rng = RNG(math.max(Random(), 1))
 
     for _, enemy in ipairs(Isaac.FindInRadius(entity.Position, 60, EntityPartition.ENEMY)) do
+        if GetPtrHash(entity) == GetPtrHash(enemy) then goto continue end
         if not Helpers.IsEnemy(enemy) then goto continue end
         if not ModRNG.RandomBoolean(rng, 0.35) then goto continue end
+
+        local Puff = Isaac.Spawn(
+            EntityType.ENTITY_EFFECT,
+            EffectVariant.POOF02,
+            2,
+            entity.Position,
+            Vector.Zero,
+            entity
+        )
+
+        Puff:GetSprite().PlaybackSpeed = ModRNG.RandomFloat(rng, 0.9, 1.1)
+
+        Puff.Color = Effects.Turmeric.Color
 
         StatusEffects.SetStatusEffect(effects.TURMERIC, enemy, 90, entity)
         ::continue::
@@ -366,7 +374,7 @@ local function OnKillingPepperEnemy(_, entity)
     local X = ModRNG.RandomFloat(RNG, 0.85, 1.15)
     local Y = ModRNG.RandomFloat(RNG, 0.85, 1.15)
 
-    Puff.Color = Effects.Peppered.Color
+    Puff.Color = Effects.Pepper.Color
     Puff.SpriteScale = Vector(X, Y)
 
     local Peppers = 10
@@ -380,12 +388,12 @@ end
 mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, OnKillingPepperEnemy)
 mod:AddCallback(PRE_NPC_KILL.ID, OnKillingPepperEnemy)
 
-local function OnDamagincTurmericEnemy(_, entity)
+local function OnDamaginCuminEnemy(_, entity)
     if not StatusEffects.EntHasStatusEffect(entity, effects.CUMIN) then return end
     if dmgFlags.Cumin == true then return end
     data(entity).CuminStopCountdown = 5
 end
-mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, OnDamagincTurmericEnemy)
+mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, OnDamaginCuminEnemy)
 
 local function OnDamagincGingerEnemy(_, entity, amount, flags, source, Cooldown)
     if not StatusEffects.EntHasStatusEffect(entity, effects.GINGER) then return end
@@ -423,7 +431,7 @@ mod:AddCallback(ModCallbacks.MC_POST_PROJECTILE_INIT, StatusProjInit)
 
 mod:AddCallback(SEL.Callbacks.ID.PRE_REMOVE_ENTITY_STATUS_EFFECT, function(_, entity)
     data(entity).SaltType = nil
-end, Flags.Salted)
+end, Flags.Salt)
 
 local CinderCreeps = 10
 local ndegrees = 360/CinderCreeps

@@ -86,8 +86,6 @@ end)
 mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG, function(_, player, _, flags)
     local roomType = game:GetRoom():GetType()
 
-    print(flags)
-
     if not Player.IsAnyEdith(player) then return end
 	if Maths.HasBitFlags(flags, DamageFlag.DAMAGE_ACID) or ((roomType ~= RoomType.ROOM_SACRIFICE or roomType ~= RoomType.ROOM_DEVIL) and Maths.HasBitFlags(flags, DamageFlag.DAMAGE_SPIKES)) then return false end
 end)
@@ -158,8 +156,5 @@ end)
 mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_GRID_COLLISION, function(_, player, _, grid)
 	if not Player.IsAnyEdith(player) then return end
     if grid:GetType() ~= GridEntityType.GRID_ROCK_SPIKED then return end
-    print("colliding with edith")
-
 	return true
-	-- print()
 end)

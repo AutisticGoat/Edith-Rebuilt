@@ -179,15 +179,15 @@ EdithRebuilt.Enums = {
 	},
 	---@enum EdithStatusEffects
 	EdithStatusEffects = {
-		SALTED = "Salted",
-		CINDER = "Cinder",
+		SALTED = "Salt",
 		GARLIC = "Garlic",
 		OREGANO = "Oregano",
 		CUMIN = "Cumin",
 		TURMERIC = "Turmeric",
 		CINNAMON = "Cinnamon",
 		GINGER = "Ginger",
-		PEPPERED = "Peppered",
+		PEPPERED = "Pepper",
+		CINDER = "Cinder",
 		HYDRARGYRUM_CURSE = "HydrargyrumCurse"
 	},
 	Tables = {
