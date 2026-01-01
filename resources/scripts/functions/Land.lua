@@ -324,7 +324,6 @@ local function EntityInteractHandler(ent, parent, knockback)
 	end
 end
 
-
 local function VestigeUnlockManager()
 	local pgd = Isaac.GetPersistentGameData()
 	local VestigeAch = enums.Achievements.ACHIEVEMENT_VESTIGE
