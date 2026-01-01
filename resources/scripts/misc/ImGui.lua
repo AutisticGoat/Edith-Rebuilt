@@ -942,6 +942,45 @@ local function AddChangelogs()
 - Added T.Edith's multishot parry synergy
 -- Works exactly the same as Edith's multishot stomp synergy
 	]], true)
+	ImGui.AddTab(Menu.TabBars.Changelog, "EdithRebuilt_v1.6.0", "v1.6.0")
+	ImGui.AddText("EdithRebuilt_v1.6.0", 
+	[[
+- Fixed T.Edith's arrow's grudge design changing its rotation
+- Fixed T. Edith's grudge's dash not dealing damage consistently
+- Fixed Edith's stomp neptunus synergy not working at all
+- Fixed Tainted Edith not interacting correctly with white fireplaces
+- Potentially fixed Edith's arrow moving the camera in Beast fight
+- Potentially fixed T. Edith's grudge collision with enemies being weird
+- Added more checks to T.Edith's Stop hops function
+- Added Edith's special land radius for Slots and Pickups
+- Added T. Edith's special land radius for Slots and Pickups
+- Added Lost contact stomp synergy
+- Added Bird's Eye/Ghost Pepper's parry/stomp synergy
+- Added Little Horn's parry/stomp synergy
+- Improved Edith's flight interaction
+- Improved costumes system
+- Improved Edith's stomp grid destruction
+- Increased Edith's defensive stomp frames window (15 > 18)
+- Salted enemy's death effect nullification will only happen when killing with a stomp
+- Salted enemy's death effect nullification will only happen with non-boss enemies
+- Now Edith will be less pushed by water currents
+- Now Edith will only swap active slots when jumping
+- Now Edith can drop trinkets when pressing the drop button in jump cooldown
+- Now Tainted Edith can destroy fireplaces in Grudge challenge
+- Now T. Edith's grudge dash screenshake can be disabled with screenshake option form ImGui Menu
+- Now T.Edith parry will apply jump recoil to enemies
+- Now Edith/T.Edith can destroy movable TNT
+- Spices Mix changes: 
+-- Now Spices Mix has a cooldown (5 seconds)
+-- Added a flavor text for everytime the Spices Mix is used
+--- This flavor text has the name of the spice and its effect in enemies
+- Tainted Edith mini-rework:
+-- Now Cinder enemies will receive x1.2 times more damage from parries
+-- Removed Cinder creep applying cinder status effect
+-- T. Edith won't spawn cinder creep on Hop land
+-- T. Edith hop land now applies cinder status effect (max 4 seconds, depends on HopDash move charge)
+-- Imprecise Parry cinder status effects duration has a max duration of 12 seconds
+	]], true)
 end
 
 -- ---@param enabled boolean

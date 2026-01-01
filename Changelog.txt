@@ -117,3 +117,9 @@ v1.5.1
 - Included T.Edith's jupiter Synergy's  script
 - Added T.Edith's multishot parry synergy
 -- Works exactly the same as Edith's multishot stomp synergy
+
+v1.6.0
+- Added Edith's lost contact stomp synergy
+- Added more checks to T.Edith's Stop hops function
+- Salted enemy's death effect nullification will only happen when killing with a stomp
+- Salted enemy's death effect nullification will only happen with non-boss enemies
