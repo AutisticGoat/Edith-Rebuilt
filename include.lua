@@ -92,7 +92,8 @@ local includeFiles = {
 	stmpSyn .. "HolyLight",
 	stmpSyn .. "Jupiter",
 	stmpSyn .. "LostContact",
-
+	stmpSyn .. "LittleHorn",
+	stmpSyn .. "Peppers",
 
 	parrySyn .. "blackPowder",
 	parrySyn .. "brimstone",
@@ -115,6 +116,7 @@ local includeFiles = {
 	parrySyn .. "OcularRift",
 	parrySyn .. "HolyLight",
 	parrySyn .. "Jupiter",
+	parrySyn .. "LittleHorn",
 }
 
 for _, v in ipairs(includeFiles) do
