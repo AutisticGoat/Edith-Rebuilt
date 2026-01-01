@@ -1,5 +1,5 @@
 -- Script taken from Isaac Blue Prints (https://isaacblueprints.com/tutorials/concepts/entity_data/)
-local mod = EdithRebuilt
+local mod = EdithRebuilt --[[@as ModReference]]
 local dataHolder = {}
 
 -- We will store the data within its own table in the data holder for easy access
@@ -41,7 +41,7 @@ local function ClearEntityData(_, ent)
 end
 
 for _, callback in ipairs(ClearDataCallbacks) do
-    mod:AddCallback(callback, ClearEntityData)
+    mod:AddPriorityCallback(callback, CallbackPriority.IMPORTANT, ClearEntityData)
 end
 
 mod:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT, function()
