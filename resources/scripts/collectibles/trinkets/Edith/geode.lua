@@ -20,7 +20,7 @@ function Geode:SpawnOnKill(npc, source)
 
 	local rng = player:GetTrinketRNG(trinkets.TRINKET_GEODE)
 
-	if not ModRNG.RandomBoolean(rng, 0.025 * mod.exp(player:GetTrinketMultiplier(trinkets.TRINKET_GEODE), 1, 1.75)) then return end
+	if not ModRNG.RandomBoolean(rng, 0.025 * Maths.exp(player:GetTrinketMultiplier(trinkets.TRINKET_GEODE), 1, 1.75)) then return end
 
 	Isaac.Spawn(
 		EntityType.ENTITY_PICKUP,
