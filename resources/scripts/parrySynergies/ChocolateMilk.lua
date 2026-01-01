@@ -10,7 +10,7 @@ local data = mod.DataHolder.GetEntityData
 mod:AddCallback(callbacks.PERFECT_PARRY, function(_, player, _, params)
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_CHOCOLATE_MILK) then return end
 
-    local ChocoMult = data(player).ParryChocoMult
+    local ChocoMult = data(player).ParryChocoMult or 0
 
     if ChocoMult > 0 then
         params.ParryDamage = params.ParryDamage * (2 * ChocoMult)

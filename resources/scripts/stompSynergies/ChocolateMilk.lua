@@ -8,9 +8,13 @@ mod:AddCallback(callbacks.OFFENSIVE_STOMP, function(_, player, params)
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_CHOCOLATE_MILK) then return end
 
     local baseMult = Player.PlayerHasBirthright(player) and 2.5 or 2
-    local ChocoMult = data(player).ChocoMult
+    local ChocoMult = data(player).ChocoMult or 0
 
-    params.Damage = params.Damage * (baseMult * ChocoMult)
+    if ChocoMult > 0 then
+        params.Damage = params.Damage * (baseMult * ChocoMult)
+    end
+
+    data(player).StompChocoMult = 0    
 end)
 
 ---@param player EntityPlayer
@@ -23,5 +27,5 @@ mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
     if not weapon then return end
     local chargePercent = weapon:GetCharge() / weapon:GetMaxCharge()
 
-    data(player).ChocoMult = chargePercent
+    data(player).StompChocoMult = chargePercent
 end)
