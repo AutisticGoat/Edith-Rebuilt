@@ -138,7 +138,6 @@ mod:AddCallback(ModCallbacks.MC_USE_ITEM, function(_, ID, _, player)
     player:AddNullCostume(Costume)
 end)
 
-
 mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, function()
 	local pool = game:GetItemPool()
 
