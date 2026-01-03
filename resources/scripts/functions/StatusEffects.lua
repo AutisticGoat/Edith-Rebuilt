@@ -450,4 +450,11 @@ local function OnCinderParry(_, player, ent)
 end
 mod:AddCallback(enums.Callbacks.PERFECT_PARRY, OnCinderParry)
 
+
+---@param npc EntityNPC
+mod:AddCallback(ModCallbacks.MC_POST_NPC_DEATH, function(_, npc)
+    if not StatusEffects.EntHasStatusEffect(npc, effects.SALTED) then return end
+    Helpers.SpawnSaltGib(npc, 8, 3, nil, true)
+end)
+
 return StatusEffects
