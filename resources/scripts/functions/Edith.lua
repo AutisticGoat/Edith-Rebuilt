@@ -8,7 +8,6 @@ local misc = enums.Misc
 local tables = enums.Tables
 local JumpTags = tables.JumpTags
 local jumpFlags = tables.JumpFlags
-local challenges = enums.Challenge
 local Player = require("resources.scripts.functions.Player")
 local Math = require("resources.scripts.functions.Maths")
 local VecDir = require("resources.scripts.functions.VecDir")
@@ -264,6 +263,10 @@ function Edith.TargetMovementManager(player, target, isMoving)
 		target.Velocity = target.Velocity + Vector(VectorX, VectorY):Normalized():Resized(4)
 	end
     target:MultiplyFriction(friction or 0.8)
+
+	if Player.HasTanukiStatueEffect(player) then
+		target.Velocity = target.Velocity * 0.2
+	end
 end 
 
 ---@param player EntityPlayer
@@ -287,7 +290,8 @@ function Edith.StompDamageManager(player, params)
         Birthtight = Player.PlayerHasBirthright(player) and 1.2 or 1,
         BloodClot = player:HasCollectible(CollectibleType.COLLECTIBLE_BLOOD_CLOT) and 1.1 or 1,
         Flight = Player.CanFly and 1.25 or 1,
-        RocketLaunch = params.RocketLaunch and 1.2 or 1
+        RocketLaunch = params.RocketLaunch and 1.2 or 1,
+		TanukiStatue = Player.HasTanukiStatueEffect(player) and 1.5 or 1
     }
 	local playerDamage = player.Damage
 	local coalBonus = params.CoalBonus or 0
@@ -299,7 +303,8 @@ function Edith.StompDamageManager(player, params)
         mults.Birthtight * 
         mults.BloodClot * 
         mults.Flight * 
-        mults.RocketLaunch
+        mults.RocketLaunch * 
+		mults.TanukiStatue
     ) + coalBonus
 
 	local damageFormula = math.max(Math.Round(RawFormula, 2), 1)

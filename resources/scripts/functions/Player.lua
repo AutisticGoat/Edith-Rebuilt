@@ -145,4 +145,11 @@ function player.IsJudasWithBirthright(p)
 	return p:GetPlayerType() == PlayerType.PLAYER_JUDAS and player.PlayerHasBirthright(p)
 end
 
+---@param p EntityPlayer
+---@return boolean
+function player.HasTanukiStatueEffect(p)
+---@diagnostic disable-next-line: undefined-field
+	return p:GetGnawedLeafTimer() >= 60
+end
+
 return player
