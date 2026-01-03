@@ -1,6 +1,5 @@
 local mod = EdithRebuilt
 local callbacks = mod.Enums.Callbacks
-local data = mod.DataHolder.GetEntityData
 
 ---@param player EntityPlayer
 mod:AddCallback(callbacks.OFFENSIVE_STOMP, function(_, player)
