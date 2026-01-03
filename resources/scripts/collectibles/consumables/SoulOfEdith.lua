@@ -6,7 +6,10 @@ local utils = enums.Utils
 local sfx = utils.SFX
 local rng = utils.RNG
 local jumpFlags = enums.Tables.JumpFlags
-local Helpers = mod.Modules.HELPERS
+local modules = mod.Modules
+local Helpers = modules.HELPERS
+local Land = modules.LAND
+local ModRNG = modules.RNG
 local data = mod.DataHolder.GetEntityData
 local damageBase = 13.5
 local SoulOfEdith = {}
@@ -57,11 +60,11 @@ function SoulOfEdith:ParryJump(player)
 
 	for _, ent in pairs(Isaac.FindInCapsule(Capsule(player.Position, Vector.One, 0, 50), EntityPartition.ENEMY)) do
 		ent:TakeDamage(rawFormula, 0, EntityRef(player), 0)
-		mod.TriggerPush(ent, player, 20, 3, true)
+		Helpers.TriggerPush(ent, player, 20)
 	end
     
     playerData.IsSoulOfEdithJump = true
-	mod.LandFeedbackManager(player, SoundPick, Color(1, 1, 1, 0))
+	Land.LandFeedbackManager(player, SoundPick, Color(1, 1, 1, 0))
     playerData.IsSoulOfEdithJump = false
 
 	local tear 
@@ -69,10 +72,10 @@ function SoulOfEdith:ParryJump(player)
         tear = Isaac.Spawn(EntityType.ENTITY_TEAR, TearVariant.ROCK, 0, Isaac.GetRandomPosition(), Vector.Zero, player):ToTear()
 		if not tear then return end
 		tear.CollisionDamage = tear.CollisionDamage * 1.2
-        tear.Height = -600 * mod.RandomFloat(rng, 0.9, 1.1)
-		tear.FallingSpeed = 4 * mod.RandomFloat(rng, 0.6, 1.8)
-        tear.FallingAcceleration = 2.5 * mod.RandomFloat(rng, 0.6, 1.8)
-		tear:AddTearFlags(TearFlags.TEAR_SPECTRAL)
+        tear.Height = -600 * ModRNG.RandomFloat(rng, 0.9, 1.1)
+		tear.FallingSpeed = 4 * ModRNG.RandomFloat(rng, 0.6, 1.8)
+        tear.FallingAcceleration = 2.5 * ModRNG.RandomFloat(rng, 0.6, 1.8)
+		tear:AddTearFlags(TearFlags.TEAR_SPECTRAL | TearFlags.TEAR_PIERCING)
 		Helpers.ForceSaltTear(tear, false)
 		data(tear).IsSoulOfEdithTear = true
     end
