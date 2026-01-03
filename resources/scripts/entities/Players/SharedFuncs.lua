@@ -144,7 +144,6 @@ mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, function()
 
 	for _, player in ipairs(PlayerManager.GetPlayers()) do
 		if Player.IsAnyEdith(player) then		
-			pool:RemoveCollectible(CollectibleType.COLLECTIBLE_GNAWED_LEAF)
 			pool:RemoveCollectible(CollectibleType.COLLECTIBLE_NIGHT_LIGHT)
 			pool:RemoveCollectible(CollectibleType.COLLECTIBLE_MONTEZUMAS_REVENGE)
 		end
