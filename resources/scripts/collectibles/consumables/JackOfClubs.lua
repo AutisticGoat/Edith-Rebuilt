@@ -15,7 +15,7 @@ function JackOfClubs:OnJackOfClubsUse(_, player)
     for _, enemy in pairs(Helpers.GetEnemies()) do
         enemyPos = enemy.Position
 
-        if not ModRNG.RandomBoolean(rng, 0.4) then goto Break end
+        if not ModRNG.RandomBoolean(rng, 0.6) then goto Break end
         game:BombExplosionEffects(
             enemyPos,
             100,
