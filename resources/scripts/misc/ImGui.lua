@@ -981,6 +981,22 @@ local function AddChangelogs()
 -- T. Edith hop land now applies cinder status effect (max 4 seconds, depends on HopDash move charge)
 -- Imprecise Parry cinder status effects duration has a max duration of 12 seconds
 	]], true)
+	ImGui.AddTab(Menu.TabBars.Changelog, "EdithRebuilt_v1.6.1", "v1.6.1")
+	ImGui.AddText("EdithRebuilt_v1.6.1", 
+	[[
+- Fixed Geode not triggering its killing enemy effect
+- Fixed Soul of Edith not working at all
+- Replaced Divine Wrath's sprite
+- Now salted enemies drop salt gibs on death
+- Now Mod's data holder's clear data function should run earlier
+- Improved Chocolate Milk stomp/parry synergy's scripts
+- Improved Salt Rocks' gamefeel use
+- Increased jack of clubs' explosing chance (40% > 60%)
+- Re-added Gnawed Leaf to pools when playing with Edith
+- Added Edith's Gnawed leaf interaction
+-- Stomp's damage will get a x1.5 damage mult
+-- Edith's Damage will be much slower than usual
+	]], true)
 end
 
 -- ---@param enabled boolean

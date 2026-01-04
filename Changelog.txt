@@ -119,7 +119,53 @@ v1.5.1
 -- Works exactly the same as Edith's multishot stomp synergy
 
 v1.6.0
-- Added Edith's lost contact stomp synergy
+- Fixed T.Edith's arrow's grudge design changing its rotation
+- Fixed T. Edith's grudge's dash not dealing damage consistently
+- Fixed Edith's stomp neptunus synergy not working at all
+- Fixed Tainted Edith not interacting correctly with white fireplaces
+- Potentially fixed Edith's arrow moving the camera in Beast fight
+- Potentially fixed T. Edith's grudge collision with enemies being weird
 - Added more checks to T.Edith's Stop hops function
+- Added Edith's special land radius for Slots and Pickups
+- Added T. Edith's special land radius for Slots and Pickups
+- Added Lost contact stomp synergy
+- Added Bird's Eye/Ghost Pepper's parry/stomp synergy
+- Added Little Horn's parry/stomp synergy
+- Improved Edith's flight interaction
+- Improved costumes system
+- Improved Edith's stomp grid destruction
+- Increased Edith's defensive stomp frames window (15 > 18)
 - Salted enemy's death effect nullification will only happen when killing with a stomp
 - Salted enemy's death effect nullification will only happen with non-boss enemies
+- Now Edith will be less pushed by water currents
+- Now Edith will only swap active slots when jumping
+- Now Edith can drop trinkets when pressing the drop button in jump cooldown
+- Now Tainted Edith can destroy fireplaces in Grudge challenge
+- Now T. Edith's grudge dash screenshake can be disabled with screenshake option form ImGui Menu
+- Now T.Edith parry will apply jump recoil to enemies
+- Now Edith/T.Edith can destroy movable TNT
+- Spices Mix changes: 
+-- Now Spices Mix has a cooldown (5 seconds)
+-- Added a flavor text for everytime the Spices Mix is used
+--- This flavor text has the name of the spice and its effect in enemies
+- Tainted Edith mini-rework:
+-- Now Cinder enemies will receive x1.2 times more damage from parries
+-- Removed Cinder creep applying cinder status effect
+-- T. Edith won't spawn cinder creep on Hop land
+-- T. Edith hop land now applies cinder status effect (max 4 seconds, depends on HopDash move charge)
+-- Imprecise Parry cinder status effects duration has a max duration of 12 seconds
+
+v1.6.1
+- Fixed Geode not triggering its killing enemy effect
+- Fixed Soul of Edith not working at all
+- Replaced Divine Wrath's sprite
+- Now salted enemies drop salt gibs on death
+- Now Mod's data holder's clear data function should run earlier
+- Improved Chocolate Milk stomp/parry synergy's scripts
+- Improved Salt Rocks' gamefeel use
+- Increased jack of clubs' explosing chance (40% > 60%)
+- Re-added Gnawed Leaf to pools when playing with Edith
+- Added Edith's Gnawed leaf interaction
+-- Stomp's damage will get a x1.5 damage mult
+-- Edith's Damage will be much slower than usual
+
