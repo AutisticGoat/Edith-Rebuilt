@@ -221,6 +221,7 @@ EdithRebuilt.Enums = {
 			[8] = "_enby",
 			[9] = "_Venezuela",
 			[10] = "_Chile",
+			[11] = "_Mexico",
 		},
 		TargetLineColorValues = {
 			[2] = {R = 245/255, G = 169/255, B = 184/255},
@@ -231,7 +232,8 @@ EdithRebuilt.Enums = {
 			[7] = {R = 128/255, G = 0, B = 128/255},
 			[8] = {R = 154/255, G = 89/255, B = 207/255},
 			[9] = {R = 0, G = 36/255, B = 125/255},
-			[10] = {R = 213/255, G = 43/255, B = 30/255}
+			[10] = {R = 213/255, G = 43/255, B = 30/255},
+			[11] = {R = 0, G = 104/255, B = 71/255},
 		},
 		FrameLimits = {
 			["Idle"] = 12,
@@ -328,6 +330,7 @@ EdithRebuilt.Enums = {
 				"Enby",
 				"Venezuela",
 				"Chile",
+				"Mexico",
 			},
 			StompSound = {
 				"Stone", 
