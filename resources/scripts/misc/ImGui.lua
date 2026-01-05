@@ -997,6 +997,17 @@ local function AddChangelogs()
 -- Stomp's damage will get a x1.5 damage mult
 -- Edith's Damage will be much slower than usual
 	]], true)
+	ImGui.AddTab(Menu.TabBars.Changelog, "EdithRebuilt_v1.6.2", "v1.6.2")
+	ImGui.AddText("EdithRebuilt_v1.6.2",
+	[[
+- Fixed Edith being able to destroy doors
+- Fixed T. Edith's arrow not having its grudge design in Grudge challenge
+- Potentially fixed an error when imprecise parrying a troll bomb
+- Added an extra check to slot land manger function
+- Added Effigy EID description
+- Added Chunk of basalt EID description
+- Added Mexico's target design
+	]], true)
 end
 
 -- ---@param enabled boolean
