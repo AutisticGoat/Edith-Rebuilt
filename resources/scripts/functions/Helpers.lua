@@ -58,7 +58,7 @@ end
 ---@param entity Entity
 ---@param radius number
 ---@param breakmirror boolean
-function Helpers.DestroyGrid(entity, radius, breakmirror)
+function Helpers.DestroyGrid(entity, radius)
     local room = game:GetRoom()
     radius = radius or 10
     for i = 0, (room:GetGridSize()) do
@@ -66,17 +66,9 @@ function Helpers.DestroyGrid(entity, radius, breakmirror)
 
 		if not grid then goto continue end
 		if (entity.Position - grid.Position):Length() > radius then goto continue end
+		if grid:GetType() == GridEntityType.GRID_DOOR then goto continue end
 
-		if (grid.Desc.Type ~= GridEntityType.GRID_DOOR) then
-			grid:Destroy()
-		else
-			if grid.Desc.Variant ~= 1 or grid.Desc.State ~= 1 then
-				grid:Destroy()
-			end
-			if breakmirror then 
-				grid:Destroy() 
-			end
-		end
+		grid:Destroy()
 
 		::continue::
     end
