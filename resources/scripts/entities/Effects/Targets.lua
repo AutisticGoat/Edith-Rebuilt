@@ -169,7 +169,7 @@ local function TaintedEdithArrowRender(effect, player, saveData)
 	effectData.RGBState = effectData.RGBState or 0
 	effect.Visible = effect.FrameCount > 1
 
-	if saveData.ArrowDesign ~= 2 then
+	if saveData.ArrowDesign ~= 2 and Helpers.IsGrudgeChallenge() == false then
 		effect:GetSprite().Rotation = TEdith.GetHopParryParams(player).HopDirection:GetAngleDegrees() 
 	end
 
@@ -215,6 +215,12 @@ function mod:Mierda(effect)
 	local MenuSprite = isTarget and Helpers.GetConfigData("EdithData").TargetDesign or Helpers.GetConfigData("TEdithData").ArrowDesign
 	local TargetTable = isTarget and tables.TargetSuffix or tables.ArrowSuffix
 	local path = isTarget and misc.TargetPath or misc.ArrowPath
-	effect:GetSprite():ReplaceSpritesheet(0, path .. Helpers.When(MenuSprite, TargetTable, "") .. ".png", true)
+	local design = Helpers.When(MenuSprite, TargetTable, "")
+
+	if not isTarget and Helpers.IsGrudgeChallenge() then
+		design = "_grudge"
+	end
+
+	effect:GetSprite():ReplaceSpritesheet(0, path .. design .. ".png", true)
 end
 mod:AddCallback(enums.Callbacks.TARGET_SPRITE_CHANGE, mod.Mierda)
