@@ -11,7 +11,6 @@ local Helpers = modules.HELPERS
 local Creeps = modules.CREEPS
 local Maths = modules.MATHS
 local effects = enums.EdithStatusEffects
-local SaltedFlag = StatusEffectLibrary.StatusFlag.EDITH_REBUILT_SALTED
 local SaltHeart = {}
 
 ---@param entity Entity
