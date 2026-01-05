@@ -115,7 +115,19 @@ local Descs = {
                 Name = "",
                 Desc = "On use:# Spawn 2 rock rings around Isaac# Shoot 8-12 arched fire rock tears in random directions"
             }
-        }
+        },
+        [Collectibles.COLLECTIBLE_EFFIGY] = { 
+            ["en_us"] = {
+                Name = "",
+                Desc = "On use:# Isaac will do a high jump and a target will appear below him#Once Isaac starts falling, the target will move to Isaac's nearest enemy#Landing will damage the enemy and push it"
+            }
+        },
+        [Collectibles.COLLECTIBLE_CHUNK_OF_BASALT] = { 
+            ["en_us"] = {
+                Name = "",
+                Desc = "Press the Drop button ({{ButtonRT}}) while moving to perform a Dash#If Isaac collides with an enemy while dashing: #{{Damage}} The enemy will be damaged#The enemy will be pushed#If the enemy is killed by the dash, it will shoot 5-8 basalt tears in random directions"
+            }
+        },
     },
     Trinkets = {
         [Trinkets.TRINKET_RUMBLING_PEBBLE] = {
