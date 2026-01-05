@@ -224,6 +224,9 @@ end
 local function SlotLandManager(parent, ent)
 	local var = ent.Variant
 	local slot = ent:ToSlot() ---@cast slot EntitySlot
+	
+	if not slot then return end
+	
 	local TriggerDamageSlots = {
 		[SlotVariant.BLOOD_DONATION_MACHINE] = true,
 		[SlotVariant.DEVIL_BEGGAR] = true,
