@@ -194,6 +194,9 @@ end
 local function PickupLandHandler(parent, ent)
 	local var = ent.Variant
 	local pickup = ent:ToPickup() ---@cast pickup EntityPickup
+
+	if not pickup then return end
+
 	local isFlavorTextPickup = Helpers.When(var, tables.BlacklistedPickupVariants, false)
 	local IsLuckyPenny = var == PickupVariant.PICKUP_COIN and ent.SubType == CoinSubType.COIN_LUCKYPENNY
 	local room = game:GetRoom()
@@ -408,7 +411,7 @@ function Land.EdithStomp(parent, params, breakGrid)
 	end
 
 	if breakGrid then
-		Helpers.DestroyGrid(parent, params.Radius, false)
+		Helpers.DestroyGrid(parent, params.Radius)
 	end
 end
 
@@ -506,7 +509,6 @@ function Land.LandFeedbackManager(player, soundTable, GibColor, IsParryLand)
 	local IsEdithsHood = data(player).HoodLand
 	local IsMortis = Helpers.IsLJMortis()
 	local isEdithJump = Player.IsEdith(player, false) or IsSoulOfEdith or IsEdithsHood
-	local isVestige = Helpers.IsVestigeChallenge()
 
 	if isEdithJump then
 		local isRocketLaunchStomp = data(player).RocketLaunch

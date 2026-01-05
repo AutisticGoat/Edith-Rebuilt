@@ -57,7 +57,6 @@ end
 ---Helper grid destroyer function
 ---@param entity Entity
 ---@param radius number
----@param breakmirror boolean
 function Helpers.DestroyGrid(entity, radius)
     local room = game:GetRoom()
     radius = radius or 10
