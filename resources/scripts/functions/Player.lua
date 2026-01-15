@@ -56,9 +56,16 @@ function player.ManageEdithWeapons(player)
 	local weapon = player:GetWeapon(1)
 
 	if not weapon then return end
-	if not Helpers.When(weapon:GetWeaponType(), enums.Tables.OverrideWeapons, false) then return end
+
+	local weaponType = weapon:GetWeaponType()
+
+	if not Helpers.When(weaponType, enums.Tables.OverrideWeapons, false) then return end
+
 	local newWeapon = Isaac.CreateWeapon(WeaponType.WEAPON_TEARS, player)
 	Isaac.DestroyWeapon(weapon)
+
+	if weaponType == WeaponType.WEAPON_LUDOVICO_TECHNIQUE then return end
+
 	player:EnableWeaponType(WeaponType.WEAPON_TEARS, true)
 	player:SetWeapon(newWeapon, 1)	
 end

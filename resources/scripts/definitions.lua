@@ -204,7 +204,8 @@ EdithRebuilt.Enums = {
 			[WeaponType.WEAPON_BOMBS] = true,
 			[WeaponType.WEAPON_ROCKETS] = true,
 			[WeaponType.WEAPON_TECH_X] = true,
-			[WeaponType.WEAPON_SPIRIT_SWORD] = true
+			[WeaponType.WEAPON_SPIRIT_SWORD] = true,
+			[WeaponType.WEAPON_LUDOVICO_TECHNIQUE] = true,
 		},
 		ArrowSuffix = {
 			[1] = "_arrow",

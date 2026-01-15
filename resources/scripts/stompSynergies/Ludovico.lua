@@ -15,6 +15,11 @@ local function SpawnLudoTear(player)
 
     local tearData = data(tear)
     tear:AddTearFlags(player.TearFlags | TearFlags.TEAR_BOUNCE | TearFlags.TEAR_BOUNCE)
+
+    if player:GetPlayerType() == enums.PlayerType.PLAYER_EDITH then
+        helpers.ForceSaltTear(tear, false)
+    end
+
     tearData.FakeLudo = true
     playerData.LudoTear = tear
 end
