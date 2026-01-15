@@ -68,7 +68,7 @@ end
 ---@param velocidad number
 ---@return integer
 function Edith.GetStompCooldown(velocidad)
-	return math.ceil(18 + (velocidad - 1) * -10)
+	return math.ceil(15 + (velocidad - 1) * -10)
 end
 
 ---@param player EntityPlayer
