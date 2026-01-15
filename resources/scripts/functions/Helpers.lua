@@ -176,10 +176,8 @@ end
 ---@param pusher Entity
 ---@param strength number
 function Helpers.TriggerPush(pushed, pusher, strength)
-	-- local PushFactor = Helpers.GetPushFactor(pushed)
-	local dir = ((pusher.Position - pushed.Position) * -1):Resized(strength)-- * PushFactor
+	local dir = ((pusher.Position - pushed.Position) * -1):Resized(strength)
 	pushed.Velocity = dir
-	-- pushed:AddKnockback(EntityRef(pusher), dir, 2, false)
 end
 
 ---Changes `Entity` velocity so now it goes to `Target`'s Position, `strenght` determines how fast it'll go
