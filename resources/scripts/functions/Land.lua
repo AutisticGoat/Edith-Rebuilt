@@ -729,7 +729,7 @@ local function PerfectParryManager(player, ent, HopParams, IsTaintedEdith)
 	local tear = ent:ToTear()
 	local shouldTriggerFireJets = IsTaintedEdith and hasBirthright or Player.IsJudasWithBirthright(player)
 
-	local CinderMult = StatusEffect.EntHasStatusEffect(ent, "Cinder") and 1.2 or 1
+	local CinderMult = StatusEffect.EntHasStatusEffect(ent, "Cinder") and 1.25 or 1
 
 	Isaac.RunCallback(enums.Callbacks.PERFECT_PARRY, player, ent, HopParams)
 
