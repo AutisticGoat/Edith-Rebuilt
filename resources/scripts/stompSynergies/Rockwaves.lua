@@ -5,18 +5,19 @@ local callbacks = mod.Enums.Callbacks
 function mod:RockStomp(player)
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_TERRA) then return end
 	local hasBirthright = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT)
-	local totalrocks = hasBirthright and 8 or 6
 	local totalrings = hasBirthright and 2 or 1
-	local shockwaveDamage = (hasBirthright and player.Damage * 1.4 or player.Damage) / 2
+	local damageMult = hasBirthright and 1.5 or 1.25
+	local shockwaveDamage = (player.Damage * damageMult) / 2
 
 	for ring = 1, totalrings do
-		local dist = ring == 1 and 40 or 20
-		for rocks = 1, totalrocks do
+		local totalRocks = ring == 1 and 6 or 12
+		local dist = ring == 1 and 40 or 70
+		for rocks = 1, totalRocks do
 			CustomShockwaveAPI:SpawnCustomCrackwave(
 				player.Position, -- Position
 				player, -- Spawner
 				dist, -- Steps
-				rocks * (360 / totalrocks), -- Angle
+				rocks * (360 / totalRocks), -- Angle
 				1, -- Delay
 				ring, -- Limit
 				shockwaveDamage -- Damage
