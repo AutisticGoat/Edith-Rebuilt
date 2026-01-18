@@ -177,3 +177,14 @@ v1.6.2
 - Added Effigy EID description
 - Added Chunk of basalt EID description
 - Added Mexico's target design
+
+v1.6.3
+- Reduced Edith's jump base cooldown frames (18 > 15)
+- Tweaked Edith's stomp cooldown manager function
+-- Now cooldown should be reduced less on high movement speed (for reference, 2.0 speed sets cooldown to 8 frames)
+- Added Ludovico stomp synergy
+- Fixed Terra's stomp synergy's shockwaves destroying every enemy 
+- Tweaked Terra's stomp synergy
+-- Increased shockwaves' damage
+-- Increased distance between shockwave rings
+- Increased Cindered enemy received damage from parry mult (x1.2 > x1.25)

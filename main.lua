@@ -7,7 +7,7 @@ EdithRebuilt.SaveManager = require("resources.scripts.libs.EdithRebuiltSaveManag
 EdithRebuilt.SaveManager.Init(mod)
 EdithRebuilt.Hsx = require("resources.scripts.libs.lhsx")
 
-EdithRebuilt.Version = "v1.6.2"
+EdithRebuilt.Version = "v1.6.3"
 
 include("resources.scripts.libs.prenpckillcallback")
 include("resources.scripts.libs.EdithKotryJumpLib").Init()

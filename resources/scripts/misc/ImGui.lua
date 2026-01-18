@@ -1008,6 +1008,19 @@ local function AddChangelogs()
 - Added Chunk of basalt EID description
 - Added Mexico's target design
 	]], true)
+	ImGui.AddTab(Menu.TabBars.Changelog, "EdithRebuilt_v1.6.3", "v1.6.3")
+	ImGui.AddText("EdithRebuilt_v1.6.3",
+	[[
+- Reduced Edith's jump base cooldown frames (18 > 15)
+- Tweaked Edith's stomp cooldown manager function
+-- Now cooldown should be reduced less on high movement speed (for reference, 2.0 speed sets cooldown to 8 frames)
+- Added Ludovico stomp synergy
+- Fixed Terra's stomp synergy's shockwaves destroying every enemy 
+- Tweaked Terra's stomp synergy
+-- Increased shockwaves' damage
+-- Increased distance between shockwave rings
+- Increased Cindered enemy received damage from parry mult (x1.2 > x1.25)
+	]], true)
 end
 
 -- ---@param enabled boolean
