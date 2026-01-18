@@ -16,7 +16,6 @@ function Maths.SecondsToFrames(seconds)
 	return math.ceil(seconds * 30)
 end
 
-
 ---Logaritmic function
 ---@param x number
 ---@param base number

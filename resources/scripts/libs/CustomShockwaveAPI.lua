@@ -1,4 +1,4 @@
--- Custom Shockwave API by BrakeDude (https://github.com/BrakeDude/CustomShockwaveAPI), tweaked a little bit
+-- Custom Shockwave API by BrakeDude (https://github.com/BrakeDude/CustomShockwaveAPI)
 local localversion = 1.3
 local game = Game()
 local sfx = SFXManager()
@@ -6,8 +6,6 @@ local function Log(str)
     print(str)
     Isaac.DebugString(str)
 end
-
-local data = EdithRebuilt.DataHolder.GetEntityData -- Can be changed
 
 local function load()
 	CustomShockwaveAPI = RegisterMod("Custom Shockwave", 1)
@@ -128,7 +126,7 @@ local function load()
 				):ToEffect()
 
                 if not effect then return end
-                local effectData = data(effect)
+                local effectData = effect:GetData()
 				local pit 
 
 				effect.Parent = player --[[@as Entity]]
@@ -162,7 +160,7 @@ local function load()
 
 	---@param effect EntityEffect
 	function CustomShockwaveAPI:UpdateCustomRockExplosion(effect)
-		local data = data(effect)
+		local data = effect:GetData()
 		if not data.CustomRockExplosion then return end
         if effect.FrameCount ~= 2 then return end
         local scale = effect.SpriteScale.X
@@ -180,7 +178,8 @@ local function load()
         )
             
 		for _, ent in ipairs(Isaac.FindInRadius(effect.Position, 20 * scale, EntityPartition.ENEMY)) do
-            if (ent.Type == EntityType.ENTITY_FIREPLACE and ent.Variant ~= 4) then goto continue end
+			if ent.Type ~= EntityType.ENTITY_FIREPLACE then goto continue end
+            if ent.Variant ~= 4 then goto continue end
             ent:Die()
             ::continue::
         end
