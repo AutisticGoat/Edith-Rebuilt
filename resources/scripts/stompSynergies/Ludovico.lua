@@ -4,6 +4,7 @@ local mod = EdithRebuilt
 local enums = mod.Enums
 local Callbacks = enums.Callbacks
 local helpers = mod.Modules.HELPERS
+local Player = mod.Modules.PLAYER
 local data = mod.DataHolder.GetEntityData -- ESA NALGOTA VAN PA ENCIMA E MI
 
 ---@param player EntityPlayer
@@ -33,6 +34,7 @@ function KillLudoTear(player)
 end
 
 function mod:ForceSpawnFakeLudoTear(player)
+    if not Player.IsAnyEdith(player) then return end
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_LUDOVICO_TECHNIQUE) then return end
     SpawnLudoTear(player)
 end
