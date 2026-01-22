@@ -7,7 +7,7 @@ local Player = modules.PLAYER
 
 ---@param player EntityPlayer
 ---@param JumpData JumpData
-function mod:FLatStoneStomp(player, JumpData)
+mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, function (_, player, JumpData)
     if not player:ToPlayer() then return end
     if not Player.IsEdith(player, false) then return end
 
@@ -18,8 +18,7 @@ function mod:FLatStoneStomp(player, JumpData)
     if JumpData.Tags.EdithRebuilt_FlatStoneLand then return end
     Land.TriggerFlatStoneMiniJumps(player, 7, 1.4)
     TargetArrow.RemoveEdithTarget(player)
-end
-mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, mod.FLatStoneStomp, mod.Enums.Tables.JumpParams)
+end, mod.Enums.Tables.JumpParams)
 
 ---@param ent Entity
 ---@param data JumpData

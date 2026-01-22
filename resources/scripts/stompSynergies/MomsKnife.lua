@@ -19,7 +19,6 @@ end)
 
 ---@param knife EntityKnife
 mod:AddCallback(ModCallbacks.MC_POST_KNIFE_UPDATE, function(_, knife)
-	
 	if not data(knife).StompKnife then return end
 	if knife:IsFlying() then return end 
 

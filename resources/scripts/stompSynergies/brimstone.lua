@@ -7,10 +7,9 @@ mod:AddCallback(callbacks.OFFENSIVE_STOMP, function(_, player)
 
 	local totalRays = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and 6 or 4
 	local shootDegrees = 360 / totalRays
-	local laser
-	
+
 	for	i = 1, totalRays do
-		laser = player:FireDelayedBrimstone(shootDegrees * i, player)
+		local laser = player:FireDelayedBrimstone(shootDegrees * i, player)
 		laser:SetMaxDistance(player.TearRange / 5)
 		laser:AddTearFlags(player.TearFlags)
 		data(laser).StompBrimstone = true

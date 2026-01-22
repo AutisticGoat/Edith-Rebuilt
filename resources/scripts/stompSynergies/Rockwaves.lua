@@ -2,7 +2,7 @@ local mod = EdithRebuilt
 local callbacks = mod.Enums.Callbacks
 
 ---@param player EntityPlayer
-function mod:RockStomp(player)
+mod:AddCallback(callbacks.OFFENSIVE_STOMP, function(_, player)
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_TERRA) then return end
 	local hasBirthright = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT)
 	local totalrings = hasBirthright and 2 or 1
@@ -24,5 +24,4 @@ function mod:RockStomp(player)
 			)
 		end
 	end
-end
-mod:AddCallback(callbacks.OFFENSIVE_STOMP, mod.RockStomp)
+end)

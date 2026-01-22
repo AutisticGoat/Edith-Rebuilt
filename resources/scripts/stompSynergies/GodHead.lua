@@ -3,41 +3,34 @@ local callbacks = mod.Enums.Callbacks
 local Modules = mod.Modules
 local helpers = Modules.HELPERS
 local Player = Modules.PLAYER
-local Maths = Modules.MATHS
-local Helpers = Modules.HELPERS
 local data = mod.DataHolder.GetEntityData
 
 ---@param player EntityPlayer
-mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, function (_, player)
+mod:AddCallback(callbacks.OFFENSIVE_STOMP, function (_, player)
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_GODHEAD) then return end		
 
+    local scaleBase = Player.PlayerHasBirthright(player) and 2 or 1.5
     local godTear = Isaac.Spawn(EntityType.ENTITY_TEAR, 0, 0, player.Position, Vector.Zero, player):ToTear() ---@cast godTear EntityTear
 
-    print("Spawn")
-
-    godTear:GetData().IsStompGodTear = true
-
-    godTear.Scale = 1.5 * player.SpriteScale.X
+    godTear.Scale = scaleBase * player.SpriteScale.X
     godTear.CollisionDamage = 0
     godTear.Height = -10
     godTear:AddTearFlags(TearFlags.TEAR_GLOW | TearFlags.TEAR_SPECTRAL | TearFlags.TEAR_PIERCING)
 
-    print(Maths.HasBitFlags(godTear.TearFlags, TearFlags.TEAR_HOMING))
+    data(godTear).IsStompGodTear = true
+    godTear:Update()
 
     helpers.ChangeColor(godTear, nil, nil, nil, 0)
-end, mod.Enums.Tables.JumpParams.EdithJump)
+end)
 
 ---@param tear EntityTear  
 mod:AddCallback(ModCallbacks.MC_POST_TEAR_UPDATE, function(_, tear)
-    if not tear:GetData().IsStompGodTear then return end
-    if Maths.HasBitFlags(tear.TearFlags, TearFlags.TEAR_HOMING) then return end
-
-    print("mierdaaaaaaa")
+    if not data(tear).IsStompGodTear then return end
 
     tear.Height = -10
     tear.Position = (tear.Parent or tear.SpawnerEntity).Position
 
-    local Count = Player.PlayerHasBirthright(Helpers.GetPlayerFromTear(tear) --[[@as EntityPlayer]]) and 24 or 12
+    local Count = Player.PlayerHasBirthright(helpers.GetPlayerFromTear(tear) --[[@as EntityPlayer]]) and 24 or 12
 
     if tear.FrameCount < Count then return end
     tear:Remove()

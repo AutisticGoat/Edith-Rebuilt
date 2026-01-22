@@ -14,9 +14,8 @@ function mod:StompDamageAdders(player, ent, params)
     local formula = 1 / math.max((10 - (player.Luck * 0.9)), 2)
 
     if not ModRNG.RandomBoolean(rng, formula) then return end
-    
-    local DamageMult = Player.PlayerHasBirthright(player) and 4 or 3
 
+    local DamageMult = Player.PlayerHasBirthright(player) and 4 or 3
 
     Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.CRACK_THE_SKY, 10, ent.Position, Vector.Zero, player)
     ent:TakeDamage(params.Damage * DamageMult, DamageFlag.DAMAGE_LASER, EntityRef(player), 0)

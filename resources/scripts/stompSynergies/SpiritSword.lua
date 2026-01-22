@@ -3,7 +3,7 @@ local callbacks = mod.Enums.Callbacks
 local data = mod.DataHolder.GetEntityData
 
 ---@param player EntityPlayer
-function mod:SwordStomp(player)
+mod:AddCallback(callbacks.OFFENSIVE_STOMP, function(_, player)
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_SPIRIT_SWORD) then return end
 
     local knife = player:FireKnife(
@@ -33,7 +33,7 @@ function mod:SwordStomp(player)
     local effectSprite = effect:GetSprite()
     effectSprite:Load("gfx/008.010_spirit sword.anm2", true)
     effectSprite:Play("SpinDown")
-    
+
     local damageMult = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and 0.75 or 0.5
     local baseDamage = ((player.Damage * 8) + 10)
     local formula = baseDamage * damageMult
@@ -41,16 +41,15 @@ function mod:SwordStomp(player)
     knife.SpriteScale = knife.SpriteScale * 1.7
     knifeData.StompSword = true
     knife.CollisionDamage = formula
-end
-mod:AddCallback(callbacks.OFFENSIVE_STOMP, mod.SwordStomp)
+end)
 
-function mod:RemoveStompKnife(knife)
+---@param knife EntityKnife
+mod:AddCallback(ModCallbacks.MC_POST_KNIFE_UPDATE, function(_, knife)
     local knifeSprite = knife:GetSprite()
     local knifeData = data(knife)
-	
+
     if knife.Variant ~= KnifeVariant.SPIRIT_SWORD or not knifeData.StompSword then return end
     if not (knifeSprite:GetAnimation() == "SpinDown" and knifeSprite:IsFinished()) then return end
 
     knife:Remove()
-end
-mod:AddCallback(ModCallbacks.MC_POST_KNIFE_UPDATE, mod.RemoveStompKnife)
+end)
