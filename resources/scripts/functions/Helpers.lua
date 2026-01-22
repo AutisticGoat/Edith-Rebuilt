@@ -332,8 +332,8 @@ end
 ---Function used to spawn Tainted Edith's birthright fire jets
 ---@param position Vector
 ---@param damage number
----@param mult number
----@param scale number
+---@param mult? number
+---@param scale? number
 function Helpers.SpawnFireJet(position, damage, mult, scale)
 	local Fire = Isaac.Spawn(
 		EntityType.ENTITY_EFFECT,
@@ -344,7 +344,9 @@ function Helpers.SpawnFireJet(position, damage, mult, scale)
 		nil
 	)
 	Fire.SpriteScale = Fire.SpriteScale * (scale or 1)
-	Fire.CollisionDamage = damage * mult
+	Fire.CollisionDamage = damage * (mult or 1)
+
+	return Fire
 end
 
 --Checks if player is pressing Edith's jump button
@@ -555,4 +557,12 @@ function Helpers.RenderAreaOfEffect(pos, AreaSize, AreaColor) -- Took from Melee
         LINE_SPRITE:Render(renderPosition)
     end
 end
+
+---@param wisp Entity
+---@param ID CollectibleType
+function Helpers.IsModItemWisp(wisp, ID)
+	if not wisp:ToFamiliar() then return false end
+	return wisp.Variant == FamiliarVariant.WISP and wisp.SubType == ID
+end
+
 return Helpers

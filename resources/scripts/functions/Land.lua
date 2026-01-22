@@ -122,12 +122,6 @@ end
 
 ---@param player EntityPlayer
 ---@return boolean
-local function ShouldConsumeKeys(player)
-	return (player:GetNumKeys() > 0 and not player:HasGoldenKey())
-end
-
----@param player EntityPlayer
----@return boolean
 local function CanUseKey(player)
 	return (player:GetNumKeys() > 0 or player:HasGoldenKey())
 end
@@ -364,6 +358,8 @@ function Land.EdithStomp(parent, params, breakGrid)
 	local SaltedTime = Math.Round(Math.Clamp(120 * (Player.GetplayerTears(parent) / 2.73), 60, 360))
 	local isSalted
 
+	-- DebugRenderer.Get(1, false):Capsule(capsule)
+
 	params.StompedEntities = Isaac.FindInCapsule(capsule)
 
 	if not isDefStomp then
@@ -594,20 +590,19 @@ end
 ---@param height number
 ---@param speed number
 function Land.TriggerLandenemyJump(player, enemyTable, knockback, height, speed)
-	-- local knockback = 
-
 	for _, ent in ipairs(enemyTable) do
+		if not Helpers.IsEnemy(ent) then goto continue end
+
 		local PushFactor = Helpers.GetPushFactor(ent)
 
-		if Helpers.IsEnemy(ent) then
-			Helpers.TriggerJumpPush(ent, player, knockback * 1.5, 5)
-			JumpLib:TryJump(ent, {
-				Height = height * PushFactor,
-				Speed = speed * PushFactor,
-				Tags = "EdithRebuilt_EnemyJump",
-				-- Flags = JumpLib.Flags.
-			})	
-		end
+		Helpers.TriggerJumpPush(ent, player, knockback * 1.5, 5)
+		JumpLib:TryJump(ent, {
+			Height = height * PushFactor,
+			Speed = speed * PushFactor,
+			Tags = "EdithRebuilt_EnemyJump",
+			-- Flags = JumpLib.Flags.
+		})
+		::continue::
 	end
 end
 
@@ -724,16 +719,16 @@ end
 ---@param HopParams TEdithHopParryParams
 ---@param IsTaintedEdith any
 local function PerfectParryManager(player, ent, HopParams, IsTaintedEdith)
+	if ent:ToTear() then return end
+	
 	local damageFlag = Player.PlayerHasBirthright(player) and DamageFlag.DAMAGE_FIRE or 0
 	local proj = ent:ToProjectile()
-	local tear = ent:ToTear()
 	local shouldTriggerFireJets = IsTaintedEdith and hasBirthright or Player.IsJudasWithBirthright(player)
 
 	local CinderMult = StatusEffect.EntHasStatusEffect(ent, "Cinder") and 1.25 or 1
 
 	Isaac.RunCallback(enums.Callbacks.PERFECT_PARRY, player, ent, HopParams)
 
-	if tear then return end
 	if proj then
 		local spawner = proj.Parent or proj.SpawnerEntity
 		local targetEnt = spawner or Helpers.GetNearestEnemy(player) or proj
