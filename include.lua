@@ -95,6 +95,7 @@ local includeFiles = {
 	stmpSyn .. "LittleHorn",
 	stmpSyn .. "Peppers",
 	stmpSyn .. "Ludovico",
+	stmpSyn .. "EdithsHood",
 
 	parrySyn .. "blackPowder",
 	parrySyn .. "brimstone",

@@ -381,12 +381,12 @@ EdithRebuilt.Enums = {
 			[PickupVariant.PICKUP_TRINKET] = true,
 			[PickupVariant.PICKUP_COLLECTIBLE] = true,
 			[PickupVariant.PICKUP_BROKEN_SHOVEL] = true,
-		},
+		} --[[@as PickupVariant[]],
 		PhysicsFamiliar = {
 			[FamiliarVariant.SAMSONS_CHAINS] = true,
 			[FamiliarVariant.PUNCHING_BAG] = true,
 			[FamiliarVariant.CUBE_BABY] = true,
-		},
+		} --[[@as FamiliarVariant[]],
 		CooldownSounds = {
 			[1] = {
 				SoundID = SoundEffect.SOUND_STONE_IMPACT,
