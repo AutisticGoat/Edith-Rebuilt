@@ -5,8 +5,8 @@ local effects = enums.EdithStatusEffects
 local StsEffects = modules.STATUS_EFFECTS
 local Helpers = modules.HELPERS
 local ModRNG = modules.RNG
+local game = enums.Utils.Game
 local SpicesMix = {}
-local data = mod.DataHolder.GetEntityData
 
 local Descriptions = {
     [effects.SALTED] = "Slow and weakness, chance to destroy enemy's shots",
@@ -53,7 +53,7 @@ function SpicesMix:OnSpicesMixUse(_, RNG, player)
         ::continue::
     end
 
-    Game():GetHUD():ShowItemText(data.ID, Descriptions[data.ID])
+    game:GetHUD():ShowItemText(data.ID, Descriptions[data.ID])
 
     return true
 end 
