@@ -7,6 +7,13 @@ local Helpers = modules.HELPERS
 local plyMan = PlayerManager
 local GildedStone = {}
 
+---@param player EntityPlayer
+mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function (_, player)
+	local gildedCount = player:GetCollectibleNum(items.COLLECTIBLE_GILDED_STONE)
+	if gildedCount < 1 then return end
+	player.Luck = player.Luck + (1 * gildedCount)
+end, CacheFlag.CACHE_LUCK)
+
 ---@param tear EntityTear
 function GildedStone:ShootingRockTears(tear)
 	local player = Helpers.GetPlayerFromTear(tear)
@@ -22,9 +29,9 @@ end
 mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, GildedStone.ShootingRockTears)
 
 local RockRewards = {
-    [75] = {Variant = PickupVariant.PICKUP_COIN, SubType = CoinSubType.COIN_PENNY},
+    [70] = {Variant = PickupVariant.PICKUP_COIN, SubType = CoinSubType.COIN_PENNY},
     [15] = {Variant = PickupVariant.PICKUP_COIN, SubType = CoinSubType.COIN_NICKEL},
-    [5] = {Variant = PickupVariant.PICKUP_COIN, SubType = CoinSubType.COIN_DIME},
+    [10] = {Variant = PickupVariant.PICKUP_COIN, SubType = CoinSubType.COIN_DIME},
     [4] = {Variant = PickupVariant.PICKUP_COLLECTIBLE, SubType = CollectibleType.COLLECTIBLE_QUARTER},
     [1] = {Variant = PickupVariant.PICKUP_COLLECTIBLE, SubType = CollectibleType.COLLECTIBLE_DOLLAR},
 }

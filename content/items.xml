@@ -58,6 +58,7 @@
 		gfx="collectibles_Gilded_Stone.png"
 		quality="2"
 		coins="5"
+		cache="luck"
 		tags="offensive summonable"
 		achievement="EdithRebuilt_Gilded Stone"
 	/>
