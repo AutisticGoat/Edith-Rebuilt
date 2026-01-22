@@ -34,6 +34,7 @@ local ClearDataCallbacks = {
     ModCallbacks.MC_POST_ENTITY_REMOVE,
     ModCallbacks.MC_POST_NPC_DEATH,
 }
+---@cast ClearDataCallbacks ModCallbacks[]
 
 local function ClearEntityData(_, ent)
     local ptrHash = GetPtrHash(ent)

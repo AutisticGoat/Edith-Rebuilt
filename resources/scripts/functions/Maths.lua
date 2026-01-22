@@ -88,5 +88,4 @@ function Maths.HasBitFlags(flags, checkFlag)
 	return flags & checkFlag == checkFlag
 end
 
-
 return Maths
