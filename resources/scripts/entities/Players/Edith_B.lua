@@ -18,8 +18,6 @@ local TargetArrow = modules.TARGET_ARROW
 local TEdithMod = modules.TEDITH
 local Helpers = modules.HELPERS
 local Maths = modules.MATHS
-local Creeps = modules.CREEPS
-local ModRNG = modules.RNG
 local effects = modules.STATUS_EFFECTS
 local data = mod.DataHolder.GetEntityData
 local TEdith = {}
@@ -32,9 +30,6 @@ function TEdith:TaintedEdithInit(player)
 	local isGrudge = Helpers.IsGrudgeChallenge()
 	local costume = isGrudge and costumes.ID_EDITH_B_GRUDGE_SCARF or costumes.ID_EDITH_B_SCARF
 	local HopParams = TEdithMod.GetHopParryParams(player)
-
-	data(player).movementVector = Vector.Zero
-	HopParams.HopDirection = Vector.Zero
 
 	player:AddNullCostume(costume)
 	Player.SetChallengeSprite(player, Isaac.GetChallenge())
@@ -130,7 +125,7 @@ function mod:EdithPlayerUpdate(player)
 	local MovX = (((input.left > 0.3 and -input.left) or (input.right > 0.3 and input.right)) or 0) * (game:GetRoom():IsMirrorWorld() and -1 or 1)
 	local MovY = (input.up > 0.3 and -input.up) or (input.down > 0.3 and input.down) or 0
 
-	playerData.movementVector = Vector(MovX, MovY):Normalized() 
+	playerData.movementVector = Vector(MovX, MovY):Normalized()
 
 	HopParams.IsParryJump = HopParams.IsParryJump or false
 
@@ -142,7 +137,7 @@ function mod:EdithPlayerUpdate(player)
 			if not IsGrudge then
 				TEdithMod.InitTaintedEdithParryJump(player, jumpTags.TEdithJump)
 			else
-				local PerfectParry, _ = land.ParryLandManager(player, HopParams, true)
+				local PerfectParry = land.ParryLandManager(player, HopParams, true)
 				land.LandFeedbackManager(player, land.GetLandSoundTable(true, true), misc.BurntSaltColor, true)
 
 				if PerfectParry then
