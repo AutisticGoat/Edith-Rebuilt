@@ -14,14 +14,17 @@ local baseRange = 6.5
 local baseHeight = -23.45
 local baseMultiplier = -70 / baseRange
 
+---@param player EntityPlayer
+---@param position Vector
+---@param rng RNG
+---@param minTears integer
+---@param maxTears integer
 local function ShootSalTear(player, position, rng, minTears, maxTears)
 	local tear
 	local fallSpeedVar
 
     for _ = 1, rng:RandomInt(minTears, maxTears) do
-        tear = Isaac.Spawn(EntityType.ENTITY_TEAR, 0, 0, position, rng:RandomVector():Resized(20), player):ToTear()
-
-        if not tear then return end
+        tear = Isaac.Spawn(EntityType.ENTITY_TEAR, 0, 0, position, rng:RandomVector():Resized(20), player):ToTear() ---@cast tear EntityTear
 
         fallSpeedVar = ModRNG.RandomFloat(rng, 1.8, 2.2)
 
@@ -41,14 +44,13 @@ end
 ---@param player EntityPlayer
 function Sal:SalSpawnSaltCreep(player)
 	if not player:HasCollectible(items.COLLECTIBLE_SAL) then return end
-	if player.FrameCount % 15 ~= 0 then return end
+	if player.FrameCount % 10 ~= 0 then return end
 
 	local rng = player:GetCollectibleRNG(items.COLLECTIBLE_SAL)
-	local randomGib = {
-		amount = rng:RandomInt(2, 5),
-		speed = ModRNG.RandomFloat(rng, 1, 2.5) 
-	}
-	Creeps.SpawnSaltCreep(player, player.Position, 0, 3, randomGib.amount, randomGib.speed, saltTypes.SAL, true, true)
+	local gibAmount = rng:RandomInt(2, 5)
+	local gibSpeed = ModRNG.RandomFloat(rng, 1, 2.5)
+
+	Creeps.SpawnSaltCreep(player, player.Position, 0.5, 2, gibAmount, gibSpeed, saltTypes.SAL, true, true)
 end
 mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, Sal.SalSpawnSaltCreep)
 
@@ -56,15 +58,15 @@ mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, Sal.SalSpawnSaltCreep)
 ---@param source EntityRef
 function Sal:KillingSalEnemy(entity, source)
 	if not StatusEffects.EntHasStatusEffect(entity, enums.EdithStatusEffects.SALTED) then return end
-
-	local Ent = source.Entity
 	local player = Helpers.GetPlayerFromRef(source)
-	local tear = Ent and Ent:ToTear()
-	
+
 	if not player then return end
 	if not player:HasCollectible(items.COLLECTIBLE_SAL) then return end
+
+	local Ent = source.Entity
+	local tear = Ent and Ent:ToTear()
 	if tear and data(tear).IsSalTear then return end
 
-	ShootSalTear(player, entity.Position, player:GetCollectibleRNG(items.COLLECTIBLE_SAL), 6, 12)
+	ShootSalTear(player, entity.Position, player:GetCollectibleRNG(items.COLLECTIBLE_SAL), 8, 12)
 end
 mod:AddCallback(ModCallbacks.MC_POST_ENTITY_KILL, Sal.KillingSalEnemy)
