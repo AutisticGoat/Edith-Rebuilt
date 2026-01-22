@@ -20,11 +20,11 @@ local EdithsHood = {}
 ---@param tear EntityTear
 function EdithsHood:ShootSaltTears(tear)
 	local player = helpers.GetPlayerFromTear(tear)
-	
+
 	if not player then return end
 	if Player.IsAnyEdith(player) then return end
 	if not player:HasCollectible(items.COLLECTIBLE_EDITHS_HOOD) then return end
-	
+
 	helpers.ForceSaltTear(tear, false)
 end
 mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, EdithsHood.ShootSaltTears)
@@ -53,30 +53,31 @@ function EdithsHood:JumpCooldown(player)
 	local pitch = soundTab.Pitch == 1.2 and (soundTab.Pitch * RNGMod.RandomFloat(player:GetDropRNG(), 1, 1.1)) or soundTab.Pitch
 	sfx:Play(soundTab.SoundID, 2, 0, false, pitch)
 	Player.SetColorCooldown(player, 0.6, 5)
-	playerData.StompedEntities = nil
-	playerData.IsDefensiveStomp = false
 end
 mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, EdithsHood.JumpCooldown)
 
 function EdithsHood:TriggerJump(player)
-	local data = data(player)
+	local playerData = data(player)
 
+	if Player.IsAnyEdith(player) then return end
 	if not player:HasCollectible(items.COLLECTIBLE_EDITHS_HOOD) then return end
-	if not data.HoodJumpTimer or data.HoodJumpTimer ~= 0 then return end
+	if not playerData.HoodJumpTimer or playerData.HoodJumpTimer ~= 0 then return end
 	if not Input.IsActionTriggered(ButtonAction.ACTION_DROP, player.ControllerIndex) then return end
-	
-	data.HoodJumpTimer = 90
+
+	playerData.HoodJumpTimer = 60
 
 	Edith.InitEdithJump(player, jumpTags.EdithsHoodJump)
 end
-mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, EdithsHood.TriggerJump)
+mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, EdithsHood.TriggerJump)
 
 function EdithsHood:OnHoodJumpLand(player)
+	if Player.IsAnyEdith(player) then return end
+
 	local params = Edith.GetJumpStompParams(player)
 
-	params.Damage = (player.Damage * 0.75) * 3
-	params.Radius = 30
-	params.Knockback = 5
+	params.Damage = (player.Damage * 1.25) * 3
+	params.Radius = 40
+	params.Knockback = 8
 
 	Land.LandFeedbackManager(player, Land.GetLandSoundTable(false), Color.Default, false)
 	Land.EdithStomp(player, params, false)
@@ -85,7 +86,7 @@ function EdithsHood:OnHoodJumpLand(player)
 	for i = 1, maxCreep do
 		Creeps.SpawnSaltCreep(player, player.Position + Vector(0, 30):Rotated(saltDegrees*i), 0.1, 5, 1, 3, saltTypes.EDITHS_HOOD)
 	end
-	player:SetMinDamageCooldown(20)
+	player:SetMinDamageCooldown(30)
 end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, EdithsHood.OnHoodJumpLand, jumpParams.EdithsHoodJump)
 
