@@ -13,10 +13,8 @@ function Grudge:OnTaintedEdithGrudgeCollision(player, collider)
     if not Player.IsEdith(player, true) then return end
     if not Helpers.IsGrudgeChallenge() then return end
 
-    if collider.Type == EntityType.ENTITY_FIREPLACE then
-        if collider.Variant ~= 4 then
-            collider:Die()
-        end
+    if collider.Type == EntityType.ENTITY_FIREPLACE and collider.Variant ~= 4 then
+        collider:Die()
     end
 
     if not Helpers.IsEnemy(collider) then return end
