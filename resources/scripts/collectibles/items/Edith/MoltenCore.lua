@@ -1,8 +1,6 @@
 local mod = EdithRebuilt
 local enums = mod.Enums
 local items = enums.CollectibleType
-local utils = enums.Utils
-local game = utils.Game
 local MoltenCore = {}
 local Helpers = mod.Modules.HELPERS
 local data = mod.DataHolder.GetEntityData
@@ -10,7 +8,7 @@ local data = mod.DataHolder.GetEntityData
 function MoltenCore:MoltenCoreStats(player)
 	local MoltenCoreCount = player:GetCollectibleNum(items.COLLECTIBLE_MOLTEN_CORE)
 	if MoltenCoreCount < 1 then return end
-	player.Damage = player.Damage + (1 * MoltenCoreCount)
+	player.Damage = player.Damage + (1.25 * MoltenCoreCount)
 end
 mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, MoltenCore.MoltenCoreStats, CacheFlag.CACHE_DAMAGE)
 
@@ -18,7 +16,7 @@ mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, MoltenCore.MoltenCoreStats, Cach
 function MoltenCore:MoltenCoreUpdate(player)
 	if not player:HasCollectible(items.COLLECTIBLE_MOLTEN_CORE) then return end
 
-	for _, enemy in ipairs(Isaac.FindInRadius(player.Position, 60, EntityPartition.ENEMY)) do
+	for _, enemy in ipairs(Isaac.FindInRadius(player.Position, 80, EntityPartition.ENEMY)) do
 		if not Helpers.IsEnemy(enemy) then goto continue end
 		data(enemy).IsInCoreRadius = true
 
@@ -66,6 +64,6 @@ function MoltenCore:KillingSalEnemy(entity, source)
 	if not Helpers.IsEnemy(entity) then return end
 	if not entData.IsInCoreRadius then return end
 
-	Helpers.SpawnFireJet(entity.Position, player.Damage * 2.5, 1, 1)
+	Helpers.SpawnFireJet(entity.Position, player.Damage * 2.5, 1, 2)
 end
 mod:AddCallback(PRE_NPC_KILL.ID, MoltenCore.KillingSalEnemy)
