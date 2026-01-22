@@ -45,7 +45,7 @@ local function SaltCreepUpdate(effect)
     
     local effectData = data(effect)
     local spawnType = effectData.SpawnType ---@cast spawnType SaltTypes
-    local player = effect.SpawnerEntity:ToPlayer() 
+    local player = Helpers.GetPlayerFromTear(effect)
     local isSaltShakerSalt = Helpers.When(spawnType, SaltShakerSalts, false)
 
     if not player then return end
