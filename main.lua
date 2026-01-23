@@ -2,6 +2,7 @@ EdithRebuilt = RegisterMod("Edith: Rebuilt", 1) --[[@as ModReference|table]]
 local mod = EdithRebuilt
 
 EdithRebuilt.DataHolder = include("resources.scripts.libs.DataHolder")
+EdithRebuilt.TempStatsLib = include("resources.scripts.libs.TempStatsLib")
 EdithRebuilt.SaveManager = require("resources.scripts.libs.EdithRebuiltSaveManager")
 EdithRebuilt.SaveManager.Init(mod)
 EdithRebuilt.Hsx = require("resources.scripts.libs.lhsx")
