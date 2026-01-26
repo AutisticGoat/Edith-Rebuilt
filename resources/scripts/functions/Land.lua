@@ -310,7 +310,9 @@ end
 local function DamageManager(parent, ent, damage, TerraMult, knockback)
 	local FrozenMult = ent:HasEntityFlags(EntityFlag.FLAG_FREEZE) and 1.2 or 1 
 	damage = (damage * FrozenMult) * TerraMult
-	Land.LandDamage(ent, parent, damage, knockback)
+
+	local pushMult = StatusEffect.EntHasStatusEffect(ent, status.SALTED) and 2 or 1
+	Land.LandDamage(ent, parent, damage, knockback * pushMult)
 end
 
 local function EntityInteractHandler(ent, parent, knockback)
