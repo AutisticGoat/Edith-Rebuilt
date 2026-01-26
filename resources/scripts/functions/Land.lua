@@ -83,7 +83,7 @@ function Land.AddExtraGore(ent, player)
 	if not ent:ToNPC() then return end
 
 	ent:AddEntityFlags(EntityFlag.FLAG_EXTRA_GORE)
-	ent:MakeBloodPoof(ent.Position, nil, 0.5)
+	ent:MakeBloodPoof(nil, nil, 0.5)
 	sfx:Play(SoundEffect.SOUND_DEATH_BURST_LARGE)
 end
 
@@ -823,18 +823,24 @@ function Land.ParryLandManager(player, HopParams, IsTaintedEdith)
 
 	Land.TriggerLandenemyJump(player, HopParams.ParriedEnemies, HopParams.ParryKnockback, 8, 2)
 
-	local IFrames = (PerfectParry and 25 or 15) + math.ceil((HopParams.HopStaticCharge + HopParams.HopStaticBRCharge * 0.2) / 4)
+	local IFrames = (PerfectParry and 30 or 20) + math.ceil((HopParams.HopStaticCharge + HopParams.HopStaticBRCharge * 0.25) / 4)
 
 	player:SetMinDamageCooldown(IFrames)
 	PerfectParryMisc(player, PerfectParry)
 
-	HopParams.ParryCooldown = IsTaintedEdith and (PerfectParry and (hasBirthcake and 8 or 10) or 15) or 0
+	local staticChargeCooldownBonus = math.ceil(4 * (HopParams.HopStaticCharge / 100)) 
+
+	HopParams.ParryCooldown = (
+		IsTaintedEdith and 
+		(PerfectParry and 
+		((hasBirthcake and 10 or 12) - staticChargeCooldownBonus) or 15) or 0
+	)
+
 	HopParams.IsParryJump = false
 
 	GrudgeUnlockManager(PerfectParry)
 
 	HopParams.ParriedEnemies = {}
-
 	return PerfectParry, EnemiesInImpreciseParry
 end
 
