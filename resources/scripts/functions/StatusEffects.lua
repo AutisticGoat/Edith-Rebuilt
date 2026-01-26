@@ -167,6 +167,7 @@ end
 ---@param npc EntityNPC
 local function OnSaltedUpdate(npc)
     if not StatusEffects.EntHasStatusEffect(npc, effects.SALTED) then return end
+    if JumpLib:GetData(npc).Jumping then return end
     npc:MultiplyFriction(0.6)
 end
 
