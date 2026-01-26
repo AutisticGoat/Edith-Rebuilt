@@ -6,9 +6,8 @@ local EdithMod = modules.EDITH
 local Helpers = modules.HELPERS
 local TargetArrow = modules.TARGET_ARROW
 local Land = modules.LAND
-
-
 local Effigy = {}
+local jumpData = { tag = "EdithRebuilt_EffigyJump", }
 
 ---@param player EntityPlayer
 ---@param flags UseFlag
@@ -37,7 +36,7 @@ function Effigy:OnEffigyLand(player)
 
     player:SetMinDamageCooldown(20)
 end
-mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, Effigy.OnEffigyLand, { tag = "EdithRebuilt_EffigyJump", })
+mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, Effigy.OnEffigyLand, jumpData)
 
 ---@param player EntityPlayer
 function Effigy:OnEffigyJumpUpdate(player)
@@ -58,4 +57,4 @@ function Effigy:OnEffigyJumpUpdate(player)
 		player.Position = target.Position
 	end
 end
-mod:AddCallback(JumpLib.Callbacks.ENTITY_UPDATE_60, Effigy.OnEffigyJumpUpdate, { tag = "EdithRebuilt_EffigyJump", })
+mod:AddCallback(JumpLib.Callbacks.ENTITY_UPDATE_60, Effigy.OnEffigyJumpUpdate, jumpData)
