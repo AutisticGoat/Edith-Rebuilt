@@ -1,13 +1,34 @@
 EdithRebuilt = RegisterMod("Edith: Rebuilt", 1) --[[@as ModReference|table]]
 local mod = EdithRebuilt
+local font = Font()
+font:Load("font/pftempestasevencondensed.fnt")
 
-EdithRebuilt.DataHolder = include("resources.scripts.libs.DataHolder")
-EdithRebuilt.TempStatsLib = include("resources.scripts.libs.TempStatsLib")
+if not REPENTOGON then
+    mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
+        local text = "REPENTOGON is missing"
+        local text2 = "check repentogon.com"
+        font:DrawStringScaledUTF8(text, Isaac.GetScreenWidth()/1.1 - font:GetStringWidthUTF8(text)/2, Isaac.GetScreenHeight()/1.2, 1, 1, KColor(2,.5,.5,1), 1, true )
+        font:DrawStringScaledUTF8(text2, Isaac.GetScreenWidth()/1.1 - font:GetStringWidthUTF8(text2)/2, Isaac.GetScreenHeight()/1.2 + 8, 1, 1, KColor(2,.5,.5,1), 1, true )
+    end)
+	return 
+end
+
+if not REPENTANCE_PLUS then
+	mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
+        local text = "This mod is meant to be used with Repentance+ DLC"
+        local text2 = "Look for it on steam"
+        font:DrawStringScaledUTF8(text, Isaac.GetScreenWidth()/1.1 - font:GetStringWidthUTF8(text)/2, Isaac.GetScreenHeight()/1.2, 1, 1, KColor(2,.5,.5,1), 1, true )
+        font:DrawStringScaledUTF8(text2, Isaac.GetScreenWidth()/1.1 - font:GetStringWidthUTF8(text2)/2, Isaac.GetScreenHeight()/1.2 + 8, 1, 1, KColor(2,.5,.5,1), 1, true )
+    end)
+end
+
+EdithRebuilt.DataHolder = require("resources.scripts.libs.DataHolder")
+EdithRebuilt.TempStatsLib = require("resources.scripts.libs.TempStatsLib")
 EdithRebuilt.SaveManager = require("resources.scripts.libs.EdithRebuiltSaveManager")
 EdithRebuilt.SaveManager.Init(mod)
 EdithRebuilt.Hsx = require("resources.scripts.libs.lhsx")
 
-EdithRebuilt.Version = "v1.6.3"
+EdithRebuilt.Version = "v1.7.0b"
 
 include("resources.scripts.libs.prenpckillcallback")
 include("resources.scripts.libs.EdithKotryJumpLib").Init()
