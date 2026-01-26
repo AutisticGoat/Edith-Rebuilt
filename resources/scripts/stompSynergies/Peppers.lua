@@ -1,8 +1,7 @@
 local mod = EdithRebuilt
 local callbacks = mod.Enums.Callbacks
 local ModRNG = mod.Modules.RNG
-local fires = 4
-local degrees = 360 / fires
+local Player = mod.Modules.PLAYER
 
 ---@param player EntityPlayer
 ---@param direction Vector
@@ -25,8 +24,11 @@ end
 ---@param player EntityPlayer
 mod:AddCallback(callbacks.OFFENSIVE_STOMP, function(_, player)
     local rng = player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_GHOST_PEPPER) or player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_BIRDS_EYE)
-    
+
     if not rng then return end
+
+    local fires = Player.PlayerHasBirthright(player) and 8 or 4
+    local degrees = 360 / fires
 
     local chance = (
         (not HasBothPeppers(player) and 1 / math.max((12 - player.Luck), 2)) or
