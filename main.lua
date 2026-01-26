@@ -22,7 +22,7 @@ if not REPENTANCE_PLUS then
     end)
 end
 
-EdithRebuilt.DataHolder = require("resources.scripts.libs.DataHolder")
+EdithRebuilt.DataHolder = include("resources.scripts.libs.DataHolder")
 EdithRebuilt.TempStatsLib = require("resources.scripts.libs.TempStatsLib")
 EdithRebuilt.SaveManager = require("resources.scripts.libs.EdithRebuiltSaveManager")
 EdithRebuilt.SaveManager.Init(mod)
