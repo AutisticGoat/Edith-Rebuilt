@@ -7,7 +7,6 @@ local funcs = "functions/"
 local compat = "compat/"
 local libs = "libs/"
 local misc = "misc/"
-local effects = "StatusEffects/"
 
 local includeFiles = {
 	-- Cosas necesarias
@@ -65,6 +64,8 @@ local includeFiles = {
 	ent .. "Players/Edith_B",
 	ent .. "Players/SharedFuncs",
 	-- Personajes fin
+
+	ent .. "Wisps/SaltShaker",
 
 	"challenges/Vestige",
 	"challenges/Grudge",
