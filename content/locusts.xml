@@ -1,0 +1,34 @@
+<locusts gfxroot="gfx_dedith/familiars/locusts/">
+	<!--
+		Vanilla color presets
+	-->
+	<color name="default" />
+	<color name="fly_red" r="768" g="512" b="512" or="0" og="-255" ob="-255"/>
+	<color name="fly_green" r="512" g="768" b="512" or="-255" og="0" ob="-255"/>
+	<color name="fly_blue" r="512" g="512" b="768" or="-255" og="-255" ob="0"/>
+	<color name="fly_yellow" r="1024" g="768" b="512" or="0" og="0" ob="-255"/>
+	<color name="fly_orange" r="1024" g="512" b="512" or="0" og="0" ob="-255"/>
+	<color name="fly_black" r="255" g="255" b="255"/>
+	<color name="fly_purple" r="768" g="512" b="1024" or="0" og="-255" ob="0"/>
+	<color name="fly_pink" r="1024" g="512" b="768" or="0" og="-255" ob="0"/>
+	<color name="fly_cyan" r="680" g="1024" b="1024" or="0" og="0" ob="0"/>
+
+	<!--
+		D!Edith color presets
+	-->
+	<color name="fly_lightgrey" r="200" g="200" b="200" or="50" og="50" ob="50"/>
+	<color name="fly_darkpurple" r="472" g="284" b="692" or="0" og="-128" ob="0"/>
+	<color name="fly_pale" r="828" g="624" b="620" or="0" og="0" ob="0"/>
+	<color name="fly_gold" r="850" g="550" b="275" or="0" og="0" ob="0"/>
+	<color name="fly_shadyred" r="-255" g="-255" b="-255" or="255" og="0" ob="0"/>
+	<color name="fly_white" r="255" g="255" b="255" or="0" og="0" ob="0"/>
+
+	<!--
+		Locusts
+	-->
+	<!-- Salty Baby -->
+	<locust id="0" tearFlags2="20" procChance="0.75" color="fly_white" />
+	
+	<!-- The Blue Berry -->
+	<!--<locust id="21" damageMultiplier="1" speed="1" collisionInterval="7" tearFlags="0" color="fly_red" />-->
+</locusts>
