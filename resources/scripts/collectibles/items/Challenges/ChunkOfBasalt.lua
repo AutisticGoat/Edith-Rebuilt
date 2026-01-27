@@ -2,14 +2,20 @@ local mod = EdithRebuilt
 local enums = mod.Enums
 local items = enums.CollectibleType
 local utils = enums.Utils
-local Helpers = mod.Modules.HELPERS
-local EdithMod = mod.Modules.EDITH
+local game = utils.Game
+local sfx = utils.SFX
+local modules = mod.Modules
+local Helpers = modules.HELPERS
+local EdithMod = modules.EDITH
+local Player = modules.PLAYER
 local ChunkOfBasalt = {}
 local data = mod.DataHolder.GetEntityData
 
 ---@param player EntityPlayer
 function ChunkOfBasalt:TriggerBasaltDash(player)
     if not player:HasCollectible(items.COLLECTIBLE_CHUNK_OF_BASALT) then return end
+    if player:GetMovementDirection() == Direction.NO_DIRECTION then return end
+
     local playerData = data(player)
 
     playerData.BasaltCount = playerData.BasaltCount or 60
@@ -27,7 +33,8 @@ function ChunkOfBasalt:TriggerBasaltDash(player)
 
     if playerData.BasaltCount > 0 then return end
     playerData.BasaltCount = 60
-    utils.SFX:Play(SoundEffect.SOUND_SHELLGAME)
+    playerData.BasaltFlickering = 0
+    sfx:Play(SoundEffect.SOUND_SHELLGAME)
     EdithMod.EdithDash(player, player:GetMovementInput():Normalized(), 60, 2)
     playerData.IsBasaltDassh = true
 end
@@ -39,49 +46,98 @@ function ChunkOfBasalt:Timer(player)
     local playerData = data(player)
 
     if playerData.IsBasaltDassh then return end
+    playerData.BasaltCount = playerData.BasaltCount or 0
     playerData.BasaltCount = math.max(playerData.BasaltCount - 1, 0)
 
     if playerData.BasaltCount ~= 1 then return end
-    utils.SFX:Play(SoundEffect.SOUND_STONE_IMPACT)
+    sfx:Play(SoundEffect.SOUND_STONE_IMPACT)
     player:SetColor(Color(0.3, 0.3, 0.3), 5, -1, true, false)
 end
 mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, ChunkOfBasalt.Timer)
 
 ---@param player EntityPlayer
+function ChunkOfBasalt:Cooldown(player)
+    if not player:HasCollectible(items.COLLECTIBLE_CHUNK_OF_BASALT) then return end
+    local playerData = data(player)
+
+    if playerData.BasaltCount > 0 then return end
+    playerData.BasaltFlickering = playerData.BasaltFlickering or 0
+    playerData.BasaltFlickering = playerData.BasaltFlickering + 1
+
+    if playerData.BasaltFlickering == 10 then
+        Player.SetColorCooldown(player, -0.6, 2)
+        playerData.BasaltFlickering = 0
+    end
+end
+mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, ChunkOfBasalt.Cooldown)
+
+---@param player EntityPlayer
 ---@param collider Entity
 ---@return boolean?
 function ChunkOfBasalt:OnCollidingWithEnemy(player, collider)
+    if not Helpers.IsEnemy(collider) then return end
     if not player:HasCollectible(items.COLLECTIBLE_CHUNK_OF_BASALT) then return end
+
     local playerData = data(player)
     if not playerData.IsBasaltDassh then return end
-    
-    local damageFormula = player.Damage * (player.Velocity:Length() / 4)
-    local rng = player:GetCollectibleRNG(items.COLLECTIBLE_CHUNK_OF_BASALT)
+
+    local damageFormula = player.Damage * (player.Velocity:Length() / 5)
+    local capsule = Capsule(player.Position, Vector.One, 0, 80)
 
     collider:TakeDamage(damageFormula, 0, EntityRef(player), 0)
 
-    utils.SFX:Play(SoundEffect.SOUND_MEATY_DEATHS)
+    sfx:Play(SoundEffect.SOUND_MEATY_DEATHS)
+    game:ShakeScreen(6)
     Helpers.TriggerPush(player, collider, 10)
 
-    if collider.HitPoints > damageFormula then return end
-    for _ = 1, rng:RandomInt(5, 8) do
-        local tear = Isaac.Spawn(EntityType.ENTITY_TEAR, 0, 0, collider.Position, RandomVector():Resized(15),  player):ToTear()
+    player:SetMinDamageCooldown(30)
 
-        if not tear then return end
-
-        Helpers.ForceSaltTear(tear, true)
+    for rocks = 1, 8 do
+        CustomShockwaveAPI:SpawnCustomCrackwave(
+            player.Position, -- Position
+            player, -- Spawner
+            40, -- Steps
+            rocks * (360 / 8), -- Angle
+            1, -- Delay
+            1, -- Limit
+            player.Damage * 2 -- Damage
+        )
     end
 
-    player:SetMinDamageCooldown(20)
+    for _, ent in ipairs(Isaac.FindInCapsule(capsule,EntityPartition.ENEMY)) do
+        if GetPtrHash(ent) ~= GetPtrHash(collider) then
+            collider:TakeDamage(damageFormula * 0.75, 0, EntityRef(player), 0)   
+        end
+    end
 end
 mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_COLLISION, ChunkOfBasalt.OnCollidingWithEnemy)
 
 function ChunkOfBasalt:DenyDamage(player)
     local playerData = data(player)
 
-    if playerData.IsBasaltDassh then 
-        playerData.IsBasaltDassh = false
-        return false
-    end
+    if not playerData.IsBasaltDassh then return end
+    playerData.IsBasaltDassh = false
+    return false
 end
 mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG, ChunkOfBasalt.DenyDamage)
+
+---@param player EntityPlayer
+function ChunkOfBasalt:OnGridColl(player)
+    local playerData = data(player)
+
+    if not playerData.IsBasaltDassh then return end
+
+    game:ShakeScreen(10)
+    for rocks = 1, 8 do
+        CustomShockwaveAPI:SpawnCustomCrackwave(
+            player.Position, -- Position
+            player, -- Spawner
+            40, -- Steps
+            rocks * (360 / 8), -- Angle
+            1, -- Delay
+            1, -- Limit
+            player.Damage * 2 -- Damage
+        )
+    end
+end
+mod:AddCallback(ModCallbacks.MC_PLAYER_GRID_COLLISION, ChunkOfBasalt.OnGridColl)
