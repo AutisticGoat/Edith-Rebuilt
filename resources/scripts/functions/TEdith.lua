@@ -10,9 +10,7 @@ local jumpTags = enums.Tables.JumpTags
 local maths = require("resources.scripts.functions.Maths")
 local helpers = require("resources.scripts.functions.Helpers")
 local Player = require("resources.scripts.functions.Player")
-local StatusEffects = require("resources.scripts.functions.StatusEffects")
 local Land = require("resources.scripts.functions.Land")
-local VecDir = require("resources.scripts.functions.VecDir")
 local TEdith = {}
 local data = mod.DataHolder.GetEntityData
 
@@ -284,7 +282,7 @@ end
 ---@param tag string
 function TEdith.InitTaintedEdithParryJump(player, tag)
 	local jumpHeight = 8
-	local jumpSpeed = 3.25
+	local jumpSpeed = 5
 	local room = game:GetRoom()
 	local RoomWater = room:HasWater()
 	local isChap4 = helpers.IsChap4()

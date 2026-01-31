@@ -104,6 +104,14 @@ end
 mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, mod.TaintedEdithUpdate)
 
 ---@param player EntityPlayer
+local function TintEnemies(player)
+	for _, enemy in ipairs(Isaac.FindInRadius(player.Position, misc.PerfectParryRadius + 4, EntityPartition.ENEMY)) do
+		enemy:SetColor(Color(1, 1, 1, 1, 2), 5, 100, true, false)
+	end
+end
+
+
+---@param player EntityPlayer
 function mod:EdithPlayerUpdate(player)
 	if not Player.IsEdith(player, true) then return end
 
@@ -129,13 +137,25 @@ function mod:EdithPlayerUpdate(player)
 
 	HopParams.IsParryJump = HopParams.IsParryJump or false
 
+	TintEnemies(player)
+
 	if Helpers.IsKeyStompTriggered(player) then
 		if HopParams.ParryCooldown == 0 and not isTaintedEdithJump(player) and not HopParams.IsParryJump then
-			if HopParams.IsHoping then
-				TEdithMod.StopTEdithHops(player, 0, true, true, false)
-			end
+			-- if HopParams.IsHoping then
+			-- 	TEdithMod.StopTEdithHops(player, 0, true, true, false)
+			-- end
 			if not IsGrudge then
-				TEdithMod.InitTaintedEdithParryJump(player, jumpTags.TEdithJump)
+				if not HopParams.IsHoping then
+					TEdithMod.InitTaintedEdithParryJump(player, jumpTags.TEdithJump)
+				else
+					TEdithMod.StopTEdithHops(player, 0, true, true, false)
+					local PerfectParry = land.ParryLandManager(player, HopParams, true)
+					land.LandFeedbackManager(player, land.GetLandSoundTable(true, PerfectParry), misc.BurntSaltColor, PerfectParry)
+
+					if PerfectParry then
+						TEdithMod.AddHopDashCharge(player, 20, 0.5)
+					end
+				end
 			else
 				local PerfectParry = land.ParryLandManager(player, HopParams, true)
 				land.LandFeedbackManager(player, land.GetLandSoundTable(true, true), misc.BurntSaltColor, true)
