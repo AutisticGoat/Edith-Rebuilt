@@ -316,6 +316,32 @@ function TEdith.InitTaintedEdithParryJump(player, tag)
 	data(player).IsParryJump = true
 end
 
+---@param player EntityPlayer
+---@param IsGrudge boolean
+---@param HopParams TEdithHopParryParams
+function TEdith.ParryTriggerManager(player, IsGrudge, HopParams)
+	if not IsGrudge then
+		if not HopParams.IsHoping then
+			TEdith.InitTaintedEdithParryJump(player, jumpTags.TEdithJump)
+		else
+			TEdith.StopTEdithHops(player, 0, true, true, false)
+			local PerfectParry = Land.ParryLandManager(player, HopParams, true)
+			land.LandFeedbackManager(player, Land.GetLandSoundTable(true, PerfectParry), misc.BurntSaltColor, PerfectParry)
+
+			if PerfectParry then
+				TEdith.AddHopDashCharge(player, 20, 0.5)
+			end
+		end
+	else
+		local PerfectParry = Land.ParryLandManager(player, HopParams, true)
+		Land.LandFeedbackManager(player, Land.GetLandSoundTable(true, true), misc.BurntSaltColor, true)
+
+		if PerfectParry then
+			TEdith.AddHopDashCharge(player, 20, 0.5)
+		end
+	end
+end	
+
 local JumpHeightParams = {
 	growth = 0.35, 
 	offset = 0.65, 
