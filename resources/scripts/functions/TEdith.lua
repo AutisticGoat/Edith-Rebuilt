@@ -198,6 +198,10 @@ function TEdith.StopTEdithHops(player, cooldown, useQuitJump, resetChrg, resetHo
 	player:SetMinDamageCooldown(cooldown)
 end
 
+local function HopCurve(t)
+    return 1 - ((1 - t) ^ 2)
+end
+
 ---@param player EntityPlayer
 ---@param hopParams TEdithHopParryParams
 function TEdith.HopDashMovementManager(player, hopParams)
@@ -221,9 +225,9 @@ function TEdith.HopDashMovementManager(player, hopParams)
 	end
 
 	local smoothFactor = 0.225
-	local targetVel = (((HopVec * 2) * (speedBase + (player.MoveSpeed - 1))) * chargeMult) * VelMult
+	local targetVel = (((HopVec * 2) * (speedBase + (player.MoveSpeed - 1))) * HopCurve(chargeMult)) * VelMult
+
 	player.Velocity = player.Velocity + (targetVel - player.Velocity) * smoothFactor
-	
 	hopParams.GrudgeDash = (IsGrudge and HopVec:Length() > 0)
 end
 
@@ -326,7 +330,7 @@ function TEdith.ParryTriggerManager(player, IsGrudge, HopParams)
 		else
 			TEdith.StopTEdithHops(player, 0, true, true, false)
 			local PerfectParry = Land.ParryLandManager(player, HopParams, true)
-			land.LandFeedbackManager(player, Land.GetLandSoundTable(true, PerfectParry), misc.BurntSaltColor, PerfectParry)
+			Land.LandFeedbackManager(player, Land.GetLandSoundTable(true, PerfectParry), misc.BurntSaltColor, PerfectParry)
 
 			if PerfectParry then
 				TEdith.AddHopDashCharge(player, 20, 0.5)
