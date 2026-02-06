@@ -219,7 +219,7 @@ function TEdith.HopDashMovementManager(player, hopParams)
 	local IsGrudge = helpers.IsGrudgeChallenge()
 	local chargeMult = (charge / 100)
 	local VelMult = IsGrudge and 1.2 or 1 
-	local speedBase = IsGrudge and 9 or 8
+	local speedBase = IsGrudge and 10 or 9
 
 	if not isHopVecZero then
 		if not isJumping and not IsGrudge then
