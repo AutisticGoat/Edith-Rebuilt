@@ -85,6 +85,7 @@ function mod:TaintedEdithUpdate(player)
 
 	if arrow then
 		TEdithMod.HopDashChargeManager(player, arrow)
+		-- TEdithMod.ResetHopDashCharge(player, true, true)
 	else
 		TEdithMod.HopDashMovementManager(player, HopParams)
 
@@ -99,6 +100,7 @@ function mod:TaintedEdithUpdate(player)
 
 	if arrow and not isArrowMoving then
 		TargetArrow.RemoveEdithTarget(player, true)
+		-- TEdithMod.ResetHopDashCharge(player, true, true)
 	end
 end
 mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, mod.TaintedEdithUpdate)
@@ -197,7 +199,7 @@ local damageBase = 3.5
 function mod:EdithHopLanding(player)	
 	local HopParams = TEdithMod.GetHopParryParams(player)
 	local tearRange = player.TearRange / 40
-	local Knockbackbase = (player.ShotSpeed * 10) + 2
+	local Knockbackbase = (player.ShotSpeed * 10) + 8
 	local Charge = TEdithMod.GetHopDashCharge(player, false, true)
 	local BRCharge = HopParams.HopMoveBRCharge
 

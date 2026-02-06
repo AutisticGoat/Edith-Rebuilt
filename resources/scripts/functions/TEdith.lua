@@ -251,8 +251,9 @@ end
 function TEdith.HopDashChargeManager(player, arrow)
 	local HopParams = TEdith.GetHopParryParams(player)
 	local posDif = arrow.Position - player.Position
+	local VecSize = HopParams.IsHoping and 25 or 10
 	local posDifLenght = posDif:Length()
-	local maxDist = 2.5
+	local maxDist = 2.5 * (10/VecSize)
 	local BaseCharge = helpers.IsGrudgeChallenge() and 9.5 or 8
 	local targetframecount = arrow.FrameCount
 	local chargeAdd = BaseCharge * maths.exp(player.MoveSpeed, 1, 1.5)
@@ -260,9 +261,7 @@ function TEdith.HopDashChargeManager(player, arrow)
 
 	local arrowVel = data(player).movementVector
 	local HopVec = arrowVel
-
-	-- Calcula la velocidad objetivo (la que ya usabas)
-	local targetVel = HopVec:Resized(10)
+	local targetVel = HopVec:Resized(VecSize)
 
 	if posDifLenght >= maxDist then
 		targetVel = targetVel - (posDif:Normalized() * (posDifLenght / maxDist))
@@ -272,7 +271,6 @@ function TEdith.HopDashChargeManager(player, arrow)
 	arrow.Velocity = arrow.Velocity + (targetVel - arrow.Velocity) * smoothFactor
 
 	if targetframecount < 2 and HopParams.IsHoping == true then
-		TEdith.StopTEdithHops(player, 20, true, true, true)
 		Land.LandFeedbackManager(player, Land.GetLandSoundTable(true), misc.BurntSaltColor, false)
 	end
 
