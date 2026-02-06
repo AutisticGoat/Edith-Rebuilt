@@ -165,10 +165,12 @@ end
 ---@param useQuitJump boolean
 ---@param resetChrg boolean
 ---@param resetHopcooldown boolean
-function TEdith.StopTEdithHops(player, cooldown, useQuitJump, resetChrg, resetHopcooldown)
+---@param notreduceFriction? boolean
+function TEdith.StopTEdithHops(player, cooldown, useQuitJump, resetChrg, resetHopcooldown, notreduceFriction)
 	if not Player.IsEdith(player, true) then return end
 	local HopParams = TEdith.GetHopParryParams(player)
 	local IsMoving = HopParams.IsHoping or HopParams.GrudgeDash
+	notreduceFriction = notreduceFriction or false
 
 	if not IsMoving then return end
 
@@ -182,7 +184,9 @@ function TEdith.StopTEdithHops(player, cooldown, useQuitJump, resetChrg, resetHo
 		HopParams.HopCooldown = 8
 	end
 
-	player:MultiplyFriction(0.5)
+	if not notreduceFriction then
+		player:MultiplyFriction(0.5)
+	end
 
 	cooldown = cooldown or 0
 	useQuitJump = useQuitJump or false
@@ -251,7 +255,7 @@ end
 function TEdith.HopDashChargeManager(player, arrow)
 	local HopParams = TEdith.GetHopParryParams(player)
 	local posDif = arrow.Position - player.Position
-	local VecSize = HopParams.IsHoping and 25 or 10
+	local VecSize = data(player).IsRedirectioningMove and 25 or 10
 	local posDifLenght = posDif:Length()
 	local maxDist = 2.5 * (10/VecSize)
 	local BaseCharge = helpers.IsGrudgeChallenge() and 9.5 or 8

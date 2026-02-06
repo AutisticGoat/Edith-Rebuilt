@@ -6,7 +6,6 @@ local game = utils.Game
 local sfx = utils.SFX
 local costumes = enums.NullItemID
 local tables = enums.Tables
-local jumpTags = tables.JumpTags
 local jumpParams = tables.JumpParams
 local misc = enums.Misc
 local modules = mod.Modules
@@ -29,7 +28,6 @@ function TEdith:TaintedEdithInit(player)
 
 	local isGrudge = Helpers.IsGrudgeChallenge()
 	local costume = isGrudge and costumes.ID_EDITH_B_GRUDGE_SCARF or costumes.ID_EDITH_B_SCARF
-	local HopParams = TEdithMod.GetHopParryParams(player)
 
 	player:AddNullCostume(costume)
 	Player.SetChallengeSprite(player, Isaac.GetChallenge())
@@ -63,6 +61,10 @@ function mod:TaintedEdithUpdate(player)
 	local IsMoving = HopParams.IsHoping or HopParams.GrudgeDash
 	local charge = TEdithMod.GetHopDashCharge(player, false)
 	local Peffects = player:GetEffects()
+	local pData = data(player)
+	local CanRedirectMove = TEdithMod.GetHopDashCharge(player, false) > 0 and TEdithMod.GetHopDashCharge(player, true) <= 0
+
+	pData.IsRedirectioningMove = CanRedirectMove and (arrow ~= nil)
 
 	if player.CanFly and charge >= 85 and not Peffects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_LEO) then
 		Peffects:AddCollectibleEffect(CollectibleType.COLLECTIBLE_LEO, false, 1)
@@ -85,10 +87,8 @@ function mod:TaintedEdithUpdate(player)
 
 	if arrow then
 		TEdithMod.HopDashChargeManager(player, arrow)
-		-- TEdithMod.ResetHopDashCharge(player, true, true)
 	else
 		TEdithMod.HopDashMovementManager(player, HopParams)
-
 		if TEdithMod.GetHopDashCharge(player, false, true) < 10 then
 			HopParams.HopMoveCharge = 0
 			HopParams.HopStaticCharge = 0
@@ -98,9 +98,39 @@ function mod:TaintedEdithUpdate(player)
 
 	TEdithMod.ParryCooldownManager(player, HopParams)
 
+	if isArrowMoving then
+		pData.PressCount = pData.PressCount or 0 
+		pData.PressCount = pData.PressCount + 1
+
+
+		if pData.IsRedirectioningMove then
+			if pData.PressCount == 20 then
+				ImGui.PushNotification("Too much time redirectioning, restarting move charge", ImGuiNotificationType.INFO)
+				TEdithMod.ResetHopDashCharge(player, true, true)
+				TEdithMod.StopTEdithHops(player, 0, false, true, true, false)
+				pData.PressCount = 0
+			elseif pData.PressCount == 2 then
+				player:SetMinDamageCooldown(20)
+				player:MultiplyFriction(0.5)
+			end
+		end
+	end
+
 	if arrow and not isArrowMoving then
-		TargetArrow.RemoveEdithTarget(player, true)
-		-- TEdithMod.ResetHopDashCharge(player, true, true)
+		if pData.IsRedirectioningMove then
+			player:MultiplyFriction(0.5)
+			if pData.PressCount <= 2 then
+				TargetArrow.RemoveEdithTarget(player, true)
+				TEdithMod.StopTEdithHops(player, 20, false, true, true, false)
+				ImGui.PushNotification("Single Tap, restarting move charge", ImGuiNotificationType.INFO)
+			elseif pData.PressCount >= 5 then
+				ImGui.PushNotification("Movement redirectioned, keeping speed", ImGuiNotificationType.SUCCESS)
+				TargetArrow.RemoveEdithTarget(player, true)			
+			end
+		else
+			TargetArrow.RemoveEdithTarget(player, true)
+		end
+		pData.PressCount = 0
 	end
 end
 mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, mod.TaintedEdithUpdate)
@@ -113,7 +143,6 @@ local function TintEnemies(player)
 		end
 	end
 end
-
 
 ---@param player EntityPlayer
 function mod:EdithPlayerUpdate(player)
@@ -158,7 +187,7 @@ function mod:EdithPlayerUpdate(player)
 	if HopParams.IsHoping == true then
 		TEdithMod.ResetHopDashCharge(player, false, true)
 	elseif not IsJumping then
-		player:MultiplyFriction(0.5)
+		-- player:MultiplyFriction(0.5)
 	end
 
 	if Helpers.IsGrudgeChallenge() and HopParams.GrudgeDash and player.Velocity:Length() > 0.15 then		
@@ -291,6 +320,7 @@ mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_GRID_COLLISION, function(_, player, _
 	local params = TEdithMod.GetHopParryParams(player)
 	local charge = TEdithMod.GetHopDashCharge(player, false, false)
 	local isMoving = params.IsHoping or params.GrudgeDash
+	local arrow = TargetArrow.GetEdithTarget(player, true)
 	local rock = grid:ToRock()
 	local poop = grid:ToPoop()
 	local tnt = grid:ToTNT()
@@ -298,7 +328,7 @@ mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_GRID_COLLISION, function(_, player, _
 
 	if not isMoving then return end
 
-	if grid:GetType() == GridEntityType.GRID_ROCKB and not IsJumping then
+	if grid:GetType() == GridEntityType.GRID_ROCKB and not IsJumping and not arrow then
 		TEdithMod.StopTEdithHops(player, 20, true, not playerData.TaintedEdithTarget, true)
 	end
 
@@ -306,10 +336,12 @@ mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_GRID_COLLISION, function(_, player, _
 		if charge >= 85 then
 			grid:Destroy()
 		else
-			TEdithMod.StopTEdithHops(player, 20, true, not playerData.TaintedEdithTarget, true)
+			if not arrow then
+				TEdithMod.StopTEdithHops(player, 20, true, not playerData.TaintedEdithTarget, true)
+			end
 		end
 	else 
-		if not IsJumping then
+		if not IsJumping and not arrow then
 			TEdithMod.StopTEdithHops(player, 20, true, not playerData.TaintedEdithTarget, true)
 		end
 	end
