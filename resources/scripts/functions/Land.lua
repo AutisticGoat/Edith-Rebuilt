@@ -836,7 +836,7 @@ function Land.ParryLandManager(player, HopParams, IsTaintedEdith)
 		((hasBirthcake and 10 or 12) - staticChargeCooldownBonus) or 15) or 0
 	)
 
-	data(player).MaxParryCooldown = HopParams.ParryCooldown
+	data(player).MaxParryCooldown = HopParams.ParryCooldown or 0
 
 	HopParams.IsParryJump = false
 
