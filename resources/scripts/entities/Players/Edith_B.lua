@@ -217,7 +217,7 @@ function mod:OnNewRoom()
 	for _, player in ipairs(PlayerManager.GetPlayers()) do
 		if not Player.IsEdith(player, true) then goto continue end
 		Helpers.ChangeColor(player, _, _, _, 1)
-		TEdithMod.StopTEdithHops(player, 0, true, true, false)
+		-- TEdithMod.StopTEdithHops(player, 0, true, true, false)
 		TargetArrow.RemoveEdithTarget(player, true)
 		::continue::
 	end
