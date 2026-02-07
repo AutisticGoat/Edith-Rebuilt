@@ -102,6 +102,8 @@ function mod:TaintedEdithUpdate(player)
 		pData.PressCount = pData.PressCount or 0 
 		pData.PressCount = pData.PressCount + 1
 
+		print(pData.PressCount)
+
 		if pData.IsRedirectioningMove then
 			if pData.PressCount == 20 then
 				TEdithMod.ResetHopDashCharge(player, true, true)
@@ -217,12 +219,23 @@ function mod:OnNewRoom()
 	for _, player in ipairs(PlayerManager.GetPlayers()) do
 		if not Player.IsEdith(player, true) then goto continue end
 		Helpers.ChangeColor(player, _, _, _, 1)
-		-- TEdithMod.StopTEdithHops(player, 0, true, true, false)
-		TargetArrow.RemoveEdithTarget(player, true)
+		data(player).PressCount = 0
 		::continue::
 	end
 end
 mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, mod.OnNewRoom)
+
+function mod:OnNewFloor()
+	for _, player in ipairs(PlayerManager.GetPlayers()) do
+		if not Player.IsEdith(player, true) then goto continue end
+		-- Helpers.ChangeColor(player, _, _, _, 1)
+		TEdithMod.StopTEdithHops(player, 0, true, true, true)
+		data(player).PressCount = 0
+		::continue::
+	end
+end
+mod:AddCallback(ModCallbacks.MC_POST_NEW_FLOOR, mod.OnNewFloor)
+
 
 local damageBase = 3.5
 ---@param player EntityPlayer
