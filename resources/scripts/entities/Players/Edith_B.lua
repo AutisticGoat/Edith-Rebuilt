@@ -102,12 +102,15 @@ function mod:TaintedEdithUpdate(player)
 		pData.PressCount = pData.PressCount or 0 
 		pData.PressCount = pData.PressCount + 1
 
-
 		if pData.IsRedirectioningMove then
 			if pData.PressCount == 20 then
 				TEdithMod.ResetHopDashCharge(player, true, true)
 				TEdithMod.StopTEdithHops(player, 0, false, true, true, false)
+				TargetArrow.RemoveEdithTarget(player, true)
+				player:SetColor(Color(0.6, 0.6, 0.6, 1), 5, 1000, true, false)
 				pData.PressCount = 0
+			elseif pData.PressCount == 5 then
+				player:SetColor(Color(1, 1, 1, 1, 0.3, 0.3, 0.3), 5, 1000, true, false)
 			elseif pData.PressCount == 2 then
 				player:SetMinDamageCooldown(20)
 				player:MultiplyFriction(0.5)
@@ -121,6 +124,7 @@ function mod:TaintedEdithUpdate(player)
 			if pData.PressCount <= 2 then
 				TargetArrow.RemoveEdithTarget(player, true)
 				TEdithMod.StopTEdithHops(player, 20, false, true, true, false)
+				player:SetColor(Color(1, 1, 1, 1, 0, 0.1, 0.3), 5, 1000, true, false)
 			elseif pData.PressCount >= 5 then
 				TargetArrow.RemoveEdithTarget(player, true)			
 			end
