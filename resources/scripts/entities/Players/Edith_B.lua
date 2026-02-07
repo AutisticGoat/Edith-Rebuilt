@@ -234,7 +234,7 @@ function mod:OnNewFloor()
 		::continue::
 	end
 end
-mod:AddCallback(ModCallbacks.MC_POST_NEW_FLOOR, mod.OnNewFloor)
+mod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, mod.OnNewFloor)
 
 
 local damageBase = 3.5
