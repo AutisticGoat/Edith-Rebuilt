@@ -189,8 +189,11 @@ function mod:EdithPlayerUpdate(player)
 
 	if HopParams.IsHoping == true then
 		TEdithMod.ResetHopDashCharge(player, false, true)
+		if arrow then
+			player:MultiplyFriction(0.5)
+		end
 	elseif not IsJumping then
-		-- player:MultiplyFriction(0.5)
+		player:MultiplyFriction(0.5)
 	end
 
 	if Helpers.IsGrudgeChallenge() and HopParams.GrudgeDash and player.Velocity:Length() > 0.15 then		
@@ -228,7 +231,6 @@ mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, mod.OnNewRoom)
 function mod:OnNewFloor()
 	for _, player in ipairs(PlayerManager.GetPlayers()) do
 		if not Player.IsEdith(player, true) then goto continue end
-		-- Helpers.ChangeColor(player, _, _, _, 1)
 		TEdithMod.StopTEdithHops(player, 0, true, true, true)
 		data(player).PressCount = 0
 		::continue::
