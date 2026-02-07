@@ -228,7 +228,7 @@ function TEdith.HopDashMovementManager(player, hopParams)
 		hopParams.IsHoping = true
 	end
 
-	local smoothFactor = 0.225
+	local smoothFactor = 0.25
 	local targetVel = (((HopVec * 2) * (speedBase + (player.MoveSpeed - 1))) * HopCurve(chargeMult)) * VelMult
 
 	player.Velocity = player.Velocity + (targetVel - player.Velocity) * smoothFactor
