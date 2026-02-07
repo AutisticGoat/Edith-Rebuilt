@@ -105,7 +105,6 @@ function mod:TaintedEdithUpdate(player)
 
 		if pData.IsRedirectioningMove then
 			if pData.PressCount == 20 then
-				ImGui.PushNotification("Too much time redirectioning, restarting move charge", ImGuiNotificationType.INFO)
 				TEdithMod.ResetHopDashCharge(player, true, true)
 				TEdithMod.StopTEdithHops(player, 0, false, true, true, false)
 				pData.PressCount = 0
@@ -122,9 +121,7 @@ function mod:TaintedEdithUpdate(player)
 			if pData.PressCount <= 2 then
 				TargetArrow.RemoveEdithTarget(player, true)
 				TEdithMod.StopTEdithHops(player, 20, false, true, true, false)
-				ImGui.PushNotification("Single Tap, restarting move charge", ImGuiNotificationType.INFO)
 			elseif pData.PressCount >= 5 then
-				ImGui.PushNotification("Movement redirectioned, keeping speed", ImGuiNotificationType.SUCCESS)
 				TargetArrow.RemoveEdithTarget(player, true)			
 			end
 		else
