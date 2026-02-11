@@ -369,7 +369,7 @@ mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_GRID_COLLISION, function(_, player, _
 	end
 
 	if rock or poop or tnt then
-		if charge >= 85 then
+		if charge >= 50 then
 			grid:Destroy()
 		else
 			if not arrow then
