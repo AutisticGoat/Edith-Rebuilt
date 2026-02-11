@@ -257,7 +257,7 @@ function TEdith.HopDashChargeManager(player, arrow)
 	local posDif = arrow.Position - player.Position
 	local VecSize = data(player).IsRedirectioningMove and 25 or 10
 	local posDifLenght = posDif:Length()
-	local maxDist = 2.5 * (10/VecSize)
+	local maxDist = 2.5 * (10 / VecSize)
 	local BaseCharge = helpers.IsGrudgeChallenge() and 9 or 8
 	local targetframecount = arrow.FrameCount
 	local chargeAdd = BaseCharge * maths.exp(player.MoveSpeed, 1, 1.5)
@@ -284,7 +284,7 @@ end
 ---@param tag string
 function TEdith.InitTaintedEdithParryJump(player, tag)
 	local jumpHeight = 8
-	local jumpSpeed = 8
+	local jumpSpeed = 5.5
 	local room = game:GetRoom()
 	local RoomWater = room:HasWater()
 	local isChap4 = helpers.IsChap4()
