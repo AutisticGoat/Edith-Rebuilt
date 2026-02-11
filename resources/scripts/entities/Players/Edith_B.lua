@@ -102,12 +102,10 @@ function mod:TaintedEdithUpdate(player)
 		pData.PressCount = pData.PressCount or 0 
 		pData.PressCount = pData.PressCount + 1
 
-		print(pData.PressCount)
-
 		if pData.IsRedirectioningMove then
 			if pData.PressCount == 20 then
 				TEdithMod.ResetHopDashCharge(player, true, true)
-				TEdithMod.StopTEdithHops(player, 0, false, true, true, false)
+				TEdithMod.StopTEdithHops(player, 0, false, true, true, true)
 				TargetArrow.RemoveEdithTarget(player, true)
 				player:SetColor(Color(0.6, 0.6, 0.6, 1), 5, 1000, true, false)
 				pData.PressCount = 0
@@ -115,14 +113,13 @@ function mod:TaintedEdithUpdate(player)
 				player:SetColor(Color(1, 1, 1, 1, 0.3, 0.3, 0.3), 5, 1000, true, false)
 			elseif pData.PressCount == 2 then
 				player:SetMinDamageCooldown(20)
-				player:MultiplyFriction(0.5)
+				player:MultiplyFriction(0.4)
 			end
 		end
 	end
 
 	if arrow and not isArrowMoving then
 		if pData.IsRedirectioningMove then
-			player:MultiplyFriction(0.5)
 			if pData.PressCount <= 2 then
 				TargetArrow.RemoveEdithTarget(player, true)
 				TEdithMod.StopTEdithHops(player, 20, false, true, true, false)
@@ -155,7 +152,6 @@ function mod:EdithPlayerUpdate(player)
 
 	local playerData = data(player)
 	local HopParams = TEdithMod.GetHopParryParams(player)
-	local IsJumping = JumpLib:GetData(player).Jumping
 	local MiscConfig = Helpers.GetConfigData("MiscData")
 	local arrow = TargetArrow.GetEdithTarget(player, true)
 	local IsGrudge = Helpers.IsGrudgeChallenge()
@@ -187,17 +183,16 @@ function mod:EdithPlayerUpdate(player)
 		playerData.StoredInput = false
 	end
 
-	if HopParams.IsHoping == true then
-		TEdithMod.ResetHopDashCharge(player, false, true)
-		if arrow then
-			player:MultiplyFriction(0.5)
-		end
-	elseif not IsJumping then
+	if ShouldReduceFriction then
 		player:MultiplyFriction(0.5)
 	end
 
+	if HopParams.IsHoping == true then
+		TEdithMod.ResetHopDashCharge(player, false, true)
+	end
+
 	if Helpers.IsGrudgeChallenge() and HopParams.GrudgeDash and player.Velocity:Length() > 0.15 then		
-		if MiscConfig and MiscConfig.EnableShakescreen then
+		if MiscConfig and MiscConfig.EnableShakescreen and HopParams.HopMoveCharge > 50 then
 			game:ShakeScreen(2)
 		end
 		sfx:Play(SoundEffect.SOUND_STONE_IMPACT, 0.3, 0, false, 1.2)
@@ -223,6 +218,10 @@ function mod:OnNewRoom()
 		if not Player.IsEdith(player, true) then goto continue end
 		Helpers.ChangeColor(player, _, _, _, 1)
 		data(player).PressCount = 0
+
+		if game:GetRoom():GetType() == RoomType.ROOM_DUNGEON then
+			TEdithMod.StopTEdithHops(player, 0, true, true, true, true)
+		end
 		::continue::
 	end
 end
@@ -237,7 +236,6 @@ function mod:OnNewFloor()
 	end
 end
 mod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, mod.OnNewFloor)
-
 
 local damageBase = 3.5
 ---@param player EntityPlayer

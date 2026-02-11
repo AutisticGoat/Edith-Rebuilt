@@ -258,7 +258,7 @@ function TEdith.HopDashChargeManager(player, arrow)
 	local VecSize = data(player).IsRedirectioningMove and 25 or 10
 	local posDifLenght = posDif:Length()
 	local maxDist = 2.5 * (10/VecSize)
-	local BaseCharge = helpers.IsGrudgeChallenge() and 9.5 or 8
+	local BaseCharge = helpers.IsGrudgeChallenge() and 9 or 8
 	local targetframecount = arrow.FrameCount
 	local chargeAdd = BaseCharge * maths.exp(player.MoveSpeed, 1, 1.5)
 	HopParams.HopDirection = posDif:Normalized()
@@ -274,10 +274,6 @@ function TEdith.HopDashChargeManager(player, arrow)
 	local smoothFactor = 0.5
 	arrow.Velocity = arrow.Velocity + (targetVel - arrow.Velocity) * smoothFactor
 
-	if targetframecount < 2 and HopParams.IsHoping == true then
-		Land.LandFeedbackManager(player, Land.GetLandSoundTable(true), misc.BurntSaltColor, false)
-	end
-
 	if targetframecount > 1 and (not HopParams.IsHoping and not isJumping) and HopParams.HopCooldown == 0 then
 		TEdith.AddHopDashCharge(player, chargeAdd, 0.5)
 	end
@@ -288,7 +284,7 @@ end
 ---@param tag string
 function TEdith.InitTaintedEdithParryJump(player, tag)
 	local jumpHeight = 8
-	local jumpSpeed = 5
+	local jumpSpeed = 8
 	local room = game:GetRoom()
 	local RoomWater = room:HasWater()
 	local isChap4 = helpers.IsChap4()
