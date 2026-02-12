@@ -55,4 +55,7 @@
 	<sound name="Nautrash">
 		<sample weight="1" path="Nautrash.wav" />
 	</sound>
+	<sound name="HawkTuah">
+		<sample weight="1" path="Hawk.wav" />
+	</sound>
 </sounds>
