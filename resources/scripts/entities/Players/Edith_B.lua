@@ -268,10 +268,6 @@ function TEdith:EdithParryJump(player)
 	local perfectParry, EnemiesInImpreciseParry = land.ParryLandManager(player, HopParams, true)
 	local parryAdd = perfectParry and 20 or ((EnemiesInImpreciseParry and 5) or -15)
 
-	if perfectParry then
-
-	end
-
 	land.LandFeedbackManager(player, land.GetLandSoundTable(true, perfectParry), misc.BurntSaltColor, perfectParry)
 
 	if not parryAdd then return end
@@ -293,24 +289,6 @@ function TEdith:TaintedEdithDamageManager(player, _, flags, source)
 	return false
 end
 mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG, TEdith.TaintedEdithDamageManager)
-
-local ParryThing = Isaac.GetGiantBookIdByName("ParryEffect")
-mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
-	local overlaySprite = ItemOverlay.GetSprite()
-	local frame = overlaySprite:GetFrame()
-
-	if ItemOverlay.GetOverlayID() ~= ParryThing then return end
-
-	if frame == 0 then
-		game:SetColorModifier(ColorModifier(1, 1, 1, 1, 0.4, 1), true, 1)
-		Isaac.CreateTimer(function ()
-			game:GetRoom():UpdateColorModifier(true, true, 0.15)
-		end, 1, 1, false)
-	elseif frame == 5 then
-		overlaySprite:Stop(true)
-		overlaySprite:Reset()
-	end
-end)
 
 HudHelper.RegisterHUDElement({
 	Name = "EdithRebuilt_TaintedEdithChargeBars",

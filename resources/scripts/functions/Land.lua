@@ -56,6 +56,7 @@ local LandSounds = {
 			[8] = sounds.SOUND_KNIGHT,
 			[9] = sounds.SOUND_BLOQUEO,
 			[10] = sounds.SOUND_NAUTRASH,
+			[11] = sounds.SOUND_HAWK_TUAH,
 		}
 	}
 }
@@ -829,6 +830,10 @@ function Land.ParryLandManager(player, HopParams, IsTaintedEdith)
 	PerfectParryMisc(player, PerfectParry)
 
 	local staticChargeCooldownBonus = math.ceil(4 * (HopParams.HopStaticCharge / 100)) 
+
+	if PerfectParry and Helpers.GetConfigData(ConfigDataTypes.TEDITH).EnableParryFlash then
+		Helpers.TriggerPerfectParryFlash(player)
+	end
 
 	HopParams.ParryCooldown = (
 		IsTaintedEdith and 

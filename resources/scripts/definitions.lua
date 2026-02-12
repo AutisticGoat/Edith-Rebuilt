@@ -118,6 +118,7 @@ EdithRebuilt.Enums = {
 		SOUND_SOUL_OF_EDITH = Isaac.GetSoundIdByName("SoulOfEdith"),
 		SOUND_BLOQUEO = Isaac.GetSoundIdByName("BLOQUEO"),
 		SOUND_NAUTRASH = Isaac.GetSoundIdByName("Nautrash"),
+		SOUND_HAWK_TUAH = Isaac.GetSoundIdByName("HawkTuah"),
 	},
 	Achievements = {
 		-- Edith unlocks
@@ -154,8 +155,10 @@ EdithRebuilt.Enums = {
 		ACHIEVEMENT_GRUDGE = Isaac.GetAchievementIdByName("EdithRebuilt_Grudge"),
 		ACHIEVEMENT_CHUNK_OF_BASALT = Isaac.GetAchievementIdByName("EdithRebuilt_Chunk of Basalt"),
 
-
 		ACHIEVEMENT_THANK_YOU = Isaac.GetAchievementIdByName("EdithRebuilt_Thank You"),
+	},
+	Giantbook = {
+		PERFECT_PARRY = Isaac.GetGiantBookIdByName("ParryEffect")
 	},
 	Utils = {
 		Game = Game(),
@@ -373,6 +376,7 @@ EdithRebuilt.Enums = {
 				"Knight",
 				"Bloqueo",
 				"Nautrash",
+				"Hawk",
 			}, 
 		},
 		BlacklistedPickupVariants = { -- Pickups blacklisted from use on `Entity:ForceCollide()`

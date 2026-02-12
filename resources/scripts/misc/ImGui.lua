@@ -35,6 +35,10 @@ local data = mod.DataHolder.GetEntityData
 ---@field TrailColor table
 ---@field RGBMode boolean
 ---@field RGBSpeed number
+---@field EnableParryFlash boolean
+---@field ParryFlashColor {r: number, g: number, b: number, a: number}
+---@field ParryFlashContrast number
+---@field ParryFlashBrightness number
 ---@field EnableExtraGore boolean
 ---@field DisableSaltGibs boolean
 ---@field HopSound number
@@ -142,7 +146,8 @@ local Elements = {
 					Arrow = Prefixes.Separator .. "Tainted_Edith_Visual_Arrow",
 					Trail = Prefixes.Separator .. "Tainted_Edith_Visual_Trail",
 					RGB = Prefixes.Separator .. "Tainted_Edith_Visual_RGB",
-					HopParry = Prefixes.Separator .. "Tainted_Edith_Visual_HopParry,"
+					HopParry = Prefixes.Separator .. "Tainted_Edith_Visual_HopParry",
+					ParryFlash = Prefixes.Separator .. "Tainted_Edith_Visual_HopParry"
 				},
 				Sounds = {
 					HopParry = Prefixes.Separator .. "Tainted_Edith_Sounds_HopParry",
@@ -198,6 +203,10 @@ local Elements = {
 			TrailColor = Prefixes.TEdith.Visuals .. "TrailColor",
 			SetRGBMode = Prefixes.TEdith.Visuals .. "SetRGBMode",
 			SetRGBSpeed = Prefixes.TEdith.Visuals .. "SetRGBSpeed",
+			EnableParryFlash = Prefixes.TEdith.Visuals .. "EnableParryFlash",
+			ParryFlashColor = Prefixes.TEdith.Visuals .. "ParryFlashColor",
+			ParryFlashContrast = Prefixes.TEdith.Visuals .. "ParryFlashContrast",
+			ParryFlashBrightness = Prefixes.TEdith.Visuals .. "ParryFlashBrightness",
 			EnableExtraGore = Prefixes.TEdith.Visuals .. "EnableExtraGore",
 			DisableSaltGibs = Prefixes.TEdith.Visuals .. "DisableSaltGibs",
 		},
@@ -314,6 +323,9 @@ local function UpdateImGuiData()
 			[TEdithOptions.Visuals.SetRGBSpeed] = TEdithData.RGBSpeed or 0.005,
 			[TEdithOptions.Visuals.EnableExtraGore] = TEdithData.EnableExtraGore or false,
 			[TEdithOptions.Visuals.DisableSaltGibs] = TEdithData.DisableSaltGibs or false,
+			[TEdithOptions.Visuals.EnableParryFlash] = TEdithData.DisableSaltGibs or false,
+			[TEdithOptions.Visuals.ParryFlashContrast] = TEdithData.ParryFlashContrast or 0.4,
+			[TEdithOptions.Visuals.ParryFlashBrightness] = TEdithData.ParryFlashBrightness or 0.4,
 			[TEdithOptions.Sounds.SetHopSound] = (TEdithData.HopSound - 1) or 0,
 			[TEdithOptions.Sounds.SetParrySound] = (TEdithData.ParrySound - 1) or 0,
 			[TEdithOptions.Sounds.SetVolume] = TEdithData.Volume or 100,
@@ -325,6 +337,7 @@ local function UpdateImGuiData()
 
 		local arrowcolor = TEdithData.ArrowColor
 		local trailColor = TEdithData.TrailColor
+		local ParryFlashColor = TEdithData.ParryFlashColor
 
 		ImGui.UpdateData(TEdithOptions.Visuals.ArrowColor, ImGuiData.ColorValues, 
 		{
@@ -337,6 +350,14 @@ local function UpdateImGuiData()
 			trailColor.Red,
 			trailColor.Green,
 			trailColor.Blue,
+			
+		})
+		ImGui.UpdateData(TEdithOptions.Visuals.ParryFlashColor, ImGuiData.ColorValues, 
+		{
+			ParryFlashColor.r,
+			ParryFlashColor.g,
+			ParryFlashColor.b,
+			ParryFlashColor.a,
 		})
 	end
 
@@ -507,6 +528,7 @@ local function AddEdithOptions()
 	0.005, 0.001, 0.03, "%.5f")
 
 	ImGui.AddElement(EdithVisuals, Separator.Visuals.Stomp, ImGuiElement.SeparatorText, "Stomp")
+
 	ImGui.AddCheckbox(EdithVisuals, OptionVisuals.EnableExtraGore, "Enable stomp kill extra gore", 
 		function(check)
 			EdithData.EnableExtraGore = check
@@ -642,6 +664,7 @@ local function AddTaintedEdithOptions()
 	0.005, 0.001, 0.03, "%.5f")
 
 	ImGui.AddElement(TEdithVisuals, Separator.Visuals.HopParry, ImGuiElement.SeparatorText, "Hop & Parry")
+
 	ImGui.AddCheckbox(TEdithVisuals, OptionVisuals.EnableExtraGore, "Enable parry kill extra gore", 
 		function(check)
 			TEdithData.EnableExtraGore = check
@@ -652,6 +675,36 @@ local function AddTaintedEdithOptions()
 			TEdithData.DisableSaltGibs = check
 		end,
 	false)
+
+	ImGui.AddElement(TEdithVisuals, Separator.Visuals.ParryFlash, ImGuiElement.SeparatorText, "Parry Flash")
+
+	ImGui.AddCheckbox(TEdithVisuals, OptionVisuals.EnableParryFlash, "Enable Parry Flash", 
+		function(check)
+			TEdithData.EnableParryFlash = check
+		end,
+	false)
+
+	ImGui.AddInputColor(TEdithVisuals, OptionVisuals.ParryFlashColor, "Parry Flash Color", function (r, g, b, a)
+		TEdithData.ParryFlashColor = {
+			r = r,
+			g = g,
+			b = b,
+			a = a,
+		}
+	end, 1, 1, 1, 1)
+
+	ImGui.AddSliderFloat(TEdithVisuals, OptionVisuals.ParryFlashBrightness, "Parry Flash Brightness", 
+		function(val)
+			TEdithData.ParryFlashBrightness = val
+		end, 0.4, 0, 1
+	)
+
+	ImGui.AddSliderFloat(TEdithVisuals, OptionVisuals.ParryFlashContrast, "Parry Flash Contrast", 
+		function(val)
+			TEdithData.ParryFlashContrast = val
+		end, 0.4, 0, 1
+	)
+
 -- Visuals end
 
 -- Sounds

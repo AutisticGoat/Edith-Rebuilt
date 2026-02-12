@@ -565,4 +565,31 @@ function Helpers.IsModItemWisp(wisp, ID)
 	return wisp.Variant == FamiliarVariant.WISP and wisp.SubType == ID
 end
 
+function Helpers.TriggerPerfectParryFlash(player)
+	ItemOverlay.Show(enums.Giantbook.PERFECT_PARRY, 3, player)
+	ItemOverlay.GetSprite().Color = Color(0, 0, 0, 0)
+end
+
+mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
+	local overlaySprite = ItemOverlay.GetSprite()
+	local frame = overlaySprite:GetFrame()
+
+	if ItemOverlay.GetOverlayID() ~= enums.Giantbook.PERFECT_PARRY then return end
+
+	local tEdithConfig = Helpers.GetConfigData(ConfigDataTypes.TEDITH) --[[@as TEdithData]]
+	local color = tEdithConfig.ParryFlashColor
+	local contrast = tEdithConfig.ParryFlashContrast
+	local brightness = tEdithConfig.ParryFlashBrightness
+
+	if frame == 0 then
+		game:SetColorModifier(ColorModifier(color.r, color.g, color.b, color.a, brightness, contrast), true, 1)
+		Isaac.CreateTimer(function ()
+			game:GetRoom():UpdateColorModifier(true, true, 0.15)
+		end, 1, 1, false)
+	elseif frame == 5 then
+		overlaySprite:Stop(true)
+		overlaySprite:Reset()
+	end
+end)
+
 return Helpers
