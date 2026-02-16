@@ -27,9 +27,9 @@ function TEdith:TaintedEdithInit(player)
 	Player.SetNewANM2(player, "gfx/EdithTaintedAnim.anm2")
 
 	local isGrudge = Helpers.IsGrudgeChallenge()
-	local costume = isGrudge and costumes.ID_EDITH_B_GRUDGE_SCARF or costumes.ID_EDITH_B_SCARF
+	local costume = isGrudge and costumes.T_EDITH_GRUDGE or costumes.T_EDITH
 
-	player:AddNullCostume(costume)
+	player:AddNullItemEffect(costume, true)
 	Player.SetChallengeSprite(player, Isaac.GetChallenge())
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, TEdith.TaintedEdithInit)

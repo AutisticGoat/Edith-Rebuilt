@@ -45,10 +45,10 @@ EdithRebuilt.Enums = {
 		CARD_SOUL_EDITH = Isaac.GetCardIdByName("SoulOfEdith"),
 	},
 	NullItemID = {
-		ID_EDITH_SCARF = Isaac.GetCostumeIdByPath("gfx/characters/EdithHood.anm2"),
-		ID_EDITH_B_SCARF = Isaac.GetCostumeIdByPath("gfx/characters/EdithTaintedHood.anm2"),
-		ID_EDITH_VESTIGE_SCARF = Isaac.GetCostumeIdByPath("gfx/characters/EdithVestigeHood.anm2"),
-		ID_EDITH_B_GRUDGE_SCARF = Isaac.GetCostumeIdByPath("gfx/characters/EdithTaintedGrudgeHood.anm2"),
+		EDITH = Isaac.GetNullItemIdByName("Edith_Rebuilt_Edith"),
+		T_EDITH = Isaac.GetNullItemIdByName("Edith_Rebuilt_TEdith"),
+		EDITH_VESTIGE = Isaac.GetNullItemIdByName("Edith_Rebuilt_Edith_Vestige"),
+		T_EDITH_GRUDGE = Isaac.GetNullItemIdByName("Edith_Rebuilt_TEdith_Grudge"),
 	},
 	EffectVariant = {
 		EFFECT_EDITH_TARGET = Isaac.GetEntityVariantByName("Edith Target"),

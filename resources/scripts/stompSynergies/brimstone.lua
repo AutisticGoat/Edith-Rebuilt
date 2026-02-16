@@ -20,5 +20,4 @@ end)
 mod:AddCallback(ModCallbacks.MC_POST_LASER_UPDATE, function(_, laser)
 	if data(laser).StompBrimstone ~= true then return end	
 	laser.Angle = laser.Angle + 10
-
 end)

@@ -1,7 +1,5 @@
 <giantbook anm2root="gfx/ui/giantbook/">
 	<entry name="ParryEffect" anm2="GiantBook.anm2" anim="Appear">
-		<!-- <layer name="poof" r="228" g="228" b="228" a="255" />
-		<layer name="bg" r="228" g="228" b="228" a="153" />
-		<layer name="poof2" r="225" g="225" b="225" a="128" /> -->
+
 	</entry>
 </giantbook>

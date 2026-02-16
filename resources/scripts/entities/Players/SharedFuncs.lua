@@ -9,7 +9,6 @@ local Helpers = modules.HELPERS
 local Maths = modules.MATHS
 local TargetArrow = modules.TARGET_ARROW
 local costumes = enums.NullItemID
-local PlayerType = enums.PlayerType
 
 ---@param entity Entity
 ---@param input InputHook
@@ -26,30 +25,18 @@ mod:AddCallback(ModCallbacks.MC_INPUT_ACTION, function (_, entity, input, action
     return tables.OverrideActions[action]
 end)
 
----@param player EntityPlayer
----@param cacheFlag CacheFlag
-mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(_, player, cacheFlag)
-    if not Player.IsAnyEdith(player) then return end
-    if cacheFlag == CacheFlag.CACHE_DAMAGE then
-        player.Damage = player.Damage * 1.5
-    elseif cacheFlag == CacheFlag.CACHE_RANGE then
-        local Range = (Helpers.IsVestigeChallenge() and player:GetPlayerType() == enums.PlayerType.PLAYER_EDITH) and 4.25 or 2.5
-        player.TearRange = Player.rangeUp(player.TearRange, Range)
-    end
-end)
-
 local ModCostumes = {
-    [costumes.ID_EDITH_SCARF] = true,
-	[costumes.ID_EDITH_B_SCARF] = true,
-    [costumes.ID_EDITH_B_GRUDGE_SCARF] = true,
-    [costumes.ID_EDITH_VESTIGE_SCARF] = true,
+    [costumes.EDITH] = true,
+    [costumes.EDITH_VESTIGE] = true,
+    [costumes.T_EDITH] = true,
+    [costumes.T_EDITH_GRUDGE] = true,
 }
 
 local whiteListCostumes = {
-    [costumes.ID_EDITH_SCARF] = true,
-	[costumes.ID_EDITH_B_SCARF] = true,
-    [costumes.ID_EDITH_B_GRUDGE_SCARF] = true,
-    [costumes.ID_EDITH_VESTIGE_SCARF] = true,
+    [costumes.EDITH] = true,
+    [costumes.EDITH_VESTIGE] = true,
+    [costumes.T_EDITH] = true,
+    [costumes.T_EDITH_GRUDGE] = true,
     [CollectibleType.COLLECTIBLE_HOLY_MANTLE] = true,
     [CollectibleType.COLLECTIBLE_FATE] = true,
     [CollectibleType.COLLECTIBLE_BOOK_OF_SHADOWS] = true,
@@ -63,9 +50,17 @@ local function OnAddCostume(_, itemconfig, player)
 end
 mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_ADD_COSTUME, OnAddCostume)
 
+---@param itemconfig ItemConfigItem
+---@param player EntityPlayer
+---@return boolean?
 local function OnRemoveCostume(_, itemconfig, player)
     if not Player.IsAnyEdith(player) then return end
-    if not Helpers.When(itemconfig.Costume.ID, ModCostumes, false) then return end
+    print(itemconfig:IsNull())
+    print(itemconfig.Costume.Anm2Path)
+
+    -- print(itemconfig.IsNull(), itemconfig.Name)
+    -- print("aaaaaaaaaaaaaaaaa")
+    -- if not Helpers.When(itemconfig.Costume.ID, ModCostumes, false) then return end
     return true
 end
 mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_REMOVE_COSTUME, OnRemoveCostume)
@@ -118,8 +113,8 @@ local function GetEdithCostume(player)
     local isEdith = Player.IsEdith
 
     return (
-        (isEdith(player, false) and (Vestige and costumes.ID_EDITH_VESTIGE_SCARF or costumes.ID_EDITH_SCARF)) or
-        (isEdith(player, true) and (Grudge and costumes.ID_EDITH_B_GRUDGE_SCARF or costumes.ID_EDITH_B_SCARF)) --[[@as NullItemID]]
+        (isEdith(player, false) and (Vestige and costumes.EDITH_VESTIGE or costumes.EDITH)) or
+        (isEdith(player, true) and (Grudge and costumes.T_EDITH_GRUDGE or costumes.T_EDITH)) --[[@as NullItemID]]
     )
 end
 

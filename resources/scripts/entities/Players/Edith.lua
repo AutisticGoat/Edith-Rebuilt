@@ -1,6 +1,6 @@
 local mod = EdithRebuilt
 local enums = mod.Enums
-local costumes = enums.NullItemID
+-- local costumes = enums.Costume
 local utils = enums.Utils
 local tables = enums.Tables
 local game = utils.Game
@@ -23,12 +23,24 @@ function Edith:EdithInit(player)
 	if not Player.IsEdith(player, false) then return end
 	Player.SetNewANM2(player, "gfx/EdithAnim.anm2")
 	local isVestige = helpers.IsVestigeChallenge()
-	local costume = isVestige and costumes.ID_EDITH_VESTIGE_SCARF or costumes.ID_EDITH_SCARF
+	local costume = isVestige and enums.NullItemID.EDITH_VESTIGE or enums.NullItemID.EDITH
 
-	player:AddNullCostume(costume)
+	player:AddNullItemEffect(costume, true)
 	Player.SetChallengeSprite(player, Isaac.GetChallenge())
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, Edith.EdithInit)
+
+---@param player EntityPlayer
+mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
+	local isVestige = helpers.IsVestigeChallenge()
+	local costume = isVestige and enums.NullItemID.EDITH_VESTIGE or enums.NullItemID.EDITH
+
+	for i = 0, 14 do
+		-- print(i, player:IsNullItemCostumeVisible(costume, 0))
+	end
+
+	-- print(player:GetEffects():HasNullEffect(costume))
+end)
 
 ---@param player EntityPlayer
 local function EdithTeleportManager(player)

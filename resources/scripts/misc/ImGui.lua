@@ -323,7 +323,7 @@ local function UpdateImGuiData()
 			[TEdithOptions.Visuals.SetRGBSpeed] = TEdithData.RGBSpeed or 0.005,
 			[TEdithOptions.Visuals.EnableExtraGore] = TEdithData.EnableExtraGore or false,
 			[TEdithOptions.Visuals.DisableSaltGibs] = TEdithData.DisableSaltGibs or false,
-			[TEdithOptions.Visuals.EnableParryFlash] = TEdithData.DisableSaltGibs or false,
+			[TEdithOptions.Visuals.EnableParryFlash] = TEdithData.EnableParryFlash or false,
 			[TEdithOptions.Visuals.ParryFlashContrast] = TEdithData.ParryFlashContrast or 0.4,
 			[TEdithOptions.Visuals.ParryFlashBrightness] = TEdithData.ParryFlashBrightness or 0.4,
 			[TEdithOptions.Sounds.SetHopSound] = (TEdithData.HopSound - 1) or 0,
@@ -397,6 +397,9 @@ local function ResetSaveData(isTainted)
 		TEdithData.EnableExtraGore = false
 		TEdithData.RGBSpeed = 0.005
 		TEdithData.TrailDesign = 1
+		TEdithData.ParryFlashColor = {r = 1, g = 1, b = 1, a = 1}
+		TEdithData.ParryFlashBrightness = 1
+		TEdithData.ParryFlashContrast = 0.4
 	else
 		EdithData.TargetColor = {Red = 1, Green = 1, Blue = 1}
 		EdithData.StompSound = 1
@@ -441,23 +444,12 @@ local function recorrerTablaImGui(tabla, prefijo)
 end
 recorrerTablaImGui(Elements)
 
-local function AddTEdithOptionsToElements()
-	if not isTaintedEdithUnlocked() then return end
-	for k, v in pairs(TEdithOptions) do
-		elementTab[k] = v
-	end
-end
-
-function mod:CheckImGuiIntegrity()
+local function CheckImGuiIntegrity()
 	for _, ID in pairs(elementTab) do
 		if not ImGui.ElementExists(ID) then return false end
 	end
 	return true
 end
-
--- local TrainingOptions = {
--- 	EdithStompMultDamage = Prefixes.Edith.Gameplay .. "EdithStompMultDamage",
--- }
 
 local function AddTabBars()
 	ImGui.AddTabBar(Elements.Menu.Windows.Settings, Elements.Menu.TabBars.Settings)
@@ -1104,7 +1096,7 @@ local function OptionsUpdate()
 	local saveData = SaveManager.GetSettingsSave()
 
 	if not saveData then return end
-	if mod:CheckImGuiIntegrity() then return end
+	if CheckImGuiIntegrity() then return end
 
 	AddTabBars()
 	AddEdithOptions()
