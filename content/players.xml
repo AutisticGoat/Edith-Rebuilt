@@ -12,6 +12,7 @@
 		items="Salt Shaker"
 		noshake="true"
 		achievement="EdithRebuilt_Edith"
+		modcostume="1"
 	/>
 	<player 
 		bSkinParent="Edith​​​" 
@@ -26,5 +27,6 @@
 		birthright="Scorching ashes, blazing leaps"
 		noshake="true"
 		achievement="EdithRebuilt_The Punished"
+		modcostume="2"
 	/>
 </players>

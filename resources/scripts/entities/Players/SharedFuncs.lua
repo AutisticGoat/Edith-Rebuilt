@@ -27,16 +27,12 @@ end)
 
 local ModCostumes = {
     [costumes.EDITH] = true,
-    [costumes.EDITH_VESTIGE] = true,
     [costumes.T_EDITH] = true,
-    [costumes.T_EDITH_GRUDGE] = true,
 }
 
 local whiteListCostumes = {
     [costumes.EDITH] = true,
-    [costumes.EDITH_VESTIGE] = true,
     [costumes.T_EDITH] = true,
-    [costumes.T_EDITH_GRUDGE] = true,
     [CollectibleType.COLLECTIBLE_HOLY_MANTLE] = true,
     [CollectibleType.COLLECTIBLE_FATE] = true,
     [CollectibleType.COLLECTIBLE_BOOK_OF_SHADOWS] = true,

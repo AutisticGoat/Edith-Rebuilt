@@ -47,8 +47,6 @@ EdithRebuilt.Enums = {
 	NullItemID = {
 		EDITH = Isaac.GetNullItemIdByName("Edith_Rebuilt_Edith"),
 		T_EDITH = Isaac.GetNullItemIdByName("Edith_Rebuilt_TEdith"),
-		EDITH_VESTIGE = Isaac.GetNullItemIdByName("Edith_Rebuilt_Edith_Vestige"),
-		T_EDITH_GRUDGE = Isaac.GetNullItemIdByName("Edith_Rebuilt_TEdith_Grudge"),
 	},
 	EffectVariant = {
 		EFFECT_EDITH_TARGET = Isaac.GetEntityVariantByName("Edith Target"),
@@ -433,6 +431,8 @@ EdithRebuilt.Enums = {
 		TrailPath = "gfx/effects/TaintedEdithTrail/trail",
 		VestigeSpritePath = "gfx/characters/costumes/characterEdithVestige.png",
 		GrudgeSpritePath = "gfx/characters/costumes/characterTaintedEdithGrudge.png",
+		VestigeHoodPath = "gfx/characters/costumes/characterEdithVestigeHood.png",
+		GrudgeHoodPath = "gfx/characters/costumes/characterTaintedEdithGrudgeHood.png",
 		TargetLineColor = Color(1, 1, 1),
 		SaltShakerDist = Vector(0, 60),
 		ColorDefault = Color(1, 1, 1, 1),

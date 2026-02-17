@@ -209,20 +209,4 @@
 		damagemult="1.5"
 		range="100"
 	/>
-
-	<null
-		id="3" 
-		name="Edith_Rebuilt_Edith_Vestige" 
-		persistent="true"
-		damagemult="1.5"
-		range="170"
-	/>
-
-	<null
-		id="4" 
-		name="Edith_Rebuilt_TEdith_Grudge" 
-		persistent="true"
-		damagemult="1.5"
-		range="100"
-	/>
 </items>

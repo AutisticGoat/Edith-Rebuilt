@@ -22,25 +22,15 @@ local Edith = {}
 function Edith:EdithInit(player)
 	if not Player.IsEdith(player, false) then return end
 	Player.SetNewANM2(player, "gfx/EdithAnim.anm2")
-	local isVestige = helpers.IsVestigeChallenge()
-	local costume = isVestige and enums.NullItemID.EDITH_VESTIGE or enums.NullItemID.EDITH
+	player:AddNullItemEffect(enums.NullItemID.EDITH, true)
+	Player.SetChallengeSprite(player, Isaac.GetChallenge())	
 
-	player:AddNullItemEffect(costume, true)
-	Player.SetChallengeSprite(player, Isaac.GetChallenge())
+	if helpers.IsVestigeChallenge() then
+		local costumeDesc = player:GetCostumeSpriteDescs()[1]
+		costumeDesc:GetSprite():ReplaceSpritesheet(0, enums.Misc.VestigeHoodPath, true)
+	end
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, Edith.EdithInit)
-
----@param player EntityPlayer
-mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
-	local isVestige = helpers.IsVestigeChallenge()
-	local costume = isVestige and enums.NullItemID.EDITH_VESTIGE or enums.NullItemID.EDITH
-
-	for i = 0, 14 do
-		-- print(i, player:IsNullItemCostumeVisible(costume, 0))
-	end
-
-	-- print(player:GetEffects():HasNullEffect(costume))
-end)
 
 ---@param player EntityPlayer
 local function EdithTeleportManager(player)

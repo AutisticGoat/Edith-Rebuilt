@@ -43,3 +43,10 @@ function Vestige:EdithJumpHandler(player)
 	end
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, Vestige.EdithJumpHandler)
+
+---@param player EntityPlayer
+mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(_, player)
+	if not Player.IsEdith(player, false) then return end
+	if not Helpers.IsVestigeChallenge() then return end
+	player.TearRange = Player.rangeUp(player.TearRange, 1.75)
+end, CacheFlag.CACHE_RANGE)
