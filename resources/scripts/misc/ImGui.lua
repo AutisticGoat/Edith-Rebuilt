@@ -50,8 +50,9 @@ local data = mod.DataHolder.GetEntityData
 ---@field CustomActionKey Keyboard
 ---@field EnableShakescreen boolean
 
-local function isTaintedEdithUnlocked()
-	return Isaac.GetPersistentGameData():Unlocked(achievements.ACHIEVEMENT_TAINTED_EDITH)
+local function isEdithUnlocked(tainted)
+	local ach = tainted and achievements.ACHIEVEMENT_TAINTED_EDITH or achievements.ACHIEVEMENT_EDITH
+	return Isaac.GetPersistentGameData():Unlocked(ach)
 end
 
 local MainPrefix = "EdithRebuilt_"
@@ -297,24 +298,41 @@ local function UpdateImGuiData()
 	local TEdithOptions = Options.TEdith
 	local MiscOptions = Options.Misc
 
-	local data = {
-		[MiscOptions.CustomActionKey] = MiscData.CustomActionKey or Keyboard.KEY_Z,
-		[MiscOptions.EnableShakescreen] = MiscData.EnableShakescreen or false,
+	local data = {}
 
-		[EdithOptions.Visuals.TargetDesign] = (EdithData.TargetDesign - 1) or 0,
-		[EdithOptions.Visuals.TargetLine] = EdithData.TargetLine or false,
-		[EdithOptions.Visuals.SetRGBMode] = EdithData.RGBMode or false,
-		[EdithOptions.Visuals.SetRGBSpeed] = EdithData.RGBSpeed or 0.005,
-		[EdithOptions.Visuals.EnableExtraGore] = EdithData.EnableExtraGore or false,
-		[EdithOptions.Visuals.DisableSaltGibs] = EdithData.DisableSaltGibs or false,
-		[EdithOptions.Sounds.SetStompSound] = (EdithData.StompSound - 1) or 0,
-		[EdithOptions.Sounds.SetStompVolume] = EdithData.StompVolume or 100,
-		[EdithOptions.Sounds.SetJumpCooldownSound] = (EdithData.JumpCooldownSound - 1) or 0,
-		[EdithOptions.Gameplay.DefensiveStompWindow] = EdithData.DefensiveStompWindow or 18,
-		[EdithOptions.Gameplay.SaltShakerSlot] = EdithData.SaltShakerSlot or 0,
-	}
+	if isEdithUnlocked(false) then
+		local data = {
+			[MiscOptions.CustomActionKey] = MiscData.CustomActionKey or Keyboard.KEY_Z,
+			[MiscOptions.EnableShakescreen] = MiscData.EnableShakescreen or false,
 
-	if isTaintedEdithUnlocked() then
+			[EdithOptions.Visuals.TargetDesign] = (EdithData.TargetDesign - 1) or 0,
+			[EdithOptions.Visuals.TargetLine] = EdithData.TargetLine or false,
+			[EdithOptions.Visuals.SetRGBMode] = EdithData.RGBMode or false,
+			[EdithOptions.Visuals.SetRGBSpeed] = EdithData.RGBSpeed or 0.005,
+			[EdithOptions.Visuals.EnableExtraGore] = EdithData.EnableExtraGore or false,
+			[EdithOptions.Visuals.DisableSaltGibs] = EdithData.DisableSaltGibs or false,
+			[EdithOptions.Sounds.SetStompSound] = (EdithData.StompSound - 1) or 0,
+			[EdithOptions.Sounds.SetStompVolume] = EdithData.StompVolume or 100,
+			[EdithOptions.Sounds.SetJumpCooldownSound] = (EdithData.JumpCooldownSound - 1) or 0,
+			[EdithOptions.Gameplay.DefensiveStompWindow] = EdithData.DefensiveStompWindow or 18,
+			[EdithOptions.Gameplay.SaltShakerSlot] = EdithData.SaltShakerSlot or 0,
+		}	
+
+		for k, v in pairs(data) do
+			data[k] = v
+		end
+
+		local targetColor = EdithData.TargetColor
+
+		ImGui.UpdateData(EdithOptions.Visuals.TargetColor, ImGuiData.ColorValues, 
+		{
+			targetColor.Red,
+			targetColor.Green,
+			targetColor.Blue,
+		})
+	end
+
+	if isEdithUnlocked(true) then
 		local taintedData = {
 			[TEdithOptions.Visuals.ArrowDesign] = (TEdithData.ArrowDesign - 1) or 0,
 			[TEdithOptions.Visuals.EnableHopdashTrail] = TEdithData.EnableHopdashTrail or false,
@@ -366,15 +384,6 @@ local function UpdateImGuiData()
 	end
 
 	ImGui.UpdateData(MiscOptions.CustomActionKey, ImGuiData.Value, MiscData.CustomActionKey)
-
-	local targetColor = EdithData.TargetColor
-
-	ImGui.UpdateData(EdithOptions.Visuals.TargetColor, ImGuiData.ColorValues, 
-	{
-		targetColor.Red,
-		targetColor.Green,
-		targetColor.Blue,
-	})
 end
 
 local function ResetSaveData(isTainted)
@@ -454,11 +463,13 @@ end
 local function AddTabBars()
 	ImGui.AddTabBar(Elements.Menu.Windows.Settings, Elements.Menu.TabBars.Settings)
 	
-	ImGui.AddTab(Elements.Menu.TabBars.Settings, Elements.Menu.Tabs.Edith.Main, "Edith")
-	if isTaintedEdithUnlocked() then
+	if isEdithUnlocked(false) then
+		ImGui.AddTab(Elements.Menu.TabBars.Settings, Elements.Menu.Tabs.Edith.Main, "Edith")
+		ImGui.AddTab(Elements.Menu.TabBars.Settings, Elements.Menu.Tabs.Misc.Main, "Misc")
+	end
+	if isEdithUnlocked(true) then
 		ImGui.AddTab(Elements.Menu.TabBars.Settings, Elements.Menu.Tabs.TEdith.Main, "Tainted Edith")
 	end
-	ImGui.AddTab(Elements.Menu.TabBars.Settings, Elements.Menu.Tabs.Misc.Main, "Misc")
 end
 
 local function AddEdithOptions()
@@ -583,7 +594,7 @@ local function AddEdithOptions()
 end
 
 local function AddTaintedEdithOptions()
-	if not isTaintedEdithUnlocked() then return end
+	if not isEdithUnlocked(true) then return end
 	local TEdithTabBar = Elements.Menu.TabBars.TEdith
 	local TEdithTab = Elements.Menu.Tabs.TEdith.Main
 	local TEdithVisuals = Elements.Menu.Tabs.TEdith.Visuals
@@ -676,6 +687,7 @@ local function AddTaintedEdithOptions()
 		end,
 	false)
 
+---@diagnostic disable-next-line: redundant-parameter
 	ImGui.AddInputColor(TEdithVisuals, OptionVisuals.ParryFlashColor, "Parry Flash Color", function (r, g, b, a)
 		TEdithData.ParryFlashColor = {
 			r = r,
@@ -746,7 +758,7 @@ local function AddMiscOptions()
 			ResetSaveData(false)
 		end, 
 	true)
-	if isTaintedEdithUnlocked() then
+	if isEdithUnlocked(true) then
 		ImGui.AddButton(MiscTab, MiscOptions.ResetTEdithData, "Reset Tainted Edith Settings", 
 			function()
 				ResetSaveData(true)
@@ -836,7 +848,7 @@ local function AddProgressBars()
 	ImGui.AddProgressBar(Menu.Windows.Progress, Menu.ProgressBar.General, "General unlocks progress", 0)
 	ImGui.AddProgressBar(Menu.Windows.Progress, Menu.ProgressBar.Edith, "Edith unlocks progress", 0)
 
-	if isTaintedEdithUnlocked() then
+	if isEdithUnlocked(true) then
 		ImGui.AddProgressBar(Menu.Windows.Progress, Menu.ProgressBar.TEdith, "Tainted Edith unlocks progress", 0)
 	end
 end
@@ -1180,7 +1192,7 @@ local function UpdateProgressBar()
 
 	local totaledithUnlocks = GetEdithUnlockedAchs() / 15
 	local totaltedithUnlocks = GetTEdithUnlockedAchs() / 7
-	local totalgeneralUnlocks = (GetEdithUnlockedAchs() + GetTEdithUnlockedAchs() + (isTaintedEdithUnlocked() and 1 or 0)) / 23
+	local totalgeneralUnlocks = (GetEdithUnlockedAchs() + GetTEdithUnlockedAchs() + (isEdithUnlocked(true) and 1 or 0)) / 23
 
 	ImGui.UpdateData(Menu.ProgressBar.Edith, ImGuiData.Value, totaledithUnlocks)
 	ImGui.UpdateData(Menu.ProgressBar.TEdith, ImGuiData.Value, totaltedithUnlocks)
