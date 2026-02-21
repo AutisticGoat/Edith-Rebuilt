@@ -181,11 +181,7 @@ function mod:EdithPlayerUpdate(player)
 		playerData.StoredInput = false
 	end
 
-	if ShouldReduceFriction then
-		player:MultiplyFriction(0.5)
-	end
-
-	if HopParams.IsHoping == true then
+	if HopParams.IsHoping then
 		TEdithMod.ResetHopDashCharge(player, false, true)
 	end
 
