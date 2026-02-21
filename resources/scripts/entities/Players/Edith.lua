@@ -147,7 +147,7 @@ function Edith:OnEdithPEffectUpdate(player)
 	local RoomHasWaterCurrent = not VecDir.VectorEquals(waterCurrent, Vector.Zero)
 
 	if not EdithMod.IsJumping(player) and RoomHasWaterCurrent then
-		player.Velocity = player.Velocity * (waterCurrent * 0.5)
+		player.Velocity = player.Velocity * (waterCurrent * 0.3)
 	end
 
 	if jumpParams.RocketLaunch then return end
