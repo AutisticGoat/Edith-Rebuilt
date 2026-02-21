@@ -592,4 +592,8 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
 	end
 end)
 
+function Helpers.IsModChallenge()
+	return Helpers.IsVestigeChallenge() or Helpers.IsGrudgeChallenge()
+end
+
 return Helpers

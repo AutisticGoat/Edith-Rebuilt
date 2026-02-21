@@ -159,4 +159,17 @@ function player.HasTanukiStatueEffect(p)
 	return p:GetGnawedLeafTimer() >= 60
 end
 
+---@param p EntityPlayer
+---@param tainted boolean
+function player.SetCustomSprite(p, tainted)
+	player.SetChallengeSprite(p, Isaac.GetChallenge())	
+
+	if not Helpers.IsModChallenge() then return end
+
+	local costumeDesc = p:GetCostumeSpriteDescs()[1]
+	local hoodPath = tainted and enums.Misc.GrudgeHoodPath or enums.Misc.VestigeHoodPath
+
+	costumeDesc:GetSprite():ReplaceSpritesheet(0, hoodPath, true)
+end
+
 return player

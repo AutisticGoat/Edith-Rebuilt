@@ -23,12 +23,7 @@ function Edith:EdithInit(player)
 	if not Player.IsEdith(player, false) then return end
 	Player.SetNewANM2(player, "gfx/EdithAnim.anm2")
 	player:AddNullItemEffect(enums.NullItemID.EDITH, true)
-	Player.SetChallengeSprite(player, Isaac.GetChallenge())	
-
-	if helpers.IsVestigeChallenge() then
-		local costumeDesc = player:GetCostumeSpriteDescs()[1]
-		costumeDesc:GetSprite():ReplaceSpritesheet(0, enums.Misc.VestigeHoodPath, true)
-	end
+	Player.SetCustomSprite(player, false)
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, Edith.EdithInit)
 

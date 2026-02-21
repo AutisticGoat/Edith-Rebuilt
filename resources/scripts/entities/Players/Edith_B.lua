@@ -26,12 +26,7 @@ function TEdith:TaintedEdithInit(player)
 	if not Player.IsEdith(player, true) then return end
 	Player.SetNewANM2(player, "gfx/EdithTaintedAnim.anm2")
 	player:AddNullItemEffect(costumes.T_EDITH, true)
-	Player.SetChallengeSprite(player, Isaac.GetChallenge())
-
-	if Helpers.IsGrudgeChallenge() then
-		local costumeDesc = player:GetCostumeSpriteDescs()[1]
-		costumeDesc:GetSprite():ReplaceSpritesheet(0, enums.Misc.GrudgeHoodPath, true)
-	end
+	Player.SetCustomSprite(player, true)
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, TEdith.TaintedEdithInit)
 

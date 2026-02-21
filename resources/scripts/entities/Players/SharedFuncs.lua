@@ -51,12 +51,7 @@ mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_ADD_COSTUME, OnAddCostume)
 ---@return boolean?
 local function OnRemoveCostume(_, itemconfig, player)
     if not Player.IsAnyEdith(player) then return end
-    print(itemconfig:IsNull())
-    print(itemconfig.Costume.Anm2Path)
-
-    -- print(itemconfig.IsNull(), itemconfig.Name)
-    -- print("aaaaaaaaaaaaaaaaa")
-    -- if not Helpers.When(itemconfig.Costume.ID, ModCostumes, false) then return end
+    if not Helpers.When(itemconfig.Costume.ID, ModCostumes, false) then return end
     return true
 end
 mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_REMOVE_COSTUME, OnRemoveCostume)
@@ -100,20 +95,6 @@ mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, function(_, tear)
     tear.Velocity = -((tear.Position - target.Position):Normalized()):Resized(player.ShotSpeed * 10)
 end)
 
----@param player EntityPlayer
----@return NullItemID?
-local function GetEdithCostume(player)
-    local Vestige = Helpers.IsVestigeChallenge()
-    local Grudge = Helpers.IsGrudgeChallenge()
-
-    local isEdith = Player.IsEdith
-
-    return (
-        (isEdith(player, false) and (Vestige and costumes.EDITH_VESTIGE or costumes.EDITH)) or
-        (isEdith(player, true) and (Grudge and costumes.T_EDITH_GRUDGE or costumes.T_EDITH)) --[[@as NullItemID]]
-    )
-end
-
 local ReloadCostumeItem = {
     [CollectibleType.COLLECTIBLE_D4] = true,
     [CollectibleType.COLLECTIBLE_D100] = true,
@@ -122,11 +103,10 @@ local ReloadCostumeItem = {
 ---@param ID CollectibleType
 ---@param player EntityPlayer
 mod:AddCallback(ModCallbacks.MC_USE_ITEM, function(_, ID, _, player)
+    if not Player.IsAnyEdith(player) then return end
     if not ReloadCostumeItem[ID] then return end
 
-    local Costume = GetEdithCostume(player)    
-    if not Costume then return end
-    player:AddNullCostume(Costume)
+    Player.SetCustomSprite(player, Player.IsEdith(player, true))
 end)
 
 mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, function()
