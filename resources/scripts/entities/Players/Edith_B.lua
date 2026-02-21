@@ -317,8 +317,8 @@ HudHelper.RegisterHUDElement({
 			offset = misc.ChargeBarleftVector
 		end
 
-		HudHelper.RenderChargeBar(playerData.ChargeBar, dashCharge, 100, playerpos + offset)
-		HudHelper.RenderChargeBar(playerData.BRChargeBar, dashBRCharge, 100, playerpos + misc.ChargeBarrightVector)
+		Helpers.RenderChargeBar(playerData.ChargeBar, dashCharge, 100, playerpos + offset)
+		Helpers.RenderChargeBar(playerData.BRChargeBar, dashBRCharge, 100, playerpos + misc.ChargeBarrightVector)
 	end
 }, HudHelper.HUDType.EXTRA)
 

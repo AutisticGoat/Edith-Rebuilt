@@ -17,7 +17,6 @@ local includeFiles = {
 	libs .. "prenpckillcallback",
 	libs .. "CustomShockwaveAPI",
 	libs .. "lhsx",
-	libs .. "EdithKotryHudHelper",
 	funcs .. "functions",
 	funcs .. "unlock_functions",
 	misc .. "ImGui",
