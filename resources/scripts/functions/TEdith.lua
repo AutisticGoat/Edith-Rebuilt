@@ -352,6 +352,7 @@ function TEdith.ParryTriggerManager(player, IsGrudge, HopParams)
 		if PerfectParry then
 			TEdith.AddHopDashCharge(player, 20, 0.5)
 		end
+		TEdith.StopTEdithHops(player, 0, true, true, false)
 	end
 end	
 
