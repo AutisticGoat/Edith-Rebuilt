@@ -723,7 +723,7 @@ end
 ---@param IsTaintedEdith any
 local function PerfectParryManager(player, ent, HopParams, IsTaintedEdith)
 	if ent:ToTear() then return end
-	
+
 	local damageFlag = Player.PlayerHasBirthright(player) and DamageFlag.DAMAGE_FIRE or 0
 	local proj = ent:ToProjectile()
 	local bomb = ent:ToBomb()
@@ -775,6 +775,7 @@ local function PerfectParryManager(player, ent, HopParams, IsTaintedEdith)
 			if bomb then
 				local vel = (not nearestEnemy and RandomVector() or (nearestEnemy.Position - player.Position)):Resized(15)
 				bomb.Velocity = vel
+				bomb.ExplosionDamage = bomb.ExplosionDamage * 1.25
 			end
 		end
 	end
