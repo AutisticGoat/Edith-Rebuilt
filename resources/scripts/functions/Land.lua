@@ -726,7 +726,9 @@ local function PerfectParryManager(player, ent, HopParams, IsTaintedEdith)
 	
 	local damageFlag = Player.PlayerHasBirthright(player) and DamageFlag.DAMAGE_FIRE or 0
 	local proj = ent:ToProjectile()
+	local bomb = ent:ToBomb()
 	local shouldTriggerFireJets = IsTaintedEdith and hasBirthright or Player.IsJudasWithBirthright(player)
+	local nearestEnemy = Helpers.GetNearestEnemy(player)
 
 	local CinderMult = StatusEffect.EntHasStatusEffect(ent, "Cinder") and 1.25 or 1
 
@@ -734,7 +736,7 @@ local function PerfectParryManager(player, ent, HopParams, IsTaintedEdith)
 
 	if proj then
 		local spawner = proj.Parent or proj.SpawnerEntity
-		local targetEnt = spawner or Helpers.GetNearestEnemy(player) or proj
+		local targetEnt = spawner or nearestEnemy or proj
 
 		proj.FallingAccel = -0.1
 		proj.FallingSpeed = 0
@@ -746,26 +748,34 @@ local function PerfectParryManager(player, ent, HopParams, IsTaintedEdith)
 			proj:AddProjectileFlags(ProjectileFlags.FIRE_SPAWN)
 		end
 	else
-		if ent.Type == EntityType.ENTITY_STONEY then
-			ent:ToNPC().State = NpcState.STATE_SPECIAL
-		end
+		if Helpers.IsEnemy(ent) then		
+			sfx:Play(SoundEffect.SOUND_MEATY_DEATHS)
 
-		for i = 1, Player.GetNumTears(player) do
-			ent:TakeDamage(HopParams.ParryDamage * CinderMult, damageFlag, EntityRef(player), 0)
-		end
-		
-		if Helpers.IsEnemy(ent) and hasBirthright then
-			ent:AddBurn(EntityRef(player), 123, 5)				
-		end
-		sfx:Play(SoundEffect.SOUND_MEATY_DEATHS)
+			for _ = 1, Player.GetNumTears(player) do
+				ent:TakeDamage(HopParams.ParryDamage * CinderMult, damageFlag, EntityRef(player), 0)
+			end
 
-		if ent.Type == EntityType.ENTITY_FIREPLACE and ent.Variant ~= 4 then
-			ent:Kill()
-		end
+			if hasBirthright then
+				ent:AddBurn(EntityRef(player), 123, 5)
+			end
 
-		if ent.HitPoints <= HopParams.ParryDamage then
-			Isaac.RunCallback(enums.Callbacks.PERFECT_PARRY_KILL, player, ent)
-			Land.AddExtraGore(ent, player)
+			if ent.HitPoints <= HopParams.ParryDamage then
+				Isaac.RunCallback(enums.Callbacks.PERFECT_PARRY_KILL, player, ent)
+				Land.AddExtraGore(ent, player)
+			end
+
+			if ent.Type == EntityType.ENTITY_FIREPLACE and ent.Variant ~= 4 then
+				ent:Kill()
+			end
+		else
+			if ent.Type == EntityType.ENTITY_STONEY then
+				ent:ToNPC().State = NpcState.STATE_SPECIAL
+			end
+
+			if bomb then
+				local vel = (not nearestEnemy and RandomVector() or (nearestEnemy.Position - player.Position)):Resized(15)
+				bomb.Velocity = vel
+			end
 		end
 	end
 end
@@ -819,6 +829,7 @@ function Land.ParryLandManager(player, HopParams, IsTaintedEdith)
 
 	for _, ent in pairs(HopParams.ParriedEnemies) do
 		PerfectParryManager(player, ent, HopParams, IsTaintedEdith)
+
 		PerfectParry = true
 	end
 
