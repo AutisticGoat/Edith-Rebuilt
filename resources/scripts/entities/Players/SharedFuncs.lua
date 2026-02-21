@@ -112,12 +112,10 @@ end)
 mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, function()
 	local pool = game:GetItemPool()
 
-	for _, player in ipairs(PlayerManager.GetPlayers()) do
-		if Player.IsAnyEdith(player) then		
-			pool:RemoveCollectible(CollectibleType.COLLECTIBLE_NIGHT_LIGHT)
-			pool:RemoveCollectible(CollectibleType.COLLECTIBLE_MONTEZUMAS_REVENGE)
-		end
-	end
+    if not (PlayerManager.AnyoneIsPlayerType(enums.PlayerType.PLAYER_EDITH) or PlayerManager.AnyoneIsPlayerType(enums.PlayerType.PLAYER_EDITH_B)) then return end
+    
+    pool:RemoveCollectible(CollectibleType.COLLECTIBLE_NIGHT_LIGHT)
+    pool:RemoveCollectible(CollectibleType.COLLECTIBLE_MONTEZUMAS_REVENGE)
 end)
 
 ---@param player EntityPlayer
