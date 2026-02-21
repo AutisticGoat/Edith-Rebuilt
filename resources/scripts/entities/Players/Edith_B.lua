@@ -288,15 +288,10 @@ function TEdith:TaintedEdithDamageManager(player, _, flags, source)
 end
 mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG, TEdith.TaintedEdithDamageManager)
 
-HudHelper.RegisterHUDElement({
-	Name = "EdithRebuilt_TaintedEdithChargeBars",
-	Priority = HudHelper.Priority.NORMAL,
-	Condition = function(player)
-		return Player.IsEdith(player, true) and RoomTransition:GetTransitionMode() ~= 3
-	end,
-	XPadding = 0,
-	YPadding = 0,
-	OnRender = function(player)
+mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
+	for _, player in ipairs(PlayerManager.GetPlayers()) do
+		if not (Player.IsEdith(player, true) and RoomTransition:GetTransitionMode() ~= 3) then goto continue end
+
 		local playerpos = game:GetRoom():WorldToScreenPosition(player.Position)
 		local HopParams = TEdithMod.GetHopParryParams(player)
 		local playerData = data(player)
@@ -319,8 +314,10 @@ HudHelper.RegisterHUDElement({
 
 		Helpers.RenderChargeBar(playerData.ChargeBar, dashCharge, 100, playerpos + offset)
 		Helpers.RenderChargeBar(playerData.BRChargeBar, dashBRCharge, 100, playerpos + misc.ChargeBarrightVector)
+
+		::continue::
 	end
-}, HudHelper.HUDType.EXTRA)
+end)
 
 ---@param player EntityPlayer
 ---@param grid GridEntity
