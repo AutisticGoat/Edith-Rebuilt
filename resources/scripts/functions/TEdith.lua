@@ -11,6 +11,7 @@ local maths = require("resources.scripts.functions.Maths")
 local helpers = require("resources.scripts.functions.Helpers")
 local Player = require("resources.scripts.functions.Player")
 local Land = require("resources.scripts.functions.Land")
+local VecDir = require("resources.scripts.functions.VecDir")
 local TEdith = {}
 local data = mod.DataHolder.GetEntityData
 
@@ -277,6 +278,16 @@ function TEdith.HopDashChargeManager(player, arrow)
 	if targetframecount > 1 and (not HopParams.IsHoping and not isJumping) and HopParams.HopCooldown == 0 then
 		TEdith.AddHopDashCharge(player, chargeAdd, 0.5)
 	end
+end
+
+---@param player EntityPlayer
+function TEdith.WaterCurrentManager(player)
+	local current = game:GetRoom():GetWaterCurrent()
+	local roomHasCurrent = current:Length() ~= 0
+
+	if not roomHasCurrent then return end
+	if JumpLib:GetData(player).Jumping then return end
+	player.Velocity = player.Velocity * (current * 0.3)
 end
 
 ---Function used to trigger Tainted Edith and Burnt Hood's parry-jump

@@ -119,6 +119,8 @@ function mod:TaintedEdithUpdate(player)
 		end
 	end
 
+	TEdithMod.WaterCurrentManager(player)
+
 	if arrow and not isArrowMoving then
 		if pData.IsRedirectioningMove then
 			if pData.PressCount <= 2 then
