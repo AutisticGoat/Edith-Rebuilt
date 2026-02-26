@@ -26,9 +26,10 @@ function DivineRetribution:OnDRUse(_, rng, player, flags)
         local roomEnemies = Helpers.GetEnemies()
         if #roomEnemies <= 0 then return end
         local Hascarbattery = player:HasCollectible(CollectibleType.COLLECTIBLE_CAR_BATTERY)
+        local HeartsToAdd = Hascarbattery and 2 or 1
         local damage = (Hascarbattery and 50 or 25) * (IsJudasWithBirthright and 1.5 or 1)
         local healFunc = IsJudasWithBirthright and player.AddBlackHearts or player.AddSoulHearts
-        healFunc(player, 1)
+        healFunc(player, HeartsToAdd)
         local sound = IsJudasWithBirthright and SoundEffect.SOUND_UNHOLY or SoundEffect.SOUND_SUPERHOLY
 
         sfx:Play(sound)
