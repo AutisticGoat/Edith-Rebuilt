@@ -772,6 +772,10 @@ local function PerfectParryManager(player, ent, HopParams, IsTaintedEdith)
 				ent:ToNPC().State = NpcState.STATE_SPECIAL
 			end
 
+			if ent.Type == EntityType.ENTITY_SHOPKEEPER then
+				ent:Kill()
+			end
+
 			if bomb then
 				local vel = (not nearestEnemy and RandomVector() or (nearestEnemy.Position - player.Position)):Resized(15)
 				bomb.Velocity = vel
@@ -852,6 +856,8 @@ function Land.ParryLandManager(player, HopParams, IsTaintedEdith)
 		(PerfectParry and 
 		((hasBirthcake and 10 or 12) - staticChargeCooldownBonus) or 15) or 0
 	)
+
+	-- print(HopParams.ParryCooldown)
 
 	data(player).MaxParryCooldown = HopParams.ParryCooldown or 0
 
