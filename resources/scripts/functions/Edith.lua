@@ -260,7 +260,7 @@ function Edith.TargetMovementManager(player, target, isMoving)
 		local VectorY = ((input.up > 0.3 and -input.up) or (input.down > 0.3 and input.down) or 0)
 
 		friction = target:GetSprite():IsPlaying("Blink") and 0.5 or 0.775
-		target.Velocity = target.Velocity + Vector(VectorX, VectorY):Normalized():Resized(4)
+		target.Velocity = target.Velocity + Vector(VectorX, VectorY):Resized(4.5)
 	end
     target:MultiplyFriction(friction or 0.8)
 
