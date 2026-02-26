@@ -347,6 +347,7 @@ function TEdith.ParryTriggerManager(player, IsGrudge, HopParams)
 		end
 	else
 		local PerfectParry = Land.ParryLandManager(player, HopParams, true)
+		-- print("Perfect parry:", PerfectParry)
 		Land.LandFeedbackManager(player, Land.GetLandSoundTable(true, true), misc.BurntSaltColor, true)
 
 		if PerfectParry then
