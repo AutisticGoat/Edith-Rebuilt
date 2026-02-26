@@ -33,7 +33,7 @@ function Paprika:OnKilling(entity, source, _, amount)
     for _, Ent in ipairs(Isaac.FindInCapsule(Capsule(entPos, Vector.One, 0, 40), EntityPartition.ENEMY)) do
         Ent:TakeDamage(amount * (0.25 * ((0.05 * paprikaMult) - 0.05)), 0, source, 0)
         Ent:AddBurn(source, 60, amount * 0.2)
-        mod.TriggerPush(Ent, entity, 20, 3, false)
+        Helpers.TriggerPush(Ent, entity, 20)
     end
 end
 mod:AddCallback(PRE_NPC_KILL.ID, Paprika.OnKilling)
