@@ -38,7 +38,8 @@ function Vestige:EdithJumpHandler(player)
 		EdithMod.EdithDash(player, TargetArrow.GetEdithTargetDirection(player), TargetArrow.GetEdithTargetDistance(player), 50)
 	end
 
-	if target and JumpLib:IsFalling(player) then
+	if target and (JumpLib:IsFalling(player) or (isJumping and player.Position:Distance(target.Position) <= 5))  then
+		player.Velocity = Vector.Zero
 		player.Position = target.Position
 	end
 end
