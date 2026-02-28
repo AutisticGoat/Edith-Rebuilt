@@ -24,9 +24,9 @@ local TEdith = {}
 ---@param player EntityPlayer
 function TEdith:TaintedEdithInit(player)
 	if not Player.IsEdith(player, true) then return end
+
 	Player.SetNewANM2(player, "gfx/EdithTaintedAnim.anm2")
 	player:AddNullItemEffect(costumes.T_EDITH, true)
-	Player.SetCustomSprite(player, true)
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, TEdith.TaintedEdithInit)
 
@@ -50,6 +50,10 @@ end)
 ---@param player EntityPlayer	
 function mod:TaintedEdithUpdate(player)
 	if not Player.IsEdith(player, true) then return end
+
+	if player.FrameCount == 0 then
+		Player.SetCustomSprite(player, true)
+	end
 
 	local HopParams = TEdithMod.GetHopParryParams(player)
 	local isArrowMoving = TargetArrow.IsEdithTargetMoving(player)
@@ -134,15 +138,6 @@ end
 mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, mod.TaintedEdithUpdate)
 
 ---@param player EntityPlayer
-local function TintEnemies(player)
-	for _, enemy in ipairs(Isaac.FindInRadius(player.Position, misc.PerfectParryRadius + 4, EntityPartition.ENEMY)) do
-		if Helpers.IsEnemy(enemy) then 
-			enemy:SetColor(Color(1, 1, 1, 1, 2), 5, 100, true, false)
-		end
-	end
-end
-
----@param player EntityPlayer
 function mod:EdithPlayerUpdate(player)
 	if not Player.IsEdith(player, true) then return end
 
@@ -166,8 +161,6 @@ function mod:EdithPlayerUpdate(player)
 	playerData.movementVector = Vector(MovX, MovY):Normalized()
 
 	HopParams.IsParryJump = HopParams.IsParryJump or false
-
-	TintEnemies(player)
 
 	if Helpers.IsKeyStompTriggered(player) then
 		if HopParams.ParryCooldown == 0 and not isTaintedEdithJump(player) and not HopParams.IsParryJump then

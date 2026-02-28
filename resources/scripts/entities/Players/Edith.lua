@@ -23,7 +23,6 @@ function Edith:EdithInit(player)
 	if not Player.IsEdith(player, false) then return end
 	Player.SetNewANM2(player, "gfx/EdithAnim.anm2")
 	player:AddNullItemEffect(enums.NullItemID.EDITH, true)
-	Player.SetCustomSprite(player, false)
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, Edith.EdithInit)
 
@@ -37,6 +36,11 @@ end
 ---@param player EntityPlayer
 function Edith:OnEdithUpdate(player)
 	if not Player.IsEdith(player, false) then return end
+
+	if player.FrameCount == 0 then
+		Player.SetCustomSprite(player, false)
+	end
+
 	if player:IsDead() then TargetArrow.RemoveEdithTarget(player) return end
 
 	if player.FrameCount == 0 and helpers.GetConfigData("EdithData").SaltShakerSlot == 1 then
