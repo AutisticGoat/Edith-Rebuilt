@@ -21,8 +21,6 @@ function Grudge:OnTaintedEdithGrudgeCollision(player, collider)
 
     local HopParams = TEdithMod.GetHopParryParams(player)
 
-    -- print(HopParams.GrudgeDash)
-
     if not HopParams.GrudgeDash then return end
 
     local Aceleration = player.Velocity:Length()
