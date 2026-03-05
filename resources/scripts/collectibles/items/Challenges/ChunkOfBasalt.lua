@@ -14,29 +14,28 @@ local data = mod.DataHolder.GetEntityData
 ---@param player EntityPlayer
 function ChunkOfBasalt:TriggerBasaltDash(player)
     if not player:HasCollectible(items.COLLECTIBLE_CHUNK_OF_BASALT) then return end
-    if player:GetMovementDirection() == Direction.NO_DIRECTION then return end
-
     local playerData = data(player)
 
     playerData.BasaltCount = playerData.BasaltCount or 60
 
     if player.Velocity:Length() <= 7 then
-        playerData.IsBasaltDassh = false
+        playerData.IsBasaltDash = false
     end
 
-    if playerData.IsBasaltDassh then
+    if playerData.IsBasaltDash then
         player:CreateAfterimage(5, player.Position)
     end
 
     if not Helpers.IsKeyStompTriggered(player) then return end
-    if playerData.IsBasaltDassh then return end
+    if player:GetMovementDirection() == Direction.NO_DIRECTION then return end
+    if playerData.IsBasaltDash then return end
 
     if playerData.BasaltCount > 0 then return end
     playerData.BasaltCount = 60
     playerData.BasaltFlickering = 0
     sfx:Play(SoundEffect.SOUND_SHELLGAME)
     EdithMod.EdithDash(player, player:GetMovementInput():Normalized(), 60, 2)
-    playerData.IsBasaltDassh = true
+    playerData.IsBasaltDash = true
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, ChunkOfBasalt.TriggerBasaltDash)
 
@@ -45,7 +44,7 @@ function ChunkOfBasalt:Timer(player)
     if not player:HasCollectible(items.COLLECTIBLE_CHUNK_OF_BASALT) then return end
     local playerData = data(player)
 
-    if playerData.IsBasaltDassh then return end
+    if playerData.IsBasaltDash then return end
     playerData.BasaltCount = playerData.BasaltCount or 0
     playerData.BasaltCount = math.max(playerData.BasaltCount - 1, 0)
 
@@ -64,7 +63,7 @@ function ChunkOfBasalt:Cooldown(player)
     playerData.BasaltFlickering = playerData.BasaltFlickering or 0
     playerData.BasaltFlickering = playerData.BasaltFlickering + 1
 
-    if playerData.BasaltFlickering == 10 then
+    if playerData.BasaltFlickering == 20 then
         Player.SetColorCooldown(player, -0.6, 2)
         playerData.BasaltFlickering = 0
     end
@@ -79,7 +78,7 @@ function ChunkOfBasalt:OnCollidingWithEnemy(player, collider)
     if not player:HasCollectible(items.COLLECTIBLE_CHUNK_OF_BASALT) then return end
 
     local playerData = data(player)
-    if not playerData.IsBasaltDassh then return end
+    if not playerData.IsBasaltDash then return end
 
     local damageFormula = player.Damage * (player.Velocity:Length() / 5)
     local capsule = Capsule(player.Position, Vector.One, 0, 80)
@@ -115,8 +114,8 @@ mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_COLLISION, ChunkOfBasalt.OnCollidingW
 function ChunkOfBasalt:DenyDamage(player)
     local playerData = data(player)
 
-    if not playerData.IsBasaltDassh then return end
-    playerData.IsBasaltDassh = false
+    if not playerData.IsBasaltDash then return end
+    playerData.IsBasaltDash = false
     return false
 end
 mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG, ChunkOfBasalt.DenyDamage)
@@ -125,7 +124,7 @@ mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG, ChunkOfBasalt.DenyDamage)
 function ChunkOfBasalt:OnGridColl(player)
     local playerData = data(player)
 
-    if not playerData.IsBasaltDassh then return end
+    if not playerData.IsBasaltDash then return end
 
     game:ShakeScreen(10)
     for rocks = 1, 8 do

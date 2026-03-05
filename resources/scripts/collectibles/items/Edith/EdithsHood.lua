@@ -101,10 +101,9 @@ function EdithsHood:OnSaltedDeath(npc, source)
 
 	local rng = player:GetCollectibleRNG(items.COLLECTIBLE_EDITHS_HOOD)
 	local randomTears = rng:RandomInt(4, 8)
-	local tear
 
 	for _ = 1, randomTears do
-		tear = player:FireTear(npc.Position, rng:RandomVector():Resized(player.ShotSpeed * 10), false, false, false, player, 1.2)
+		local tear = player:FireTear(npc.Position, rng:RandomVector():Resized(player.ShotSpeed * 10), false, false, false, player, 1.2)
 
 		tear:AddTearFlags(player.TearFlags)
 	end
