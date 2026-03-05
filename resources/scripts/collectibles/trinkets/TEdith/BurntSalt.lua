@@ -1,8 +1,10 @@
 local mod = EdithRebuilt
 local enums = mod.Enums
 local modules = mod.Modules
-local ModRNG = modules.RNG
 local Helpers = modules.HELPERS
+local Status = modules.STATUS_EFFECTS
+local creeps = modules.CREEPS
+local effects = enums.EdithStatusEffects
 local trinket = enums.TrinketType
 local data = mod.DataHolder.GetEntityData
 local BurntSalt = {}
@@ -13,42 +15,44 @@ function BurntSalt:SaltTearShoot(tear)
 
     if not player then return end
     if not player:HasTrinket(trinket.TRINKET_BURNT_SALT) then return end
-    if not ModRNG.RandomBoolean(player:GetTrinketRNG(trinket.TRINKET_BURNT_SALT)) then return end 
+    if tear.TearIndex % 3 ~= 0 then return end
+ 
     Helpers.ForceSaltTear(tear, true)
     data(tear).BurntSaltTear = true
     tear.CollisionDamage = tear.CollisionDamage * 1.25
 end
 mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, BurntSalt.SaltTearShoot)
 
----@param npc EntityNPC
+---@param ent Entity
 ---@param source EntityRef
-function BurntSalt:OnKill(npc, source)
+mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(_, ent, _, _, source, countdown)
     if source.Type == 0 then return end
 
     local player = Helpers.GetPlayerFromRef(source)
     local tear = source.Entity:ToTear()
 
-    if not player or not tear then return end 
+    if not player or not tear then return end
     if not player:HasTrinket(trinket.TRINKET_BURNT_SALT) then return end
     if not data(tear).BurntSaltTear then return end 
 
-    local rng = player:GetTrinketRNG(trinket.TRINKET_BURNT_SALT)
+    Status.SetStatusEffect(effects.CINDER, ent, 150, player)
+end)
 
-    if mod.RandomBoolean(rng) then return end
+local totalCreeps = 10
+local degrees = 360/totalCreeps
 
-    local burntSaltTear
-    for _ = 1, rng:RandomInt(4, 7) do
-        burntSaltTear = Isaac.Spawn(
-            EntityType.ENTITY_TEAR,
-            0,
-            0,
-            npc.Position,
-            rng:RandomVector():Resized(player.ShotSpeed * 10),
-            player
-        ):ToTear()  
-        
-        if not burntSaltTear then return end
-        Helpers.ForceSaltTear(burntSaltTear, true)
+---@param npc EntityNPC
+---@param source EntityRef
+mod:AddCallback(ModCallbacks.MC_POST_ENTITY_KILL, function (_, npc, source)
+    if source.Type == 0 then return end
+
+    local player = Helpers.GetPlayerFromRef(source)
+
+    if not player then return end 
+    if not player:HasTrinket(trinket.TRINKET_BURNT_SALT) then return end
+    if not Status.EntHasStatusEffect(npc, effects.CINDER) then return end
+
+    for i = 1, totalCreeps do
+        creeps.SpawnCinderCreep(player, npc.Position + Vector(0, 40):Rotated(degrees * i), 3, 5)
     end
-end
-mod:AddCallback(ModCallbacks.MC_POST_ENTITY_KILL, BurntSalt.OnKill)
+end)
