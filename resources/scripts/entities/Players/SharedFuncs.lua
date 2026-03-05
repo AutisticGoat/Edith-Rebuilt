@@ -125,3 +125,26 @@ mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_GRID_COLLISION, function(_, player, _
     if grid:GetType() ~= GridEntityType.GRID_ROCK_SPIKED then return end
 	return true
 end)
+
+local VestigePath = "gfx/ui/stage/EdithPortraitVestige.png"
+local GrudgePath = "gfx/ui/stage/TEdithPortraitGrudge.png"
+
+---@param sprite Sprite
+---@param layer integer
+local function replacePortrait(sprite, layer)
+    local IsVestige = Helpers.IsVestigeChallenge()
+    local IsGrudge = Helpers.IsGrudgeChallenge()
+    local path = IsVestige and VestigePath or IsGrudge and GrudgePath
+
+    if not path then return end
+
+    sprite:ReplaceSpritesheet(layer, path, true)
+end
+
+mod:AddCallback(ModCallbacks.MC_POST_BOSS_INTRO_SHOW, function ()
+    replacePortrait(RoomTransition:GetVersusScreenSprite(), 12)
+end)
+
+mod:AddCallback(ModCallbacks.MC_POST_NIGHTMARE_SCENE_SHOW, function()
+    replacePortrait(NightmareScene.GetBackgroundSprite(), 6)
+end)

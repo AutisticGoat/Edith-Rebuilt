@@ -301,8 +301,8 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
 			offset = misc.ChargeBarleftVector
 		end
 
-		Helpers.RenderChargeBar(playerData.ChargeBar, dashCharge, 100, playerpos + offset)
-		Helpers.RenderChargeBar(playerData.BRChargeBar, dashBRCharge, 100, playerpos + misc.ChargeBarrightVector)
+		HudHelper.RenderChargeBar(playerData.ChargeBar, dashCharge, 100, playerpos + offset)
+		HudHelper.RenderChargeBar(playerData.BRChargeBar, dashBRCharge, 100, playerpos + misc.ChargeBarrightVector)
 
 		::continue::
 	end
