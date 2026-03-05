@@ -114,7 +114,7 @@
 		tags="offensive"
 		achievement="EdithRebuilt_SpicesMix"
 		chargetype="timed"
-		maxcharges="150"
+		maxcharges="180"
 	/>
 	<passive	
 		id="11" 

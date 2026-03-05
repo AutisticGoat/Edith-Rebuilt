@@ -117,6 +117,8 @@ EdithRebuilt.Enums = {
 		SOUND_BLOQUEO = Isaac.GetSoundIdByName("BLOQUEO"),
 		SOUND_NAUTRASH = Isaac.GetSoundIdByName("Nautrash"),
 		SOUND_HAWK_TUAH = Isaac.GetSoundIdByName("HawkTuah"),
+		SOUND_CINNAMON_COUGH = Isaac.GetSoundIdByName("CinnamonCough"),
+		SOUND_PEPPER_SNEEZE = Isaac.GetSoundIdByName("PepperSneeze"),
 	},
 	Achievements = {
 		-- Edith unlocks

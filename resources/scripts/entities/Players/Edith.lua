@@ -36,16 +36,14 @@ end
 ---@param player EntityPlayer
 function Edith:OnEdithUpdate(player)
 	if not Player.IsEdith(player, false) then return end
+	if player:IsDead() then TargetArrow.RemoveEdithTarget(player) return end
 
 	if player.FrameCount == 0 then
 		Player.SetCustomSprite(player, false)
-	end
-
-	if player:IsDead() then TargetArrow.RemoveEdithTarget(player) return end
-
-	if player.FrameCount == 0 and helpers.GetConfigData("EdithData").SaltShakerSlot == 1 then
-		player:RemoveCollectible(enums.CollectibleType.COLLECTIBLE_SALTSHAKER)
-		player:SetPocketActiveItem(enums.CollectibleType.COLLECTIBLE_SALTSHAKER, ActiveSlot.SLOT_POCKET, false)
+		if helpers.GetConfigData(enums.ConfigDataTypes.EDITH).SaltShakerSlot == 1 then
+			player:RemoveCollectible(enums.CollectibleType.COLLECTIBLE_SALTSHAKER)
+			player:SetPocketActiveItem(enums.CollectibleType.COLLECTIBLE_SALTSHAKER, ActiveSlot.SLOT_POCKET, false)
+		end
 	end
 
 	local isMoving = TargetArrow.IsEdithTargetMoving(player)

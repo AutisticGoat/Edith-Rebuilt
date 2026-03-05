@@ -58,4 +58,10 @@
 	<sound name="HawkTuah">
 		<sample weight="1" path="Hawk.wav" />
 	</sound>
+	<sound name="CinnamonCough">
+		<sample weight="1" path="CinnamonCough.wav" />
+	</sound>
+	<sound name="PepperSneeze">
+		<sample weight="1" path="PepperSneeze.wav" />
+	</sound>
 </sounds>

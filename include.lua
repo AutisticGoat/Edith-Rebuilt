@@ -7,6 +7,7 @@ local funcs = "functions/"
 local compat = "compat/"
 local libs = "libs/"
 local misc = "misc/"
+local effects = "statusEffects/"
 
 local includeFiles = {
 	-- Cosas necesarias
@@ -21,6 +22,17 @@ local includeFiles = {
 	funcs .. "unlock_functions",
 	misc .. "ImGui",
 	misc .. "UnlockManager",
+
+	effects .. "Oregano",
+	effects .. "Salt",
+	effects .. "Cinder",
+	effects .. "HydrargyrumCurse",
+	effects .. "Garlic",
+	effects .. "Cinnamon",
+	effects .. "Turmeric",
+	effects .. "Ginger",
+	effects .. "Pepper",
+	effects .. "Cumin",
 
 	-- Items
 	col .. "items/Edith/SaltShaker",

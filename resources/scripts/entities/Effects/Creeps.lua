@@ -12,7 +12,8 @@ local data = mod.DataHolder.GetEntityData
 local ModCreeps = {
     [subtype.CINDER_CREEP] = true,
     [subtype.SALT_CREEP] = true,
-    [subtype.PEPPER_CREEP] = true
+    [subtype.PEPPER_CREEP] = true,
+    [subtype.OREGANO_CREEP] = true,
 }
 
 ---@param effect EntityEffect
@@ -107,6 +108,18 @@ local function CinderCreepUpdate(effect)
     end
 end
 
+local function OreganoCreepUpdate(effect)
+    if effect.SubType ~= subtype.OREGANO_CREEP then return end    
+
+    local player = effect.SpawnerEntity:ToPlayer()
+
+    if not player then return end
+
+    for _, entity in pairs(Isaac.FindInRadius(effect.Position, 20 * effect.SpriteScale.X, EntityPartition.ENEMY)) do
+        entity:AddSlowing(EntityRef(player), 150, 0.8, Color(1, 1, 1, 1, 113/255, 120/255, 82/255))
+    end
+end
+
 ---@param npc EntityNPC
 mod:AddCallback(ModCallbacks.MC_NPC_UPDATE, function(_, npc)
 	local npcData = data(npc)
@@ -130,4 +143,5 @@ mod:AddCallback(ModCallbacks.MC_POST_EFFECT_UPDATE, function(_, effect)
     SaltCreepUpdate(effect)
     PepperCreepUpdate(effect)
     CinderCreepUpdate(effect)
+    OreganoCreepUpdate(effect)
 end, EffectVariant.PLAYER_CREEP_RED)

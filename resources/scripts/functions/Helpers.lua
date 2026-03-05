@@ -244,7 +244,6 @@ function Helpers.IsDogmaAppearCutscene()
 	return TV:GetSprite():IsPlaying("Idle2") and Dogma ~= nil
 end
 
----Helper function that returns `EntityPlayer` from `EntityRef`
 ---@param EntityRef EntityRef
 ---@return EntityPlayer?
 function Helpers.GetPlayerFromRef(EntityRef)
@@ -595,51 +594,5 @@ end)
 function Helpers.IsModChallenge()
 	return Helpers.IsVestigeChallenge() or Helpers.IsGrudgeChallenge()
 end
-
---- From HudHelper by Benny 🐐: https://github.com/BenevolusGoat/hud-helper
-	function Helpers.ShouldHideHUD()
-		return ModConfigMenu and ModConfigMenu.IsVisible
-			or not game:GetHUD():IsVisible() and not (TheFuture or {}).HiddenHUD
-			or game:GetSeeds():HasSeedEffect(SeedEffect.SEED_NO_HUD)
-	end
-
-	---@param HUDSprite Sprite
-	---@param charge number
-	---@param maxCharge number
-	---@param position Vector
-	---@function
-	function Helpers.RenderChargeBar(HUDSprite, charge, maxCharge, position)
-		if Helpers.ShouldHideHUD() or not Options.ChargeBars then return end
-		if game:GetRoom():GetRenderMode() == RenderMode.RENDER_WATER_REFLECT then return end
-
-		local chargePercent = math.min(charge / maxCharge, 1)
-
-		if chargePercent == 1 then
-			-- ChargedHUD:IsPlaying("StartCharged") and not
-			if HUDSprite:IsFinished("Charged") or HUDSprite:IsFinished("StartCharged") then
-				if not HUDSprite:IsPlaying("Charged") then
-					HUDSprite:Play("Charged", true)
-				end
-			elseif not HUDSprite:IsPlaying("Charged") then
-				if not HUDSprite:IsPlaying("StartCharged") then
-					HUDSprite:Play("StartCharged", true)
-				end
-			end
-		elseif chargePercent > 0 and chargePercent < 1 then
-			if not HUDSprite:IsPlaying("Charging") then
-				HUDSprite:Play("Charging")
-			end
-			local frame = math.floor(chargePercent * 100)
-			HUDSprite:SetFrame("Charging", frame)
-		elseif chargePercent == 0 and not HUDSprite:IsPlaying("Disappear") and not HUDSprite:IsFinished("Disappear") then
-			HUDSprite:Play("Disappear", true)
-		end
-
-		HUDSprite:Render(position)
-		if Isaac.GetFrameCount() % 2 == 0 and not game:IsPaused() then
-			HUDSprite:Update()
-		end
-	end
----
 
 return Helpers
