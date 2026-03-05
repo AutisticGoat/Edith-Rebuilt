@@ -68,7 +68,7 @@ function EdithsHood:TriggerJump(player)
 
 	Edith.InitEdithJump(player, jumpTags.EdithsHoodJump)
 end
-mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, EdithsHood.TriggerJump)
+mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, EdithsHood.TriggerJump)
 
 function EdithsHood:OnHoodJumpLand(player)
 	if Player.IsAnyEdith(player) then return end
@@ -79,6 +79,7 @@ function EdithsHood:OnHoodJumpLand(player)
 	params.Radius = 40
 	params.Knockback = 8
 
+	data(player).HoodLand = true
 	Land.LandFeedbackManager(player, Land.GetLandSoundTable(false), Color.Default, false)
 	Land.EdithStomp(player, params, false)
 	Land.TriggerLandenemyJump(player, params.StompedEntities, params.Knockback, 10, 1.8)
@@ -87,6 +88,7 @@ function EdithsHood:OnHoodJumpLand(player)
 		Creeps.SpawnSaltCreep(player, player.Position + Vector(0, 30):Rotated(saltDegrees*i), 0.1, 5, 1, 3, saltTypes.EDITHS_HOOD)
 	end
 	player:SetMinDamageCooldown(30)
+	data(player).HoodLand = false
 end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, EdithsHood.OnHoodJumpLand, jumpParams.EdithsHoodJump)
 
