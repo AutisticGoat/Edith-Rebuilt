@@ -38,8 +38,8 @@
 		description="Vestige of disobedience" 
 		gfx="collectibles_EdithsHood.png"
 		quality="2"
-		cache="firedelay damage"
-		tags="offensive tearsup summonable"
+		damagemult="1.35"
+		tags="offensive summonable"
 		achievement="EdithRebuilt_Ediths Hood"
 	/>
 	<passive
