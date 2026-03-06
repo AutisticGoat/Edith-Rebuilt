@@ -48,7 +48,7 @@ mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(_, entity)
     for _, ent in ipairs(Isaac.FindInRadius(entity.Position, 40, EntityPartition.ENEMY)) do
         if GetPtrHash(ent) ~= GetPtrHash(entity) then
             Helpers.TriggerPush(ent, entity, 30)
-            ent:TakeDamage(15, 0, EntityRef(entity), 0)
+            ent:TakeDamage(ent.MaxHitPoints * 0.2, 0, EntityRef(entity), 0)
         end
     end
     damageFlag = false
