@@ -1,22 +1,20 @@
 -- Script taken from Isaac Blue Prints (https://isaacblueprints.com/tutorials/concepts/entity_data/)
 local mod = EdithRebuilt --[[@as ModReference]]
 local dataHolder = {}
-
--- We will store the data within its own table in the data holder for easy access
-dataHolder.Data = {}
+local data = {}
 
 ---@param entity any
 ---@return table
 function dataHolder.GetEntityData(entity)
     local ptrHash = GetPtrHash(entity)
 
-    if not dataHolder.Data[ptrHash] then
-        dataHolder.Data[ptrHash] = {}
-        local entityData = dataHolder.Data[ptrHash]
+    if not data[ptrHash] then
+        data[ptrHash] = {}
+        local entityData = data[ptrHash]
         entityData.Pointer = EntityPtr(entity)
     end
 
-    return dataHolder.Data[ptrHash]
+    return data[ptrHash]
 end
 
 local ClearDataCallbacks = {
@@ -37,8 +35,7 @@ local ClearDataCallbacks = {
 ---@cast ClearDataCallbacks ModCallbacks[]
 
 local function ClearEntityData(_, ent)
-    local ptrHash = GetPtrHash(ent)
-    dataHolder.Data[ptrHash] = nil
+    data[GetPtrHash(ent)] = nil
 end
 
 for _, callback in ipairs(ClearDataCallbacks) do
@@ -46,7 +43,7 @@ for _, callback in ipairs(ClearDataCallbacks) do
 end
 
 mod:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT, function()
-    dataHolder.Data = {}
+    data = {}
 end)
 
 return dataHolder
