@@ -51,15 +51,3 @@ mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(_, player)
 	if not Helpers.IsVestigeChallenge() then return end
 	player.TearRange = Player.rangeUp(player.TearRange, 1.75)
 end, CacheFlag.CACHE_RANGE)
-
-mod:AddCallback(ModCallbacks.MC_POST_BOSS_INTRO_SHOW, function ()
-    if not Helpers.IsVestigeChallenge() then return end
-    local sprite = RoomTransition:GetVersusScreenSprite()
-    sprite:ReplaceSpritesheet(12, "gfx/ui/stage/EdithPortraitVestige.png", true)
-end)
-
-mod:AddCallback(ModCallbacks.MC_POST_NIGHTMARE_SCENE_SHOW, function()
-	if not Helpers.IsVestigeChallenge() then return end
-	local sprite = NightmareScene.GetBackgroundSprite()
-	sprite:ReplaceSpritesheet(6, "gfx/ui/stage/EdithPortraitVestige.png", true)
-end)
