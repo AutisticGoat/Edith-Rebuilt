@@ -42,7 +42,7 @@ mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(_, entity)
 
     sfx:Play(enums.SoundEffect.SOUND_PEPPER_SNEEZE, 1, 2, false, ModRNG.RandomFloat(rng, 0.95, 1.15))
 
-    if damageFlag == true then return end
+    if damageFlag then return end
 
     damageFlag = true
     for _, ent in ipairs(Isaac.FindInRadius(entity.Position, 40, EntityPartition.ENEMY)) do

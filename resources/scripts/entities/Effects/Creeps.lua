@@ -94,7 +94,7 @@ local function PepperCreepUpdate(effect)
     end
 end
 
--- ---@param effect EntityEffect
+---@param effect EntityEffect
 local function CinderCreepUpdate(effect)
     if effect.SubType ~= subtype.CINDER_CREEP then return end    
 
