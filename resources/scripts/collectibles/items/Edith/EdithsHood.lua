@@ -13,7 +13,9 @@ local RNGMod = modules.RNG
 local Edith = modules.EDITH
 local Land = modules.LAND
 local Creeps = modules.CREEPS
-local sfx = enums.Utils.SFX
+local utils = enums.Utils
+local sfx = utils.SFX
+local game = utils.Game
 local data = mod.DataHolder.GetEntityData
 local maxCreep = 10
 local saltDegrees = 360 / maxCreep
@@ -55,7 +57,7 @@ mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
 	if not playerData.HoodJumpTimer or playerData.HoodJumpTimer ~= 0 then return end
 	if not Input.IsActionTriggered(ButtonAction.ACTION_DROP, player.ControllerIndex) then return end
 
-	playerData.HoodJumpTimer = 60
+	playerData.HoodJumpTimer = game:GetRoom():IsClear() and 10 or 60
 
 	Edith.InitEdithJump(player, jumpTags.EdithsHoodJump)
 end)
