@@ -6,40 +6,36 @@ local EdithMod = modules.EDITH
 local Helpers = modules.HELPERS
 local TargetArrow = modules.TARGET_ARROW
 local Land = modules.LAND
-local Effigy = {}
-local jumpData = { tag = "EdithRebuilt_EffigyJump", }
+local jumpData = { tag = "EdithRebuilt_EffigyJump" }
 
 ---@param player EntityPlayer
----@param flags UseFlag
-function Effigy:OnEffigyUse(_, _, player, flags)
+mod:AddCallback(ModCallbacks.MC_USE_ITEM, function (_, _, _, player)
     if JumpLib:GetData(player).Jumping then return end
-    EdithMod.InitEdithJump(player, "EdithRebuilt_EffigyJump", true)
+    EdithMod.InitEdithJump(player, jumpData.tag, true)
 
     if not Helpers.GetNearestEnemy(player) then return end
     TargetArrow.SpawnEdithTarget(player, false)
-end
-mod:AddCallback(ModCallbacks.MC_USE_ITEM, Effigy.OnEffigyUse, items.COLLECTIBLE_EFFIGY)
+end, items.COLLECTIBLE_EFFIGY)
 
 ---@param player EntityPlayer
-function Effigy:OnEffigyLand(player)
+mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, function (_, player)
     local JumpParams = EdithMod.GetJumpStompParams(player)
 
-    JumpParams.Damage = 40 + (player.Damage / 2)
+    JumpParams.Damage = 40 + (player.Damage)
     JumpParams.Radius = 40
-    JumpParams.Knockback = 10
+    JumpParams.Knockback = 20
 
     Land.EdithStomp(player, JumpParams, true)
     Land.LandFeedbackManager(player, Land.GetLandSoundTable(false, false), Color.Default, false)
-    Land.TriggerLandenemyJump(player, JumpParams, JumpParams.Knockback,3, 2)
+    Land.TriggerLandenemyJump(player, JumpParams.StompedEntities, JumpParams.Knockback, 3, 2)
 
     TargetArrow.RemoveEdithTarget(player, false)
 
     player:SetMinDamageCooldown(20)
-end
-mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, Effigy.OnEffigyLand, jumpData)
+end, jumpData)
 
 ---@param player EntityPlayer
-function Effigy:OnEffigyJumpUpdate(player)
+mod:AddCallback(JumpLib.Callbacks.ENTITY_UPDATE_60, function(_, player)
     local target = TargetArrow.GetEdithTarget(player, false)
     local jumpInternalData = JumpLib.Internal:GetData(player)
     local NearestEnemy = Helpers.GetNearestEnemy(player)
@@ -56,5 +52,4 @@ function Effigy:OnEffigyJumpUpdate(player)
     if target and JumpLib:IsFalling(player) then
 		player.Position = target.Position
 	end
-end
-mod:AddCallback(JumpLib.Callbacks.ENTITY_UPDATE_60, Effigy.OnEffigyJumpUpdate, jumpData)
+end, jumpData)
