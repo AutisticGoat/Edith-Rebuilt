@@ -7,13 +7,6 @@ local Helpers = modules.HELPERS
 local plyMan = PlayerManager
 local GildedStone = {}
 
----@param player EntityPlayer
-mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function (_, player)
-	local gildedCount = player:GetCollectibleNum(items.COLLECTIBLE_GILDED_STONE)
-	if gildedCount < 1 then return end
-	player.Luck = player.Luck + (1 * gildedCount)
-end, CacheFlag.CACHE_LUCK)
-
 ---@param tear EntityTear
 function GildedStone:ShootingRockTears(tear)
 	local player = Helpers.GetPlayerFromTear(tear)

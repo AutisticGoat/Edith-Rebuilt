@@ -54,11 +54,11 @@
 	<passive
 		id="5" 
 		name="Gilded Stone" 
-		description="Wealth amidst rubble" 
+		description="Luck up, Wealth amidst rubble" 
 		gfx="collectibles_Gilded_Stone.png"
 		quality="2"
 		coins="5"
-		cache="luck"
+		luck="1"
 		tags="offensive summonable"
 		achievement="EdithRebuilt_Gilded Stone"
 	/>
