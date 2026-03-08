@@ -27,7 +27,7 @@
 		Locusts
 	-->
 	<!-- Salty Baby -->
-	<locust id="0" tearFlags2="20" procChance="0.75" color="fly_white" />
+	<!-- <locust id="0" tearFlags2="20" procChance="0.75" color="fly_white" /> -->
 	
 	<!-- The Blue Berry -->
 	<!--<locust id="21" damageMultiplier="1" speed="1" collisionInterval="7" tearFlags="0" color="fly_red" />-->
