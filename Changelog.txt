@@ -188,3 +188,109 @@ v1.6.3
 -- Increased shockwaves' damage
 -- Increased distance between shockwave rings
 - Increased Cindered enemy received damage from parry mult (x1.2 > x1.25)
+
+v1.7.0
+- General:
+-- Removed Suplex from pools when playing with any Edith (will be re-added)
+-- Now both Ediths will get flight when going to a crawlspace room
+- Tainted Edith:
+-- Added a custom portrait sprite when playing Grudge challenge
+-- Updated Character Selection sprite
+-- Now her costume is managed by a null item
+-- Now her damage multipler is managed by a null item
+-- Movement Rework: 
+--- Now Tainted Edith HopDash will behave different depending on how many frames you keep the button
+---- 1-4 frames: Tainted Edith will stop her movement and reset the hopdash charge, Edith will flash in blue
+---- 5-19 frames: Tainted Edith will stop and spawn her arrow, allowing her to redirect the movement without losing charge, Edith will flash in light grey
+---- 20+ frames: The redirect will be cancelled and Tainted Edith charge will be restarted, Edith will flash in black
+--- Tweaked Hopdash speed formula to be parabolic (less charge gives more, 50% charge gives 75% of speed, and 80% charge gives 96% of speed)
+--- Now Tainted Edith can go trough rooms without stopping her movement
+--- Now Tainted Edith can destroy rocks at 50% or more HopDash charge
+--- Stopping a hopdash with the parry button will instantly perform a parry land
+--- Increased HopDash speed base (8 > 8.5)
+--- Reduced GrudgeDash speed base (10 > 9)
+--- Removed GrudgeDash speed multiplier
+--- Fixed GrudgeDash collision behaving weird
+-- Parry:
+--- Increased Perfect Parry Radius (18 > 22)
+--- Increased Perfect parry i-frames (25 > 30)
+--- Increased Imprecise parry i-frames (15 > 20)
+--- Increased parry cooldown: 
+---- Perfect parry: 10 > 12
+---- Birthcake perfect parry: 8 > 10
+--- Parry cooldown will be reduced with HopDash static charge (up to 8 frames at 100%)
+--- Now HopDash charge increases i-Frames (1 frame every 20%, max 10 frames with Birthright)
+--- Added a 6 frames input buffer for the parry
+--- Added a perfect parry flash (configurable in ImGui menu)
+--- Added Hawk Tuah perfect parry sound effect
+--- Now Bombs can be parried (parried bombs increases their damage by x1.25)
+- Edith:
+-- Added a custom portrait sprite when playing Vestige challenge
+-- Now her costume is managed by a null item
+-- Now her damage multipler is managed by a null item
+-- Updated Character Selection sprite
+-- Added Edith's Hood stomp synergy
+-- Added Pepper's stomp synergy birthright improvement
+-- Now Edith's ImGui Options wont appear when she's locked
+-- Reduced Edith's water current drag strenght
+-- Increased Edith's target movement speed (Resizer 4 > 4.5)
+- Items:
+-- Now Divine Retribution grants a full soul heart when having Car Battery
+-- Tweaked Sal:
+--- Reduced frames between salt creep spawn (15 > 10)
+--- Now salt creep deals damage (0.5 per tick)
+--- Reduced salt creep duration (3 secs > 2 secs)
+-- Tweaked Molten Core:
+--- Increased burn radius (60 > 80)
+--- Increased damage addition (1 > 1.25)
+--- Increased killing's fire jet size (scaled by 2)
+-- Tweaked Edith's Hood:
+--- Changed cooldown Update Callback (POST_PLAYER_UPDATE > POST_PEFFECT_UPDATE, this should make the cooldown be reduced slower)
+--- Reduced stomp cooldown (90 > 60)
+--- Now its Damage multiplier is added through XML
+--- Increased stomp Damage (increased player's damage mult, 0.75 > 1.5)
+--- Now its Damage multiplier is added through XML
+--- Increased stomp radius (30 > 40)
+--- Increased stomp Knockback (5, 15)
+--- Increased stomp i-frames (20 > 30)
+--- Reduced Edith's Hood cooldown on clear rooms (10 frames)
+-- Tweaked Gilded Stone:
+--- Now it grants 1 luck
+--- Reduced Penny chance reward (75% > 70%)
+--- Increased Dime chance reward (5% > 10%)
+-- Reworked Sulfuric Fire:
+--- Now using it nearby enemies will grant a fading damage up (2 for 4 seconds, depends on th quantity of hit enemies)
+--- Now it pushes enemies on use
+--- Killing an enemy while having the damage up will spawn brimstone ball on its position
+--- Added a damage mult when using it with Judas while having birthright (x1.5)
+--- Added a damage mult when using it while having Car Battery (x1.25)
+--- Added a screen shake on use
+-- Reworked Chunk of Basalt:
+--- Now Isaac will flicker when the dash is ready
+--- Now colliding with an enemy while dashing will create a ring of shockwaves around the hit position, dealing player's damage x2
+--- Now Colliding with a grid entity will create a ring of shockwaves around the hit position, dealing player's damage x2
+--- Enemies near to the collided enemy will get 75% of the collision damage
+--- Increased dash damage divider (4 > 5)
+-- Reworked Spices Mix:
+--- Updated Sprite
+--- Now spices can be switched by pressing the Drop key
+--- Now the spice info flavor text is displayed when changing spices or pressing the Map button
+--- Now a spice jar is rendered Above the item's sprite
+--- Moved all spices (status effects in general) to their own scripts
+--- Reworked the following spice effects:
+---- Oregano:
+----- Now enemies spawns oregano creep that slows enemies
+----- Now enemies takes damage over time
+---- Pepper:
+----- Now Pepper creep is spawned on killing a peppered enemy
+----- Now Sneezes pushes and damages enemies
+----- Now Sneezes have a sound effect
+----- Added an sneeze sound effect
+---- Cinnamon:
+----- Every 20 frames the enemy will cough, pushing enemies and leaving a cinnamon dust cloud for 5 seconds
+----- Enemies inside this cloud will get 3 damage every 15 frames
+- Trinkets
+-- Reworked Burnt Salt:
+--- Now every third shot tear will be a burnt salt tear
+--- Hitting an enemy with a burnt salt tear will apply Cinder status effect
+--- Killing an enemy with Cinder status effect will spawn a circle of cinder creep around it
