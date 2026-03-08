@@ -1029,6 +1029,9 @@ local function InitSaveData()
 	TEdithData.EnableHopdashTrail = TEdithData.EnableHopdashTrail or false
 	TEdithData.TrailColor = TEdithData.TrailColor or {Red = 1, Green = 0, Blue = 0}
 	TEdithData.TrailDesign = TEdithData.TrailDesign or 1
+	TEdithData.ParryFlashColor = TEdithData.ParryFlashColor or {r = 1, g = 1, b = 1, a = 1}
+	TEdithData.ParryFlashBrightness = TEdithData.ParryFlashBrightness or 1
+	TEdithData.ParryFlashContrast = TEdithData.ParryFlashContrast or 0.4
 
 	MiscData.EnableShakescreen = MiscData.EnableShakescreen or true
 	MiscData.CustomActionKey = MiscData.CustomActionKey or Keyboard.KEY_Z
