@@ -165,7 +165,7 @@ function mod:EdithPlayerUpdate(player)
 	if Helpers.IsKeyStompTriggered(player) then
 		if HopParams.ParryCooldown == 0 and not isTaintedEdithJump(player) and not HopParams.IsParryJump then
 			TEdithMod.ParryTriggerManager(player, IsGrudge, HopParams)
-		elseif HopParams.ParryCooldown > 0 and HopParams.ParryCooldown >= playerData.MaxParryCooldown - 6 then
+		elseif playerData.MaxParryCooldown and (HopParams.ParryCooldown > 0 and HopParams.ParryCooldown >= playerData.MaxParryCooldown - 6) then
 			player:SetColor(Color(1, 1, 1, 1, 0.3), 3, 1, true, false)
 			playerData.StoredInput = true
 		end
