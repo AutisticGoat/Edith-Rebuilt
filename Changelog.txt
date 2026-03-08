@@ -294,3 +294,6 @@ v1.7.0
 --- Now every third shot tear will be a burnt salt tear
 --- Hitting an enemy with a burnt salt tear will apply Cinder status effect
 --- Killing an enemy with Cinder status effect will spawn a circle of cinder creep around it
+
+v1.7.0a
+- Fixed Parry flash data not being properly initialized (looks like this also fixed a memory leak lol)
