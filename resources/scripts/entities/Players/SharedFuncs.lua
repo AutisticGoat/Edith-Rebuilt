@@ -149,3 +149,13 @@ end)
 mod:AddCallback(ModCallbacks.MC_POST_NIGHTMARE_SCENE_SHOW, function()
     replacePortrait(NightmareScene.GetBackgroundSprite(), 6)
 end)
+
+mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function ()
+    if game:GetRoom():GetType() ~= RoomType.ROOM_DUNGEON then return end
+
+    for _, player in ipairs(PlayerManager.GetPlayers()) do
+        if not Player.IsAnyEdith(player) then goto continue end
+        player:UseActiveItem(CollectibleType.COLLECTIBLE_BIBLE, UseFlag.USE_NOANIM)
+        ::continue::
+    end
+end)
