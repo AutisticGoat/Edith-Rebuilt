@@ -36,10 +36,3 @@ function Grudge:OnTaintedEdithGrudgeCollision(player, collider)
     collider:TakeDamage(Damage, DamageFlag.DAMAGE_CRUSH, EntityRef(player), 0)
 end
 mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_COLLISION, Grudge.OnTaintedEdithGrudgeCollision)
-
--- mod:AddCallback(ModCallbacks.MC_POST_RENDER, function ()
---     if not Helpers.IsGrudgeChallenge() then return end
-    
---     local sprite = RoomTransition:GetVersusScreenSprite()
---     sprite:ReplaceSpritesheet(12, "gfx/ui/stage/TEdithPortraitGrudge.png", true)
--- end)
