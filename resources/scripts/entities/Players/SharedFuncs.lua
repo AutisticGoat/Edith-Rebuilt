@@ -116,6 +116,7 @@ mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, function()
     
     pool:RemoveCollectible(CollectibleType.COLLECTIBLE_NIGHT_LIGHT)
     pool:RemoveCollectible(CollectibleType.COLLECTIBLE_MONTEZUMAS_REVENGE)
+    pool:RemoveCollectible(CollectibleType.COLLECTIBLE_SUPLEX)
 end)
 
 ---@param player EntityPlayer
