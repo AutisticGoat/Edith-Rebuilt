@@ -170,7 +170,7 @@ local Descs = {
         },
         [Cards.CARD_SOUL_EDITH] = {
             ["en_us"] = {
-                Name = "Jack of clubs",
+                Name = "Soul of Edith",
                 Desc = "On use, the player will jump, on landing:#{{Damage}} Near enemies will be pushed and will receive damage#{{Collectible592}} Rock tears will fall from the ceiling in random positions"
             }
         },
