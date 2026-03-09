@@ -33,7 +33,6 @@ local data = mod.DataHolder.GetEntityData
 ---@field IsHoping boolean
 ---@field IsParryJump boolean
 ---@field GrudgeDash boolean
----@field HopCooldown integer
 
 ---@param player EntityPlayer
 ---@return TEdithHopParryParams
@@ -56,7 +55,6 @@ function TEdith.GetHopParryParams(player)
 		ParriedEnemies = {},
 		ImpreciseParriedEnemies = {},
 		GrudgeDash = false,
-		HopCooldown = 0
 
 	} --[[@as TEdithHopParryParams]]
 	local playerData = data(player)
@@ -165,9 +163,8 @@ end
 ---@param cooldown integer
 ---@param useQuitJump boolean
 ---@param resetChrg boolean
----@param resetHopcooldown boolean
 ---@param notreduceFriction? boolean
-function TEdith.StopTEdithHops(player, cooldown, useQuitJump, resetChrg, resetHopcooldown, notreduceFriction)
+function TEdith.StopTEdithHops(player, cooldown, useQuitJump, resetChrg, notreduceFriction)
 	if not Player.IsEdith(player, true) then return end
 	local HopParams = TEdith.GetHopParryParams(player)
 	local IsMoving = HopParams.IsHoping or HopParams.GrudgeDash
@@ -180,10 +177,6 @@ function TEdith.StopTEdithHops(player, cooldown, useQuitJump, resetChrg, resetHo
 	HopParams.IsHoping = false
 	HopParams.GrudgeDash = false
 	HopParams.HopDirection = Vector.Zero
-
-	if resetHopcooldown then
-		HopParams.HopCooldown = 8
-	end
 
 	if not notreduceFriction then
 		player:MultiplyFriction(0.5)
@@ -258,7 +251,7 @@ function TEdith.HopDashChargeManager(player, arrow)
 	local VecSize = data(player).IsRedirectioningMove and 25 or 10
 	local posDifLenght = posDif:Length()
 	local maxDist = 2.5 * (10 / VecSize)
-	local BaseCharge = helpers.IsGrudgeChallenge() and 9 or 8
+	local BaseCharge = 9
 	local targetframecount = arrow.FrameCount
 	local chargeAdd = BaseCharge * maths.exp(player.MoveSpeed, 1, 1.5)
 	HopParams.HopDirection = posDif:Normalized()
@@ -274,7 +267,7 @@ function TEdith.HopDashChargeManager(player, arrow)
 	local smoothFactor = 0.5
 	arrow.Velocity = arrow.Velocity + (targetVel - arrow.Velocity) * smoothFactor
 
-	if targetframecount > 1 and (not HopParams.IsHoping and not isJumping) and HopParams.HopCooldown == 0 then
+	if targetframecount > 1 and (not HopParams.IsHoping and not isJumping) then
 		TEdith.AddHopDashCharge(player, chargeAdd, 0.5)
 	end
 end

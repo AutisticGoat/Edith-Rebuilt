@@ -72,16 +72,7 @@ function mod:TaintedEdithUpdate(player)
 		Peffects:RemoveCollectibleEffect(CollectibleType.COLLECTIBLE_LEO, -1)
 	end
 
-	if not IsMoving then
-		HopParams.HopCooldown = math.max(HopParams.HopCooldown -1, 0)
-	end
-
-	if HopParams.HopCooldown == 1 then
-		sfx:Play(SoundEffect.SOUND_STONE_IMPACT, 0.5, 0, false, 1.8)
-		player:SetColor(Color(1, 1, 1, 1, 0, 0.3, 0), 5, 100, true, false)
-	end
-
-	if isArrowMoving and HopParams.HopCooldown == 0 then
+	if isArrowMoving then
 		TargetArrow.SpawnEdithTarget(player, true)
 	end
 
@@ -105,7 +96,7 @@ function mod:TaintedEdithUpdate(player)
 		if pData.IsRedirectioningMove then
 			if pData.PressCount == 5 then
 				player:SetColor(Color(1, 1, 1, 1, 0.3, 0.3, 0.3), 5, 1000, true, false)
-			elseif pData.PressCount == 2 then
+			elseif pData.PressCount <= 2 then
 				player:SetMinDamageCooldown(20)
 				player:MultiplyFriction(0.05)
 			end
@@ -118,7 +109,8 @@ function mod:TaintedEdithUpdate(player)
 		if pData.IsRedirectioningMove then
 			if pData.PressCount <= 2 then
 				TargetArrow.RemoveEdithTarget(player, true)
-				TEdithMod.StopTEdithHops(player, 20, false, true, true, false)
+				TEdithMod.StopTEdithHops(player, 20, false, true, true)
+				player:MultiplyFriction(0.05)
 				player:SetColor(Color(1, 1, 1, 1, 0, 0.1, 0.3), 5, 1000, true, false)
 			elseif pData.PressCount >= 5 then
 				TargetArrow.RemoveEdithTarget(player, true)			
@@ -201,7 +193,7 @@ function mod:OnNewRoom()
 		data(player).PressCount = 0
 
 		if game:GetRoom():GetType() == RoomType.ROOM_DUNGEON then
-			TEdithMod.StopTEdithHops(player, 0, true, true, true, true)
+			TEdithMod.StopTEdithHops(player, 0, true, true, true)
 		end
 		::continue::
 	end
