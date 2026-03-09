@@ -353,8 +353,8 @@ function TEdith.ParryTriggerManager(player, IsGrudge, HopParams)
 			TEdith.AddHopDashCharge(player, 20, 0.5)
 		end
 		TEdith.StopTEdithHops(player, 0, true, true, false)
-		player:MultiplyFriction(0.3)
 	end
+	player:MultiplyFriction(0.1)
 end	
 
 local JumpHeightParams = {

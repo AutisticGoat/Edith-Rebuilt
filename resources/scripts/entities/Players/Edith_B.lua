@@ -107,7 +107,7 @@ function mod:TaintedEdithUpdate(player)
 				player:SetColor(Color(1, 1, 1, 1, 0.3, 0.3, 0.3), 5, 1000, true, false)
 			elseif pData.PressCount == 2 then
 				player:SetMinDamageCooldown(20)
-				player:MultiplyFriction(0.4)
+				player:MultiplyFriction(0.05)
 			end
 		end
 	end
