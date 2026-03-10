@@ -297,3 +297,17 @@ v1.7.0
 
 v1.7.0a
 - Fixed Parry flash data not being properly initialized (looks like this also fixed a memory leak lol)
+
+v1.7.1
+- Tainted Edith:
+-- Movement: 
+--- Removed T. Edith's redirect reset
+--- Removed Redirection slide
+--- Removed Parry slide
+--- Removed single tap stop slide
+--- Removed Hopdash cooldown
+--- Removed Rock destroy charge limit
+--- Reduced Arrow speed when redirecting the hopdash
+--- Reduced T. Edith's min invulnerability damage charge (30% > 20%)
+--- Increased Hopdash land damage
+--- Tweaked Hopdash land damage formula
