@@ -123,6 +123,7 @@ end)
 ---@param grid GridEntity
 mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_GRID_COLLISION, function(_, player, _, grid)
 	if not Player.IsAnyEdith(player) then return end
+    if not grid then return end
     if grid:GetType() ~= GridEntityType.GRID_ROCK_SPIKED then return end
 	return true
 end)
