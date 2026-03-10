@@ -603,7 +603,7 @@ function Land.TriggerLandenemyJump(player, enemyTable, knockback, height, speed)
 			Height = height * PushFactor,
 			Speed = speed * PushFactor,
 			Tags = "EdithRebuilt_EnemyJump",
-			-- Flags = JumpLib.Flags.
+			Flags = JumpLib.Flags.COLLISION_GRID
 		})
 		::continue::
 	end
@@ -837,10 +837,10 @@ function Land.ParryLandManager(player, HopParams, IsTaintedEdith)
 
 	for _, ent in pairs(HopParams.ParriedEnemies) do
 		PerfectParryManager(player, ent, HopParams, IsTaintedEdith)
-
 		PerfectParry = true
 	end
-
+	
+	Land.TriggerLandenemyJump(player, HopParams.ImpreciseParriedEnemies, HopParams.ParryKnockback, 8, 2)
 	Land.TriggerLandenemyJump(player, HopParams.ParriedEnemies, HopParams.ParryKnockback, 8, 2)
 
 	local IFrames = (PerfectParry and 30 or 25) + math.ceil((HopParams.HopStaticCharge + HopParams.HopStaticBRCharge * 0.25) / 4)
@@ -860,8 +860,6 @@ function Land.ParryLandManager(player, HopParams, IsTaintedEdith)
 		((hasBirthcake and 10 or 12) - staticChargeCooldownBonus) or 15) or 0
 	)
 
-	-- print(HopParams.ParryCooldown)
-
 	data(player).MaxParryCooldown = HopParams.ParryCooldown or 0
 
 	HopParams.IsParryJump = false
@@ -869,6 +867,7 @@ function Land.ParryLandManager(player, HopParams, IsTaintedEdith)
 	GrudgeUnlockManager(PerfectParry)
 
 	HopParams.ParriedEnemies = {}
+	HopParams.ImpreciseParriedEnemies = {}
 	return PerfectParry, EnemiesInImpreciseParry
 end
 
