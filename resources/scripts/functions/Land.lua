@@ -840,7 +840,7 @@ function Land.ParryLandManager(player, HopParams, IsTaintedEdith)
 
 	Land.TriggerLandenemyJump(player, HopParams.ParriedEnemies, HopParams.ParryKnockback, 8, 2)
 
-	local IFrames = (PerfectParry and 30 or 20) + math.ceil((HopParams.HopStaticCharge + HopParams.HopStaticBRCharge * 0.25) / 4)
+	local IFrames = (PerfectParry and 30 or 25) + math.ceil((HopParams.HopStaticCharge + HopParams.HopStaticBRCharge * 0.25) / 4)
 
 	player:SetMinDamageCooldown(IFrames)
 	PerfectParryMisc(player, PerfectParry)
