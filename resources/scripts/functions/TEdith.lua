@@ -248,7 +248,7 @@ end
 function TEdith.HopDashChargeManager(player, arrow)
 	local HopParams = TEdith.GetHopParryParams(player)
 	local posDif = arrow.Position - player.Position
-	local VecSize = data(player).IsRedirectioningMove and 25 or 10
+	local VecSize = data(player).IsRedirectioningMove and 15 or 10
 	local posDifLenght = posDif:Length()
 	local maxDist = 2.5 * (10 / VecSize)
 	local BaseCharge = 9
