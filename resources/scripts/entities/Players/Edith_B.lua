@@ -312,20 +312,14 @@ mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_GRID_COLLISION, function(_, player, _
 
 	if not isMoving then return end
 
-	if grid:GetType() == GridEntityType.GRID_ROCKB and not IsJumping and not arrow then
-		TEdithMod.StopTEdithHops(player, 20, true, not playerData.TaintedEdithTarget, true)
-	end
+	-- if grid:GetType() == GridEntityType.GRID_ROCKB and not IsJumping and not arrow then
+	-- 	TEdithMod.StopTEdithHops(player, 20, true, not playerData.TaintedEdithTarget, true)
+	-- end
 
 	if rock or poop or tnt then
-		if charge >= 50 then
-			grid:Destroy()
-		else
-			if not arrow then
-				TEdithMod.StopTEdithHops(player, 20, true, not playerData.TaintedEdithTarget, true)
-			end
-		end
+		grid:Destroy()
 	else 
-		if not IsJumping and not arrow then
+		if not IsJumping then
 			TEdithMod.StopTEdithHops(player, 20, true, not playerData.TaintedEdithTarget, true)
 		end
 	end
