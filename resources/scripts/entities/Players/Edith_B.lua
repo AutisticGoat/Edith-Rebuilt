@@ -58,15 +58,13 @@ function mod:TaintedEdithUpdate(player)
 	local HopParams = TEdithMod.GetHopParryParams(player)
 	local isArrowMoving = TargetArrow.IsEdithTargetMoving(player)
 	local arrow = TargetArrow.GetEdithTarget(player, true)
-	local IsMoving = HopParams.IsHoping or HopParams.GrudgeDash
-	local charge = TEdithMod.GetHopDashCharge(player, false)
 	local Peffects = player:GetEffects()
 	local pData = data(player)
 	local CanRedirectMove = TEdithMod.GetHopDashCharge(player, false) > 0 and TEdithMod.GetHopDashCharge(player, true) <= 0
 
 	pData.IsRedirectioningMove = CanRedirectMove and (arrow ~= nil)
 
-	if player.CanFly and charge >= 85 and not Peffects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_LEO) then
+	if player.CanFly and not Peffects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_LEO) then
 		Peffects:AddCollectibleEffect(CollectibleType.COLLECTIBLE_LEO, false, 1)
 	else
 		Peffects:RemoveCollectibleEffect(CollectibleType.COLLECTIBLE_LEO, -1)
@@ -210,17 +208,18 @@ function mod:OnNewFloor()
 end
 mod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, mod.OnNewFloor)
 
-local damageBase = 3.5
+local damageBase = 5.25
 ---@param player EntityPlayer
 function mod:EdithHopLanding(player)	
 	local HopParams = TEdithMod.GetHopParryParams(player)
 	local tearRange = player.TearRange / 40
 	local Knockbackbase = (player.ShotSpeed * 10) + 8
-	local Charge = TEdithMod.GetHopDashCharge(player, false, true)
-	local BRCharge = HopParams.HopMoveBRCharge
+	local Charge = TEdithMod.GetHopDashCharge(player, false, false)
+	local BRCharge = HopParams.HopMoveBRCharge / 100
+	local BRMult = 1 + BRCharge
+	local damageFormula = (((damageBase + player.Damage) / 2.5) * (TEdithMod.HopCurve(Charge/100))) * BRMult
 
-	--- Pendiente de rehacer
-	HopParams.HopDamage = (((damageBase + player.Damage) / 3.5) * (Charge + BRCharge) / 100) * (Charge / 100) 
+	HopParams.HopDamage = damageFormula
 	HopParams.HopKnockback = Knockbackbase * maths.exp(Charge / 100, 1, 1.5)
 	HopParams.HopRadius = math.min((30 + (tearRange - 9)), 35)
 
@@ -278,7 +277,7 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
 			playerpos.X = (Helpers.GetScreenCenter().X * 2 - playerpos.X)
 		end
 
-		if not dashCharge or not dashBRCharge then return end
+		if not dashCharge or not dashBRCharge then goto continue end
 
 		playerData.ChargeBar = playerData.ChargeBar or Sprite("gfx/TEdithChargebar.anm2", true)
 		playerData.BRChargeBar = playerData.BRChargeBar or Sprite("gfx/TEdithBRChargebar.anm2", true)
