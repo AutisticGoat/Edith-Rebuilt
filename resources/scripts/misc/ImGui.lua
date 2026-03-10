@@ -830,6 +830,7 @@ local function AddContributors()
 	- Sylvy_owo
 	- .radiox
 	- Edith's No.1 Fan
+	- River Moondrop (HOLA RIVERIO)
 	]], 
 	true)
 
