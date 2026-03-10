@@ -829,6 +829,9 @@ function Land.ParryLandManager(player, HopParams, IsTaintedEdith)
 	end
 
 	for _, ent in pairs(Isaac.FindInCapsule(ImpreciseParryCapsule, misc.ParryPartitions)) do
+		if _ >= 1 then
+			EnemiesInImpreciseParry = true
+		end
 		ImpreciseParryManager(player, ent, HopParams, ImpreciseParryCapsule, PerfectParryCapsule)
 	end
 

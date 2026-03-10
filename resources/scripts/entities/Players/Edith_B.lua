@@ -239,7 +239,7 @@ function TEdith:EdithParryJump(player)
 	end
 
 	local perfectParry, EnemiesInImpreciseParry = land.ParryLandManager(player, HopParams, true)
-	local parryAdd = perfectParry and 20 or ((EnemiesInImpreciseParry and 5) or -15)
+	local parryAdd = perfectParry and 30 or ((EnemiesInImpreciseParry and 15) or 0)
 
 	land.LandFeedbackManager(player, land.GetLandSoundTable(true, perfectParry), misc.BurntSaltColor, perfectParry)
 
