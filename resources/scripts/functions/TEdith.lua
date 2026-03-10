@@ -196,7 +196,7 @@ function TEdith.StopTEdithHops(player, cooldown, useQuitJump, resetChrg, notredu
 	player:SetMinDamageCooldown(cooldown)
 end
 
-local function HopCurve(t)
+function TEdith.HopCurve(t)
     return 1 - ((1 - t) ^ 2)
 end
 
@@ -222,7 +222,7 @@ function TEdith.HopDashMovementManager(player, hopParams)
 	end
 
 	local smoothFactor = 0.25
-	local targetVel = (((HopVec * 2) * (speedBase + (player.MoveSpeed - 1))) * HopCurve(chargeMult))
+	local targetVel = (((HopVec * 2) * (speedBase + (player.MoveSpeed - 1))) * TEdith.HopCurve(chargeMult))
 
 	player.Velocity = player.Velocity + (targetVel - player.Velocity) * smoothFactor
 	hopParams.GrudgeDash = (IsGrudge and HopVec:Length() > 0)
