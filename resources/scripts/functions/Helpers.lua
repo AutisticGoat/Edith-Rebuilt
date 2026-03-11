@@ -528,6 +528,7 @@ end
 function Helpers.ForceSaltTear(tear, tainted)
 	local IsBloodTear = Helpers.When(tear.Variant, tables.BloodytearVariants, false)
 	doEdithTear(tear, IsBloodTear, tainted)
+	tear:Update()
 end
 
 local LINE_SPRITE = Sprite("gfx/TinyBug.anm2", true)
