@@ -284,7 +284,8 @@ end
 ---@param player EntityPlayer
 ---@param params EdithJumpStompParams
 function Edith.StompDamageManager(player, params)
-    local chapter = math.ceil(level:GetStage() / 2)
+	local chapterDiv = game:IsGreedMode() and 1 or 2
+    local chapter = math.ceil(level:GetStage() / chapterDiv)
     local mults = {
         MultiShot = Math.Round(Math.exp(Player.GetNumTears(player), 1, 0.5), 2),
         Birthtight = Player.PlayerHasBirthright(player) and 1.2 or 1,
