@@ -361,8 +361,6 @@ function Land.EdithStomp(parent, params, breakGrid)
 	local SaltedTime = Math.Round(Math.Clamp(120 * (Player.GetplayerTears(parent) / 2.73), 60, 360))
 	local isSalted
 
-	-- DebugRenderer.Get(1, false):Capsule(capsule)
-
 	params.StompedEntities = Isaac.FindInCapsule(capsule)
 
 	if not isDefStomp then
@@ -422,7 +420,7 @@ end
 ---@param HopParams TEdithHopParryParams
 function Land.TaintedEdithHop(parent, HopParams)
 	local capsule = Capsule(parent.Position, Vector.One, 0, HopParams.HopRadius)
-	local PickupCapsule = Capsule(parent.Position, Vector.One, 0, 20)
+	local PickupCapsule = Capsule(parent.Position, Vector.One, 0, 25)
 	local SlotCapsule = Capsule(parent.Position, Vector.One, 0, parent.Size)
 	local Charge = HopParams.HopMoveCharge / 100
 	local BRCharge = HopParams.HopMoveBRCharge / 100
@@ -674,7 +672,7 @@ end
 ---@param HopParams TEdithHopParryParams
 local function ParryTearManager(ent, HopParams)
 	local tear = ent:ToTear() ---@cast tear EntityTear
-
+	
 	Helpers.BoostTear(tear, 20, 1.5 + ((HopParams.HopStaticCharge + HopParams.HopStaticBRCharge) / 100))
 
 	if hasBirthright then
