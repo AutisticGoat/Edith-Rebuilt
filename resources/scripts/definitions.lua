@@ -379,13 +379,6 @@ EdithRebuilt.Enums = {
 				"Hawk",
 			}, 
 		},
-		BlacklistedPickupVariants = { -- Pickups blacklisted from use on `Entity:ForceCollide()`
-			[PickupVariant.PICKUP_PILL] = true,
-			[PickupVariant.PICKUP_TAROTCARD] = true,
-			[PickupVariant.PICKUP_TRINKET] = true,
-			[PickupVariant.PICKUP_COLLECTIBLE] = true,
-			[PickupVariant.PICKUP_BROKEN_SHOVEL] = true,
-		} --[[@as PickupVariant[]],
 		PhysicsFamiliar = {
 			[FamiliarVariant.SAMSONS_CHAINS] = true,
 			[FamiliarVariant.PUNCHING_BAG] = true,
