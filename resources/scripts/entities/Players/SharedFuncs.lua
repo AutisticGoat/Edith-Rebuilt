@@ -160,3 +160,10 @@ mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function ()
         ::continue::
     end
 end)
+
+---@param player EntityPlayer
+mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_RENDER, function (_, player)
+    if not Player.IsAnyEdith(player) then return end
+
+    player:ClearEntityFlags(EntityFlag.FLAG_SLIPPERY_PHYSICS)
+end)
