@@ -28,7 +28,7 @@ EdithRebuilt.SaveManager = require("resources.scripts.libs.EdithRebuiltSaveManag
 EdithRebuilt.SaveManager.Init(mod)
 EdithRebuilt.Hsx = require("resources.scripts.libs.lhsx")
 
-EdithRebuilt.Version = "v1.7.1"
+EdithRebuilt.Version = "v1.7.2beta"
 
 include("resources.scripts.libs.hud_helper")
 include("resources.scripts.libs.prenpckillcallback")

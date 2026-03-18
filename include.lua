@@ -15,6 +15,7 @@ local includeFiles = {
 	compat .. "Birthcake",
 	compat .. "RunicTablet",
 	compat .. "TheFuture",
+	compat .. "Birthwrong/Edith",
 	libs .. "prenpckillcallback",
 	libs .. "CustomShockwaveAPI",
 	libs .. "lhsx",
