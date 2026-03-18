@@ -191,9 +191,8 @@ local function PickupLandHandler(parent, ent)
 	local pickup = ent:ToPickup() ---@cast pickup EntityPickup
 
 	if not pickup then return end
+	if pickup.Variant == PickupVariant.PICKUP_COLLECTIBLE then return end
 
-	local isFlavorTextPickup = Helpers.When(var, tables.BlacklistedPickupVariants, false)
-	local IsLuckyPenny = var == PickupVariant.PICKUP_COIN and ent.SubType == CoinSubType.COIN_LUCKYPENNY
 	local room = game:GetRoom()
 	local IsPickedUp = pickup:GetSprite():IsPlaying("Collect")
 
@@ -201,8 +200,9 @@ local function PickupLandHandler(parent, ent)
 		Land.PickupManager(parent, pickup)
 	end
 
-	if isFlavorTextPickup or IsLuckyPenny or IsPickedUp then return end
-	parent:ForceCollide(pickup, true)
+	if IsPickedUp then return end
+
+	data(pickup).HopLandedPlayer = parent
 
 	if not Player.IsEdith(parent, false) then return end
 
@@ -213,6 +213,15 @@ local function PickupLandHandler(parent, ent)
 		Ambush.StartChallenge()
 	end
 end
+
+mod:AddCallback(ModCallbacks.MC_POST_PICKUP_UPDATE, function (_, pickup)
+	local player = data(pickup).HopLandedPlayer ---@cast player EntityPlayer
+
+	if not player then return end
+
+	player:ForceCollide(pickup, true)
+	data(pickup).HopLandedPlayer = nil
+end)
 
 ---@param parent EntityPlayer
 ---@param ent EntitySlot
@@ -354,9 +363,9 @@ function Land.EdithStomp(parent, params, breakGrid)
 	local isDefStomp = params.IsDefensiveStomp
 	local HasTerra = parent:HasCollectible(CollectibleType.COLLECTIBLE_TERRA)
 	local TerraRNG = parent:GetCollectibleRNG(CollectibleType.COLLECTIBLE_TERRA)
-	local TerraMult = HasTerra and modRNG.RandomFloat(TerraRNG, 0.5, 2) or 1	
+	local TerraMult = HasTerra and modRNG.RandomFloat(TerraRNG, 0.5, 2) or 1
 	local capsule = Capsule(parent.Position, Vector.One, 0, params.Radius)
-	local PickupCapsule = Capsule(parent.Position, Vector.One, 0, 20)
+	local PickupCapsule = Capsule(parent.Position, Vector.One, 0, 30)
 	local SlotCapsule = Capsule(parent.Position, Vector.One, 0, parent.Size)
 	local SaltedTime = Math.Round(Math.Clamp(120 * (Player.GetplayerTears(parent) / 2.73), 60, 360))
 	local isSalted
@@ -420,7 +429,7 @@ end
 ---@param HopParams TEdithHopParryParams
 function Land.TaintedEdithHop(parent, HopParams)
 	local capsule = Capsule(parent.Position, Vector.One, 0, HopParams.HopRadius)
-	local PickupCapsule = Capsule(parent.Position, Vector.One, 0, 25)
+	local PickupCapsule = Capsule(parent.Position, Vector.One, 0, 30)
 	local SlotCapsule = Capsule(parent.Position, Vector.One, 0, parent.Size)
 	local Charge = HopParams.HopMoveCharge / 100
 	local BRCharge = HopParams.HopMoveBRCharge / 100
@@ -430,6 +439,7 @@ function Land.TaintedEdithHop(parent, HopParams)
 
 	for _, ent in ipairs(Isaac.FindInCapsule(PickupCapsule)) do
 		if ent:ToPickup() then
+			print(ent)
 			PickupLandHandler(parent, ent)
 		end
 	end
@@ -465,19 +475,21 @@ end
 ---@param IsChap4 boolean
 ---@param hasWater boolean
 local function SfxFeedbackManager(sound, volume, IsChap4, hasWater)
-	if isEdithJump and isVestige then
-		sound = enums.SoundEffect.SOUND_EDITH_STOMP
-	end
+    if isEdithJump and isVestige then
+        sound = enums.SoundEffect.SOUND_EDITH_STOMP
+    end
 
-	sfx:Play(sound, volume, 0, false)
+    local sounds = {
+        { sound = sound, volume = volume, pitch = 0, loop = false },
+        IsChap4  and { sound = SoundEffect.SOUND_MEATY_DEATHS, volume = volume - 0.5, pitch = 0, loop = false, a = 1, b = 0 },
+        hasWater and { sound = enums.SoundEffect.SOUND_EDITH_STOMP_WATER, volume = volume,       pitch = 0, loop = false },
+    }
 
-	if IsChap4 then
-		sfx:Play(SoundEffect.SOUND_MEATY_DEATHS, volume - 0.5, 0, false, 1, 0)
-	end
-
-	if hasWater then
-		sfx:Play(enums.SoundEffect.SOUND_EDITH_STOMP_WATER, volume, 0, false)
-	end	
+    for _, s in ipairs(sounds) do
+        if s then
+            sfx:Play(s.sound, s.volume, s.pitch, s.loop, s.a, s.b)
+        end
+    end
 end
 
 ---Function for audiovisual feedback of Edith and Tainted Edith landings.
@@ -673,6 +685,8 @@ end
 local function ParryTearManager(ent, HopParams)
 	local tear = ent:ToTear() ---@cast tear EntityTear
 	
+	if not tear then return end
+
 	Helpers.BoostTear(tear, 20, 1.5 + ((HopParams.HopStaticCharge + HopParams.HopStaticBRCharge) / 100))
 
 	if hasBirthright then
