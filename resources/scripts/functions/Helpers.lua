@@ -531,6 +531,12 @@ function Helpers.ForceSaltTear(tear, tainted)
 	tear:Update()
 end
 
+---@param entity Entity
+---@return boolean
+function Helpers.IsJumping(entity)
+	return JumpLib:GetData(entity).Jumping
+end
+
 local LINE_SPRITE = Sprite("gfx/TinyBug.anm2", true)
 local MAX_POINTS = 360
 local ANGLE_SEPARATION = 360 / MAX_POINTS

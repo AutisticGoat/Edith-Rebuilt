@@ -79,7 +79,7 @@ local function EdithTargetManagement(effect, player)
 	local params = Edith.GetJumpStompParams(player)
 	local RoomName = level:GetCurrentRoomDesc().Data.Name
 
-	local anim = (Helpers.IsKeyStompPressed(player) or Edith.IsJumping(player) and params.Cooldown == 0) and "Blink" or "Idle" 
+	local anim = (Helpers.IsKeyStompPressed(player) or Helpers.IsJumping(player) and params.Cooldown == 0) and "Blink" or "Idle" 
 	effect:GetSprite():Play(anim)
 
 	if RoomName ~= "Beast Room" then

@@ -330,8 +330,7 @@ function Edith.StompCooldownManager(player, params)
 end
 
 ---@param player EntityPlayer
----@param params EdithJumpStompParams
-function Edith.StompTargetRemover(player, params)
+function Edith.StompTargetRemover(player)
     if Helpers.IsKeyStompPressed(player) or TargetArrow.IsEdithTargetMoving(player) then return end
     -- if params.CanJump then return end
     TargetArrow.RemoveEdithTarget(player)
@@ -353,9 +352,9 @@ function Edith.ExplosionRecoil(player, params, bomb)
 	local velTarget = (
 		bomb and (player.Position - bomb.Position) or 
 		-player.Velocity
-	):Normalized()
+	):Resized(15)
 
-	player.Velocity = velTarget:Resized(15)
+	player.Velocity = velTarget
 	params.RocketLaunch = true
 end
 
@@ -363,7 +362,6 @@ end
 ---@param jumpParams EdithJumpStompParams
 function Edith.CooldownUpdate(player, jumpParams)
     jumpParams.Cooldown = math.max(jumpParams.Cooldown - 1, 0)
-
 	jumpParams.CanJump = jumpParams.Cooldown == 0
 
 	if not (jumpParams.Cooldown == 1 and player.FrameCount > 20) then return end
@@ -380,7 +378,7 @@ end
 function Edith.JumpMovement(player)
 	if Helpers.IsVestigeChallenge() then return end
 	if not TargetArrow.GetEdithTarget(player) then return end
-	if not Edith.IsJumping(player) then return end
+	if not Helpers.IsJumping(player) then return end
 
 	local div = (Helpers.IsKeyStompPressed(player) and player.CanFly) and 70 or 50
 	Edith.EdithDash(player, TargetArrow.GetEdithTargetDirection(player, false), TargetArrow.GetEdithTargetDistance(player), div)
@@ -460,14 +458,10 @@ end
 function Edith:MoveBloodClotsToEdith(familiar)
 	local player = familiar.Player
 
-	if not Edith.IsJumping(player) then return end
+	if not Helpers.IsJumping(player) then return end
 	familiar.Velocity = player.Velocity	
 end
 mod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, Edith.MoveBloodClotsToEdith, FamiliarVariant.BLOOD_BABY)
 
----@param player EntityPlayer
-function Edith.IsJumping(player)
-    return JumpLib:GetData(player).Jumping
-end
 
 return Edith

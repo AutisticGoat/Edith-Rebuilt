@@ -1,6 +1,5 @@
 local mod = EdithRebuilt
 local enums = mod.Enums
--- local costumes = enums.Costume
 local utils = enums.Utils
 local tables = enums.Tables
 local game = utils.Game
@@ -52,7 +51,7 @@ function Edith:OnEdithUpdate(player)
 	local isShooting = Player.IsPlayerShooting(player)
 	local jumpData = JumpLib:GetData(player)
 	local isPitfall = JumpLib:IsPitfalling(player)
-	local isJumping = EdithMod.IsJumping(player)
+	local isJumping = helpers.IsJumping(player)
 	local IsVestige = helpers.IsVestigeChallenge() 
 	local jumpParams = params(player)
 
@@ -70,7 +69,7 @@ function Edith:OnEdithUpdate(player)
 
 	EdithMod.TargetMovementManager(player, target, isMoving)
 	EdithMod.JumpTriggerManager(player, jumpParams, isKeyStompPressed, isJumping, IsVestige)
-	EdithMod.HeadDirectionManager(player, isJumping, isShooting, isKeyStompPressed)
+	EdithMod.HeadDirectioMnManager(player, isJumping, isShooting, isKeyStompPressed)
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, Edith.OnEdithUpdate)
 
@@ -84,12 +83,14 @@ end
 ---@param player EntityPlayer
 function Edith:OnStartingJump(player)
 	local jumpParams = params(player)
+
 	jumpParams.JumpStartPos = player.Position
 	jumpParams.JumpStartDist = TargetArrow.GetEdithTargetDistance(player)
 
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_LUMP_OF_COAL) then return end
+
 	local rng = player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_LUMP_OF_COAL)
-	jumpParams.CoalBonus = ModRNG.RandomFloat(rng, 0.5, 0.6) * TargetArrow.GetEdithTargetDistance(player) / 40
+	jumpParams.CoalBonus = ModRNG.RandomFloat(rng, 0.5, 0.6) * jumpParams.JumpStartDist / 40
 end
 mod:AddCallback(JumpLib.Callbacks.POST_ENTITY_JUMP, Edith.OnStartingJump, JumpParams.EdithJump)
 
@@ -130,7 +131,7 @@ function Edith:OnEdithLanding(player, _, pitfall)
 
 	jumpParams.RocketLaunch = false	
 
-	EdithMod.StompTargetRemover(player, jumpParams)
+	EdithMod.StompTargetRemover(player)
 end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, Edith.OnEdithLanding, JumpParams.EdithJump)
 
@@ -143,7 +144,7 @@ function Edith:OnEdithPEffectUpdate(player)
 	local waterCurrent = room:GetWaterCurrent()
 	local RoomHasWaterCurrent = not VecDir.VectorEquals(waterCurrent, Vector.Zero)
 
-	if not EdithMod.IsJumping(player) and RoomHasWaterCurrent then
+	if not helpers.IsJumping(player) and RoomHasWaterCurrent then
 		player.Velocity = player.Velocity * (waterCurrent * 0.3)
 	end
 
@@ -202,7 +203,7 @@ function Edith:DamageStuff(_, damage, _, source)
 
 	if not player then return end
 	if not Player.IsEdith(player, false) then return end
-	if not JumpLib:GetData(player).Jumping then return end  
+	if not helpers.IsJumping(player) then return end  
 	local HasHeels = player:HasCollectible(CollectibleType.COLLECTIBLE_MOMS_HEELS)
 
 	if not (familiar or (HasHeels and damage == 12)) then return end
@@ -228,7 +229,7 @@ function Edith:EdithRender(player)
 	if not IsFleshTrapdoor then return end
 	if not Player.IsEdith(player, false) then return end
 	if not sprite:IsPlaying("Trapdoor") then return end
-	if sprite:GetFrame() ~= 8 then return end
+	if sprite:GetFrame() ~= 7 then return end
 
 	game:StartStageTransition(false, 0, player)
 end
@@ -242,15 +243,12 @@ function Edith:OnActiveItemRemoveTarget(ID, _, player)
 end
 mod:AddCallback(ModCallbacks.MC_PRE_USE_ITEM, Edith.OnActiveItemRemoveTarget)
 
----@param ID CollectibleType
 ---@param player EntityPlayer
-mod:AddCallback(ModCallbacks.MC_PRE_USE_ITEM, function (_, ID, _, player)
-	if ID ~= CollectibleType.COLLECTIBLE_KAMIKAZE then return end
+mod:AddCallback(ModCallbacks.MC_PRE_USE_ITEM, function (_, _, _, player)
 	if not Player.IsEdith(player, false) then return end
-	if not EdithMod.IsJumping(player) then return end
-
+	if not helpers.IsJumping(player) then return end
 	return true
-end)
+end, CollectibleType.COLLECTIBLE_KAMIKAZE)
 
 ---@param bomb EntityBomb
 function Edith:OnBombExplode(bomb)
@@ -268,6 +266,6 @@ mod:AddCallback(ModCallbacks.MC_POST_BOMB_UPDATE, Edith.OnBombExplode)
 ---@param player EntityPlayer
 mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_POCKET_ITEMS_SWAP, function(_, player)
 	if not Player.IsEdith(player, false) then return end
-	if EdithMod.IsJumping(player) then return end
+	if helpers.IsJumping(player) then return end
 	return true
 end)
