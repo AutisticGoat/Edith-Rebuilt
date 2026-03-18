@@ -69,7 +69,7 @@ function Edith:OnEdithUpdate(player)
 
 	EdithMod.TargetMovementManager(player, target, isMoving)
 	EdithMod.JumpTriggerManager(player, jumpParams, isKeyStompPressed, isJumping, IsVestige)
-	EdithMod.HeadDirectioMnManager(player, isJumping, isShooting, isKeyStompPressed)
+	EdithMod.HeadDirectionManager(player, isJumping, isShooting, isKeyStompPressed)
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, Edith.OnEdithUpdate)
 
