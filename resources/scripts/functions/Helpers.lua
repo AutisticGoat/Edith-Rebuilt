@@ -507,6 +507,9 @@ local function doEdithTear(tear, IsBlood, isTainted)
 
 	local tearSizeMult = player:HasCollectible(CollectibleType.COLLECTIBLE_SOY_MILK) and 1 or 0.85
 	local tearData = data(tear)
+
+	if tearData.IsEdithRebuiltSaltTear then return end
+
 	local path = (isTainted and (IsBlood and "burnt_blood_salt_tears" or "burnt_salt_tears") or (IsBlood and "blood_salt_tears" or "salt_tears"))
 	local newSprite = misc.TearPath .. path .. ".png"
 
