@@ -20,6 +20,6 @@ function BurntHood:ParryJump(player)
 	if not PerfectParry then return end
 
 	player:SetMinDamageCooldown(20)
-	player:FullCharge(ActiveSlot.SLOT_PRIMARY)
+	player:FullCharge(player:GetActiveItemSlot(items.COLLECTIBLE_BURNT_HOOD))
 end
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, BurntHood.ParryJump, { tag = "BrokenHoodParry" })
