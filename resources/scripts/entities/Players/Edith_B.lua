@@ -78,7 +78,7 @@ function mod:TaintedEdithUpdate(player)
 		TEdithMod.HopDashChargeManager(player, arrow)
 	else
 		TEdithMod.HopDashMovementManager(player, HopParams)
-		if TEdithMod.GetHopDashCharge(player, false, true) < 10 then
+		if TEdithMod.GetHopDashCharge(player, false) < 10 then
 			HopParams.HopMoveCharge = 0
 			HopParams.HopStaticCharge = 0
 			HopParams.HopDirection = Vector.Zero
@@ -217,7 +217,7 @@ function mod:EdithHopLanding(player)
 	local Charge = TEdithMod.GetHopDashCharge(player, false, false)
 	local BRCharge = HopParams.HopMoveBRCharge / 100
 	local BRMult = 1 + BRCharge
-	local damageFormula = (((damageBase + player.Damage) / 2.5) * (TEdithMod.HopCurve(Charge/100))) * BRMult
+	local damageFormula = (((damageBase + player.Damage) / 2) * (TEdithMod.HopCurve(Charge/100))) * BRMult
 
 	HopParams.HopDamage = damageFormula
 	HopParams.HopKnockback = Knockbackbase * maths.exp(Charge / 100, 1, 1.5)
