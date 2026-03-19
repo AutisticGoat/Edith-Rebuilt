@@ -262,13 +262,13 @@ function Land.HandleEntityInteraction(ent, parent, knockback)
         end,
         [EntityType.ENTITY_FAMILIAR] = function()
             if not Helpers.When(var, tables.PhysicsFamiliar, false) then return end
-            Helpers.TriggerPush(ent, parent, knockback)
+            Helpers.TriggerPush(ent, parent, knockback * 1.3)
 
 			local fam = ent:ToFamiliar() 
 			if not fam then return end
 
 			if fam.Variant == FamiliarVariant.CUBE_BABY then
-				fam:Shoot()
+				fam:TryThrow(EntityRef(parent), fam.Velocity, 0)
 			end
         end,
         [EntityType.ENTITY_BOMB] = function()
