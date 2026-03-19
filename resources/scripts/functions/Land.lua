@@ -274,14 +274,8 @@ function Land.HandleEntityInteraction(ent, parent, knockback)
         [EntityType.ENTITY_BOMB] = function()
 			if Player.IsEdith(parent, true) then return end
             Helpers.TriggerPush(ent, parent, knockback)
-        end,
-        -- [EntityType.ENTITY_PICKUP] = function()
-            
-        -- end,
-		[EntityType.ENTITY_SLOT] = function ()
-
-		end,
-        [EntityType.ENTITY_SHOPKEEPER] = function()
+        end,        
+		[EntityType.ENTITY_SHOPKEEPER] = function()
 			if Player.IsEdith(parent, true) then return end
             ent:Kill()
         end,

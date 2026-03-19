@@ -429,8 +429,6 @@ local function ResetSaveData(isTainted)
 	RenderMenu = true
 end
 
-local TEdithOptions = {}
-
 mod:AddCallback(ModCallbacks.MC_POST_UPDATE, function()
 	UpdateImGuiData()
 end)

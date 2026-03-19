@@ -96,8 +96,7 @@ function Edith.HeadDirectionManager(player, jumping, shooting, keyStomp)
 end
 
 ---@param player EntityPlayer
----@param jumpData JumpData
-function Edith.CustomDropBehavior(player, jumpData)
+function Edith.CustomDropBehavior(player)
 	if not Player.IsEdith(player, false) then return end
 	local params = Edith.GetJumpStompParams(player)
 	if not Input.IsActionTriggered(ButtonAction.ACTION_DROP, player.ControllerIndex) then return end
@@ -462,6 +461,5 @@ function Edith:MoveBloodClotsToEdith(familiar)
 	familiar.Velocity = player.Velocity	
 end
 mod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, Edith.MoveBloodClotsToEdith, FamiliarVariant.BLOOD_BABY)
-
 
 return Edith

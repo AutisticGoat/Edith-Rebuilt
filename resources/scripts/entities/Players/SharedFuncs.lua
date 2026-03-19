@@ -16,6 +16,7 @@ local costumes = enums.NullItemID
 ---@return integer|boolean?
 mod:AddCallback(ModCallbacks.MC_INPUT_ACTION, function (_, entity, input, action)
     if not entity then return end
+
     local player = entity:ToPlayer()
 
     if not player then return end
@@ -39,22 +40,23 @@ local whiteListCostumes = {
     [CollectibleType.COLLECTIBLE_GAMEKID] = true,
 }
 
-local function OnAddCostume(_, itemconfig, player)
+---@param itemconfig ItemConfigItem
+---@param player EntityPlayer
+---@return boolean?
+mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_ADD_COSTUME, function(_, itemconfig, player)
     if not Player.IsAnyEdith(player) then return end
     if Helpers.When(itemconfig.Costume.ID, whiteListCostumes, false) then return end
     return true
-end
-mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_ADD_COSTUME, OnAddCostume)
+end)
 
 ---@param itemconfig ItemConfigItem
 ---@param player EntityPlayer
 ---@return boolean?
-local function OnRemoveCostume(_, itemconfig, player)
+mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_REMOVE_COSTUME, function(_, itemconfig, player)
     if not Player.IsAnyEdith(player) then return end
     if not Helpers.When(itemconfig.Costume.ID, ModCostumes, false) then return end
     return true
-end
-mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_REMOVE_COSTUME, OnRemoveCostume)
+end)
 
 mod:AddCallback(ModCallbacks.MC_POST_TEAR_UPDATE, function(_, tear)
     local player = Helpers.GetPlayerFromTear(tear)
