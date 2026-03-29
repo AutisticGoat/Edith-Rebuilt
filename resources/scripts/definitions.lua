@@ -168,11 +168,11 @@ EdithRebuilt.Enums = {
 	},
 	---@enum SaltTypes
 	SaltTypes = {
-		SALT_SHAKER = "SaltShaker",
-		SALT_SHAKER_JUDAS = "SaltShakerJudas",
-		SAL = "Sal",
-		SALT_HEART = "SaltHeart",
-		EDITHS_HOOD = "EdithsHood",
+		SALT_SHAKER = 1 << 0,
+		SALT_SHAKER_JUDAS = 1 << 1,
+		SAL = 1 << 2,
+		SALT_HEART = 1 << 3,
+		EDITHS_HOOD = 1 << 4,
 	},
 	---@enum ConfigDataTypes
 	ConfigDataTypes = {
@@ -250,6 +250,7 @@ EdithRebuilt.Enums = {
 			[TearVariant.PUPULA_BLOOD] = true,
 			[TearVariant.GODS_FLESH_BLOOD] = true,
 			[TearVariant.NAIL_BLOOD] = true,
+			[TearVariant.EYE_BLOOD] = true
 		},
 		BackdropColors = {
 			[BackdropType.CORPSE3] = Color(0.75, 0.2, 0.2),
