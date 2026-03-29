@@ -828,17 +828,17 @@ local function AddContributors()
 	- Sylvy_owo
 	- .radiox
 	- Edith's No.1 Fan
-	- River Moondrop (HOLA RIVERIO)
 	]], 
 	true)
-
+	
 	ImGui.AddText(Menu.Tabs.Credits.Team, 
 	[[
-	Team: 
-
+	Team:
+	
 	- gigamouse: finished Tainted Edith sprite, items sprites
 	- Pattowolfx220: Testing, First Tainted Edith sprite, items sprites
-	- Kotry: Project leader, coder, unlock sheets sprite
+	- River Moondrop (HOLA RIVERIO): Costumes sprites
+	- Kotry: Project leader, coder, unlock sheets sprites
 	]],
 	true)
 end

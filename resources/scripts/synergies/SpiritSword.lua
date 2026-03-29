@@ -1,0 +1,50 @@
+local mod = EdithRebuilt
+local callbacks = mod.Enums.Callbacks
+local data = mod.DataHolder.GetEntityData
+
+---@param player EntityPlayer
+local function FireSpiritSword(player)
+	if not player:HasCollectible(CollectibleType.COLLECTIBLE_SPIRIT_SWORD) then return end
+
+	local knife = player:FireKnife(player, 90, true, 0, KnifeVariant.SPIRIT_SWORD)
+	local knifeData = data(knife)
+	local knifeSprite = knife:GetSprite()
+
+	knifeSprite:Play("SpinDown", true)
+	knife.Visible = false
+
+	local effect = Isaac.Spawn(
+		EntityType.ENTITY_EFFECT,
+		EffectVariant.POOF01,
+		0,
+		player.Position,
+		Vector.Zero,
+		nil
+	):ToEffect() ---@cast effect EntityEffect
+
+	effect:FollowParent(player)
+	local effectSprite = effect:GetSprite()
+	effectSprite:Load("gfx/008.010_spirit sword.anm2", true)
+	effectSprite:Play("SpinDown")
+
+	local damageMult = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and 0.75 or 0.5
+	local baseDamage = (player.Damage * 8) + 10
+
+	knife.SpriteScale = knife.SpriteScale * 1.7
+	knifeData.SynergySword = true
+	knife.CollisionDamage = baseDamage * damageMult
+end
+
+mod:AddCallback(callbacks.PERFECT_PARRY, function(_, player) FireSpiritSword(player) end)
+mod:AddCallback(callbacks.OFFENSIVE_STOMP, function(_, player) FireSpiritSword(player) end)
+
+---@param knife EntityKnife
+mod:AddCallback(ModCallbacks.MC_POST_KNIFE_UPDATE, function(_, knife)
+	local knifeSprite = knife:GetSprite()
+	local knifeData = data(knife)
+
+	if knife.Variant ~= KnifeVariant.SPIRIT_SWORD or not knifeData.SynergySword then return end
+	if not (knifeSprite:GetAnimation() == "SpinDown" and knifeSprite:IsFinished()) then return end
+
+	knife:Remove()
+end)

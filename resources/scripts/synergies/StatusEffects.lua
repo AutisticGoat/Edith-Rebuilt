@@ -1,0 +1,14 @@
+local mod = EdithRebuilt
+local Callbacks = mod.Enums.Callbacks
+
+---@param player EntityPlayer
+---@param entity Entity
+local function ApplyTearflagEffects(player, entity)
+	if not entity:IsEnemy() then return end
+
+	local ent = entity:ToNPC() ---@cast ent EntityNPC
+	ent:ApplyTearflagEffects(ent.Position, player.TearFlags, player, player.Damage)
+end
+
+mod:AddCallback(Callbacks.PERFECT_PARRY, function(_, player, entity) ApplyTearflagEffects(player, entity) end)
+mod:AddCallback(Callbacks.OFFENSIVE_STOMP_HIT, function(_, player, entity) ApplyTearflagEffects(player, entity) end)
