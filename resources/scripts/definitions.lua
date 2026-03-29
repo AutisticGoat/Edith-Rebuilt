@@ -1,3 +1,4 @@
+local game = Game()
 local EdithPlayer = Isaac.GetPlayerTypeByName("Edith​​​", false)
 local EdithBPlayer = Isaac.GetPlayerTypeByName("Edith​​​", true)
 local edithJumpTag = "edithRebuilt_EdithJump"
@@ -161,10 +162,10 @@ EdithRebuilt.Enums = {
 		PERFECT_PARRY = Isaac.GetGiantBookIdByName("ParryEffect")
 	},
 	Utils = {
-		Game = Game(),
+		Game = game,
 		SFX = SFXManager(),
 		RNG = RNG(),
-		Level = Game():GetLevel(),
+		Level = game:GetLevel(),
 	},
 	---@enum SaltTypes
 	SaltTypes = {
