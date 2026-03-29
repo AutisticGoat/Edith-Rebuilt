@@ -1,4 +1,4 @@
-EdithRebuilt = RegisterMod("Edith: Rebuilt", 1) --[[@as ModReference|table]]
+EdithRebuilt = RegisterMod("Edith: Rebuilt", 1) ---@class ModReference
 local mod = EdithRebuilt
 local font = Font()
 font:Load("font/pftempestasevencondensed.fnt")
@@ -28,7 +28,7 @@ EdithRebuilt.SaveManager = require("resources.scripts.libs.EdithRebuiltSaveManag
 EdithRebuilt.SaveManager.Init(mod)
 EdithRebuilt.Hsx = require("resources.scripts.libs.lhsx")
 
-EdithRebuilt.Version = "v1.7.2beta"
+EdithRebuilt.Version = "v1.8.0beta"
 
 include("resources.scripts.libs.hud_helper")
 include("resources.scripts.libs.prenpckillcallback")
@@ -49,6 +49,8 @@ EdithRebuilt.Modules = {
 	TEDITH = include("resources.scripts.functions.TEdith"),
 	STATUS_EFFECTS = include("resources.scripts.functions.StatusEffects"),
 	CREEPS = include("resources.scripts.functions.Creeps"),
+	JUMP = include("resources.scripts.functions.Jump"),
+	STOMP_UTILS = include("resources.scripts.functions.StompUtils")
 }
 
 include("include")
