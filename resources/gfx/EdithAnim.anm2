@@ -756,9 +756,9 @@
             </NullAnimations>
             <Triggers/>
         </Animation>
-        <Animation Name="Trapdoor" FrameNum="9" Loop="false">
+        <Animation Name="Trapdoor" FrameNum="5" Loop="false">
             <RootAnimation>
-                <Frame XPosition="0" YPosition="0" Delay="2" Visible="true" XScale="100" YScale="100" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="false"/>
+                <Frame XPosition="0" YPosition="0" Delay="5" Visible="true" XScale="100" YScale="100" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="false"/>
             </RootAnimation>
             <LayerAnimations>
                 <LayerAnimation LayerId="0" Visible="true"/>
@@ -775,8 +775,6 @@
                 <LayerAnimation LayerId="14" Visible="true"/>
                 <LayerAnimation LayerId="11" Visible="true"/>
                 <LayerAnimation LayerId="12" Visible="true">
-                    <Frame XPosition="0" YPosition="1" XPivot="32" YPivot="56" XCrop="0" YCrop="192" Width="64" Height="64" XScale="100" YScale="100" Delay="2" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="true"/>
-                    <Frame XPosition="0" YPosition="2" XPivot="32" YPivot="56" XCrop="0" YCrop="192" Width="64" Height="64" XScale="110" YScale="90" Delay="2" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="true"/>
                     <Frame XPosition="0" YPosition="0" XPivot="32" YPivot="56" XCrop="0" YCrop="192" Width="64" Height="64" XScale="95" YScale="105" Delay="2" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="true"/>
                     <Frame XPosition="0" YPosition="7" XPivot="32" YPivot="56" XCrop="0" YCrop="192" Width="64" Height="64" XScale="85" YScale="115" Delay="1" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="false"/>
                     <Frame XPosition="0" YPosition="72" XPivot="32" YPivot="56" XCrop="0" YCrop="208" Width="64" Height="16" XScale="50" YScale="150" Delay="1" Visible="true" RedTint="255" GreenTint="255" BlueTint="255" AlphaTint="255" RedOffset="0" GreenOffset="0" BlueOffset="0" Rotation="0" Interpolated="false"/>
