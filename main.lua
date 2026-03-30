@@ -50,7 +50,8 @@ EdithRebuilt.Modules = {
 	STATUS_EFFECTS = include("resources.scripts.functions.StatusEffects"),
 	CREEPS = include("resources.scripts.functions.Creeps"),
 	JUMP = include("resources.scripts.functions.Jump"),
-	STOMP_UTILS = include("resources.scripts.functions.StompUtils")
+	BIT_MASK = include("resources.scripts.functions.BitMask"),
+	STOMP_UTILS = include("resources.scripts.functions.StompUtils"),
 }
 
 include("include")
