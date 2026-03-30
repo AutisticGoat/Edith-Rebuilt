@@ -46,7 +46,7 @@ local function ShootPeppers(player, isStomp)
     for i = 1, fires do
         local dir = Vector(0, 1):Rotated(degrees * i)
 
-        if HasBothPeppers(player) then
+        if HasBothPeppers then
             if ModRNG.RandomBoolean(rng) then
                 RedCandle(player, dir)
             else
