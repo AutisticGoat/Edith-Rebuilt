@@ -19,8 +19,10 @@ mod:AddCallback(ModCallbacks.MC_POST_ENTITY_KILL, function(_, npc, source)
 	if not player:HasTrinket(trinkets.TRINKET_GEODE) then return end
 
 	local rng = player:GetTrinketRNG(trinkets.TRINKET_GEODE)
+	local trinketMult = player:GetTrinketMultiplier(trinkets.TRINKET_GEODE)
+	local chanceFormula = 0.025 * Maths.exp(trinketMult, 1, 1.75)
 
-	if not ModRNG.RandomBoolean(rng, 0.025 * Maths.exp(player:GetTrinketMultiplier(trinkets.TRINKET_GEODE), 1, 1.75)) then return end
+	if not ModRNG.RandomBoolean(rng, trinketMult) then return end
 
 	Isaac.Spawn(
 		EntityType.ENTITY_PICKUP,
@@ -38,7 +40,6 @@ mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG, function (_, player, _, fla
 	if not player:HasTrinket(trinkets.TRINKET_GEODE) then return end
 	if player:GetDamageCooldown() > 0 then return end
 	if BitMask.HasAnyBitFlags(flags, NonDestroyFlags) then return end
-
 
 	local rng = player:GetTrinketRNG(trinkets.TRINKET_GEODE)
 
