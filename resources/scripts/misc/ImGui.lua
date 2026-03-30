@@ -8,6 +8,7 @@ local achievements = enums.Achievements
 local RenderMenu = true
 local SaveManager = mod.SaveManager
 local data = mod.DataHolder.GetEntityData
+local ImGuiMod = {}
 
 ---@class EdithData
 ---@field TargetDesign number
@@ -853,34 +854,10 @@ local function AddProgressBars()
 end
 
 local function AddChangelogs()
-	-- ImGui.AddTabBar(Menu.Windows.Changelog, Menu.TabBars.Changelog)
-
 	ImGui.AddText(Menu.Windows.Changelog, [[
 The changelog has been moved to pastebin, check it here: https://pastebin.com/HuxvYkGC
 	]])
 end
-
--- ---@param enabled boolean
--- local function DisplayTrainingOptions(enabled)
--- 	if not SaveManager.IsLoaded() then return end
--- 	local saveData = SaveManager.GetSettingsSave()
-
--- 	if not saveData then return end
--- 	local EdithData = saveData.EdithData
--- 	local TEdithData = saveData.TEdithData
--- 	local MiscData = saveData.MiscData
-
--- 	if enabled then
--- 		ImGui.AddDragFloat("EdithGameplaySettings", TrainingOptions.EdithStompMultDamage, "Set Stomp damage Mult", 
--- 		function(val)
--- 			EdithData.CustomStompDmgMult = val
--- 		end, 1, 0.005, 1, 2)
--- 	else
--- 		for _, options in pairs(TrainingOptions) do
--- 			ImGui.RemoveElement(options)
--- 		end
--- 	end
--- end
 
 local function OptionsUpdate()	
 	if not RenderMenu then return end
@@ -980,7 +957,7 @@ local function UpdateProgressBar()
 end
 mod:AddCallback(ModCallbacks.MC_POST_RENDER, UpdateProgressBar)
 
-function mod:DestroyImGuiOptions()
+function ImGuiMod.DestroyImGuiOptions()
 	for _, ID in pairs(elementTab) do
 		if not ImGui.ElementExists(ID) then goto continue end 
 		ImGui.RemoveElement(ID)
@@ -1035,15 +1012,14 @@ local function InitSaveData()
 	MiscData.EnableShakescreen = MiscData.EnableShakescreen or true
 	MiscData.CustomActionKey = MiscData.CustomActionKey or Keyboard.KEY_Z
 	
-	mod:DestroyImGuiOptions()
+	ImGuiMod.DestroyImGuiOptions()
 end
 
-function mod:ManageUnlock()
+mod:AddCallback(ModCallbacks.MC_POST_ACHIEVEMENT_UNLOCK, function ()
 	RenderMenu = false
-end
-mod:AddCallback(ModCallbacks.MC_POST_ACHIEVEMENT_UNLOCK, mod.ManageUnlock, achievements.ACHIEVEMENT_TAINTED_EDITH)
+end, achievements.ACHIEVEMENT_TAINTED_EDITH)
 
-mod:AddCallback(ModCallbacks.MC_MAIN_MENU_RENDER, mod.DestroyImGuiOptions)
+mod:AddCallback(ModCallbacks.MC_MAIN_MENU_RENDER, ImGuiMod.DestroyImGuiOptions)
 mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, InitSaveData)
 mod:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT, InitSaveData)
 mod:AddCallback(ModCallbacks.MC_PRE_MOD_UNLOAD, InitSaveData)
