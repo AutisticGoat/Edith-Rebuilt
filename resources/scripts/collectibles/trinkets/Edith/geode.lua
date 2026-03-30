@@ -1,16 +1,16 @@
 local mod = EdithRebuilt
 local enums = mod.Enums
 local trinkets = enums.TrinketType
+local NonDestroyFlags = DamageFlag.DAMAGE_INVINCIBLE | DamageFlag.DAMAGE_NO_PENALTIES | DamageFlag.DAMAGE_CURSED_DOOR
 local modules = mod.Modules
 local ModRNG = modules.RNG
 local Helpers = modules.HELPERS
 local Maths = modules.MATHS
-local Geode = {}
-local NonDestroyFlags = DamageFlag.DAMAGE_INVINCIBLE | DamageFlag.DAMAGE_NO_PENALTIES | DamageFlag.DAMAGE_CURSED_DOOR
+local BitMask = modules.BIT_MASK
 
 ---@param npc EntityNPC
 ---@param source EntityRef
-function Geode:SpawnOnKill(npc, source)
+mod:AddCallback(ModCallbacks.MC_POST_ENTITY_KILL, function(_, npc, source)
 	if source.Type == 0 then return end
 
 	local player = Helpers.GetPlayerFromRef(source)
@@ -30,22 +30,24 @@ function Geode:SpawnOnKill(npc, source)
 		Vector.Zero,
 		player
 	)
-end
-mod:AddCallback(ModCallbacks.MC_POST_ENTITY_KILL, Geode.SpawnOnKill)
+end)
 
 ---@param player EntityPlayer
 ---@param flags DamageFlag
-function Geode:DestroyGeode(player, _, flags)
+mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG, function (_, player, _, flags)
 	if not player:HasTrinket(trinkets.TRINKET_GEODE) then return end
-	if Maths.HasBitFlags(flags, NonDestroyFlags) then return end
+	if player:GetDamageCooldown() > 0 then return end
+	if BitMask.HasAnyBitFlags(flags, NonDestroyFlags) then return end
+
 
 	local rng = player:GetTrinketRNG(trinkets.TRINKET_GEODE)
+
+	if not ModRNG.RandomBoolean(rng, 0.25) then return end
+	player:TryRemoveTrinket(trinkets.TRINKET_GEODE)
+
 	local trinketMult = player:GetTrinketMultiplier(trinkets.TRINKET_GEODE)
 	local totalRunes = 3 + (trinketMult - 1)
 	local spawnDegree = 360 / totalRunes
-	
-	if not ModRNG.RandomBoolean(rng, 0.25) then return end
-	player:TryRemoveTrinket(trinkets.TRINKET_GEODE)
 
 	for i = 1, totalRunes do
 		Isaac.Spawn(
@@ -57,5 +59,4 @@ function Geode:DestroyGeode(player, _, flags)
 			player
 		)
 	end
-end
-mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG, Geode.DestroyGeode)
+end)
