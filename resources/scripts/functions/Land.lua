@@ -447,8 +447,14 @@ function Land.TaintedEdithHop(parent, HopParams)
 	for _, ent in ipairs(Isaac.FindInCapsule(capsule)) do
 		Land.HandleEntityInteraction(ent, parent, HopParams.HopKnockback)
 		Land.LandDamage(ent, parent, HopParams.HopDamage, HopParams.HopKnockback)
-		
+
 		if Helpers.IsEnemy(ent) then			
+			local npc = ent:ToNPC()
+
+			if npc then
+				npc:ApplyTearflagEffects(ent.Position, parent.TearFlags, parent, parent.Damage)
+			end
+
 			StatusEffect.SetStatusEffect(status.CINDER, ent, CinderDuration, parent)
 			if BRCharge > 0 then
 				ent:AddBurn(PlayerRef, burnDuration, burnDamage)
