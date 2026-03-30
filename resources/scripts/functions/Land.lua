@@ -267,7 +267,7 @@ function Land.HandleEntityInteraction(ent, parent, knockback)
 			local fam = ent:ToFamiliar() 
 			if not fam then return end
 
-			if fam.Variant == FamiliarVariant.CUBE_BABY then
+			if var == FamiliarVariant.CUBE_BABY then
 				fam:TryThrow(EntityRef(parent), fam.Velocity, 0)
 			end
         end,
