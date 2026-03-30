@@ -151,7 +151,7 @@ end
 ---@param jumpIntData InternalJumpData
 ---@param jumpParams EdithJumpStompParams
 function Edith.DefensiveStompManager(player, jumpIntData, jumpParams)
-	local config = Helpers.GetConfigData("EdithData")
+	local config = Helpers.GetConfigData("EdithData") ---@cast config EdithData
 
 	if not config then return end
 
@@ -232,15 +232,13 @@ function Edith.BombFall(player, jumpConfig, jumpParams)
 end
 
 ---@param bomb EntityBomb
-function mod:BombUpdate(bomb)
+mod:AddCallback(ModCallbacks.MC_POST_BOMB_RENDER, function(_, bomb)
 	if not data(bomb).IsEdithRocket then return end
 	local rocketHeight = JumpLib:GetData(bomb).Height
 
-	if rocketHeight <= 15 then
-		JumpLib:QuitJump(bomb)
-	end
-end
-mod:AddCallback(ModCallbacks.MC_POST_BOMB_RENDER, mod.BombUpdate)
+	if rocketHeight > 15 then return end
+	JumpLib:QuitJump(bomb)
+end)
 
 ---@param player EntityPlayer
 ---@param target EntityEffect
@@ -374,13 +372,17 @@ function Edith.CooldownUpdate(player, jumpParams)
 end
 
 ---@param player EntityPlayer
-function Edith.JumpMovement(player)
-	if Helpers.IsVestigeChallenge() then return end
-	if not TargetArrow.GetEdithTarget(player) then return end
-	if not Helpers.IsJumping(player) then return end
+---@param isJumping boolean
+---@param isVestige boolean
+function Edith.JumpMovement(player, isJumping, isVestige)
+	if isVestige then return end
+	if not isJumping then return end
 
-	local div = (Helpers.IsKeyStompPressed(player) and player.CanFly) and 70 or 50
-	Edith.EdithDash(player, TargetArrow.GetEdithTargetDirection(player, false), TargetArrow.GetEdithTargetDistance(player), div)
+	local targetDirection = TargetArrow.GetEdithTargetDirection(player, false)
+	local targetDistance = TargetArrow.GetEdithTargetDistance(player)
+	local div = (Helpers.IsKeyStompPressed(player) and player.CanFly) and 140 or 100
+
+	Edith.EdithDash(player, targetDirection, targetDistance, div)
 end
 
 ---@param player EntityPlayer

@@ -70,6 +70,7 @@ function Edith:OnEdithUpdate(player)
 	EdithMod.TargetMovementManager(player, target, isMoving)
 	EdithMod.JumpTriggerManager(player, jumpParams, isKeyStompPressed, isJumping, IsVestige)
 	EdithMod.HeadDirectionManager(player, isJumping, isShooting, isKeyStompPressed)
+	EdithMod.JumpMovement(player, isJumping, IsVestige)
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, Edith.OnEdithUpdate)
 
@@ -150,7 +151,6 @@ function Edith:OnEdithPEffectUpdate(player)
 
 	if jumpParams.RocketLaunch then return end
 	EdithMod.CooldownUpdate(player, jumpParams)
-	EdithMod.JumpMovement(player)
 end
 mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, Edith.OnEdithPEffectUpdate)
 
