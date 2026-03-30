@@ -180,6 +180,10 @@ function mod:EdithPlayerUpdate(player)
 		chosenDir = Direction.DOWN
 	end
 
+	if player:GetSprite():GetAnimation() == "MinecartEnter" then
+		TEdithMod.StopTEdithHops(player, 0, true, true)
+	end
+
 	player:SetHeadDirection(chosenDir, 1, true)
 end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, mod.EdithPlayerUpdate)
