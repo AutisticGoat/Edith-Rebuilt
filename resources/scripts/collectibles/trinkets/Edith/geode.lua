@@ -22,7 +22,7 @@ mod:AddCallback(ModCallbacks.MC_POST_ENTITY_KILL, function(_, npc, source)
 	local trinketMult = player:GetTrinketMultiplier(trinkets.TRINKET_GEODE)
 	local chanceFormula = 0.025 * Maths.exp(trinketMult, 1, 1.75)
 
-	if not ModRNG.RandomBoolean(rng, trinketMult) then return end
+	if not ModRNG.RandomBoolean(rng, chanceFormula) then return end
 
 	Isaac.Spawn(
 		EntityType.ENTITY_PICKUP,
