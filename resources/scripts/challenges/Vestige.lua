@@ -1,6 +1,5 @@
 local mod = EdithRebuilt
 local JumpTags = mod.Enums.Tables.JumpTags
-local data = mod.DataHolder.GetEntityData
 local modules = mod.Modules
 local TargetArrow = modules.TARGET_ARROW
 local Helpers = modules.HELPERS
@@ -20,28 +19,31 @@ mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(_, player)
 	player.TearRange = Player.rangeUp(player.TearRange, 1.75)
 end, CacheFlag.CACHE_RANGE)
 
----@param player EntityPlayer
-mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
-	if not IsEdithAndVestige(player) then return end
+local function HandleVestigeDeath(player)
+    if not player:IsDead() then return false end
+    TargetArrow.RemoveEdithTarget(player)
+    return true
+end
 
-	local playerData = data(player)
-	if player:IsDead() then 
-		TargetArrow.RemoveEdithTarget(player) 
-		return
-	end
+local function HandleVestigeJumpTrigger(player)
+    local jumpData = JumpLib:GetData(player)
+    local isJumping = jumpData.Jumping
+    local sprite = player:GetSprite()
 
-	local isKeyStompTriggered = Helpers.IsKeyStompTriggered(player)
-	local jumpData = JumpLib:GetData(player)
-	local isJumping = jumpData.Jumping 
-	local sprite = player:GetSprite()
-
-    if isKeyStompTriggered and not isJumping and not sprite:IsPlaying("BigJumpUp") and not sprite:IsPlaying("BigJumpFinish") then
+    if Helpers.IsKeyStompTriggered(player) and not isJumping
+    and not sprite:IsPlaying("BigJumpUp") and not sprite:IsPlaying("BigJumpFinish") then
         player:PlayExtraAnimation("BigJumpUp")
-	end
+    end
 
     if sprite:IsEventTriggered("StartJump") and not isJumping then
         EdithMod.InitEdithJump(player, JumpTags.EdithJump, true)
     end
+end
+
+mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
+    if not IsEdithAndVestige(player) then return end
+    if HandleVestigeDeath(player) then return end
+    HandleVestigeJumpTrigger(player)
 end)
 
 ---@param player EntityPlayer
@@ -49,10 +51,10 @@ mod:AddCallback(JumpLib.Callbacks.ENTITY_UPDATE_60, function (_, player)
 	if not IsEdithAndVestige(player) then return end
 
 	local target = TargetArrow.GetEdithTarget(player)
-	local IsFalling = JumpLib:IsFalling(player)
-	local targetDistance = TargetArrow.GetEdithTargetDistance(player)
 
 	if not target then return end
+	local IsFalling = JumpLib:IsFalling(player)
+	local targetDistance = TargetArrow.GetEdithTargetDistance(player)
 
 	if Jump.GetJumpFrame(player) > 6 then
 		EdithMod.EdithDash(player, TargetArrow.GetEdithTargetDirection(player), targetDistance, 50)
