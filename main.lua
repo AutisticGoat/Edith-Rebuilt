@@ -30,6 +30,8 @@ EdithRebuilt.Hsx = require("resources.scripts.libs.lhsx")
 
 EdithRebuilt.Version = "v1.8.0beta"
 
+include("resources.scripts.misc.dss.dssmain")
+include("resources.scripts.misc.dss.changelogs")
 include("resources.scripts.libs.hud_helper")
 include("resources.scripts.libs.prenpckillcallback")
 include("resources.scripts.libs.EdithKotryJumpLib").Init()
