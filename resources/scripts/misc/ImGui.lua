@@ -276,20 +276,10 @@ for _, link in ipairs(links) do
 end
 
 local function UpdateImGuiData()
-	-- print("Loaded function")
-
 	if not SaveManager.IsLoaded() then return end
 	local saveData = SaveManager.GetSettingsSave()
-	
-	-- print("Loaded Save Manager")
 
 	if not saveData then return end
-
-	-- print("Loaded save data")
-
-	-- if not mod:CheckImGuiIntegrity() then return end
-	
-	
 
 	local EdithData = saveData.EdithData ---@cast EdithData EdithData
 	local TEdithData = saveData.TEdithData ---@cast TEdithData TEdithData
@@ -299,10 +289,10 @@ local function UpdateImGuiData()
 	local TEdithOptions = Options.TEdith
 	local MiscOptions = Options.Misc
 
-	local data = {}
+	local optionsData = {}
 
 	if isEdithUnlocked(false) then
-		local data = {
+		local edithData = {
 			[MiscOptions.CustomActionKey] = MiscData.CustomActionKey or Keyboard.KEY_Z,
 			[MiscOptions.EnableShakescreen] = MiscData.EnableShakescreen or false,
 
@@ -317,20 +307,22 @@ local function UpdateImGuiData()
 			[EdithOptions.Sounds.SetJumpCooldownSound] = (EdithData.JumpCooldownSound - 1) or 0,
 			[EdithOptions.Gameplay.DefensiveStompWindow] = EdithData.DefensiveStompWindow or 18,
 			[EdithOptions.Gameplay.SaltShakerSlot] = EdithData.SaltShakerSlot or 0,
-		}	
+		}
 
-		for k, v in pairs(data) do
-			data[k] = v
+		for k, v in pairs(edithData) do
+			optionsData[k] = v
 		end
 
 		local targetColor = EdithData.TargetColor
 
-		ImGui.UpdateData(EdithOptions.Visuals.TargetColor, ImGuiData.ColorValues, 
-		{
-			targetColor.Red,
-			targetColor.Green,
-			targetColor.Blue,
-		})
+		if targetColor then
+			ImGui.UpdateData(EdithOptions.Visuals.TargetColor, ImGuiData.ColorValues, 
+			{
+				targetColor.Red,
+				targetColor.Green,
+				targetColor.Blue,
+			})
+		end
 	end
 
 	if isEdithUnlocked(true) then
@@ -351,7 +343,7 @@ local function UpdateImGuiData()
 		}
 
 		for k, v in pairs(taintedData) do
-			data[k] = v
+			optionsData[k] = v
 		end
 
 		local arrowcolor = TEdithData.ArrowColor
@@ -380,7 +372,7 @@ local function UpdateImGuiData()
 		})
 	end
 
-	for option, newValue in pairs(data) do
+	for option, newValue in pairs(optionsData) do
 		ImGui.UpdateData(option, ImGuiData.Value, newValue)
 	end
 
@@ -388,8 +380,6 @@ local function UpdateImGuiData()
 end
 
 local function ResetSaveData(isTainted)
-	local SaveManager = mod.SaveManager
-	if not SaveManager then return end
 	local menuData = SaveManager.GetSettingsSave()
 	if not menuData then return end
 
@@ -461,13 +451,13 @@ end
 
 local function AddTabBars()
 	ImGui.AddTabBar(Elements.Menu.Windows.Settings, Elements.Menu.TabBars.Settings)
-	
+
 	if isEdithUnlocked(false) then
 		ImGui.AddTab(Elements.Menu.TabBars.Settings, Elements.Menu.Tabs.Edith.Main, "Edith")
+		if isEdithUnlocked(true) then
+			ImGui.AddTab(Elements.Menu.TabBars.Settings, Elements.Menu.Tabs.TEdith.Main, "Tainted Edith")
+		end
 		ImGui.AddTab(Elements.Menu.TabBars.Settings, Elements.Menu.Tabs.Misc.Main, "Misc")
-	end
-	if isEdithUnlocked(true) then
-		ImGui.AddTab(Elements.Menu.TabBars.Settings, Elements.Menu.Tabs.TEdith.Main, "Tainted Edith")
 	end
 end
 
@@ -859,7 +849,9 @@ The changelog has been moved to pastebin, check it here: https://pastebin.com/Hu
 	]])
 end
 
-local function OptionsUpdate()	
+local game = Game()
+
+local function OptionsUpdate()
 	if not RenderMenu then return end
 	if not SaveManager.IsLoaded() then return end
 	local saveData = SaveManager.GetSettingsSave()
@@ -875,6 +867,9 @@ local function OptionsUpdate()
 	AddProgressBars()
 	AddChangelogs()
 	UpdateImGuiData()
+
+	
+
 	RenderMenu = false
 end
 
