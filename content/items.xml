@@ -79,7 +79,7 @@
 		description="Making it burn" 
 		gfx="collectibles_Fate_of_the_Unfaithful.png"
 		quality="3"
-		maxcharges="4"
+		maxcharges="3"
 		cache="damage"
 		tags="offensive"
 		achievement="EdithRebuilt_Ediths Hood"
