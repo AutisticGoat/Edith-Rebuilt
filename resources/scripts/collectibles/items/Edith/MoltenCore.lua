@@ -6,7 +6,7 @@ local Helpers = mod.Modules.HELPERS
 local data = mod.DataHolder.GetEntityData
 
 local CORE = {
-    RADIUS = 80,
+    RADIUS = 120,
     DAMAGE_MULT_MAX = 2,
     DAMAGE_SCALE = 50,
     DAMAGE_INTERVAL = 15,
