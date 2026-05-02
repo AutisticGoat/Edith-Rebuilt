@@ -11,7 +11,7 @@ local Maths = modules.MATHS
 local sfx = utils.SFX
 
 local DR = {
-    DAMAGE_BASE = 25,
+    DAMAGE_BASE = 40,
     DAMAGE_JUDAS_MULT = 1.5,
 }
 
@@ -33,7 +33,7 @@ end
 ---@param hasCarBattery boolean
 ---@param isJudasWithBirthright boolean
 local function HealPlayer(player, hasCarBattery, isJudasWithBirthright)
-    local heartsToAdd = hasCarBattery and 2 or 1
+    local heartsToAdd = hasCarBattery and 4 or 2
     local healFunc = isJudasWithBirthright and player.AddBlackHearts or player.AddSoulHearts
     healFunc(player, heartsToAdd)
 end
