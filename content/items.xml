@@ -17,7 +17,8 @@
 		description="To spice up the danger" 
 		gfx="collectibles_PepperGrinder.png"
 		quality="2" 
-		maxcharges="1"
+		chargetype="timed"
+		maxcharges="120"
 		achievement="EdithRebuilt_Pepper Grinder"
 		tags="offensive"
 	/>
