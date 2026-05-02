@@ -5,13 +5,7 @@ local EdithMod = modules.EDITH
 local TEdithMod = modules.TEDITH
 local TargetArrow = modules.TARGET_ARROW
 local Player = modules.PLAYER
-
--- La lógica de FlatStone difiere sustancialmente entre parry y stomp:
---   Parry:  IsEdith(true), multiplier 1.6, llama ParryLandManager
---   Stomp:  IsEdith(false), multiplier 1.4, llama EdithStomp + TriggerLandenemyJump,
---           además verifica IsDefensiveStomp y aplica un Mult de daño previo
-
--- ── Primer ENTITY_LAND: dispara los mini-saltos ──────────────────────────────
+local jumpParams = mod.Enums.Tables.JumpParams
 
 ---@param player EntityPlayer
 ---@param JumpData JumpData
@@ -23,7 +17,7 @@ local function ParryFlatStoneMiniJumps(_, player, JumpData)
     Land.TriggerFlatStoneMiniJumps(player, 7, 1.6)
     TargetArrow.RemoveEdithTarget(player)
 end
-mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, ParryFlatStoneMiniJumps, mod.Enums.Tables.JumpParams.TEdithJump)
+mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, ParryFlatStoneMiniJumps, jumpParams.TEdithJump)
 
 ---@param player EntityPlayer
 ---@param JumpData JumpData
@@ -39,9 +33,7 @@ local function StompFlatStoneMiniJumps(_, player, JumpData)
     Land.TriggerFlatStoneMiniJumps(player, 7, 1.6)
     TargetArrow.RemoveEdithTarget(player)
 end
-mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, StompFlatStoneMiniJumps, mod.Enums.Tables.JumpParams.EdithJump)
-
--- ── Segundo ENTITY_LAND (tag): ejecuta el aterrizaje del mini-salto ───────────
+mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, StompFlatStoneMiniJumps, jumpParams.EdithJump)
 
 ---@param ent Entity
 ---@param data JumpData

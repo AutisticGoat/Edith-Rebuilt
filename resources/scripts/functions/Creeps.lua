@@ -3,8 +3,6 @@ local enums = mod.Enums
 local SubTypes = enums.SubTypes
 local Creeps = {}
 local data = mod.DataHolder.GetEntityData
-local Helpers = require("resources.scripts.functions.Helpers")
-local Maths = require("resources.scripts.functions.Maths")
 
 ---Spawns Salt Creep
 ---@param parent Entity
@@ -20,6 +18,7 @@ local Maths = require("resources.scripts.functions.Maths")
 function Creeps.SpawnSaltCreep(parent, position, damage, timeout, gibAmount, gibSpeed, spawnType, inheritParentColor, inheritParentVel, color)
 	gibAmount = gibAmount or 0
 
+	local modules = mod.Modules
 	local salt = Isaac.Spawn(
 		EntityType.ENTITY_EFFECT, 
 		EffectVariant.PLAYER_CREEP_RED, 
@@ -30,7 +29,7 @@ function Creeps.SpawnSaltCreep(parent, position, damage, timeout, gibAmount, gib
 	):ToEffect() ---@cast salt EntityEffect
 
 	local saltColor = inheritParentColor and parent.Color or Color.Default
-	local timeOutSeconds = Maths.SecondsToFrames(timeout) or 30
+	local timeOutSeconds = modules.MATHS.SecondsToFrames(timeout) or 30
 
 	salt.CollisionDamage = damage or 0
 	salt.Color = color or saltColor
@@ -38,9 +37,11 @@ function Creeps.SpawnSaltCreep(parent, position, damage, timeout, gibAmount, gib
 
 	if gibAmount > 0 then
 		local gibColor = color or (inheritParentColor and Color.Default or nil)
-		Helpers.SpawnSaltGib(parent, gibAmount, gibSpeed, gibColor, inheritParentVel)
+		modules.HELPERS.SpawnSaltGib(parent, gibAmount, gibSpeed, gibColor, inheritParentVel)
 	end
-	data(salt).SpawnType = spawnType
+
+	data(salt).SpawnType = data(salt).SpawnType or 0
+	data(salt).SpawnType = modules.BIT_MASK.AddBitFlags(data(salt).SpawnType, spawnType)
 end
 
 ---Spawns Pepper creep, used for Pepper Grinder
@@ -59,7 +60,7 @@ function Creeps.SpawnPepperCreep(parent, position, damage, timeout)
 	):ToEffect() ---@cast pepper EntityEffect
 
 	pepper.CollisionDamage = damage or 0
-	pepper:SetTimeout(Maths.SecondsToFrames(timeout) or 30)
+	pepper:SetTimeout(mod.Modules.MATHS.SecondsToFrames(timeout) or 30)
 end
 
 ---Spawns Pepper creep, used for Pepper Grinder
@@ -78,7 +79,7 @@ function Creeps.SpawnCinderCreep(parent, position, damage, timeout)
 	):ToEffect() ---@cast Cinder EntityEffect
 
 	Cinder.CollisionDamage = damage or 0
-	Cinder:SetTimeout(Maths.SecondsToFrames(timeout) or 30)
+	Cinder:SetTimeout(mod.Modules.MATHS.SecondsToFrames(timeout) or 30)
 
 	return Cinder
 end
@@ -98,7 +99,7 @@ function Creeps.SpawnOreganoCreep(parent, position, timeout)
 	):ToEffect() ---@cast pepper EntityEffect
 
 	pepper.CollisionDamage = 0
-	pepper:SetTimeout(Maths.SecondsToFrames(timeout) or 30)
+	pepper:SetTimeout(mod.Modules.MATHS.SecondsToFrames(timeout) or 30)
 end
 
 ---Custom black powder spawn (Used for Edith's black powder stomp synergy)

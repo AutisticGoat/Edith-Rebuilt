@@ -4,35 +4,20 @@ local enums = mod.Enums
 local utils = enums.Utils
 local game = utils.Game
 local sfx = utils.SFX
-local costumes = enums.NullItemID
 local tables = enums.Tables
-local jumpParams = tables.JumpParams
 local misc = enums.Misc
 local modules = mod.Modules
 local VecDir = modules.VEC_DIR
-local maths = modules.MATHS
+local maths = modules.MATHS  
 local land = modules.LAND
 local Player = modules.PLAYER
 local TargetArrow = modules.TARGET_ARROW
 local TEdithMod = modules.TEDITH
 local Helpers = modules.HELPERS
-local Maths = modules.MATHS
 local effects = modules.STATUS_EFFECTS
+local BitMask = modules.BIT_MASK
+local Jump = modules.JUMP
 local data = mod.DataHolder.GetEntityData
-local TEdith = {}
-
----@param player EntityPlayer
-function TEdith:TaintedEdithInit(player)
-	if not Player.IsEdith(player, true) then return end
-
-	Player.SetNewANM2(player, "gfx/EdithTaintedAnim.anm2")
-	player:AddNullItemEffect(costumes.T_EDITH, true)
-end
-mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, TEdith.TaintedEdithInit)
-
-local function isTaintedEdithJump(player)
-	return JumpLib:GetData(player).Tags["edithRebuilt_TaintedEdithJump"] or false
-end
 
 ---@param ent Entity
 mod:AddCallback(enums.Callbacks.PERFECT_PARRY_KILL, function(_, _, ent)
@@ -41,41 +26,41 @@ end)
 
 mod:AddCallback(ModCallbacks.MC_PRE_NPC_UPDATE, function(_, npc)
 	if npc:IsBoss() then return end
-	if not effects.EntHasStatusEffect(npc, "Cinder") then return end 
+	if not effects.EntHasStatusEffect(npc, "Cinder") then return end
 	if not data(npc).KilledByParry then return end
 
 	return true
 end)
 
----@param player EntityPlayer	
-function mod:TaintedEdithUpdate(player)
-	if not Player.IsEdith(player, true) then return end
-
-	if player.FrameCount == 0 then
-		Player.SetCustomSprite(player, true)
+---@param player EntityPlayer
+---@param forceStopHops boolean
+local function ResetTEdithPlayer(player, forceStopHops)
+	Helpers.ChangeColor(player, _, _, _, 1)
+	data(player).PressCount = 0
+	if forceStopHops then
+		TEdithMod.StopTEdithHops(player, 0, true, true, true)
 	end
+end
 
-	local HopParams = TEdithMod.GetHopParryParams(player)
-	local isArrowMoving = TargetArrow.IsEdithTargetMoving(player)
-	local arrow = TargetArrow.GetEdithTarget(player, true)
+---@param player EntityPlayer
+local function ManageLeoEffect(player)
 	local Peffects = player:GetEffects()
-	local pData = data(player)
-	local CanRedirectMove = TEdithMod.GetHopDashCharge(player, false) > 0 and TEdithMod.GetHopDashCharge(player, true) <= 0
 
-	pData.IsRedirectioningMove = CanRedirectMove and (arrow ~= nil)
-
-	if player.CanFly and not Peffects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_LEO) then
-		Peffects:AddCollectibleEffect(CollectibleType.COLLECTIBLE_LEO, false, 1)
+	if player.CanFly then
+		if not Peffects:HasCollectibleEffect(CollectibleType.COLLECTIBLE_LEO) then
+			Peffects:AddCollectibleEffect(CollectibleType.COLLECTIBLE_LEO, false, 1)
+		end
 	else
 		Peffects:RemoveCollectibleEffect(CollectibleType.COLLECTIBLE_LEO, -1)
 	end
+end
 
-	if isArrowMoving then
-		TargetArrow.SpawnEdithTarget(player, true)
-	end
-
+---@param player EntityPlayer
+---@param arrow EntityEffect?
+---@param HopParams table
+local function ManageHopDashCharge(player, arrow, HopParams)
 	if arrow then
-		TEdithMod.HopDashChargeManager(player, arrow)
+		TEdithMod.HopDashChargeManager(player, arrow, HopParams)
 	else
 		TEdithMod.HopDashMovementManager(player, HopParams)
 		if TEdithMod.GetHopDashCharge(player, false) < 10 then
@@ -84,72 +69,44 @@ function mod:TaintedEdithUpdate(player)
 			HopParams.HopDirection = Vector.Zero
 		end
 	end
-
-	TEdithMod.ParryCooldownManager(player, HopParams)
-
-	if isArrowMoving then
-		pData.PressCount = pData.PressCount or 0 
-		pData.PressCount = pData.PressCount + 1
-
-		if pData.IsRedirectioningMove then
-			if pData.PressCount == 5 then
-				player:SetColor(Color(1, 1, 1, 1, 0.3, 0.3, 0.3), 5, 1000, true, false)
-			elseif pData.PressCount <= 2 then
-				player:SetMinDamageCooldown(20)
-				player:MultiplyFriction(0.05)
-			end
-		end
-	end
-
-	TEdithMod.WaterCurrentManager(player)
-
-	if arrow and not isArrowMoving then
-		if pData.IsRedirectioningMove then
-			if pData.PressCount <= 2 then
-				TargetArrow.RemoveEdithTarget(player, true)
-				TEdithMod.StopTEdithHops(player, 20, false, true, true)
-				player:MultiplyFriction(0.05)
-				player:SetColor(Color(1, 1, 1, 1, 0, 0.1, 0.3), 5, 1000, true, false)
-			elseif pData.PressCount >= 5 then
-				TargetArrow.RemoveEdithTarget(player, true)			
-			end
-		else
-			TargetArrow.RemoveEdithTarget(player, true)
-		end
-		pData.PressCount = 0
-	end
 end
-mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, mod.TaintedEdithUpdate)
 
 ---@param player EntityPlayer
-function mod:EdithPlayerUpdate(player)
-	if not Player.IsEdith(player, true) then return end
+local function SetEdithSprite(player)
+	if player.FrameCount > 0 then return end
+	Player.SetCustomSprite(player, true)
+end
 
-	Player.ManageEdithWeapons(player)
+---@param player EntityPlayer
+mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(_, player)
+	if not Player.IsEdith(player, true) then return end	
+	if Helpers.IsDSSMenuOpen() then return end
 
-	local playerData = data(player)
 	local HopParams = TEdithMod.GetHopParryParams(player)
-	local MiscConfig = Helpers.GetConfigData("MiscData")
 	local arrow = TargetArrow.GetEdithTarget(player, true)
-	local IsGrudge = Helpers.IsGrudgeChallenge()
-	local input = {
-		up = Input.GetActionValue(ButtonAction.ACTION_UP, player.ControllerIndex),
-		down = Input.GetActionValue(ButtonAction.ACTION_DOWN, player.ControllerIndex),
-		left = Input.GetActionValue(ButtonAction.ACTION_LEFT, player.ControllerIndex),
-		right = Input.GetActionValue(ButtonAction.ACTION_RIGHT, player.ControllerIndex),
-	}
 
-	local MovX = (((input.left > 0.3 and -input.left) or (input.right > 0.3 and input.right)) or 0) * (game:GetRoom():IsMirrorWorld() and -1 or 1)
-	local MovY = (input.up > 0.3 and -input.up) or (input.down > 0.3 and input.down) or 0
+	SetEdithSprite(player)
+	ManageLeoEffect(player)
+	ManageHopDashCharge(player, arrow, HopParams)
+	TEdithMod.ParryCooldownManager(player, HopParams)
+	TEdithMod.WaterCurrentManager(player)
+end)
 
-	playerData.movementVector = Vector(MovX, MovY):Normalized()
-
+---@param player EntityPlayer
+---@param playerData table
+---@param HopParams table
+---@param IsGrudge boolean
+local function ManageParryInput(player, playerData, HopParams, IsGrudge)
 	HopParams.IsParryJump = HopParams.IsParryJump or false
 
 	if Helpers.IsKeyStompTriggered(player) then
-		if HopParams.ParryCooldown == 0 and not isTaintedEdithJump(player) and not HopParams.IsParryJump then
+		local isParryJump = Jump.IsSpecificJump(JumpLib:GetData(player), tables.JumpTags.TEdithJump)
+		local cooldown = HopParams.ParryCooldown
+		local maxCooldown =  playerData.MaxParryCooldown
+
+		if cooldown == 0 and not isParryJump and not HopParams.IsParryJump then
 			TEdithMod.ParryTriggerManager(player, IsGrudge, HopParams)
-		elseif playerData.MaxParryCooldown and (HopParams.ParryCooldown > 0 and HopParams.ParryCooldown >= playerData.MaxParryCooldown - 6) then
+		elseif maxCooldown and (HopParams.ParryCooldown > 0 and HopParams.ParryCooldown >= maxCooldown - 6) then
 			player:SetColor(Color(1, 1, 1, 1, 0.3), 3, 1, true, false)
 			playerData.StoredInput = true
 		end
@@ -157,91 +114,192 @@ function mod:EdithPlayerUpdate(player)
 		TEdithMod.ParryTriggerManager(player, IsGrudge, HopParams)
 		playerData.StoredInput = false
 	end
+end
+
+---@param player EntityPlayer
+---@param HopParams table
+---@param MiscConfig MiscData
+local function ManageGrudgeEffects(player, HopParams, MiscConfig)
+	if not Helpers.IsGrudgeChallenge() then return end
+	if not HopParams.GrudgeDash then return end
+	if player.Velocity:Length() <= 0.15 then return end
+
+	if MiscConfig and MiscConfig.EnableShakescreen and HopParams.HopMoveCharge > 50 then
+		game:ShakeScreen(2)
+	end
+	sfx:Play(SoundEffect.SOUND_STONE_IMPACT, 0.3, 0, false, 1.2)
+end
+
+---@param player EntityPlayer
+---@param HopParams table
+---@param arrow EntityEffect?
+local function ManageHeadDirection(player, HopParams, arrow)
+	if Player.IsPlayerShooting(player) then return end
+
+	local faceDirection = VecDir.VectorToDirection(HopParams.HopDirection)
+	local chosenDir = faceDirection or Direction.DOWN
+
+	if HopParams.IsHoping or (arrow and arrow.Visible == true) then
+		chosenDir = faceDirection or Direction.DOWN
+	elseif VecDir.VectorEquals(HopParams.HopDirection, Vector.Zero) then
+		chosenDir = Direction.DOWN
+	end
+
+	player:SetHeadDirection(chosenDir, 1, true)
+end
+
+local StopDashAnimations = {
+	["MinecartEnter"] = true,
+	["TeleportUp"] = true,
+	["TeleportDown"] = true,
+}
+
+local function ManageStopAnimations(player)
+	if not Helpers.When(player:GetSprite():GetAnimation(), StopDashAnimations, false) then return end
+
+	TEdithMod.StopTEdithHops(player, 0, true, true)
+end
+
+---@param player EntityPlayer
+---@param pData table
+---@param arrow EntityEffect?
+---@param isArrowMoving boolean
+local function ManageTargetCleanup(player, pData, arrow, isArrowMoving)
+	if not arrow or isArrowMoving then return end
+
+	if pData.IsRedirectioningMove then
+		if pData.PressCount <= 2 then
+			TargetArrow.RemoveEdithTarget(player, true)
+			TEdithMod.StopTEdithHops(player, 20, false, true, true)
+			player:MultiplyFriction(0.05)
+			player:SetColor(Color(1, 1, 1, 1, 0, 0.1, 0.3), 5, 1000, true, false)
+		elseif pData.PressCount >= 5 then
+			TargetArrow.RemoveEdithTarget(player, true)
+		end
+	else
+		TargetArrow.RemoveEdithTarget(player, true)
+	end
+
+	pData.PressCount = 0
+end
+
+---@param player EntityPlayer
+---@param pData table
+---@param isArrowMoving boolean
+local function ManageRedirectionInput(player, pData, isArrowMoving)
+	if not isArrowMoving then return end
+
+	pData.PressCount = pData.PressCount + 1
+
+	if not pData.IsRedirectioningMove then return end
+
+	if pData.PressCount == 5 then
+		player:SetColor(Color(1, 1, 1, 1, 0.3, 0.3, 0.3), 5, 1000, true, false)
+	elseif pData.PressCount <= 2 then
+		player:SetMinDamageCooldown(20)
+		player:MultiplyFriction(0.05)
+	end
+end
+
+---@param player EntityPlayer
+---@param isArrowMoving boolean
+local function ArrowSpawnManager(player, isArrowMoving)
+	if not isArrowMoving then return end 
+	TargetArrow.SpawnEdithTarget(player, true)
+end
+
+---@param player EntityPlayer
+---@param pData table
+---@param arrow EntityEffect
+local function SetRedirectValues(player, pData, arrow)
+	local CanRedirectMove = TEdithMod.GetHopDashCharge(player, false) > 0 and TEdithMod.GetHopDashCharge(player, true) <= 0
+
+	pData.IsRedirectioningMove = CanRedirectMove and (arrow ~= nil)
+	pData.PressCount = pData.PressCount or 0
+end
+
+
+---@param player EntityPlayer
+mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
+	if not Player.IsEdith(player, true) then return end
+
+	Player.ManageEdithWeapons(player)
+
+	local HopParams = TEdithMod.GetHopParryParams(player)
+	local MiscConfig = Helpers.GetConfigData("MiscData") ---@cast MiscConfig MiscData
+	local arrow = TargetArrow.GetEdithTarget(player, true)
+	local IsGrudge = Helpers.IsGrudgeChallenge()
+	local isArrowMoving = TargetArrow.IsEdithTargetMoving(player)
+	local pData = data(player)
+
+	TEdithMod.ArrowMovementManager(player, HopParams)
+
+	ManageParryInput(player, data(player), HopParams, IsGrudge)
 
 	if HopParams.IsHoping then
 		TEdithMod.ResetHopDashCharge(player, false, true)
 	end
 
-	if Helpers.IsGrudgeChallenge() and HopParams.GrudgeDash and player.Velocity:Length() > 0.15 then		
-		if MiscConfig and MiscConfig.EnableShakescreen and HopParams.HopMoveCharge > 50 then
-			game:ShakeScreen(2)
-		end
-		sfx:Play(SoundEffect.SOUND_STONE_IMPACT, 0.3, 0, false, 1.2)
-	end
+	SetRedirectValues(player, pData, arrow)
+	ManageTargetCleanup(player, pData, arrow, isArrowMoving)
+	ArrowSpawnManager(player, isArrowMoving)
+	ManageRedirectionInput(player, pData, isArrowMoving)
+	ManageGrudgeEffects(player, HopParams, MiscConfig)
+	ManageHeadDirection(player, HopParams, arrow)
+	ManageStopAnimations(player)
+end)
 
-	if Player.IsPlayerShooting(player) then return end
+local function RoomFloorStopManager(_, isLevelCallback)
+	local isDungeon = game:GetRoom():GetType() == RoomType.ROOM_DUNGEON
+	local forceStop = isLevelCallback or isDungeon
 
-	local faceDirection = VecDir.VectorToDirection(HopParams.HopDirection)
-	local chosenDir = faceDirection	or Direction.DOWN
-
-	if HopParams.IsHoping or (arrow and arrow.Visible == true) then
-		chosenDir = faceDirection
-	elseif VecDir.VectorEquals(HopParams.HopDirection, Vector.Zero) then
-		chosenDir = Direction.DOWN
-	end
-
-	if player:GetSprite():GetAnimation() == "MinecartEnter" then
-		TEdithMod.StopTEdithHops(player, 0, true, true)
-	end
-
-	player:SetHeadDirection(chosenDir, 1, true)
+	Player.ForEachPlayerType(function(player)
+		ResetTEdithPlayer(player, forceStop)
+	end, enums.PlayerType.PLAYER_EDITH_B)
 end
-mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, mod.EdithPlayerUpdate)
 
-function mod:OnNewRoom()
-	for _, player in ipairs(PlayerManager.GetPlayers()) do
-		if not Player.IsEdith(player, true) then goto continue end
-		Helpers.ChangeColor(player, _, _, _, 1)
-		data(player).PressCount = 0
-
-		if game:GetRoom():GetType() == RoomType.ROOM_DUNGEON then
-			TEdithMod.StopTEdithHops(player, 0, true, true, true)
-		end
-		::continue::
-	end
-end
-mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, mod.OnNewRoom)
-
-function mod:OnNewFloor()
-	for _, player in ipairs(PlayerManager.GetPlayers()) do
-		if not Player.IsEdith(player, true) then goto continue end
-		TEdithMod.StopTEdithHops(player, 0, true, true, true)
-		data(player).PressCount = 0
-		::continue::
-	end
-end
-mod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, mod.OnNewFloor)
+mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function ()
+	RoomFloorStopManager(_, false)
+end)
+mod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, function ()
+	RoomFloorStopManager(_, true)
+end)
 
 local damageBase = 5.25
+
 ---@param player EntityPlayer
-function mod:EdithHopLanding(player)	
-	local HopParams = TEdithMod.GetHopParryParams(player)
+---@param jumpData JumpData
+---@param params TEdithHopParryParams
+local function OnHopLand(player, jumpData, params)
+	if not Jump.IsSpecificJump(jumpData, tables.JumpTags.TEdithHop) then return end
+
 	local tearRange = player.TearRange / 40
 	local Knockbackbase = (player.ShotSpeed * 10) + 8
 	local Charge = TEdithMod.GetHopDashCharge(player, false, false)
-	local BRCharge = HopParams.HopMoveBRCharge / 100
+	local BRCharge = params.HopMoveBRCharge / 100
 	local BRMult = 1 + BRCharge
 	local damageFormula = (((damageBase + player.Damage) / 2) * (TEdithMod.HopCurve(Charge/100))) * BRMult
 
-	HopParams.HopDamage = damageFormula
-	HopParams.HopKnockback = Knockbackbase * maths.exp(Charge / 100, 1, 1.5)
-	HopParams.HopRadius = math.min((30 + (tearRange - 9)), 35)
+	params.HopDamage = damageFormula
+	params.HopKnockback = Knockbackbase * maths.exp(Charge / 100, 1, 1.5)
+	params.HopRadius = math.min((30 + (tearRange - 9)), 35)
 
-	player:SpawnWaterImpactEffects(player.Position, Vector(1, 1), 1)	
+	player:SpawnWaterImpactEffects(player.Position, Vector(1, 1), 1)
 	land.LandFeedbackManager(player, land.GetLandSoundTable(true), misc.BurntSaltColor)
-	land.TaintedEdithHop(player, HopParams)
+	land.TaintedEdithHop(player, params)
 end
-mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, mod.EdithHopLanding, jumpParams.TEdithHop)
 
 ---@param player EntityPlayer
-function TEdith:EdithParryJump(player)
-	local HopParams = TEdithMod.GetHopParryParams(player)
+---@param jumpData JumpData
+---@param params TEdithHopParryParams
+local function OnParryLand(player, jumpData, params)
+	if not Jump.IsSpecificJump(jumpData, tables.JumpTags.TEdithJump) then return end
 
-	if TargetArrow.GetEdithTarget(player, true) then 
+	if TargetArrow.GetEdithTarget(player, true) then
 		TEdithMod.ResetHopDashCharge(player, true, true)
 	end
 
-	local perfectParry, EnemiesInImpreciseParry = land.ParryLandManager(player, HopParams, true)
+	local perfectParry, EnemiesInImpreciseParry = land.ParryLandManager(player, params, true)
 	local parryAdd = perfectParry and 30 or ((EnemiesInImpreciseParry and 15) or 0)
 
 	land.LandFeedbackManager(player, land.GetLandSoundTable(true, perfectParry), misc.BurntSaltColor, perfectParry)
@@ -249,52 +307,79 @@ function TEdith:EdithParryJump(player)
 	if not parryAdd then return end
 	TEdithMod.AddHopDashCharge(player, parryAdd, 0.75)
 end
-mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, TEdith.EdithParryJump, jumpParams.TEdithJump)
+
+---@param ent Entity
+---@param jumpData JumpData
+mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, function(_, ent, jumpData)
+	local player = ent:ToPlayer()
+
+	if not player then return end
+
+	local HopParams = TEdithMod.GetHopParryParams(player)
+
+	OnHopLand(player, jumpData, HopParams)
+	OnParryLand(player, jumpData, HopParams)
+end)
 
 ---@param player EntityPlayer
 ---@param flags DamageFlag
 ---@param source EntityRef
 ---@return boolean?
-function TEdith:TaintedEdithDamageManager(player, _, flags, source)
-	local HopParams = TEdithMod.GetHopParryParams(player)
-
+mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG, function (_, player, _, flags, source)
 	if source.Type == EntityType.ENTITY_SLOT then return end
 	if not Player.IsEdith(player, true) then return end
+
+	local HopParams = TEdithMod.GetHopParryParams(player)
+
 	if not (HopParams.IsHoping == true and HopParams.HopMoveCharge >= 20) then return end
-	if Maths.HasBitFlags(flags, DamageFlag.DAMAGE_RED_HEARTS) then return end
+	if BitMask.HasBitFlags(flags, DamageFlag.DAMAGE_RED_HEARTS --[[@as BitSet128]]) then return end
 	return false
+end)
+
+---@param playerData table
+local function SetChargeBars(playerData)
+	playerData.ChargeBar = playerData.ChargeBar or Sprite("gfx/TEdithChargebar.anm2", true)
+	playerData.BRChargeBar = playerData.BRChargeBar or Sprite("gfx/TEdithBRChargebar.anm2", true)
+end	
+
+local function GetMainChargeOffset(player, playerData)
+	local isBRChargeBarAnimFinished = Player.PlayerHasBirthright(player) and not playerData.BRChargeBar:IsFinished("Disappear")
+
+	return isBRChargeBarAnimFinished and misc.ChargeBarleftVector or misc.ChargeBarcenterVector
 end
-mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG, TEdith.TaintedEdithDamageManager)
+
+local function RenderChargeBars(playerData, playerpos, offset, dashCharge, dashBRCharge)
+	HudHelper.RenderChargeBar(playerData.ChargeBar, dashCharge, 100, playerpos + offset)
+	HudHelper.RenderChargeBar(playerData.BRChargeBar, dashBRCharge, 100, playerpos + misc.ChargeBarrightVector)
+end
+
+local function GetPlayerRenderPos(player)
+	local playerpos = game:GetRoom():WorldToScreenPosition(player.Position)
+	if game:GetRoom():IsMirrorWorld() then
+		playerpos.X = (Helpers.GetScreenCenter().X * 2 - playerpos.X)
+	end
+
+	return playerpos
+end
 
 mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
-	for _, player in ipairs(PlayerManager.GetPlayers()) do
-		if not (Player.IsEdith(player, true) and RoomTransition:GetTransitionMode() ~= 3) then goto continue end
+	Player.ForEachPlayerType(function(player)
+		if RoomTransition:GetTransitionMode() == 3 then return end
 
-		local playerpos = game:GetRoom():WorldToScreenPosition(player.Position)
-		local HopParams = TEdithMod.GetHopParryParams(player)
+		local hopParams = TEdithMod.GetHopParryParams(player)
 		local playerData = data(player)
-		local dashCharge = HopParams.HopStaticCharge
-		local dashBRCharge = HopParams.HopStaticBRCharge
-		local offset = misc.ChargeBarcenterVector
+		local dashCharge = hopParams.HopStaticCharge
+		local dashBRCharge = hopParams.HopStaticBRCharge
 
-		if game:GetRoom():IsMirrorWorld() then
-			playerpos.X = (Helpers.GetScreenCenter().X * 2 - playerpos.X)
-		end
+		if not dashCharge or not dashBRCharge then return end
 
-		if not dashCharge or not dashBRCharge then goto continue end
+		SetChargeBars(playerData)
+		local playerpos = GetPlayerRenderPos(player)
+		local offset = GetMainChargeOffset(player, playerData)
 
-		playerData.ChargeBar = playerData.ChargeBar or Sprite("gfx/TEdithChargebar.anm2", true)
-		playerData.BRChargeBar = playerData.BRChargeBar or Sprite("gfx/TEdithBRChargebar.anm2", true)
 
-		if Player.PlayerHasBirthright(player) and not playerData.BRChargeBar:IsFinished("Disappear") then
-			offset = misc.ChargeBarleftVector
-		end
-
-		HudHelper.RenderChargeBar(playerData.ChargeBar, dashCharge, 100, playerpos + offset)
-		HudHelper.RenderChargeBar(playerData.BRChargeBar, dashBRCharge, 100, playerpos + misc.ChargeBarrightVector)
-
-		::continue::
-	end
+		RenderChargeBars(playerData, playerpos, offset, dashCharge, dashBRCharge)
+	end, enums.PlayerType.PLAYER_EDITH_B)
 end)
 
 ---@param player EntityPlayer
@@ -309,13 +394,13 @@ mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_GRID_COLLISION, function(_, player, _
 	local rock = grid:ToRock()
 	local poop = grid:ToPoop()
 	local tnt = grid:ToTNT()
-	local IsJumping = JumpLib:GetData(player).Jumping
+	local IsJumping = Jump.IsJumping(player)
 
 	if not isMoving then return end
 
 	if rock or poop or tnt then
 		grid:Destroy()
-	else 
+	else
 		if not IsJumping then
 			TEdithMod.StopTEdithHops(player, 20, true, not playerData.TaintedEdithTarget, true)
 		end
@@ -324,7 +409,7 @@ end)
 
 ---@param player EntityPlayer
 ---@param collider Entity
-mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_COLLISION, function (_, player, collider)
+mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_COLLISION, function(_, player, collider)
 	if not Player.IsEdith(player, true) then return end
 	if collider.Type ~= EntityType.ENTITY_FIREPLACE then return end
 	if collider.Variant ~= 4 then return end
@@ -332,3 +417,26 @@ mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_COLLISION, function (_, player, colli
 
 	TEdithMod.StopTEdithHops(player, 20, true, true, true)
 end)
+
+---@param fam EntityFamiliar
+local function IsWisp(fam)
+	local var = fam.Variant
+	return var == FamiliarVariant.WISP or var == FamiliarVariant.ITEM_WISP
+end
+
+---@param fam EntityFamiliar
+mod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, fam)
+	if not IsWisp(fam) then return end
+	if not Player.IsEdith(fam.Player, true) then return end
+	if fam.Velocity:Length() <= 50 then return end
+	fam.Velocity = Vector.Zero
+end)
+
+---@param npc EntityNPC
+mod:AddCallback(ModCallbacks.MC_NPC_UPDATE, function (_, npc)
+	Player.ForEachPlayerType(function (player)
+		if not VecDir.VectorEquals(player.Position, npc:CalcTargetPosition(100)) then return end
+		if npc.Velocity:Length() <= 50 then return end
+		npc.Velocity = Vector.Zero
+	end, enums.PlayerType.PLAYER_EDITH_B)
+end, EntityType.ENTITY_WILLO)

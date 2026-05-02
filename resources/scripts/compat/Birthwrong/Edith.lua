@@ -7,9 +7,9 @@ local modules = mod.Modules
 local Helpers = modules.HELPERS
 local Maths = modules.MATHS
 local Status = modules.STATUS_EFFECTS
+local Jump = modules.JUMP
 local game = enums.Utils.Game
 local saveManager = mod.SaveManager
-local data = mod.DataHolder.GetEntityData
 
 Birthwrong.registerDescription(enums.PlayerType.PLAYER_EDITH, "Dissolution, flooded rooms", "algo debe de hacer luego lo voy a pensar")
 
@@ -18,18 +18,18 @@ Birthwrong.registerDescription(enums.PlayerType.PLAYER_EDITH, "Dissolution, floo
 local function AddToSpeedReductionCounter(player, amount)
     local runSave = saveManager.GetRunSave(player)
     if not runSave then return end
-    
+
     runSave.SpeedReduction = math.max(runSave.SpeedReduction + amount, 0)
 end
 
-local waterAmount = 0 
+local waterAmount = 0
 
 ---@param player EntityPlayer
 mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function (_, player)
-    if not Birthwrong.hasCharacterBW(player, enums.PlayerType.PLAYER_EDITH) then return end
     local runSave = saveManager.GetRunSave(player)
     
     if not runSave then return end
+    if not Birthwrong.hasCharacterBW(player, enums.PlayerType.PLAYER_EDITH) then return end
 
     runSave.SpeedReduction = runSave.SpeedReduction or 0
 
@@ -39,13 +39,13 @@ mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function (_, player)
         return 
     end
 
-    if Helpers.IsJumping(player) then return end
+    if Jump.IsJumping(player) then return end
     if player.FrameCount % 20 ~= 0 then return end
     if Maths.Round(player.MoveSpeed, 2) == 0.1 then return end
 
     Helpers.SpawnSaltGib(player, 4, 2)
 
-    player:SetCanShoot(player.MoveSpeed >= 0.75)    
+    player:SetCanShoot(player.MoveSpeed >= 0.7)
 
     AddToSpeedReductionCounter(player, 1)
     player:AddCacheFlags(CacheFlag.CACHE_SPEED, true)
@@ -64,6 +64,7 @@ end, CacheFlag.CACHE_SPEED)
 ---@param player EntityPlayer
 ---@param ent Entity
 mod:AddCallback(enums.Callbacks.OFFENSIVE_STOMP_KILL, function (_, player, ent)
+    if not Birthwrong.hasCharacterBW(player, enums.PlayerType.PLAYER_EDITH) then return end
     if not Helpers.IsEnemy(ent) then return end
     if not Status.EntHasStatusEffect(ent, enums.EdithStatusEffects.SALTED) then return end
     AddToSpeedReductionCounter(player, -5)

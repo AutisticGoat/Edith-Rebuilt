@@ -52,13 +52,12 @@ mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, function(_, tear)
 
 	if not player then return end 
 	if not player:HasTrinket(trinket.TRINKET_RUMBLING_PEBBLE) then return end
-	
+
 	local rng = player:GetTrinketRNG(trinket.TRINKET_RUMBLING_PEBBLE)
 
 	if not ModRNG.RandomBoolean(rng) then return end
-	tear.CollisionDamage = tear.CollisionDamage * ModRNG.RandomFloat(rng, 0.5, 2)
-	tear:AddTearFlags(TearFlags.TEAR_ROCK)
-	tear:ChangeVariant(TearVariant.ROCK)
+
+	Helpers.TurnTearToTerraTear(tear, rng)
 	data(tear).IsPebbleTear = true
 end)
 

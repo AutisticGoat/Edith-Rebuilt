@@ -12,93 +12,124 @@ local helpers = modules.HELPERS
 local RNGMod = modules.RNG
 local Edith = modules.EDITH
 local Land = modules.LAND
+local BitMask = modules.BIT_MASK
 local Creeps = modules.CREEPS
+local Jump = modules.JUMP
 local utils = enums.Utils
 local sfx = utils.SFX
 local game = utils.Game
 local data = mod.DataHolder.GetEntityData
-local maxCreep = 10
+
+local HOOD = {
+    DAMAGE_BASE_MULT = 1.5,
+    DAMAGE_FINAL_MULT = 3,
+    TEAR_SPEED_MULT = 10,
+    TIMER_CLEAR_ROOM = 10,
+    TIMER_COMBAT_ROOM = 240,
+}
+
+local maxCreep   = 10
 local saltDegrees = 360 / maxCreep
 
----@param tear EntityTear
 mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, function(_, tear)
-	local player = helpers.GetPlayerFromTear(tear)
-
-	if not player then return end
-	if Player.IsAnyEdith(player) then return end
-	if not player:HasCollectible(items.COLLECTIBLE_EDITHS_HOOD) then return end
-
-	helpers.ForceSaltTear(tear, false)
+    local player = helpers.GetPlayerFromTear(tear)
+    if not player then return end
+    if Player.IsAnyEdith(player) then return end
+    if not player:HasCollectible(items.COLLECTIBLE_EDITHS_HOOD) then return end
+    helpers.ForceSaltTear(tear, false)
 end)
 
+---@param playerData table
+local function DecreaseHoodTimer(playerData)
+    playerData.HoodJumpTimer = Math.Clamp((playerData.HoodJumpTimer or 0) - 1, 0, 90)
+end
+
 ---@param player EntityPlayer
+---@param playerData table
+local function ManageFinishedCooldown(player, playerData)
+    if playerData.HoodJumpTimer ~= 1 then return end
+
+    local EdithSave = helpers.GetConfigData("EdithData") --[[@as EdithData]]
+    local soundTab = tables.CooldownSounds[EdithSave.JumpCooldownSound or 1]
+    local pitch = soundTab.Pitch == 1.2 and (soundTab.Pitch * RNGMod.RandomFloat(player:GetDropRNG(), 1, 1.1)) or soundTab.Pitch
+
+    sfx:Play(soundTab.SoundID, 2, 0, false, pitch)
+    Player.SetColorCooldown(player, 0.6, 5)
+end
+
 mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(_, player)
-	if not player:HasCollectible(items.COLLECTIBLE_EDITHS_HOOD) then return end
-	if JumpLib:GetData(player).Jumping then return end
+    if not player:HasCollectible(items.COLLECTIBLE_EDITHS_HOOD) then return end
+    if JumpLib:GetData(player).Jumping then return end
 
-	local playerData = data(player)
-	playerData.HoodJumpTimer = playerData.HoodJumpTimer or 0
-	playerData.HoodJumpTimer = Math.Clamp(playerData.HoodJumpTimer - 1, 0, 90) or 0
-
-	if playerData.HoodJumpTimer ~= 1 then return end
-	local EdithSave = helpers.GetConfigData("EdithData") --[[@as EdithData]]
-	local soundTab = tables.CooldownSounds[EdithSave.JumpCooldownSound or 1]
-	local pitch = soundTab.Pitch == 1.2 and (soundTab.Pitch * RNGMod.RandomFloat(player:GetDropRNG(), 1, 1.1)) or soundTab.Pitch
-	sfx:Play(soundTab.SoundID, 2, 0, false, pitch)
-	Player.SetColorCooldown(player, 0.6, 5)	
+    local playerData = data(player)
+    DecreaseHoodTimer(playerData)
+    ManageFinishedCooldown(player, playerData)
 end)
 
----@param player EntityPlayer
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
-	local playerData = data(player)
+    local playerData = data(player)
+    if Player.IsAnyEdith(player) then return end
+    if not player:HasCollectible(items.COLLECTIBLE_EDITHS_HOOD) then return end
+    if not playerData.HoodJumpTimer or playerData.HoodJumpTimer ~= 0 then return end
+    if not Input.IsActionTriggered(ButtonAction.ACTION_DROP, player.ControllerIndex) then return end
 
-	if Player.IsAnyEdith(player) then return end
-	if not player:HasCollectible(items.COLLECTIBLE_EDITHS_HOOD) then return end
-	if not playerData.HoodJumpTimer or playerData.HoodJumpTimer ~= 0 then return end
-	if not Input.IsActionTriggered(ButtonAction.ACTION_DROP, player.ControllerIndex) then return end
-
-	playerData.HoodJumpTimer = game:GetRoom():IsClear() and 10 or 60
-
-	Edith.InitEdithJump(player, jumpTags.EdithsHoodJump)
+    playerData.HoodJumpTimer = game:GetRoom():IsClear() and HOOD.TIMER_CLEAR_ROOM or HOOD.TIMER_COMBAT_ROOM
+    Jump.InitEdithJump(player, jumpTags.EdithsHoodJump)
 end)
 
 ---@param player EntityPlayer
-mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, function (_, player)
-	if Player.IsAnyEdith(player) then return end
+---@param params EdithJumpStompParams
+local function SetJumpParams(player, params)
+    params.Damage = (player.Damage * HOOD.DAMAGE_BASE_MULT) * HOOD.DAMAGE_FINAL_MULT
+    params.Radius = 40
+    params.Knockback = 15
+end
 
-	local params = Edith.GetJumpStompParams(player)
-	local playerData = data(player)
+---@param player EntityPlayer
+---@param params EdithJumpStompParams
+local function TriggerLandEffects(player, params)
+    local playerData = data(player)
+    playerData.HoodLand = true
+    Land.LandFeedbackManager(player, Land.GetLandSoundTable(false), Color.Default, false)
+    playerData.HoodLand = false
+    Land.EdithStomp(player, params, false)
+    Land.TriggerLandenemyJump(player, params.StompedEntities, params.Knockback, 10, 1.8)
+end
 
-	params.Damage = (player.Damage * 1.5) * 3
-	params.Radius = 40
-	params.Knockback = 15
+---@param player EntityPlayer
+local function SpawnSaltCreep(player)
+    for i = 1, maxCreep do
+        Creeps.SpawnSaltCreep(player, player.Position + Vector(0, 30):Rotated(saltDegrees * i), 0.1, 5, 1, 3, saltTypes.EDITHS_HOOD)
+    end
+end
 
-	playerData.HoodLand = true
-	Land.LandFeedbackManager(player, Land.GetLandSoundTable(false), Color.Default, false)
-	playerData.HoodLand = false
-	Land.EdithStomp(player, params, false)
-	Land.TriggerLandenemyJump(player, params.StompedEntities, params.Knockback, 10, 1.8)
+mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, function(_, player)
+    if Player.IsAnyEdith(player) then return end
 
-	for i = 1, maxCreep do
-		Creeps.SpawnSaltCreep(player, player.Position + Vector(0, 30):Rotated(saltDegrees*i), 0.1, 5, 1, 3, saltTypes.EDITHS_HOOD)
-	end
-	player:SetMinDamageCooldown(30)
+    local params = Edith.GetJumpStompParams(player)
+    SetJumpParams(player, params)
+    TriggerLandEffects(player, params)
+    SpawnSaltCreep(player)
+    player:SetMinDamageCooldown(30)
 end, jumpParams.EdithsHoodJump)
 
+---@param player EntityPlayer
 ---@param npc EntityNPC
----@param source EntityRef
+local function SpawnSaltTears(player, npc)
+    local rng = player:GetCollectibleRNG(items.COLLECTIBLE_EDITHS_HOOD)
+    local randomTears = rng:RandomInt(4, 8)
+    local shotSpeed = player.ShotSpeed
+
+    for _ = 1, randomTears do
+        local tear = player:FireTear(npc.Position, rng:RandomVector():Resized(shotSpeed * HOOD.TEAR_SPEED_MULT), false, false, false, player, 1.2)
+        tear:AddTearFlags(player.TearFlags)
+    end
+end
+
 mod:AddCallback(PRE_NPC_KILL.ID, function(_, npc, source)
-	local saltedType = data(npc).SaltType ---@cast saltedType SaltTypes
     local player = helpers.GetPlayerFromRef(source)
-
     if not player then return end
-    if saltedType ~= saltTypes.EDITHS_HOOD then return end
-
-	local rng = player:GetCollectibleRNG(items.COLLECTIBLE_EDITHS_HOOD)
-	local randomTears = rng:RandomInt(4, 8)
-
-	for _ = 1, randomTears do
-		local tear = player:FireTear(npc.Position, rng:RandomVector():Resized(player.ShotSpeed * 10), false, false, false, player, 1.2)
-		tear:AddTearFlags(player.TearFlags)
-	end
+	if not data(npc).SaltType then return end
+    if not BitMask.HasBitFlags(data(npc).SaltType, saltTypes.EDITHS_HOOD --[[@as BitSet128]]) then return end
+    SpawnSaltTears(player, npc)
 end)

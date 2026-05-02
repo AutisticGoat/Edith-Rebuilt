@@ -1,15 +1,48 @@
 local mod = EdithRebuilt
 local enums = mod.Enums
 local challenges = enums.Challenge
+local game = enums.Utils.Game
 local misc = enums.Misc
 local players = enums.PlayerType
-local maths = require("resources.scripts.functions.Maths")
-local Helpers = require("resources.scripts.functions.Helpers")
-local player = {}
+local Player = {}
+
+
+---@param fn fun(player: EntityPlayer)
+---@param type PlayerType
+function Player.ForEachPlayerType(fn, type)
+	for _, player in ipairs(PlayerManager.GetPlayers()) do
+		if player:GetPlayerType() ~= type then goto continue end
+		fn(player)
+		::continue::
+	end
+end
+
+---@param player EntityPlayer
+---@return table
+function Player.GetMovementInput(player)
+    local ci = player.ControllerIndex
+    return {
+        up    = Input.GetActionValue(ButtonAction.ACTION_UP, ci),
+        down  = Input.GetActionValue(ButtonAction.ACTION_DOWN, ci),
+        left  = Input.GetActionValue(ButtonAction.ACTION_LEFT, ci),
+        right = Input.GetActionValue(ButtonAction.ACTION_RIGHT, ci),
+    }
+end
+
+---Basically makes both Edith's be less dragged by water currents
+---@param player EntityPlayer
+function Player.WaterCurrentManager(player)
+	local modules = mod.Modules
+	local waterCurrent = game:GetRoom():GetWaterCurrent()
+	local RoomHasWaterCurrent = not modules.VEC_DIR.VectorEquals(waterCurrent, Vector.Zero)
+
+	if not (not modules.JUMP.IsJumping(player) and RoomHasWaterCurrent) then return end
+	player.Velocity = player.Velocity * (waterCurrent * 0.3)
+end	
 
 ---@param player EntityPlayer
 ---@param challenge Challenge
-function player.SetChallengeSprite(player, challenge)
+function Player.SetChallengeSprite(player, challenge)
 	if challenge == Challenge.CHALLENGE_NULL then return end
 
 	local sprite = (
@@ -24,42 +57,69 @@ function player.SetChallengeSprite(player, challenge)
 	end
 end
 
+---@param player EntityPlayer
+function Player.CanUseBombs(player)
+	return player:GetNumBombs() > 0 or player:HasGoldenBomb()
+end
+
+---@param player EntityPlayer
+---@return boolean
+function Player.HasBombTearItem(player)
+	return (player:HasCollectible(CollectibleType.COLLECTIBLE_DR_FETUS) or	player:HasCollectible(CollectibleType.COLLECTIBLE_EPIC_FETUS))
+end
+
+---@param player EntityPlayer
+---@return boolean
+function Player.CanTriggerBombStomp(player)
+	return Player.HasBombTearItem(player) or Player.CanUseBombs(player)
+end	
+
+---@param player EntityPlayer
+---@return boolean
+function Player.ShouldConsumeBomb(player)
+	return player:GetNumBombs() > 0 and not player:HasGoldenBomb()
+end
 
 ---Checks if player is Edith
 ---@param player EntityPlayer
 ---@param tainted boolean set it to `true` to check if player is Tainted Edith
 ---@return boolean
-function player.IsEdith(player, tainted)
+function Player.IsEdith(player, tainted)
 	return player:GetPlayerType() == (tainted and players.PLAYER_EDITH_B or players.PLAYER_EDITH)
 end
 
 ---Checks if any player is Edith
 ---@param p EntityPlayer
 ---@return boolean
-function player.IsAnyEdith(p)
-	return player.IsEdith(p, true) or player.IsEdith(p, false)
+function Player.IsAnyEdith(p)
+	return Player.IsEdith(p, true) or Player.IsEdith(p, false)
+end
+
+function Player.AnyoneIsEdith()
+    return PlayerManager.AnyoneIsPlayerType(enums.PlayerType.PLAYER_EDITH)
+        or PlayerManager.AnyoneIsPlayerType(enums.PlayerType.PLAYER_EDITH_B)
 end
 
 ---@param p EntityPlayer
 ---@return integer
-function player.GetNumTears(p)
+function Player.GetNumTears(p)
 	return p:GetMultiShotParams(WeaponType.WEAPON_TEARS):GetNumTears()
 end
 
 ---@param player EntityPlayer
-function player.PlayerHasBirthright(player)
+function Player.PlayerHasBirthright(player)
 	return player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT)
 end
 
 ---@param player EntityPlayer
-function player.ManageEdithWeapons(player)
+function Player.ManageEdithWeapons(player)
 	local weapon = player:GetWeapon(1)
 
 	if not weapon then return end
 
 	local weaponType = weapon:GetWeaponType()
 
-	if not Helpers.When(weaponType, enums.Tables.OverrideWeapons, false) then return end
+	if not mod.Modules.HELPERS.When(weaponType, enums.Tables.OverrideWeapons, false) then return end
 
 	local newWeapon = Isaac.CreateWeapon(WeaponType.WEAPON_TEARS, player)
 	Isaac.DestroyWeapon(weapon)
@@ -73,7 +133,7 @@ end
 ---Changes `player`'s ANM2 file
 ---@param player EntityPlayer
 ---@param FilePath string
-function player.SetNewANM2(player, FilePath)
+function Player.SetNewANM2(player, FilePath)
 	local playerSprite = player:GetSprite()
 
 	if not (playerSprite:GetFilename() ~= FilePath and not player:IsCoopGhost()) then return end
@@ -85,7 +145,7 @@ end
 ---@param player EntityPlayer
 ---@param intensity number
 ---@param duration integer
-function player.SetColorCooldown(player, intensity, duration)
+function Player.SetColorCooldown(player, intensity, duration)	
 	local pcolor = player.Color
 	local col = pcolor:GetColorize()
 	local tint = pcolor:GetTint()
@@ -93,7 +153,7 @@ function player.SetColorCooldown(player, intensity, duration)
 	local Red = off.R + (intensity + ((col.R + tint.R) * 0.2))
 	local Green = off.G + (intensity + ((col.G + tint.G) * 0.2))
 	local Blue = off.B + (intensity + ((col.B + tint.B) * 0.2))
-		
+
 	pcolor:SetOffset(Red, Green, Blue)
 	player:SetColor(pcolor, duration, 100, true, false)
 end
@@ -103,7 +163,7 @@ end
 ---@param val number
 ---@param mult? boolean
 ---@return number
-function player.tearsUp(firedelay, val, mult)
+function Player.tearsUp(firedelay, val, mult)
     local currentTears = 30 / (firedelay + 1)
     local newTears = mult and (currentTears * val) or currentTears + val
     return math.max((30 / newTears) - 1, -0.75)
@@ -113,7 +173,7 @@ end
 ---@param range number
 ---@param val number
 ---@return number
-function player.rangeUp(range, val)
+function Player.rangeUp(range, val)
     local currentRange = range / 40.0
     local newRange = currentRange + val
     return math.max(1.0, newRange) * 40.0
@@ -122,21 +182,21 @@ end
 ---Returns player's range stat as portrayed in Game's stat HUD
 ---@param player EntityPlayer
 ---@return number
-function player.GetPlayerRange(player)
+function Player.GetPlayerRange(player)
 	return player.TearRange / 40
 end
 
 ---Returns player's tears stat as portrayed in game's stats HUD
 ---@param p EntityPlayer
 ---@return number
-function player.GetplayerTears(p)
-    return maths.Round(30 / (p.MaxFireDelay + 1), 2)
+function Player.GetplayerTears(p)
+    return mod.Modules.MATHS.Round(30 / (p.MaxFireDelay + 1), 2)
 end
 
 ---Checks if player is shooting by checking if shoot inputs are being pressed
 ---@param p EntityPlayer
 ---@return boolean
-function player.IsPlayerShooting(p)
+function Player.IsPlayerShooting(p)
 	local shoot = {
         l = Input.IsActionPressed(ButtonAction.ACTION_SHOOTLEFT, p.ControllerIndex),
         r = Input.IsActionPressed(ButtonAction.ACTION_SHOOTRIGHT, p.ControllerIndex),
@@ -148,23 +208,23 @@ end
 
 ---Used to add some interactions to Judas' Birthright effect
 ---@param p EntityPlayer
-function player.IsJudasWithBirthright(p)
-	return p:GetPlayerType() == PlayerType.PLAYER_JUDAS and player.PlayerHasBirthright(p)
+function Player.IsJudasWithBirthright(p)
+	return p:GetPlayerType() == PlayerType.PLAYER_JUDAS and Player.PlayerHasBirthright(p)
 end
 
 ---@param p EntityPlayer
 ---@return boolean
-function player.HasTanukiStatueEffect(p)
+function Player.HasTanukiStatueEffect(p)
 ---@diagnostic disable-next-line: undefined-field
 	return p:GetGnawedLeafTimer() >= 60
 end
 
 ---@param p EntityPlayer
 ---@param tainted boolean
-function player.SetCustomSprite(p, tainted)
-	player.SetChallengeSprite(p, Isaac.GetChallenge())	
+function Player.SetCustomSprite(p, tainted)
+	Player.SetChallengeSprite(p, Isaac.GetChallenge())	
 
-	if not Helpers.IsModChallenge() then return end
+	if not mod.Modules.HELPERS.IsModChallenge() then return end
 
 	local costumeDesc = p:GetCostumeSpriteDescs()[1]
 	local hoodPath = tainted and enums.Misc.GrudgeHoodPath or enums.Misc.VestigeHoodPath
@@ -172,4 +232,4 @@ function player.SetCustomSprite(p, tainted)
 	costumeDesc:GetSprite():ReplaceSpritesheet(0, hoodPath, true)
 end
 
-return player
+return Player

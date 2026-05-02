@@ -10,6 +10,10 @@ local data = mod.DataHolder.GetEntityData
 
 local Helpers = {}
 
+function Helpers.IsDSSMenuOpen()
+	return DeadSeaScrollsMenu.IsOpen() ~= nil
+end
+
 function Helpers.GetScreenCenter()
 	local room = game:GetRoom()
 	local pos = room:WorldToScreenPosition(Vector(0,0)) - room:GetRenderScrollOffset() - game.ScreenShakeOffset	
@@ -73,6 +77,53 @@ function Helpers.DestroyGrid(entity, radius)
     end
 end
 
+local baseRange = 6.5
+local baseHeight = -23.45
+local baseMultiplier = -70 / baseRange
+
+---@param tear EntityTear
+---@param rng RNG
+local function ApplySharedTearPhysics(tear, rng)
+	local ModRNG = mod.Modules.RNG
+    local fallSpeedVar = ModRNG.RandomFloat(rng, 1.8, 2.2)
+    tear.Height = baseHeight * 3
+    tear.Velocity = tear.Velocity * ModRNG.RandomFloat(rng, 0.2, 0.6)
+    tear.FallingAcceleration = ModRNG.RandomFloat(rng, 0.7, 1.6) * 3
+    tear.FallingSpeed = baseMultiplier * fallSpeedVar
+    tear.CollisionDamage = tear.CollisionDamage * rng:RandomInt(8, 12) / 10
+    tear.Scale = tear.CollisionDamage / 3.5
+end
+
+---@class TearConfig
+---@field variant integer
+---@field position Vector
+---@field velocity Vector
+---@field apply fun(tear: EntityTear, player: EntityPlayer)
+
+---@param player EntityPlayer
+---@param rng RNG
+---@param minTears integer
+---@param maxTears integer
+---@param config TearConfig
+function Helpers.ShootArchedTear(player, rng, minTears, maxTears, config)
+    for _ = 1, rng:RandomInt(minTears, maxTears) do
+        local tear = Isaac.Spawn(
+            EntityType.ENTITY_TEAR,
+            config.variant, 0,
+            config.position,
+            rng:RandomVector() * config.velocity:Length(),
+            player
+        ):ToTear() ---@cast tear EntityTear
+
+        if not tear then goto continue end
+
+        ApplySharedTearPhysics(tear, rng)
+        config.apply(tear, player)
+
+		::continue::
+    end
+end
+
 ---Makes the tear to receive a boost, increasing its speed and damage
 ---@param tear EntityTear	
 ---@param speed number
@@ -87,7 +138,7 @@ function Helpers.BoostTear(tear, speed, dmgMult)
 	if nearEnemy then
 		tear.Velocity = (nearEnemy.Position - tear.Position)
 	end
-	
+
 	tear.CollisionDamage = tear.CollisionDamage * dmgMult
 	tear.Velocity = tear.Velocity:Resized(speed)
 	tear:AddTearFlags(TearFlags.TEAR_KNOCKBACK)
@@ -95,6 +146,7 @@ end
 
 --- returns a `ConfigDataTypes`, used for mod's menu data management
 ---@param Type ConfigDataTypes
+---@return EdithData|TEdithData|MiscData?
 function Helpers.GetConfigData(Type)
 	if not saveManager:IsLoaded() then return end
 	local config = saveManager:GetSettingsSave()
@@ -124,15 +176,15 @@ function Helpers.GetNearestEnemy(player)
 	local closestEnemy, enemyPos, distanceToPlayer, checkline
 
 	for _, enemy in ipairs(Helpers.GetEnemies()) do
-		if enemy:HasEntityFlags(EntityFlag.FLAG_CHARM) then goto Break end
+		if enemy:HasEntityFlags(EntityFlag.FLAG_CHARM) then goto continue end
 		enemyPos = enemy.Position
 		distanceToPlayer = enemyPos:Distance(playerPos)
 		checkline = room:CheckLine(playerPos, enemyPos, LineCheckMode.PROJECTILE, 0, false, false)
-		if not checkline then goto Break end
-        if distanceToPlayer >= closestDistance then goto Break end
+		if not checkline then goto continue end
+        if distanceToPlayer >= closestDistance then goto continue end
         closestEnemy = enemy
         closestDistance = distanceToPlayer
-        ::Break::
+        ::continue::
 	end
     return closestEnemy
 end
@@ -199,7 +251,7 @@ function Helpers.GetEnemies()
 		::continue::
     end
     return enemyTable
-end 
+end
 
 ---@param entity Entity
 ---@return EntityPlayer?
@@ -279,6 +331,10 @@ function Helpers.ChangeColor(entity, red, green, blue, alpha)
 	color:SetTint(Red, Green, Blue, Alpha)
 
 	entity.Color = color
+end
+
+function Helpers.IsMirrorRoom()
+	return game:GetRoom():IsMirrorWorld()
 end
 
 local backdropColors = tables.BackdropColors
@@ -380,36 +436,38 @@ function Helpers.IsKeyStompTriggered(player)
 	return k_stomp
 end
 
+---@param base Color
+---@param overlay Color
+---@return Color
+local function BlendGibColor(base, overlay)
+    local result = Color(1, 1, 1)
+    local bTint = base:GetTint()
+    local oTint = overlay:GetTint()
+    local bOff  = base:GetOffset()
+    local oOff  = overlay:GetOffset()
+    local bCol  = base:GetColorize()
+
+    result:SetTint(oTint.R + bTint.R - 1, oTint.G + bTint.G - 1, oTint.B + bTint.B - 1, 1)
+    result:SetOffset(oOff.R + bOff.R, oOff.G + bOff.G, oOff.B + bOff.B)
+    result:SetColorize(bCol.R, bCol.G, bCol.B, bCol.A)
+
+    return result
+end
+
 ---@param parent Entity
 ---@param Number number
 ---@param speed number?
 ---@param color Color?
 ---@param inheritParentVel boolean?
 function Helpers.SpawnSaltGib(parent, Number, speed, color, inheritParentVel)
-    local parentColor = parent.Color
-    local parentPos = parent.Position
-    local finalColor = Color(1, 1, 1) or parent.Color
+    local finalColor = color and BlendGibColor(parent.Color, color) or Color(1, 1, 1)
 
-    if color then
-        local CTint = color:GetTint()
-        local COff = color:GetOffset()
-		local PTint = parentColor:GetTint()
-        local POff = parentColor:GetOffset()
-        local PCol = parentColor:GetColorize()
-
-        finalColor:SetTint(CTint.R + PTint.R - 1, CTint.G + PTint.G - 1, CTint.B + PTint.B - 1, 1)
-        finalColor:SetOffset(COff.R + POff.R, COff.G + POff.G, COff.B + POff.B)
-        finalColor:SetColorize(PCol.R, PCol.G, PCol.B, PCol.A)
-    end
-
-    local saltGib
-
-    for _ = 1, Number do    
-        saltGib = Isaac.Spawn(
+    for _ = 1, Number do
+        local saltGib = Isaac.Spawn(
             EntityType.ENTITY_EFFECT,
             EffectVariant.TOOTH_PARTICLE,
             0,
-            parentPos,
+            parent.Position,
             RandomVector():Resized(speed or 3),
             parent
         ):ToEffect() ---@cast saltGib EntityEffect
@@ -417,7 +475,7 @@ function Helpers.SpawnSaltGib(parent, Number, speed, color, inheritParentVel)
         saltGib.Color = finalColor
         saltGib.Timeout = 5
 
-		if inheritParentVel then
+        if inheritParentVel then
             saltGib.Velocity = saltGib.Velocity + parent.Velocity
         end
     end
@@ -465,13 +523,13 @@ end
 ---@return boolean
 function Helpers.IsChap4()
 	local backdrop = game:GetRoom():GetBackdropType()
-	
+
 	if Helpers.IsLJMortis() then return true end
 	return Helpers.When(backdrop, tables.Chap4Backdrops, false)
 end
 
 ---@param tear EntityTear
-local function tearCol(_, tear)
+mod:AddCallback(ModCallbacks.MC_POST_TEAR_DEATH, function (_, tear)
 	local tearData = data(tear)
 	if not tearData.IsEdithRebuiltSaltTear then return end
 
@@ -480,7 +538,7 @@ local function tearCol(_, tear)
 	for _, ent in ipairs(Isaac.FindByType(EntityType.ENTITY_EFFECT)) do
 		var = ent.Variant
 		sprite = ent:GetSprite()
-		
+
 		if not (var == EffectVariant.ROCK_POOF or var == EffectVariant.TOOTH_PARTICLE) then goto Break end
 		if ent.Position:Distance(tear.Position) > 10 then goto Break end
 
@@ -494,8 +552,7 @@ local function tearCol(_, tear)
 		sprite:ReplaceSpritesheet(0, misc.TearPath .. Path .. ".png", true)
 		::Break::
 	end
-end
-mod:AddCallback(ModCallbacks.MC_POST_TEAR_DEATH, tearCol)
+end)
 
 ---@param tear EntityTear
 ---@param IsBlood boolean
@@ -534,10 +591,12 @@ function Helpers.ForceSaltTear(tear, tainted)
 	tear:Update()
 end
 
----@param entity Entity
----@return boolean
-function Helpers.IsJumping(entity)
-	return JumpLib:GetData(entity).Jumping
+---@param tear EntityTear
+---@param rng RNG
+function Helpers.TurnTearToTerraTear(tear, rng)
+	tear.CollisionDamage = tear.CollisionDamage * mod.Modules.RNG.RandomFloat(rng, 0.5, 2)
+	tear:AddTearFlags(TearFlags.TEAR_ROCK)
+	tear:ChangeVariant(TearVariant.ROCK)
 end
 
 local LINE_SPRITE = Sprite("gfx/TinyBug.anm2", true)
@@ -553,8 +612,7 @@ function Helpers.RenderAreaOfEffect(pos, AreaSize, AreaColor) -- Took from Melee
 	if game:GetRoom():GetRenderMode() == RenderMode.RENDER_WATER_REFLECT then return end
 
     local renderPosition = Isaac.WorldToScreen(pos) - game.ScreenShakeOffset
-    local hitboxSize = AreaSize
-    local offset = Isaac.WorldToScreen(pos + Vector(0, hitboxSize)) - renderPosition + Vector(0, 1)
+    local offset = Isaac.WorldToScreen(pos + Vector(0, AreaSize)) - renderPosition + Vector(0, 1)
     local offset2 = offset:Rotated(ANGLE_SEPARATION)
     local segmentSize = offset:Distance(offset2)
     LINE_SPRITE.Scale = Vector(segmentSize * (2 / 3), 0.5)

@@ -19,5 +19,5 @@ local function TryShrink(player, ent, isStomp)
     ent:AddShrink(EntityRef(player), 150)
 end
 
-mod:AddCallback(Callbacks.PERFECT_PARRY,       function(_, player, ent) TryShrink(player, ent, false) end)
-mod:AddCallback(Callbacks.OFFENSIVE_STOMP_HIT, function(_, player, ent) TryShrink(player, ent, true)  end)
+mod:AddCallback(Callbacks.PERFECT_PARRY, function(_, player, ent) TryShrink(player, ent, false) end)
+mod:AddCallback(Callbacks.OFFENSIVE_STOMP_HIT, function(_, player, ent) TryShrink(player, ent, true) end)

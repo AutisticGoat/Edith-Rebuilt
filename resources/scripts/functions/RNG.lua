@@ -1,4 +1,3 @@
-local Helpers = require "resources.scripts.functions.Helpers"
 local mod = EdithRebuilt
 local enums = mod.Enums
 local tables = enums.Tables
@@ -9,7 +8,7 @@ local modRNG = {}
 ---@param rng RNG
 ---@return integer
 function modRNG.GetRandomRune(rng)
-	return Helpers.When(rng:RandomInt(1, #tables.Runes), tables.Runes)
+	return mod.Modules.HELPERS.When(rng:RandomInt(1, #tables.Runes), tables.Runes)
 end
 
 ---Returns a chance based boolean

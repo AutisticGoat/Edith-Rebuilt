@@ -7,12 +7,11 @@ local sfx = utils.SFX
 local misc = enums.Misc
 local ConfigDataTypes = enums.ConfigDataTypes
 local tables = enums.Tables
+local MortisBackdrop = tables.MortisBackdrop
 local sounds = enums.SoundEffect
 local callbacks = enums.Callbacks
 local status = enums.EdithStatusEffects
 local data = mod.DataHolder.GetEntityData
-local Math = require("resources.scripts.functions.Maths")
-local Helpers = require("resources.scripts.functions.Helpers")
 local modRNG = require("resources.scripts.functions.RNG")
 local Player = require("resources.scripts.functions.Player")
 local Edith  = require("resources.scripts.functions.Edith")
@@ -25,7 +24,8 @@ local damageFlags = DamageFlag.DAMAGE_CRUSH | DamageFlag.DAMAGE_IGNORE_ARMOR
 ---@param dealEnt Entity
 ---@param damage number
 ---@param knockback number
-function Land.LandDamage(ent, dealEnt, damage, knockback)	
+function Land.LandDamage(ent, dealEnt, damage, knockback)
+	local Helpers = mod.Modules.HELPERS
 	if not Helpers.IsEnemy(ent) then return end
 
 	ent:TakeDamage(damage, damageFlags, EntityRef(dealEnt), 0)
@@ -73,6 +73,7 @@ end
 ---@param player EntityPlayer
 function Land.AddExtraGore(ent, player)
 	local enabledExtraGore
+	local Helpers = mod.Modules.HELPERS
 
 	if Player.IsEdith(player, false) then
 		enabledExtraGore = Helpers.GetConfigData(ConfigDataTypes.EDITH).EnableExtraGore
@@ -112,13 +113,13 @@ local Chests = {
 ---@param pickup EntityPickup
 ---@return boolean
 function IsKeyRequiredChest(pickup)
-	return Helpers.When(pickup.Variant, KeyRequiredChests, false)
+	return mod.Modules.HELPERS.When(pickup.Variant, KeyRequiredChests, false)
 end
 
 ---@param pickup EntityPickup
 ---@return boolean
 local function IsChest(pickup)
-	return Helpers.When(pickup.Variant, Chests, false)
+	return mod.Modules.HELPERS.When(pickup.Variant, Chests, false)
 end
 
 ---@param player EntityPlayer
@@ -159,7 +160,7 @@ local NonTriggerAnimPickupVar = {
 ---@param pickup EntityPickup
 function Land.PickupManager(player, pickup)
 	local room = game:GetRoom()
-	local IsStopAnimPickup = Helpers.When(pickup.Variant, NonTriggerAnimPickupVar, false)
+	local IsStopAnimPickup = mod.Modules.HELPERS.When(pickup.Variant, NonTriggerAnimPickupVar, false)
 	local IsEternalHeart = (pickup.Variant == PickupVariant.PICKUP_HEART and pickup.SubType == HeartSubType.HEART_ETERNAL)
 	local IsMegaChest = (pickup.Variant == PickupVariant.PICKUP_MEGACHEST)
 
@@ -196,7 +197,7 @@ local function PickupLandHandler(parent, ent)
 	local room = game:GetRoom()
 	local IsPickedUp = pickup:GetSprite():IsPlaying("Collect")
 
-	if Helpers.IsVestigeChallenge() then
+	if mod.Modules.HELPERS.IsVestigeChallenge() then
 		Land.PickupManager(parent, pickup)
 	end
 
@@ -238,7 +239,7 @@ local function SlotLandManager(parent, ent)
 	}
 
 	if slot:GetState() == SlotState.DESTROYED then return end
-	if not Helpers.When(var, TriggerDamageSlots, false) then return end
+	if not mod.Modules.HELPERS.When(var, TriggerDamageSlots, false) then return end
 	parent:ForceCollide(ent, false)
 	parent:TakeDamage(1, 0, EntityRef(ent), 0)
 end
@@ -248,6 +249,7 @@ end
 ---@param knockback number
 function Land.HandleEntityInteraction(ent, parent, knockback)
 	local var = ent.Variant
+	local Helpers = mod.Modules.HELPERS
     local stompBehavior = {
         [EntityType.ENTITY_TEAR] = function()
             local tear = ent:ToTear()
@@ -349,73 +351,122 @@ local function VestigeUnlockManager()
 	end
 end
 
----Custom Edith stomp Behavior
+---@param parent EntityPlayer
+---@param ent Entity
+---@param params EdithJumpStompParams
+---@param saltedTime number
+---@param terraMult number
+---@param numTears number
+---@param maths table
+local function HandleStompedEnemy(parent, ent, params, saltedTime, terraMult, numTears, maths)
+	EntityInteractHandler(ent, parent, params.Knockback)
+	SaltEnemyManager(parent, ent, params.IsDefensiveStomp, saltedTime)
+
+	if not mod.Modules.HELPERS.IsEnemy(ent) then return end
+
+	if not params.IsDefensiveStomp then
+		local volume = maths.exp(numTears, 1, 1.4)
+		Isaac.RunCallback(callbacks.OFFENSIVE_STOMP_HIT, parent, ent, params)
+		sfx:Play(SoundEffect.SOUND_MEATY_DEATHS, volume)
+	end
+
+	for _ = 1, numTears do
+		DamageManager(parent, ent, params.Damage, terraMult, params.Knockback)
+	end
+
+	if ent.HitPoints > params.Damage then return end
+
+	Isaac.RunCallback(callbacks.OFFENSIVE_STOMP_KILL, parent, ent, params)
+
+	local isSalted = StatusEffect.EntHasStatusEffect(ent, enums.EdithStatusEffects.SALTED)
+	if isSalted then VestigeUnlockManager() end
+
+	EdithBirthcake(parent, isSalted)
+	Land.AddExtraGore(ent, parent)
+end
+
+---Custom Edith stomp behavior
 ---@param parent EntityPlayer
 ---@param params EdithJumpStompParams
 ---@param breakGrid boolean
 function Land.EdithStomp(parent, params, breakGrid)
-	local isDefStomp = params.IsDefensiveStomp
-	local HasTerra = parent:HasCollectible(CollectibleType.COLLECTIBLE_TERRA)
-	local TerraRNG = parent:GetCollectibleRNG(CollectibleType.COLLECTIBLE_TERRA)
-	local TerraMult = HasTerra and modRNG.RandomFloat(TerraRNG, 0.5, 2) or 1
-	local capsule = Capsule(parent.Position, Vector.One, 0, params.Radius)
-	local PickupCapsule = Capsule(parent.Position, Vector.One, 0, 30)
-	local SlotCapsule = Capsule(parent.Position, Vector.One, 0, parent.Size)
-	local SaltedTime = Math.Round(Math.Clamp(120 * (Player.GetplayerTears(parent) / 2.73), 60, 360))
-	local isSalted
+	local maths = mod.Modules.MATHS
+	local Helpers = mod.Modules.HELPERS
+	local hasTerra = parent:HasCollectible(CollectibleType.COLLECTIBLE_TERRA)
+	local terraMult = hasTerra and modRNG.RandomFloat(parent:GetCollectibleRNG(CollectibleType.COLLECTIBLE_TERRA), 0.5, 2) or 1
+	local saltedTime = maths.Round(maths.Clamp(120 * (Player.GetplayerTears(parent) / 2.73), 60, 360))
+	local numTears = Player.GetNumTears(parent)
 
-	params.StompedEntities = Isaac.FindInCapsule(capsule)
+	local Capsules = {
+		Stomp = Capsule(parent.Position, Vector.One, 0, params.Radius),
+		Pickup = Capsule(parent.Position, Vector.One, 0, 30),
+		Slot = Capsule(parent.Position, Vector.One, 0, parent.Size),
+	}
 
-	if not isDefStomp then
+	params.StompedEntities = Isaac.FindInCapsule(Capsules.Stomp)
+
+	if not params.IsDefensiveStomp then
 		Isaac.RunCallback(callbacks.OFFENSIVE_STOMP, parent, params)
 	end
 
-	for _, ent in ipairs(Isaac.FindInCapsule(PickupCapsule, EntityPartition.PICKUP)) do
-		if ent:ToPickup() then
-			PickupLandHandler(parent, ent)
-		end
+	for _, ent in ipairs(Isaac.FindInCapsule(Capsules.Pickup, EntityPartition.PICKUP)) do
+		if ent:ToPickup() then PickupLandHandler(parent, ent) end
 	end
 
-	for _, ent in ipairs(Isaac.FindInCapsule(SlotCapsule)) do
-		if ent:ToSlot() then
-			SlotLandManager(parent, ent)
-		end 
+	for _, ent in ipairs(Isaac.FindInCapsule(Capsules.Slot)) do
+		if ent:ToSlot() then SlotLandManager(parent, ent) end
 	end
 
-	--- Pendiente de reducir
 	for _, ent in ipairs(params.StompedEntities) do
-		if GetPtrHash(parent) == GetPtrHash(ent) then goto Break end
-		EntityInteractHandler(ent, parent, params.Knockback)
-		SaltEnemyManager(parent, ent, isDefStomp, SaltedTime)
-
-		if not Helpers.IsEnemy(ent) then goto Break end
-
-		local volume = Math.exp(Player.GetNumTears(parent), 1, 1.4)
-
-		if not params.IsDefensiveStomp then
-			Isaac.RunCallback(callbacks.OFFENSIVE_STOMP_HIT, parent, ent, params)
-			sfx:Play(SoundEffect.SOUND_MEATY_DEATHS, volume)
-		end
-
-		for _ = 1, Player.GetNumTears(parent) do
-			DamageManager(parent, ent, params.Damage, TerraMult, params.Knockback)
-		end
-
-		if ent.HitPoints > params.Damage then goto Break end
-		Isaac.RunCallback(callbacks.OFFENSIVE_STOMP_KILL, parent, ent, params)
-
-		if StatusEffect.EntHasStatusEffect(ent, enums.EdithStatusEffects.SALTED) then
-			VestigeUnlockManager()
-		end
-
-		EdithBirthcake(parent, isSalted)
-		Land.AddExtraGore(ent, parent)
-		::Break::
+		if GetPtrHash(parent) == GetPtrHash(ent) then goto continue end
+		HandleStompedEnemy(parent, ent, params, saltedTime, terraMult, numTears, maths)
+		::continue::
 	end
 
 	if breakGrid then
 		Helpers.DestroyGrid(parent, params.Radius)
 	end
+end
+
+---@param player EntityPlayer
+---@param params EdithJumpStompParams|TEdithHopParryParams
+local function TriggerBombExplosion(player, params)
+    if params.RocketLaunch then return end
+    game:BombExplosionEffects(player.Position, 100, player:GetBombFlags(), misc.ColorDefault, player, 1, false, false, 0)
+    if mod.Modules.PLAYER.ShouldConsumeBomb(player) then
+        player:AddBombs(-1)
+    end
+end
+
+---@param player EntityPlayer
+---@param params EdithJumpStompParams|TEdithHopParryParams
+---@param isEdith boolean
+---@param isTEdith boolean
+local function UpdateBombState(player, params, isEdith, isTEdith)
+    if isEdith then
+        if player:HasCollectible(CollectibleType.COLLECTIBLE_FAST_BOMBS) then
+            params.Cooldown = 3
+        end
+        params.BombStomp = false
+    elseif isTEdith then
+        params.ParryBomb = false
+    end
+end
+
+---@param player EntityPlayer
+---@param params EdithJumpStompParams|TEdithHopParryParams
+function Land.BombLandManager(player, params)
+	local modules = mod.Modules
+
+	local isEdith = modules.PLAYER.IsEdith(player, false)
+	local isTEdith = modules.PLAYER.IsEdith(player, true)
+
+	local isBombLand = isEdith and params.BombStomp or isTEdith and params.ParryBomb or false
+
+	if not isBombLand then return end
+
+	TriggerBombExplosion(player, params)
+    UpdateBombState(player, params, isEdith, isTEdith)
 end
 
 ---Tainted Edith hop land behavior
@@ -429,11 +480,10 @@ function Land.TaintedEdithHop(parent, HopParams)
 	local BRCharge = HopParams.HopMoveBRCharge / 100
 	local burnDamage, burnDuration = BRCharge * parent.Damage / 2, math.ceil(BRCharge * 123)
 	local PlayerRef = EntityRef(parent)
-	local CinderDuration = Helpers.SecondsToFrames(4 * (Charge + BRCharge))
+	local CinderDuration = mod.Modules.MATHS.SecondsToFrames(4 * (Charge + BRCharge))
 
 	for _, ent in ipairs(Isaac.FindInCapsule(PickupCapsule)) do
 		if ent:ToPickup() then
-			print(ent)
 			PickupLandHandler(parent, ent)
 		end
 	end
@@ -448,7 +498,7 @@ function Land.TaintedEdithHop(parent, HopParams)
 		Land.HandleEntityInteraction(ent, parent, HopParams.HopKnockback)
 		Land.LandDamage(ent, parent, HopParams.HopDamage, HopParams.HopKnockback)
 
-		if Helpers.IsEnemy(ent) then			
+		if mod.Modules.HELPERS.IsEnemy(ent) then
 			local npc = ent:ToNPC()
 
 			if npc then
@@ -492,109 +542,159 @@ local function SfxFeedbackManager(sound, volume, IsChap4, hasWater)
     end
 end
 
----Function for audiovisual feedback of Edith and Tainted Edith landings.
+local EFFECT = {
+    PLAYBACK_BASE     = 1.3,
+    PLAYBACK_VARIANCE = 1.5,
+    RAND_SIZE_MIN     = 0.8,
+    RAND_SIZE_MAX     = 1.0,
+}
+
+---@param hasWater boolean
+---@param IsChap4 boolean
+---@return EffectVariant, number
+local function GetEffectVariantAndSubType(hasWater, IsChap4)
+    if hasWater then return EffectVariant.BIG_SPLASH, 2 end
+    return EffectVariant.POOF02, (IsChap4 and 3 or 1)
+end
+
 ---@param player EntityPlayer
----@param soundTable table Takes a table with sound IDs.
----@param GibColor Color Takes a color for salt gibs spawned on Landing.
----@param IsParryLand? boolean Is used for Tainted Edith's parry land behavior and can be ignored.
-function Land.LandFeedbackManager(player, soundTable, GibColor, IsParryLand)
-	local saveManager = mod.SaveManager 
-	if not saveManager:IsLoaded() then return end
-	local menuData = saveManager:GetSettingsSave()
-	if not menuData then return end
+---@return boolean
+local function IsEdithJump(player)
+    local d = data(player)
+    return Player.IsEdith(player, false) or d.IsSoulOfEdithJump or d.HoodLand
+end
 
-	--- Pendiente de reducir
+---@class FeedbackLandParams
+---@field Size number
+---@field SoundPick number
+---@field Volume number
+---@field ScreenShakeIntensity number
+---@field GibAmount number
+---@field GibSpeed number
+
+---@param player EntityPlayer
+---@return FeedbackLandParams
+local function GetEdithLandParams(player)
+    local Helpers  = mod.Modules.HELPERS
+    local d = data(player)
+    local IsSoulOfEdith = d.IsSoulOfEdithJump
+    local IsEdithsHood = d.HoodLand
+    local isRocketLaunch = d.RocketLaunch
+    local isDefensive = Edith.GetJumpStompParams(player).IsDefensiveStomp or IsEdithsHood
+    local EdithData = Helpers.GetConfigData(ConfigDataTypes.EDITH) ---@cast EdithData EdithData
+
+    local sizeBase = IsSoulOfEdith and 0.8 or (isDefensive and 0.6 or 0.7)
+    return {
+        Size = sizeBase * (isRocketLaunch and 1.25 or 1),
+        SoundPick = EdithData.StompSound,
+        Volume = GetVolume(EdithData.StompVolume) * (isDefensive and 1.5 or 2),
+        ScreenShakeIntensity = isDefensive and 6 or (isRocketLaunch and 14 or 10),
+        GibAmount = EdithData.DisableSaltGibs and 0 or (isRocketLaunch and 14 or 10),
+        GibSpeed = isDefensive and 2 or 3,
+    }
+end
+
+---@param IsParryLand boolean
+---@return FeedbackLandParams
+local function GetTEdithLandParams(IsParryLand)
+    local TEdithData = mod.Modules.HELPERS.GetConfigData(ConfigDataTypes.TEDITH) ---@cast TEdithData TEdithData
+    return {
+        Size = IsParryLand and 0.7 or 0.5,
+        SoundPick = IsParryLand and TEdithData.ParrySound or TEdithData.HopSound,
+        Volume = GetVolume(TEdithData.Volume) * (IsParryLand and 1.5 or 1),
+        ScreenShakeIntensity = IsParryLand and 6 or 3,
+        GibAmount = not TEdithData.DisableSaltGibs and (IsParryLand and 6 or 2) or 0,
+        GibSpeed = 2,
+    }
+end
+
+---@param Variant EffectVariant
+---@param BackDrop BackdropType
+---@param IsMortis boolean
+---@return Color
+local function GetLandEffectColor(Variant, BackDrop, IsMortis)
+    local Helpers = mod.Modules.HELPERS
+    local backColor = tables.BackdropColors
+    local defColor = Color(1, 1, 1)
+    local color
+
+    if Variant == EffectVariant.BIG_SPLASH then
+        color = Helpers.When(BackDrop, backColor, Color(0.7, 0.75, 1))
+    elseif Variant == EffectVariant.POOF02 then
+        color = BackDrop == BackdropType.DROSS and defColor or backColor[BackDrop]
+    end
+
+    if IsMortis then
+        local MortisColors = {
+            [MortisBackdrop.MORGUE] = Color(0, 0, 0, 1, 0.45, 0.5, 0.575),
+            [MortisBackdrop.MOIST] = Color(0, 0.8, 0.76, 1, 0, 0, 0),
+            [MortisBackdrop.FLESH] = Color(0, 0, 0, 1, 0.55, 0.5, 0.55),
+        }
+        color = Helpers.When(Helpers.GetMortisDrop(), MortisColors, Color.Default)
+    end
+
+    return color or defColor
+end
+
+---@param player EntityPlayer
+---@param stompGFX Entity
+---@param size number
+---@param color Color
+local function ApplyEffectVisuals(player, stompGFX, size, color)
+    local rng = stompGFX:GetDropRNG()
+    local randX = modRNG.RandomFloat(rng, EFFECT.RAND_SIZE_MIN, EFFECT.RAND_SIZE_MAX)
+    local randY = modRNG.RandomFloat(rng, EFFECT.RAND_SIZE_MIN, EFFECT.RAND_SIZE_MAX)
+
+    stompGFX:GetSprite().PlaybackSpeed = EFFECT.PLAYBACK_BASE * modRNG.RandomFloat(rng, 1, EFFECT.PLAYBACK_VARIANCE)
+    stompGFX.SpriteScale = Vector(size * randX, size * randY) * player.SpriteScale.X
+    stompGFX.Color = color
+end
+
+---@param player EntityPlayer
+---@param landParams FeedbackLandParams
+---@param IsChap4 boolean
+local function SpawnLandGFX(player, landParams, IsChap4)
 	local room = game:GetRoom()
+    local hasWater = room:HasWater()
+	local Variant, SubType = GetEffectVariantAndSubType(hasWater, IsChap4)
 	local BackDrop = room:GetBackdropType()
-	local hasWater = room:HasWater()
-	local IsChap4 = Helpers.IsChap4()
-	local Variant = hasWater and EffectVariant.BIG_SPLASH or EffectVariant.POOF02
-	local SubType = hasWater and 2 or (IsChap4 and 3 or 1)
-	local backColor = tables.BackdropColors
-	local soundPick 
-	local size
-	local volume 
-	local ScreenShakeIntensity
-	local gibAmount = 0
-	local gibSpeed = 2
-	local IsSoulOfEdith = data(player).IsSoulOfEdithJump 
-	local IsEdithsHood = data(player).HoodLand
-	local IsMortis = Helpers.IsLJMortis()
-	local isEdithJump = Player.IsEdith(player, false) or IsSoulOfEdith or IsEdithsHood
-
-	if isEdithJump then
-		local isRocketLaunchStomp = data(player).RocketLaunch
-		local isDefensive = Edith.GetJumpStompParams(player).IsDefensiveStomp or IsEdithsHood
-		local EdithData = Helpers.GetConfigData(ConfigDataTypes.EDITH) ---@cast EdithData EdithData
-		size = (IsSoulOfEdith and 0.8 or (isDefensive and 0.6 or 0.7)) * (isRocketLaunchStomp and 1.25 or 1)
-		soundPick = EdithData.StompSound
-		volume = GetVolume(EdithData.StompVolume) * (isDefensive and 1.5 or 2)
-		ScreenShakeIntensity = isDefensive and 6 or (isRocketLaunchStomp and 14 or 10)
-		gibAmount = EdithData.DisableSaltGibs and 0 or (isRocketLaunchStomp and 14 or 10)
-		gibSpeed = isDefensive and 2 or 3
-	else
-		local TEdithData = Helpers.GetConfigData(ConfigDataTypes.TEDITH) ---@cast TEdithData TEdithData
-		size = IsParryLand and 0.7 or 0.5
-		soundPick = IsParryLand and TEdithData.ParrySound or TEdithData.HopSound 
-		volume = GetVolume(TEdithData.Volume) * (IsParryLand and 1.5 or 1)
-		ScreenShakeIntensity = IsParryLand and 6 or 3
-		gibAmount = not TEdithData.DisableSaltGibs and (IsParryLand and 6 or 2) or 0
-	end
-
+	local IsMortis = mod.Modules.HELPERS.IsLJMortis()
 	local stompGFX = Isaac.Spawn(
-		EntityType.ENTITY_EFFECT, 
-		Variant, 
-		SubType, 
-		player.Position, 
-		Vector.Zero, 
-		player
-	)
+        EntityType.ENTITY_EFFECT,
+        Variant, SubType,
+        player.Position, Vector.Zero, player
+    )
 
-	local rng = stompGFX:GetDropRNG()
-	local RandSize = { X = modRNG.RandomFloat(rng, 0.8, 1), Y = modRNG.RandomFloat(rng, 0.8, 1) }
-	local SizeX, SizeY = size * RandSize.X, size * RandSize.Y
-	
-	if Helpers.GetConfigData(ConfigDataTypes.MISC).EnableShakescreen then
-		game:ShakeScreen(ScreenShakeIntensity)
-	end
+	ApplyEffectVisuals(player, stompGFX, landParams.Size, GetLandEffectColor(Variant, BackDrop, IsMortis))
+end
 
-	local defColor = Color(1, 1, 1)
-	local color = defColor
-	local switch = {
-		[EffectVariant.BIG_SPLASH] = function()
-			color = Helpers.When(BackDrop, backColor, Color(0.7, 0.75, 1))
-		end,
-		[EffectVariant.POOF02] = function()
-			color = BackDrop == BackdropType.DROSS and defColor or backColor[BackDrop] 
-		end,
-	}
-	
-	Helpers.WhenEval(Variant, switch)
-	color = color or defColor
+---@param player EntityPlayer
+---@param soundTable table
+---@param GibColor Color
+---@param IsParryLand? boolean
+function Land.LandFeedbackManager(player, soundTable, GibColor, IsParryLand)
+    local saveManager = mod.SaveManager
+    if not saveManager:IsLoaded() then return end
+    if not saveManager:GetSettingsSave() then return end
 
-	if IsMortis then
-		local Colors = {
-			[MortisBackdrop.MORGUE] = Color(0, 0, 0, 1, 0.45, 0.5, 0.575),
-			[MortisBackdrop.MOIST] = Color(0, 0.8, 0.76, 1, 0, 0, 0),
-			[MortisBackdrop.FLESH] = Color(0, 0, 0, 1, 0.55, 0.5, 0.55),
-		}
-		local newcolor = Helpers.When(Helpers.GetMortisDrop(), Colors, Color.Default)
-		color = newcolor
-	end
+    local Helpers = mod.Modules.HELPERS
+    local IsChap4 = Helpers.IsChap4()
 
-	stompGFX:GetSprite().PlaybackSpeed = 1.3 * modRNG.RandomFloat(rng, 1, 1.5)
-	stompGFX.SpriteScale = Vector(SizeX, SizeY) * player.SpriteScale.X
-	stompGFX.Color = color
+    local landParams = IsEdithJump(player)
+        and GetEdithLandParams(player)
+        or GetTEdithLandParams(IsParryLand)
 
-	GibColor = GibColor or defColor
+    SpawnLandGFX(player, landParams, IsChap4)
 
-	if gibAmount > 0 then	
-		Helpers.SpawnSaltGib(player, gibAmount, gibSpeed, GibColor)
-	end
+    if Helpers.GetConfigData(ConfigDataTypes.MISC).EnableShakescreen then
+        game:ShakeScreen(landParams.ScreenShakeIntensity)
+    end
 
-	local sound = Helpers.When(soundPick, soundTable, 1)
+    if landParams.GibAmount > 0 then
+        Helpers.SpawnSaltGib(player, landParams.GibSpeed, landParams.GibSpeed, GibColor or Color(1, 1, 1))
+    end
 
-	SfxFeedbackManager(sound, volume, IsChap4, hasWater)
+    SfxFeedbackManager(Helpers.When(landParams.SoundPick, soundTable, 1), landParams.Volume, IsChap4, hasWater)
 end
 
 ---@param player EntityPlayer
@@ -603,6 +703,8 @@ end
 ---@param height number
 ---@param speed number
 function Land.TriggerLandenemyJump(player, enemyTable, knockback, height, speed)
+	local Helpers = mod.Modules.HELPERS
+
 	for _, ent in ipairs(enemyTable) do
 		if not Helpers.IsEnemy(ent) then goto continue end
 
@@ -683,11 +785,11 @@ end
 ---@param ent Entity
 ---@param HopParams TEdithHopParryParams
 local function ParryTearManager(ent, HopParams)
-	local tear = ent:ToTear() ---@cast tear EntityTear
-	
+	local tear = ent:ToTear()
+
 	if not tear then return end
 
-	Helpers.BoostTear(tear, 20, 1.5 + ((HopParams.HopStaticCharge + HopParams.HopStaticBRCharge) / 100))
+	mod.Modules.HELPERS.BoostTear(tear, 20, 1.5 + ((HopParams.HopStaticCharge + HopParams.HopStaticBRCharge) / 100))
 
 	if hasBirthright then
 		tear:AddTearFlags(TearFlags.TEAR_BURN)
@@ -703,7 +805,7 @@ local function ImpreciseParryManager(player, ent, HopParams, ImpreciseParryCapsu
 	local PickupCapsule = Capsule(player.Position, Vector.One, 0, 20)
 	local SlotCapsule = Capsule(player.Position, Vector.One, 0, player.Size)
 	local tearsMult = (Player.GetplayerTears(player) / 2.73) 
-	local CinderTime = Math.SecondsToFrames(math.min(4 * tearsMult, 12))
+	local CinderTime = mod.Modules.MATHS.SecondsToFrames(math.min(4 * tearsMult, 12))
 
 	for _, entity in ipairs(Isaac.FindInCapsule(PickupCapsule)) do
 		if entity:ToPickup() then
@@ -719,6 +821,7 @@ local function ImpreciseParryManager(player, ent, HopParams, ImpreciseParryCapsu
 
 	if ent:ToTear() then return  end
 	local pushMult = StatusEffect.EntHasStatusEffect(ent, enums.EdithStatusEffects.CINDER) and 1.5 or 1
+	local Helpers = mod.Modules.HELPERS
 	Helpers.TriggerPush(ent, player, 20 * pushMult)
 
 	if not Helpers.IsEnemy(ent) then return end
@@ -729,6 +832,18 @@ local function ImpreciseParryManager(player, ent, HopParams, ImpreciseParryCapsu
 	EnemiesInImpreciseParry = true
 end
 
+local function ProjectilePerfectParry(player, proj, shouldTriggerFireJets)
+	local spawner = proj.Parent or proj.SpawnerEntity
+	local targetEnt = spawner or Helpers.GetNearestEnemy(player) or proj
+	local flags = misc.NewProjectilFlags | (shouldTriggerFireJets and ProjectileFlags.FIRE_SPAWN or 0)
+
+	proj.FallingAccel = -0.1
+	proj.FallingSpeed = 0
+	proj.Height = -23
+	proj:AddProjectileFlags(flags)
+	proj:AddKnockback(EntityRef(player), (targetEnt.Position - player.Position):Resized(25), 5, false)
+end
+
 ---@param player EntityPlayer
 ---@param ent Entity
 ---@param HopParams TEdithHopParryParams
@@ -736,151 +851,154 @@ end
 local function PerfectParryManager(player, ent, HopParams, IsTaintedEdith)
 	if ent:ToTear() then return end
 
-	local damageFlag = Player.PlayerHasBirthright(player) and DamageFlag.DAMAGE_FIRE or 0
+	local hasBirthright = Player.PlayerHasBirthright(player) 
+	local damageFlag = hasBirthright and DamageFlag.DAMAGE_FIRE or 0
 	local proj = ent:ToProjectile()
 	local bomb = ent:ToBomb()
 	local shouldTriggerFireJets = IsTaintedEdith and hasBirthright or Player.IsJudasWithBirthright(player)
-	local nearestEnemy = Helpers.GetNearestEnemy(player)
+	local PlayerRef = EntityRef(player)
 
 	local CinderMult = StatusEffect.EntHasStatusEffect(ent, "Cinder") and 1.25 or 1
 
 	Isaac.RunCallback(enums.Callbacks.PERFECT_PARRY, player, ent, HopParams)
 
 	if proj then
-		local spawner = proj.Parent or proj.SpawnerEntity
-		local targetEnt = spawner or nearestEnemy or proj
+		ProjectilePerfectParry(player, proj, shouldTriggerFireJets)
+	elseif mod.Modules.HELPERS.IsEnemy(ent) then
+		sfx:Play(SoundEffect.SOUND_MEATY_DEATHS)
 
-		proj.FallingAccel = -0.1
-		proj.FallingSpeed = 0
-		proj.Height = -23
-		proj:AddProjectileFlags(misc.NewProjectilFlags)
-		proj:AddKnockback(EntityRef(player), (targetEnt.Position - player.Position):Resized(25), 5, false)
+		for _ = 1, Player.GetNumTears(player) do
+			ent:TakeDamage(HopParams.ParryDamage * CinderMult, damageFlag, PlayerRef, 0)
+		end
 
-		if shouldTriggerFireJets then
-			proj:AddProjectileFlags(ProjectileFlags.FIRE_SPAWN)
+		if hasBirthright then
+			ent:AddBurn(PlayerRef, 123, 5)
+		end
+
+		if ent.HitPoints <= HopParams.ParryDamage then
+			Isaac.RunCallback(enums.Callbacks.PERFECT_PARRY_KILL, player, ent)
+			Land.AddExtraGore(ent, player)
+		end
+
+		if ent.Type == EntityType.ENTITY_FIREPLACE and ent.Variant ~= 4 then
+			ent:Kill()
 		end
 	else
-		if Helpers.IsEnemy(ent) then		
-			sfx:Play(SoundEffect.SOUND_MEATY_DEATHS)
+		if ent.Type == EntityType.ENTITY_STONEY then
+			ent:ToNPC().State = NpcState.STATE_SPECIAL
+		end
 
-			for _ = 1, Player.GetNumTears(player) do
-				ent:TakeDamage(HopParams.ParryDamage * CinderMult, damageFlag, EntityRef(player), 0)
-			end
+		if ent.Type == EntityType.ENTITY_SHOPKEEPER then
+			ent:Kill()
+		end
 
-			if hasBirthright then
-				ent:AddBurn(EntityRef(player), 123, 5)
-			end
-
-			if ent.HitPoints <= HopParams.ParryDamage then
-				Isaac.RunCallback(enums.Callbacks.PERFECT_PARRY_KILL, player, ent)
-				Land.AddExtraGore(ent, player)
-			end
-
-			if ent.Type == EntityType.ENTITY_FIREPLACE and ent.Variant ~= 4 then
-				ent:Kill()
-			end
-		else
-			if ent.Type == EntityType.ENTITY_STONEY then
-				ent:ToNPC().State = NpcState.STATE_SPECIAL
-			end
-
-			if ent.Type == EntityType.ENTITY_SHOPKEEPER then
-				ent:Kill()
-			end
-
-			if bomb then
-				local vel = (not nearestEnemy and RandomVector() or (nearestEnemy.Position - player.Position)):Resized(15)
-				bomb.Velocity = vel
-				bomb.ExplosionDamage = bomb.ExplosionDamage * 1.25
-			end
+		if bomb then
+			bomb:SetExplosionCountdown(0)
+			bomb.ExplosionDamage = bomb.ExplosionDamage * 1.25
 		end
 	end
 end
 
---- Misc function used to manage some perfect parry stuff (i made it to be able to return something in the main parry function sorry)
 ---@param player EntityPlayer
 ---@param isenemy? boolean
-local function PerfectParryMisc(player, isenemy)
+local function TriggerParryShockwave(player, isenemy)
 	if not isenemy then return end
 	game:MakeShockwave(player.Position, 0.035, 0.025, 2)
 end
 
----Helper function used to manage Tainted Edith and Burnt Hood's parry-lands 
----@param player EntityPlayer
----@param HopParams TEdithHopParryParams
----@param IsTaintedEdith? boolean 
----@return boolean PerfectParry Returns a boolean that tells if there was a perfect parry 
----@return boolean EnemiesInImpreciseParry
-function Land.ParryLandManager(player, HopParams, IsTaintedEdith)
-	local damageBase = 13.5
-	local DamageStat = player.Damage 
-	local rawFormula = (damageBase + DamageStat) / 1.5 
-	local PerfectParry = false
-	local EnemiesInImpreciseParry = false
-	local ImpreciseParryCapsule = Capsule(player.Position, Vector.One, 0, misc.ImpreciseParryRadius)	
-	local PerfectParryCapsule = Capsule(player.Position, Vector.One, 0, misc.PerfectParryRadius)
-	local TearParryCapsule = Capsule(player.Position, Vector.One, 0, misc.TearParryRadius)
-	local hasBirthright = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT)
-	local BirthrightMult = hasBirthright and 1.25 or 1
-	local hasBirthcake = BirthcakeRebaked and player:HasTrinket(BirthcakeRebaked.Birthcake.ID) or false
-	local MultishotMult = Math.Round(Math.exp(Player.GetNumTears(player), 1, 0.5), 2)
-	local DamageFormula = (rawFormula * BirthrightMult) * (hasBirthcake and 1.15 or 1) * MultishotMult
+local function CalcParryDamage(player, hopParams, isTaintedEdith)
+    local damageBase = 13.5
+    local rawFormula = (damageBase + player.Damage) / 1.5
+    local birthrightMult = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and 1.25 or 1
+    local hasBirthcake = BirthcakeRebaked and player:HasTrinket(BirthcakeRebaked.Birthcake.ID) or false
+	local Maths = mod.Modules.MATHS
+    local multishotMult = Maths.Round(Maths.exp(Player.GetNumTears(player), 1, 0.5), 2)
+    local damageFormula = (rawFormula * birthrightMult) * (hasBirthcake and 1.15 or 1) * multishotMult
 
-	if IsTaintedEdith then
-		local damageIncrease = 1 + (HopParams.HopStaticCharge + HopParams.HopStaticBRCharge) / 400
-		DamageFormula = DamageFormula * damageIncrease
-	end
-
-	HopParams.ParryDamage = DamageFormula
-	HopParams.ParriedEnemies = Isaac.FindInCapsule(PerfectParryCapsule, misc.ParryPartitions)
-	HopParams.ImpreciseParriedEnemies = Isaac.FindInCapsule(ImpreciseParryCapsule, misc.ParryPartitions)
-
-	for _, ent in pairs(Isaac.FindInCapsule(TearParryCapsule, EntityPartition.TEAR)) do
-		ParryTearManager(ent, HopParams)
-		PerfectParry = true
-	end
-
-	for _, ent in pairs(Isaac.FindInCapsule(ImpreciseParryCapsule, misc.ParryPartitions)) do
-		if _ >= 1 then
-			EnemiesInImpreciseParry = true
-		end
-		ImpreciseParryManager(player, ent, HopParams, ImpreciseParryCapsule, PerfectParryCapsule)
-	end
-
-	for _, ent in pairs(HopParams.ParriedEnemies) do
-		PerfectParryManager(player, ent, HopParams, IsTaintedEdith)
-		PerfectParry = true
-	end
-	
-	Land.TriggerLandenemyJump(player, HopParams.ImpreciseParriedEnemies, HopParams.ParryKnockback, 8, 2)
-	Land.TriggerLandenemyJump(player, HopParams.ParriedEnemies, HopParams.ParryKnockback, 8, 2)
-
-	local IFrames = (PerfectParry and 30 or 25) + math.ceil((HopParams.HopStaticCharge + HopParams.HopStaticBRCharge * 0.25) / 4)
-
-	player:SetMinDamageCooldown(IFrames)
-	PerfectParryMisc(player, PerfectParry)
-
-	local staticChargeCooldownBonus = math.ceil(4 * (HopParams.HopStaticCharge / 100)) 
-
-	if PerfectParry and Helpers.GetConfigData(ConfigDataTypes.TEDITH).EnableParryFlash then
-		Helpers.TriggerPerfectParryFlash(player)
-	end
-
-	HopParams.ParryCooldown = (
-		IsTaintedEdith and 
-		(PerfectParry and 
-		((hasBirthcake and 10 or 12) - staticChargeCooldownBonus) or 15) or 0
-	)
-
-	data(player).MaxParryCooldown = HopParams.ParryCooldown or 0
-
-	HopParams.IsParryJump = false
-
-	GrudgeUnlockManager(PerfectParry)
-
-	HopParams.ParriedEnemies = {}
-	HopParams.ImpreciseParriedEnemies = {}
-	return PerfectParry, EnemiesInImpreciseParry
+    if isTaintedEdith then
+        local damageIncrease = 1 + (hopParams.HopStaticCharge + hopParams.HopStaticBRCharge) / 400
+        damageFormula = damageFormula * damageIncrease
+    end
+    return damageFormula, hasBirthcake
 end
 
+local function CalcParryCooldown(isTaintedEdith, perfectParry, hasBirthcake, staticChargeCooldownBonus)
+    if not isTaintedEdith then return 0 end
+    if not perfectParry then return 15 end
+    local base = hasBirthcake and 10 or 12
+    return base - staticChargeCooldownBonus
+end
+
+local function ProcessParryHits(player, hopParams, isTaintedEdith, capsules)
+    local perfectParry = false
+    local enemiesInImpreciseParry = false
+
+    for _, ent in pairs(Isaac.FindInCapsule(capsules.tear, EntityPartition.TEAR)) do
+        ParryTearManager(ent, hopParams)
+        perfectParry = true
+    end
+
+    enemiesInImpreciseParry = #Isaac.FindInCapsule(capsules.imprecise, misc.ParryPartitions) > 0
+
+    for _, ent in pairs(Isaac.FindInCapsule(capsules.imprecise, misc.ParryPartitions)) do
+        ImpreciseParryManager(player, ent, hopParams, capsules.imprecise, capsules.perfect)
+    end
+
+    for _, ent in pairs(hopParams.ParriedEnemies) do
+        PerfectParryManager(player, ent, hopParams, isTaintedEdith)
+        perfectParry = true
+    end
+
+    return perfectParry, enemiesInImpreciseParry
+end
+
+local function TriggerParryKnockback(player, enemies, knockback)
+    Land.TriggerLandenemyJump(player, enemies, knockback, 8, 2)
+end
+
+---Helper function used to manage Tainted Edith and Burnt Hood's parry-lands
+---@param player EntityPlayer
+---@param hopParams TEdithHopParryParams
+---@param isTaintedEdith? boolean
+---@return boolean perfectParry
+---@return boolean enemiesInImpreciseParry
+function Land.ParryLandManager(player, hopParams, isTaintedEdith)
+    local capsules = {
+        imprecise = Capsule(player.Position, Vector.One, 0, misc.ImpreciseParryRadius),
+        perfect = Capsule(player.Position, Vector.One, 0, misc.PerfectParryRadius),
+        tear = Capsule(player.Position, Vector.One, 0, misc.TearParryRadius),
+    }
+
+    local damageFormula, hasBirthcake = CalcParryDamage(player, hopParams, isTaintedEdith)
+    hopParams.ParryDamage = damageFormula
+    hopParams.ParriedEnemies = Isaac.FindInCapsule(capsules.perfect, misc.ParryPartitions)
+    hopParams.ImpreciseParriedEnemies = Isaac.FindInCapsule(capsules.imprecise, misc.ParryPartitions)
+
+    local perfectParry, enemiesInImpreciseParry = ProcessParryHits(player, hopParams, isTaintedEdith, capsules)
+
+    TriggerParryKnockback(player, hopParams.ImpreciseParriedEnemies, hopParams.ParryKnockback)
+    TriggerParryKnockback(player, hopParams.ParriedEnemies, hopParams.ParryKnockback)
+
+    local staticChargeCooldownBonus = math.ceil(4 * (hopParams.HopStaticCharge / 100))
+    local iFrames = (perfectParry and 30 or 25) + math.ceil((hopParams.HopStaticCharge + hopParams.HopStaticBRCharge * 0.25) / 4)
+
+    player:SetMinDamageCooldown(iFrames)
+    TriggerParryShockwave(player, perfectParry)
+
+	local Helpers = mod.Modules.HELPERS
+
+    if perfectParry and Helpers.GetConfigData(ConfigDataTypes.TEDITH).EnableParryFlash then
+        Helpers.TriggerPerfectParryFlash(player)
+    end
+
+    hopParams.ParryCooldown = CalcParryCooldown(isTaintedEdith, perfectParry, hasBirthcake, staticChargeCooldownBonus)
+    data(player).MaxParryCooldown = hopParams.ParryCooldown or 0
+    hopParams.IsParryJump = false
+
+    GrudgeUnlockManager(perfectParry)
+
+    hopParams.ParriedEnemies = {}
+    hopParams.ImpreciseParriedEnemies = {}
+    return perfectParry, enemiesInImpreciseParry
+end
 return Land

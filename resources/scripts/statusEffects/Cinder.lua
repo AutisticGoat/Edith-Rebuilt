@@ -16,7 +16,7 @@ local function OnCinderParry(_, player, ent)
     local damage = HasBirthright and 1.25 or 0.75
 
     for i = 1, CinderCreeps do
-		Creeps.SpawnCinderCreep(player, player.Position + Vector(0, 40):Rotated(i * ndegrees), damage, 6)
+      Creeps.SpawnCinderCreep(player, player.Position + Vector(0, 40):Rotated(i * ndegrees), damage, 6)
 	end
 end
 mod:AddCallback(mod.Enums.Callbacks.PERFECT_PARRY, OnCinderParry)

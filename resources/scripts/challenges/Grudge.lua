@@ -5,14 +5,15 @@ local modules = mod.Modules
 local Helpers = modules.HELPERS
 local TEdithMod = modules.TEDITH
 local Player = modules.PLAYER
-local Grudge = {}
 
 local function HandleFireplaceCollision(collider)
-    if collider.Type == EntityType.ENTITY_FIREPLACE and collider.Variant ~= 4 then
-        collider:Die()
-    end
+    if not (collider.Type == EntityType.ENTITY_FIREPLACE and collider.Variant ~= 4) then return end
+    collider:Die()
 end
 
+---@param player EntityPlayer
+---@param collider Entity
+---@param hopParams TEdithHopParryParams
 local function HandleGrudgeDashDamage(player, collider, hopParams)
     if not hopParams.GrudgeDash then return end
     if not Helpers.IsEnemy(collider) then return end

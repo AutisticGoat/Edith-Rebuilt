@@ -36,7 +36,7 @@ local function HandleVestigeJumpTrigger(player)
     end
 
     if sprite:IsEventTriggered("StartJump") and not isJumping then
-        EdithMod.InitEdithJump(player, JumpTags.EdithJump, true)
+        Jump.InitEdithJump(player, JumpTags.EdithJump, true)
     end
 end
 

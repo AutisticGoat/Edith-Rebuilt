@@ -5,39 +5,45 @@ local modules = mod.Modules
 local helpers = modules.HELPERS
 local ModRNG = modules.RNG
 local StatusEffects = modules.STATUS_EFFECTS
-local PepperGrinder = {}
 
----@param RNG RNG
+local PEPPER_GRINDER = {
+    PEPPER_STATUS_DURATION = 90,
+    DAMAGE_MULT = 0.25,
+    DAMAGE_DIV  = 3.5,
+}
+
 ---@param player EntityPlayer
----@return boolean?
-function PepperGrinder:UsePepperGrinder(_, RNG, player, flag)
-	if flag & UseFlag.USE_CARBATTERY == UseFlag.USE_CARBATTERY then return end
-    local hasCarBattery = player:HasCollectible(CollectibleType.COLLECTIBLE_CAR_BATTERY) 
-	local playerPos = player.Position
-	local frames = hasCarBattery and 180 or 90
-	local playerRef = EntityRef(player)
+---@param RNG RNG
+local function SpawnPepperCloud(player, RNG)
+    local X = ModRNG.RandomFloat(RNG, 0.8, 1)
+    local Y = ModRNG.RandomFloat(RNG, 0.8, 1)
+    local pitch = ModRNG.RandomFloat(RNG, 0.9, 1.1)
+    local pepperCloud = StatusEffects.SpawnSpicePuff(player, RNG)
 
-	for _, enemy in ipairs(Isaac.FindInRadius(playerPos, 100, EntityPartition.ENEMY)) do
-		helpers.TriggerPush(enemy, player, 20)
-		StatusEffects.SetStatusEffect(enums.EdithStatusEffects.PEPPERED, enemy, frames, player)
-		enemy:TakeDamage((player.Damage * 0.25) + (player.Damage / 3.5), 0, playerRef, 0)
-	end
-	
-	local PepperCloud = Isaac.Spawn(
-        EntityType.ENTITY_EFFECT,
-        EffectVariant.POOF02,
-        2,
-        playerPos,
-        Vector.Zero,
-        nil
-    )
-	local X = ModRNG.RandomFloat(RNG, 0.8, 1)
-	local Y = ModRNG.RandomFloat(RNG, 0.8, 1)
-
-	PepperCloud.SpriteScale = PepperCloud.SpriteScale * Vector(X, Y)
-
-	helpers.ChangeColor(PepperCloud, 0.4, 0.4, 0.4)
-	sfx:Play(mod.Enums.SoundEffect.SOUND_PEPPER_GRINDER, 10, 0, false, ModRNG.RandomFloat(RNG, 0.9, 1.1))
-	return true
+    pepperCloud.SpriteScale = pepperCloud.SpriteScale * Vector(X, Y)
+    helpers.ChangeColor(pepperCloud, 0.4, 0.4, 0.4)
+    sfx:Play(enums.SoundEffect.SOUND_PEPPER_GRINDER, 10, 0, false, pitch)
 end
-mod:AddCallback(ModCallbacks.MC_USE_ITEM, PepperGrinder.UsePepperGrinder, mod.Enums.CollectibleType.COLLECTIBLE_PEPPERGRINDER)
+
+---@param player EntityPlayer
+local function TriggerEnemyDamage(player)
+    local hasCarBattery = player:HasCollectible(CollectibleType.COLLECTIBLE_CAR_BATTERY)
+    local frames = PEPPER_GRINDER.PEPPER_STATUS_DURATION * (hasCarBattery and 2 or 1)
+    local damage = (player.Damage * PEPPER_GRINDER.DAMAGE_MULT) + (player.Damage / PEPPER_GRINDER.DAMAGE_DIV)
+    local playerRef = EntityRef(player)
+
+    for _, enemy in ipairs(Isaac.FindInRadius(player.Position, 100, EntityPartition.ENEMY)) do
+        helpers.TriggerPush(enemy, player, 20)
+        StatusEffects.SetStatusEffect(enums.EdithStatusEffects.PEPPERED, enemy, frames, player)
+        enemy:TakeDamage(damage, 0, playerRef, 0)
+    end
+end
+
+mod:AddCallback(ModCallbacks.MC_USE_ITEM, function(_, _, RNG, player, flag)
+    if flag & UseFlag.USE_CARBATTERY == UseFlag.USE_CARBATTERY then return end
+
+    TriggerEnemyDamage(player)
+    SpawnPepperCloud(player, RNG)
+
+    return true
+end, enums.CollectibleType.COLLECTIBLE_PEPPERGRINDER)

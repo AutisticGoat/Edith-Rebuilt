@@ -3,6 +3,7 @@ local callbacks = mod.Enums.Callbacks
 local modules = mod.Modules
 local Player = modules.PLAYER
 local StompUtils = modules.STOMP_UTILS
+local Jump = modules.JUMP
 local data = mod.DataHolder.GetEntityData
 
 ---@param player EntityPlayer
@@ -36,7 +37,7 @@ end)
 
 ---@param player EntityPlayer
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
-    if JumpLib:GetData(player).Jumping then return end
+    if Jump.Jumping then return end
     if not Player.IsPlayerShooting(player) then return end
 
     local weapon = player:GetWeapon(1)

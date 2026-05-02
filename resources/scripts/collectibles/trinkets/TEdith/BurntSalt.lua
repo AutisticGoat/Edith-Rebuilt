@@ -9,16 +9,21 @@ local trinket = enums.TrinketType
 local data = mod.DataHolder.GetEntityData
 
 ---@param tear EntityTear
+local function ShootBurntSaltTear(tear)
+    Helpers.ForceSaltTear(tear, true)
+    data(tear).BurntSaltTear = true
+    tear.CollisionDamage = tear.CollisionDamage * 1.5
+end
+
+---@param tear EntityTear
 mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, function(_, tear)
-    local player = Helpers.GetPlayerFromTear(tear) 
+    local player = Helpers.GetPlayerFromTear(tear)
 
     if not player then return end
     if not player:HasTrinket(trinket.TRINKET_BURNT_SALT) then return end
     if tear.TearIndex == 0 or tear.TearIndex % 3 ~= 0 then return end
- 
-    Helpers.ForceSaltTear(tear, true)
-    data(tear).BurntSaltTear = true
-    tear.CollisionDamage = tear.CollisionDamage * 1.25
+
+    ShootBurntSaltTear(tear)
 end)
 
 ---@param ent Entity

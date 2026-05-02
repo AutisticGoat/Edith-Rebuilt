@@ -13,12 +13,9 @@ local function SpawnSmokeCloud(player, isStomp)
     ):ToEffect() ---@cast smokeCloud EntityEffect
 
     local randomScale = smokeCloud:GetDropRNG():RandomFloat() * 0.3
-
-    -- El stomp escala y dura más con Birthright
-    -- BUG ORIGINAL (stomp): definía 'timeOut' correctamente pero siempre llamaba SetTimeout(70)
     local hasBirthright = isStomp and Player.PlayerHasBirthright(player)
-    local baseScale = hasBirthright and 0.8 or 0.5
-    local timeOut   = hasBirthright and 140 or 70
+    local baseScale = hasBirthright and 2 or 1.5
+    local timeOut = hasBirthright and 140 or 70
 
     smokeCloud.SpriteScale = Vector(baseScale + randomScale, baseScale + randomScale)
     smokeCloud:SetTimeout(timeOut)

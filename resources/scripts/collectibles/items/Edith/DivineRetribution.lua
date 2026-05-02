@@ -9,36 +9,71 @@ local ModRNG = modules.RNG
 local Player = modules.PLAYER
 local Maths = modules.MATHS
 local sfx = utils.SFX
-local DivineRetribution = {}
+
+local DR = {
+    DAMAGE_BASE = 25,
+    DAMAGE_JUDAS_MULT = 1.5,
+}
+
+---@param player EntityPlayer
+local function TriggerBadOutcome(player)
+    sfx:Play(SoundEffect.SOUND_THUMBS_DOWN)
+    Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.CRACK_THE_SKY, 1, player.Position, Vector.Zero, nil)
+end
+
+---@param hasCarBattery boolean
+---@param isJudasWithBirthright boolean
+---@return number
+local function GetRetributionDamage(hasCarBattery, isJudasWithBirthright)
+    local base = hasCarBattery and DR.DAMAGE_BASE * 2 or DR.DAMAGE_BASE
+    return base * (isJudasWithBirthright and DR.DAMAGE_JUDAS_MULT or 1)
+end
+
+---@param player EntityPlayer
+---@param hasCarBattery boolean
+---@param isJudasWithBirthright boolean
+local function HealPlayer(player, hasCarBattery, isJudasWithBirthright)
+    local heartsToAdd = hasCarBattery and 2 or 1
+    local healFunc = isJudasWithBirthright and player.AddBlackHearts or player.AddSoulHearts
+    healFunc(player, heartsToAdd)
+end
+
+---@param player EntityPlayer
+---@param isJudasWithBirthright boolean
+---@return boolean
+local function TriggerGoodOutcome(player, isJudasWithBirthright)
+    local roomEnemies = Helpers.GetEnemies()
+    if #roomEnemies <= 0 then return false end
+
+    local hasCarBattery = player:HasCollectible(CollectibleType.COLLECTIBLE_CAR_BATTERY)
+
+    HealPlayer(player, hasCarBattery, isJudasWithBirthright)
+
+    sfx:Play(isJudasWithBirthright and SoundEffect.SOUND_UNHOLY or SoundEffect.SOUND_SUPERHOLY)
+
+    local damage = GetRetributionDamage(hasCarBattery, isJudasWithBirthright)
+    for _, enemy in pairs(roomEnemies) do
+        Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.CRACK_THE_SKY, 10, enemy.Position, Vector.Zero, nil)
+        enemy:TakeDamage(damage, DamageFlag.DAMAGE_LASER, EntityRef(player), 0)
+    end
+    return true
+end
 
 ---@param rng RNG
 ---@param player EntityPlayer
 ---@param flags UseFlag
 ---@return boolean?
-function DivineRetribution:OnDRUse(_, rng, player, flags)
+mod:AddCallback(ModCallbacks.MC_USE_ITEM, function(_, _, rng, player, flags)
     if Maths.HasBitFlags(flags, UseFlag.USE_CARBATTERY) then return end
-    local IsJudasWithBirthright = Player.IsJudasWithBirthright(player)
+
+    local isJudasWithBirthright = Player.IsJudasWithBirthright(player)
 
     if ModRNG.RandomBoolean(rng) then
-        sfx:Play(SoundEffect.SOUND_THUMBS_DOWN)
-        Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.CRACK_THE_SKY, 1, player.Position, Vector.Zero, nil)
+        TriggerBadOutcome(player)
     else
-        local roomEnemies = Helpers.GetEnemies()
-        if #roomEnemies <= 0 then return end
-        local Hascarbattery = player:HasCollectible(CollectibleType.COLLECTIBLE_CAR_BATTERY)
-        local HeartsToAdd = Hascarbattery and 2 or 1
-        local damage = (Hascarbattery and 50 or 25) * (IsJudasWithBirthright and 1.5 or 1)
-        local healFunc = IsJudasWithBirthright and player.AddBlackHearts or player.AddSoulHearts
-        healFunc(player, HeartsToAdd)
-        local sound = IsJudasWithBirthright and SoundEffect.SOUND_UNHOLY or SoundEffect.SOUND_SUPERHOLY
-
-        sfx:Play(sound)
-        for _, enemies in pairs(roomEnemies) do
-            Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.CRACK_THE_SKY, 10, enemies.Position, Vector.Zero, nil)
-            enemies:TakeDamage(damage, DamageFlag.DAMAGE_LASER, EntityRef(player), 0)
-        end
+        if not TriggerGoodOutcome(player, isJudasWithBirthright) then return end
     end
-    game:ShakeScreen(15)
+
+    game:ShakeScreen(DR.SHAKE_INTENSITY)
     return true
-end
-mod:AddCallback(ModCallbacks.MC_USE_ITEM, DivineRetribution.OnDRUse, items.COLLECTIBLE_DIVINE_RETRIBUTION)
+end, items.COLLECTIBLE_DIVINE_RETRIBUTION)

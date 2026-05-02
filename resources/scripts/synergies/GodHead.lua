@@ -34,7 +34,6 @@ mod:AddCallback(ModCallbacks.MC_POST_TEAR_UPDATE, function(_, tear)
     tear.Height = -10
     tear.Position = (tear.Parent or tear.SpawnerEntity).Position
 
-    -- El stomp dura el doble con Birthright (24 frames); el parry siempre 12
     local count = 12
     if tearData.SynergyGodTear == "stomp" then
         local player = helpers.GetPlayerFromTear(tear) --[[@as EntityPlayer]]

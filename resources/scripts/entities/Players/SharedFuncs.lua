@@ -6,15 +6,15 @@ local game = utils.Game
 local modules = mod.Modules
 local Player = modules.PLAYER
 local Helpers = modules.HELPERS
-local Maths = modules.MATHS
 local TargetArrow = modules.TARGET_ARROW
+local BitMask = modules.BIT_MASK
 local costumes = enums.NullItemID
 
 ---@param entity Entity
 ---@param input InputHook
 ---@param action ButtonAction|KeySubType
 ---@return integer|boolean?
-mod:AddCallback(ModCallbacks.MC_INPUT_ACTION, function (_, entity, input, action)
+mod:AddCallback(ModCallbacks.MC_INPUT_ACTION, function(_, entity, input, action)
     if not entity then return end
 
     local player = entity:ToPlayer()
@@ -38,6 +38,8 @@ local whiteListCostumes = {
     [CollectibleType.COLLECTIBLE_FATE] = true,
     [CollectibleType.COLLECTIBLE_BOOK_OF_SHADOWS] = true,
     [CollectibleType.COLLECTIBLE_GAMEKID] = true,
+    [CollectibleType.COLLECTIBLE_EYE_OF_THE_OCCULT] = true,
+    [CollectibleType.COLLECTIBLE_NUMBER_ONE] = true,
 }
 
 ---@param itemconfig ItemConfigItem
@@ -45,7 +47,13 @@ local whiteListCostumes = {
 ---@return boolean?
 mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_ADD_COSTUME, function(_, itemconfig, player)
     if not Player.IsAnyEdith(player) then return end
+    
+    local ID = itemconfig.Costume.ID    
+    
     if Helpers.When(itemconfig.Costume.ID, whiteListCostumes, false) then return end
+
+
+    
     return true
 end)
 
@@ -72,10 +80,17 @@ end)
 ---@param flags DamageFlag
 ---@return boolean?
 mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG, function(_, player, _, flags)
-    local roomType = game:GetRoom():GetType()
-
     if not Player.IsAnyEdith(player) then return end
-	if Maths.HasBitFlags(flags, DamageFlag.DAMAGE_ACID) or ((roomType ~= RoomType.ROOM_SACRIFICE or roomType ~= RoomType.ROOM_DEVIL) and Maths.HasBitFlags(flags, DamageFlag.DAMAGE_SPIKES)) then return false end
+
+    local roomType = game:GetRoom():GetType()
+    local isAcid = BitMask.HasBitFlags(flags, DamageFlag.DAMAGE_ACID --[[@as BitSet128]])
+    local isSpike = BitMask.HasBitFlags(flags, DamageFlag.DAMAGE_SPIKES --[[@as BitSet128]])
+    local isSafeRoom = roomType == RoomType.ROOM_SACRIFICE or roomType == RoomType.ROOM_DEVIL
+    local shouldBlock = isAcid or (isSpike and not isSafeRoom)
+
+    if shouldBlock then
+        return false
+    end
 end)
 
 ---@param tear EntityTear
@@ -111,11 +126,25 @@ mod:AddCallback(ModCallbacks.MC_USE_ITEM, function(_, ID, _, player)
     Player.SetCustomSprite(player, Player.IsEdith(player, true))
 end)
 
-mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, function()
-	local pool = game:GetItemPool()
+---@param player EntityPlayer
+mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, function(_, player)
+	if not Player.IsAnyEdith(player) then return end
 
-    if not (PlayerManager.AnyoneIsPlayerType(enums.PlayerType.PLAYER_EDITH) or PlayerManager.AnyoneIsPlayerType(enums.PlayerType.PLAYER_EDITH_B)) then return end
-    
+    local IsEdith = Player.IsEdith(player, false)
+    local params = {
+        ANM2 = IsEdith and "gfx/EdithAnim.anm2" or "gfx/EdithTaintedAnim.anm2",
+        costume = IsEdith and costumes.EDITH or costumes.T_EDITH,
+    }
+
+	Player.SetNewANM2(player, params.ANM2)
+	player:AddNullItemEffect(params.costume, true)
+end)
+
+mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, function()
+    if not Player.AnyoneIsEdith() then return end
+
+    local pool = game:GetItemPool()
+
     pool:RemoveCollectible(CollectibleType.COLLECTIBLE_NIGHT_LIGHT)
     pool:RemoveCollectible(CollectibleType.COLLECTIBLE_MONTEZUMAS_REVENGE)
     pool:RemoveCollectible(CollectibleType.COLLECTIBLE_SUPLEX)
@@ -136,16 +165,16 @@ local GrudgePath = "gfx/ui/stage/TEdithPortraitGrudge.png"
 ---@param sprite Sprite
 ---@param layer integer
 local function replacePortrait(sprite, layer)
-    local IsVestige = Helpers.IsVestigeChallenge()
-    local IsGrudge = Helpers.IsGrudgeChallenge()
-    local path = IsVestige and VestigePath or IsGrudge and GrudgePath
+    local isVestige = Helpers.IsVestigeChallenge()
+    local isGrudge = Helpers.IsGrudgeChallenge()
+    local path = isVestige and VestigePath or isGrudge and GrudgePath
 
     if not path then return end
 
     sprite:ReplaceSpritesheet(layer, path, true)
 end
 
-mod:AddCallback(ModCallbacks.MC_POST_BOSS_INTRO_SHOW, function ()
+mod:AddCallback(ModCallbacks.MC_POST_BOSS_INTRO_SHOW, function()
     replacePortrait(RoomTransition:GetVersusScreenSprite(), 12)
 end)
 
@@ -153,7 +182,7 @@ mod:AddCallback(ModCallbacks.MC_POST_NIGHTMARE_SCENE_SHOW, function()
     replacePortrait(NightmareScene.GetBackgroundSprite(), 6)
 end)
 
-mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function ()
+mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function()
     if game:GetRoom():GetType() ~= RoomType.ROOM_DUNGEON then return end
 
     for _, player in ipairs(PlayerManager.GetPlayers()) do
@@ -164,7 +193,7 @@ mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function ()
 end)
 
 ---@param player EntityPlayer
-mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_RENDER, function (_, player)
+mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_RENDER, function(_, player)
     if not Player.IsAnyEdith(player) then return end
 
     player:ClearEntityFlags(EntityFlag.FLAG_SLIPPERY_PHYSICS)

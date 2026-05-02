@@ -3,10 +3,11 @@ local callbacks = mod.Enums.Callbacks
 local data = mod.DataHolder.GetEntityData
 
 ---@param player EntityPlayer
-local function FireBrimstoneRays(player)
+---@param isStomp boolean
+local function FireBrimstoneRays(player, isStomp)
 	if not player:HasCollectible(CollectibleType.COLLECTIBLE_BRIMSTONE) then return end
 
-	local totalRays = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and 6 or 4
+	local totalRays = isStomp and mod.Modules.PLAYER.PlayerHasBirthright(player) and 6 or 4
 	local shootDegrees = 360 / totalRays
 
 	for i = 1, totalRays do
@@ -17,8 +18,8 @@ local function FireBrimstoneRays(player)
 	end
 end
 
-mod:AddCallback(callbacks.PERFECT_PARRY, function(_, player) FireBrimstoneRays(player) end)
-mod:AddCallback(callbacks.OFFENSIVE_STOMP, function(_, player) FireBrimstoneRays(player) end)
+mod:AddCallback(callbacks.PERFECT_PARRY, function(_, player) FireBrimstoneRays(player, false) end)
+mod:AddCallback(callbacks.OFFENSIVE_STOMP, function(_, player) FireBrimstoneRays(player, true) end)
 
 ---@param laser EntityLaser
 mod:AddCallback(ModCallbacks.MC_POST_LASER_UPDATE, function(_, laser)

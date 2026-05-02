@@ -3,76 +3,94 @@ local enums = mod.Enums
 local items = enums.CollectibleType
 local Helpers = mod.Modules.HELPERS
 local Player = mod.Modules.PLAYER
+local SaveManager = mod.SaveManager
 local SulfuricFire = {}
+
+local SULFURIC = {
+    RADIUS_BASE = 100,
+    RADIUS_JUDAS = 150,
+    DAMAGE_SCALE = 0.175,
+    PUSH_FORCE = 20,
+    BRIMSTONE_DURATION = 150,
+    DAMAGE_BOOST_BASE = 2.5,
+    DAMAGE_BOOST_DUR = 120,
+    JUDAS_MULT = 1.5,
+    CAR_BATTERY_MULT = 1.25,
+    SHAKE_INTENSITY = 12,
+    IDENTIFIER = "EdithRebuilt_SulfuricFire",
+}
 
 ---@param player EntityPlayer
 ---@return boolean
 local function HasSulfuricFireDamageBoost(player)
-	return TempStatLib and TempStatLib:GetTempStat(player, "EdithRebuilt_SulfuricFire") ~= nil
+    return TempStatLib and TempStatLib:GetTempStat(player, SULFURIC.IDENTIFIER) ~= nil
 end
 
 ---@param player EntityPlayer
----@param flag UseFlag
----@return boolean?
-function SulfuricFire:UseSulfuricFire(_, _, player, flag)
-	if flag & UseFlag.USE_CARBATTERY == UseFlag.USE_CARBATTERY then return end
-	local ref = EntityRef(player)
-	local IsJudasWithBirthright = Player.IsJudasWithBirthright(player)
-	local HasCarBattery = player:HasCollectible(CollectibleType.COLLECTIBLE_CAR_BATTERY) 
-	local radius = IsJudasWithBirthright and 150 or 100 
-	local JudasMult = IsJudasWithBirthright and 1.5 or 1
-	local CarBatteryMult = HasCarBattery and 1.25 or 1
-	local baseDamagencrease = 2.5 * JudasMult * CarBatteryMult
-	local hitEnemies = 0
+---@return number, number
+local function GetSulfuricMultipliers(player)
+    local judasMult = Player.IsJudasWithBirthright(player) and SULFURIC.JUDAS_MULT or 1
+    local carBatteryMult = player:HasCollectible(CollectibleType.COLLECTIBLE_CAR_BATTERY) and SULFURIC.CAR_BATTERY_MULT or 1
+    return judasMult, carBatteryMult
+end
 
-	for _, enemy in pairs(Isaac.FindInRadius(player.Position, radius, EntityPartition.ENEMY)) do
-		hitEnemies = hitEnemies + 1
-
-		local damage = player.Damage + (enemy.MaxHitPoints * 0.175)
-		Helpers.SpawnFireJet(enemy.Position, damage * JudasMult * CarBatteryMult)
-		Helpers.TriggerPush(enemy, player, 20)
-		enemy:AddBrimstoneMark(ref, 150)		
-	end
-
-	if hitEnemies <= 0 then return end
-
-	local StatConfigs = {
-        Amount = baseDamagencrease * hitEnemies,
-        Duration = 120,
-        Stat = CacheFlag.CACHE_DAMAGE,
-        Identifier = "EdithRebuilt_SulfuricFire"
-    } --[[@as TempStatConfig]]
-
-
-	mod.TempStatsLib(function(player)
-        return mod.SaveManager.GetRunSave(player)
+---@param player EntityPlayer
+---@param totalDamageBoost number
+local function TriggerTempDamageUp(player, totalDamageBoost)
+	mod.TempStatsLib(function (player)
+        return SaveManager.GetRunSave(player)
     end)
+	
+    TempStatLib:AddTempStat(player, {
+        Amount = totalDamageBoost,
+        Duration = SULFURIC.DAMAGE_BOOST_DUR,
+        Stat = CacheFlag.CACHE_DAMAGE,
+        Identifier = SULFURIC.IDENTIFIER,
+    } --[[@as TempStatConfig]])
+end
 
-	TempStatLib:AddTempStat(player, StatConfigs)
+---@param player EntityPlayer
+---@param judasMult number
+---@param carBatteryMult number
+---@param ref EntityRef
+---@param hitEnemies Entity[]
+local function TriggerDamageEnemies(player, judasMult, carBatteryMult, ref, hitEnemies)
+    for _, enemy in pairs(hitEnemies) do
+        local damage = player.Damage + (enemy.MaxHitPoints * SULFURIC.DAMAGE_SCALE)
+        Helpers.SpawnFireJet(enemy.Position, damage * judasMult * carBatteryMult)
+        Helpers.TriggerPush(enemy, player, SULFURIC.PUSH_FORCE)
+        enemy:AddBrimstoneMark(ref, SULFURIC.BRIMSTONE_DURATION)
+    end
+end
 
-	enums.Utils.Game:ShakeScreen(12)
-	return true
+function SulfuricFire:UseSulfuricFire(_, _, player, flag)
+    if flag & UseFlag.USE_CARBATTERY == UseFlag.USE_CARBATTERY then return end
+
+    local judasMult, carBatteryMult = GetSulfuricMultipliers(player)
+    local radius = Player.IsJudasWithBirthright(player) and SULFURIC.RADIUS_JUDAS or SULFURIC.RADIUS_BASE
+    local hitEnemies = Isaac.FindInRadius(player.Position, radius, EntityPartition.ENEMY)
+
+    if #hitEnemies <= 0 then return end
+
+    TriggerDamageEnemies(player, judasMult, carBatteryMult, EntityRef(player), hitEnemies)
+    TriggerTempDamageUp(player, SULFURIC.DAMAGE_BOOST_BASE * judasMult * carBatteryMult * #hitEnemies)
+
+    enums.Utils.Game:ShakeScreen(SULFURIC.SHAKE_INTENSITY)
+    return true
 end
 mod:AddCallback(ModCallbacks.MC_USE_ITEM, SulfuricFire.UseSulfuricFire, items.COLLECTIBLE_SULFURIC_FIRE)
 
----@param tear EntityTear
 mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, function(_, tear)
-	local player = Helpers.GetPlayerFromTear(tear)
-
-	if not player then return end
-	if not HasSulfuricFireDamageBoost(player) then return end
-
-	tear.Color = Color(1, 0.2, 0.2, 1, 0, 0, 0, 0, 0, 0, 0.34)
+    local player = Helpers.GetPlayerFromTear(tear)
+    if not player then return end
+    if not HasSulfuricFireDamageBoost(player) then return end
+    tear.Color = Color(1, 0.2, 0.2, 1, 0, 0, 0, 0, 0, 0, 0.34)
 end)
 
----@param ent Entity
----@param source EntityRef
-mod:AddCallback(ModCallbacks.MC_POST_ENTITY_KILL, function (_, ent, source)
-	if not ent:ToNPC() then return end
-
-	local player = Helpers.GetPlayerFromRef(source)
-
-	if not player then return end
-	if not HasSulfuricFireDamageBoost(player) then return end
-	player:FireBrimstoneBall(ent.Position, Vector.Zero)
+mod:AddCallback(ModCallbacks.MC_POST_ENTITY_KILL, function(_, ent, source)
+    if not ent:ToNPC() then return end
+    local player = Helpers.GetPlayerFromRef(source)
+    if not player then return end
+    if not HasSulfuricFireDamageBoost(player) then return end
+    player:FireBrimstoneBall(ent.Position, Vector.Zero)
 end)

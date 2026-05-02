@@ -8,11 +8,7 @@ local data = {}
 function dataHolder.GetEntityData(entity)
     local ptrHash = GetPtrHash(entity)
 
-    if not data[ptrHash] then
-        data[ptrHash] = {}
-        local entityData = data[ptrHash]
-        entityData.Pointer = EntityPtr(entity)
-    end
+    data[ptrHash] = data[ptrHash] or {}
 
     return data[ptrHash]
 end

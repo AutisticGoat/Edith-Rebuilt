@@ -3,8 +3,7 @@ local mod = EdithRebuilt
 local enums = mod.Enums
 local sfx = enums.Utils.SFX
 local effects = enums.EdithStatusEffects
-local Helpers = require("resources.scripts.functions.Helpers")
-local ModRNG = require("resources.scripts.functions.RNG")
+local data = mod.DataHolder.GetEntityData
 local StatusEffects = {}
 local Effects = {
     Salt = {
@@ -77,60 +76,67 @@ local Flags = {
     HydrargyrumCurse = SEL.StatusFlag[Effects.HydrargyrumCurse.ID],
 }
 
+---@class SpiceEffect
+---@field ID string
+---@field Duration integer
+---@field Color Color
+---@field Cooldown integer
+
 local Spices = {
     [effects.SALTED] = {
         ID = effects.SALTED,
         Duration = 120,
         Color = Color(1, 1, 1, 1, 1.1, 1.1, 1.1),
         Cooldown = 180,
-    },
+    }, --[[@as SpiceEffect]]
     [effects.GARLIC] = {
         ID = effects.GARLIC,
         Duration = 120,
         Color = Effects.Garlic.Color,
         Cooldown = 120,
-    },
+    }, --[[@as SpiceEffect]]
     [effects.GINGER] = {
         ID = effects.GINGER,
         Duration = 120,
         Color = Effects.Ginger.Color,
         Cooldown = 120,
-    },
+    }, --[[@as SpiceEffect]]
     [effects.OREGANO] = {
         ID = effects.OREGANO,
         Duration = 150,
         Color = Effects.Oregano.Color,
         Cooldown = 150,
-    },
+    }, --[[@as SpiceEffect]]
     [effects.CUMIN] = {
         ID = effects.CUMIN,
         Duration = 90,
         Color = Effects.Cumin.Color,
         Cooldown = 90,
-    },
+    }, --[[@as SpiceEffect]]
     [effects.PEPPERED] = {
         ID = effects.PEPPERED,
         Duration = 150,
         Color = Effects.Pepper.Color,
         Cooldown = 180,
-    },
+    }, --[[@as SpiceEffect]]
     [effects.TURMERIC] = {
         ID = effects.TURMERIC,
         Duration = 120,
         Color = Effects.Turmeric.Color,
         Cooldown = 150,
-    },
+    }, --[[@as SpiceEffect]]
     [effects.CINNAMON] = {
         ID = effects.CINNAMON,
         Duration = 120,
         Color = Effects.Cinnamon.Color,
         Cooldown = 150,
-    },
-}
+    }, --[[@as SpiceEffect]]
+} 
 
 ---@param status EdithStatusEffects
+---@return SpiceEffect
 function StatusEffects.GetSpiceEffectData(status)
-    return Helpers.When(status, Spices)
+    return mod.Modules.HELPERS.When(status, Spices)
 end
 
 local numSpices = {
@@ -145,8 +151,9 @@ local numSpices = {
 }
 
 ---@param num integer
+---@return SpiceEffect
 function StatusEffects.GetSpiceEffect(num)
-    return Helpers.When(num, numSpices, Spices[effects.SALTED])
+    return mod.Modules.HELPERS.When(num, numSpices, Spices[effects.SALTED])
 end
 
 ---@param ent Entity
@@ -181,8 +188,18 @@ end
 ---@param rng RNG
 ---@return Entity
 function StatusEffects.SpawnSpicePuff(entity, rng)
-	sfx:Play(SoundEffect.SOUND_SUMMON_POOF, 1, 0, false, ModRNG.RandomFloat(rng, 0.8, 1.2))
+	sfx:Play(SoundEffect.SOUND_SUMMON_POOF, 1, 0, false, mod.Modules.RNG.RandomFloat(rng, 0.8, 1.2))
 	return Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.POOF02, 2, entity.Position, Vector.Zero, entity)
 end
+
+---@param ent EntityNPC
+SEL.Callbacks.AddCallback(SEL.Callbacks.ID.POST_REMOVE_ENTITY_STATUS_EFFECT, function (_, ent)
+    local npcData = data(ent)
+    local SaltType = npcData.SaltType
+
+    if not SaltType then return end
+
+    npcData.SaltType = mod.Modules.BIT_MASK.RemoveBitFlags(npcData.SaltType, SaltType)
+end, Flags.Salt)
 
 return StatusEffects

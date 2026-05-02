@@ -11,11 +11,10 @@ local JackOfClubs = {}
 ---@param player EntityPlayer
 function JackOfClubs:OnJackOfClubsUse(_, player)
     local rng = player:GetCardRNG(card.CARD_JACK_OF_CLUBS)
-    local enemyPos
     for _, enemy in pairs(Helpers.GetEnemies()) do
-        enemyPos = enemy.Position
+        local enemyPos = enemy.Position
 
-        if not ModRNG.RandomBoolean(rng, 0.6) then goto Break end
+        if not ModRNG.RandomBoolean(rng, 0.6) then goto continue end
         game:BombExplosionEffects(
             enemyPos,
             100,
@@ -27,7 +26,7 @@ function JackOfClubs:OnJackOfClubsUse(_, player)
             false,
             0
         )
-        if not ModRNG.RandomBoolean(rng) then goto Break end
+        if not ModRNG.RandomBoolean(rng) then goto continue end
         Isaac.Spawn(
             EntityType.ENTITY_PICKUP,
             PickupVariant.PICKUP_BOMB,
@@ -36,7 +35,7 @@ function JackOfClubs:OnJackOfClubsUse(_, player)
             Vector.Zero,
             nil
         )
-        ::Break::
+        ::continue::
     end
 end
 mod:AddCallback(ModCallbacks.MC_USE_CARD, JackOfClubs.OnJackOfClubsUse, card.CARD_JACK_OF_CLUBS)

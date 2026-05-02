@@ -3,8 +3,6 @@ local enums = mod.Enums
 local variants = enums.EffectVariant
 local game = enums.Utils.Game
 local level = enums.Utils.Level
-local helpers = require("resources.scripts.functions.Helpers")
-local Player = require("resources.scripts.functions.Player")
 local targetArrow = {}
 
 ---@param player EntityPlayer
@@ -50,7 +48,7 @@ end
 ---@param player EntityPlayer
 ---@param tainted? boolean
 function targetArrow.SpawnEdithTarget(player, tainted)
-	if helpers.IsDogmaAppearCutscene() then return end
+	if mod.Modules.HELPERS.IsDogmaAppearCutscene() then return end
 	if targetArrow.GetEdithTarget(player, tainted or false) then return end 
 
 	local Data = getTargetData(player)
@@ -108,10 +106,11 @@ end
 ---@param player EntityPlayer
 ---@param triggerDistance number
 function targetArrow.TargetDoorManager(effect, player, triggerDistance)
+	local Helpers = mod.Modules.HELPERS
 	local room = game:GetRoom()
 	local effectPos = effect.Position
 	local roomName = level:GetCurrentRoomDesc().Data.Name
-	local isTainted = Player.IsEdith(player, true) or false
+	local isTainted = mod.Modules.PLAYER.IsEdith(player, true) or false
 	local MirrorRoomCheck = roomName == "Mirror Room" and player:HasInstantDeathCurse()
 	local playerHasPhoto = (player:HasCollectible(CollectibleType.COLLECTIBLE_POLAROID) or player:HasCollectible(CollectibleType.COLLECTIBLE_NEGATIVE))
 
@@ -132,7 +131,7 @@ function targetArrow.TargetDoorManager(effect, player, triggerDistance)
 
 		if not (doorPos and effectPos:Distance(doorPos) <= triggerDistance) then 	
 			if player.Color.A < 1 then
-				helpers.ChangeColor(player, nil, nil, nil, 1)
+				Helpers.ChangeColor(player, nil, nil, nil, 1)
 			end
 			goto Break 
 		end
@@ -155,7 +154,7 @@ function targetArrow.TargetDoorManager(effect, player, triggerDistance)
 					end
 				else
 					if door:IsOpen() then
-						helpers.ChangeColor(player, 1, 1, 1, 1)
+						Helpers.ChangeColor(player, 1, 1, 1, 1)
 					end
 					door:TryUnlock(player)
 				end

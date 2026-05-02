@@ -299,6 +299,9 @@ v1.7.0a
 - Fixed Parry flash data not being properly initialized (looks like this also fixed a memory leak lol)
 
 v1.7.1
+- General:
+-- Fixed Spiked rocks damage negatir giving errors
+-- Updated ImGui.lua 
 - Tainted Edith:
 -- Movement: 
 --- Removed T. Edith's redirect reset
@@ -308,6 +311,13 @@ v1.7.1
 --- Removed Hopdash cooldown
 --- Removed Rock destroy charge limit
 --- Reduced Arrow speed when redirecting the hopdash
---- Reduced T. Edith's min invulnerability damage charge (30% > 20%)
+--- Reduced T. Edith's minimum invulnerability damage charge (30% > 20%)
 --- Increased Hopdash land damage
 --- Tweaked Hopdash land damage formula
+-- Parry:
+--- Increased Perfect Parry Radius (22 > 28)
+--- Increased Imprecise Parry i-frames (20 > 25)
+--- Removed failed parry hopdash charge reduction
+--- Increased imprecise parry hopdash bonus (5% > 15%)
+--- Increased perfect parry hopdash bonus (20% > 30%)
+--- Now Imprecise parries applies jump recoil to enemies

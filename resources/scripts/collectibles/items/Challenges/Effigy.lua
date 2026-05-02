@@ -4,52 +4,57 @@ local items = enums.CollectibleType
 local modules = mod.Modules
 local EdithMod = modules.EDITH
 local Helpers = modules.HELPERS
+local Jump = modules.JUMP
 local TargetArrow = modules.TARGET_ARROW
 local Land = modules.LAND
 local jumpData = { tag = "EdithRebuilt_EffigyJump" }
 
 ---@param player EntityPlayer
-mod:AddCallback(ModCallbacks.MC_USE_ITEM, function (_, _, _, player)
-    if JumpLib:GetData(player).Jumping then return end
-    EdithMod.InitEdithJump(player, jumpData.tag, true)
+---@param jumpParams EdithJumpStompParams
+local function SetEffigyStompParams(player, jumpParams)
+    jumpParams.Damage = 40 + player.Damage
+    jumpParams.Radius = 40
+    jumpParams.Knockback = 20
+end
+
+---@param player EntityPlayer
+local function TryEffigyDash(player)
+    if Jump.GetJumpFrame(player) then return end
+    EdithMod.EdithDash(player, TargetArrow.GetEdithTargetDirection(player), TargetArrow.GetEdithTargetDistance(player), 40 )
+end
+
+mod:AddCallback(ModCallbacks.MC_USE_ITEM, function(_, _, _, player)
+    if Jump.IsJumping(player) then return end
+    Jump.InitEdithJump(player, jumpData.tag, true)
 
     if not Helpers.GetNearestEnemy(player) then return end
     TargetArrow.SpawnEdithTarget(player, false)
 end, items.COLLECTIBLE_EFFIGY)
 
----@param player EntityPlayer
-mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, function (_, player)
-    local JumpParams = EdithMod.GetJumpStompParams(player)
+mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, function(_, player)
+    local jumpParams = EdithMod.GetJumpStompParams(player)
+    SetEffigyStompParams(player, jumpParams)
 
-    JumpParams.Damage = 40 + (player.Damage)
-    JumpParams.Radius = 40
-    JumpParams.Knockback = 20
-
-    Land.EdithStomp(player, JumpParams, true)
+    Land.EdithStomp(player, jumpParams, true)
     Land.LandFeedbackManager(player, Land.GetLandSoundTable(false, false), Color.Default, false)
-    Land.TriggerLandenemyJump(player, JumpParams.StompedEntities, JumpParams.Knockback, 3, 2)
+    Land.TriggerLandenemyJump(player, jumpParams.StompedEntities, jumpParams.Knockback, 3, 2)
 
     TargetArrow.RemoveEdithTarget(player, false)
-
     player:SetMinDamageCooldown(20)
 end, jumpData)
 
----@param player EntityPlayer
 mod:AddCallback(JumpLib.Callbacks.ENTITY_UPDATE_60, function(_, player)
-    local target = TargetArrow.GetEdithTarget(player, false)
-    local jumpInternalData = JumpLib.Internal:GetData(player)
-    local NearestEnemy = Helpers.GetNearestEnemy(player)
+    local nearestEnemy = Helpers.GetNearestEnemy(player)
+    if not nearestEnemy then return end
 
-    if not NearestEnemy then return end
+    local target = TargetArrow.GetEdithTarget(player, false)
     if not target then return end
 
-    target.Position = NearestEnemy.Position
+    target.Position = nearestEnemy.Position
 
-    if jumpInternalData.UpdateFrame and jumpInternalData.UpdateFrame > 6 then
-		EdithMod.EdithDash(player, TargetArrow.GetEdithTargetDirection(player), TargetArrow.GetEdithTargetDistance(player), 40)
-	end
+    TryEffigyDash(player)
 
-    if target and JumpLib:IsFalling(player) then
-		player.Position = target.Position
-	end
+    if JumpLib:IsFalling(player) then
+        player.Position = target.Position
+    end
 end, jumpData)

@@ -155,6 +155,7 @@ local Elements = {
 					HopParry = Prefixes.Separator .. "Tainted_Edith_Sounds_HopParry",
 					Cooldown = Prefixes.Separator .. "Tainted_Edith_Sounds_Cooldown"
 				},
+				-- I'll eventually add this
 				-- Gameplay = {
 				-- 	Inputs = Prefixes.Separator .. "TEdith_Gameplay_Inputs",
 				-- 	Training = Prefixes.Separator .. "TEdith_GameplayTraining"
@@ -450,15 +451,16 @@ local function CheckImGuiIntegrity()
 end
 
 local function AddTabBars()
-	ImGui.AddTabBar(Elements.Menu.Windows.Settings, Elements.Menu.TabBars.Settings)
+	if not isEdithUnlocked(false) then return end
 
-	if isEdithUnlocked(false) then
-		ImGui.AddTab(Elements.Menu.TabBars.Settings, Elements.Menu.Tabs.Edith.Main, "Edith")
-		if isEdithUnlocked(true) then
-			ImGui.AddTab(Elements.Menu.TabBars.Settings, Elements.Menu.Tabs.TEdith.Main, "Tainted Edith")
-		end
-		ImGui.AddTab(Elements.Menu.TabBars.Settings, Elements.Menu.Tabs.Misc.Main, "Misc")
+	ImGui.AddTabBar(Elements.Menu.Windows.Settings, Elements.Menu.TabBars.Settings)
+	ImGui.AddTab(Elements.Menu.TabBars.Settings, Elements.Menu.Tabs.Edith.Main, "Edith")
+
+	if isEdithUnlocked(true) then
+		ImGui.AddTab(Elements.Menu.TabBars.Settings, Elements.Menu.Tabs.TEdith.Main, "Tainted Edith")
 	end
+
+	ImGui.AddTab(Elements.Menu.TabBars.Settings, Elements.Menu.Tabs.Misc.Main, "Misc")
 end
 
 local function AddEdithOptions()
@@ -835,6 +837,8 @@ local function AddContributors()
 end
 
 local function AddProgressBars()
+	if not isEdithUnlocked(false) then return end
+
 	ImGui.AddProgressBar(Menu.Windows.Progress, Menu.ProgressBar.General, "General unlocks progress", 0)
 	ImGui.AddProgressBar(Menu.Windows.Progress, Menu.ProgressBar.Edith, "Edith unlocks progress", 0)
 
@@ -868,12 +872,9 @@ local function OptionsUpdate()
 	AddChangelogs()
 	UpdateImGuiData()
 
-	
-
 	RenderMenu = false
 end
 
-local totalAchs = {}
 local ModAchievements = {
 	Edith = {
 		achievements.ACHIEVEMENT_SALT_SHAKER,

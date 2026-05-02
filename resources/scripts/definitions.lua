@@ -5,6 +5,7 @@ local edithJumpTag = "edithRebuilt_EdithJump"
 local tedithJumpTag = "edithRebuilt_TaintedEdithJump"
 local tedithHopTag = "edithRebuilt_TaintedEdithHop"
 local edithHoodJumpTag = "edithRebuilt_EdithsHoodJump"
+local enemyJumpTag = "edithRebuilt_EnemyJump"
 
 EdithRebuilt.Enums = {
 	PlayerType = {
@@ -36,7 +37,6 @@ EdithRebuilt.Enums = {
 	TrinketType = {
 		TRINKET_GEODE = Isaac.GetTrinketIdByName("Geode"),
 		TRINKET_RUMBLING_PEBBLE = Isaac.GetTrinketIdByName("Rumbling Pebble"),
-		
 		TRINKET_PAPRIKA = Isaac.GetTrinketIdByName("Paprika"),
 		TRINKET_BURNT_SALT = Isaac.GetTrinketIdByName("Burnt Salt"),
 	},
@@ -174,6 +174,7 @@ EdithRebuilt.Enums = {
 		SAL = 1 << 2,
 		SALT_HEART = 1 << 3,
 		EDITHS_HOOD = 1 << 4,
+		SALT_ROCKS = 1 << 5,
 	},
 	---@enum ConfigDataTypes
 	ConfigDataTypes = {
@@ -194,7 +195,7 @@ EdithRebuilt.Enums = {
 		CINDER = "Cinder",
 		HYDRARGYRUM_CURSE = "HydrargyrumCurse"
 	},
-	Tables = {
+		Tables = {
 		OverrideActions = {
 			[ButtonAction.ACTION_LEFT] = 0,
 			[ButtonAction.ACTION_RIGHT] = 0,
@@ -215,30 +216,18 @@ EdithRebuilt.Enums = {
 			[1] = "_arrow",
 			[2] = "_grudge",
 		},
-		TargetSuffix = {
-			[1] = "",
-			[2] = "_trans",
-			[3] = "_rainbow",
-			[4] = "_lesbian",
-			[5] = "_bisexual",
-			[6] = "_gay",
-			[7] = "_ace",
-			[8] = "_enby",
-			[9] = "_Venezuela",
-			[10] = "_Chile",
-			[11] = "_Mexico",
-		},
-		TargetLineColorValues = {
-			[2] = {R = 245/255, G = 169/255, B = 184/255},
-			[3] = {R = 1, G = 0, B = 1},
-			[4] = {R = 1, G = 154/255, B = 86/255},
-			[5] = {R = 155/255, G = 79/255, B = 150/255},
-			[6] = {R = 123/255, G = 173/255, B = 226/255},
-			[7] = {R = 128/255, G = 0, B = 128/255},
-			[8] = {R = 154/255, G = 89/255, B = 207/255},
-			[9] = {R = 0, G = 36/255, B = 125/255},
-			[10] = {R = 213/255, G = 43/255, B = 30/255},
-			[11] = {R = 0, G = 104/255, B = 71/255},
+		TargetVisualParams = {
+			[1]  = { Suffix = "", LineColor = nil },
+			[2]  = { Suffix = "_trans", LineColor = {R = 245/255, G = 169/255, B = 184/255} },
+			[3]  = { Suffix = "_rainbow", LineColor = {R = 1, G = 0, B = 1 } },
+			[4]  = { Suffix = "_lesbian", LineColor = {R = 1, G = 154/255, B = 86/255 } },
+			[5]  = { Suffix = "_bisexual", LineColor = {R = 155/255, G = 79/255,  B = 150/255} },
+			[6]  = { Suffix = "_gay", LineColor = {R = 123/255, G = 173/255, B = 226/255} },
+			[7]  = { Suffix = "_ace", LineColor = {R = 128/255, G = 0, B = 128/255} },
+			[8]  = { Suffix = "_enby", LineColor = {R = 154/255, G = 89/255,  B = 207/255} },
+			[9]  = { Suffix = "_Venezuela", LineColor = {R = 0, G = 36/255, B = 125/255} },
+			[10] = { Suffix = "_Chile", LineColor = {R = 213/255, G = 43/255,  B = 30/255 } },
+			[11] = { Suffix = "_Mexico", LineColor = {R = 0, G = 104/255, B = 71/255 } },
 		},
 		FrameLimits = {
 			["Idle"] = 12,
@@ -277,11 +266,12 @@ EdithRebuilt.Enums = {
 			TEdithHop = tedithHopTag,
 			TEdithJump = tedithJumpTag,
 			EdithsHoodJump = edithHoodJumpTag,
+			EnemyJump = enemyJumpTag,
 		},
 		JumpFlags = {
 			EdithJump = (JumpLib.Flags.DISABLE_SHOOTING_INPUT | JumpLib.Flags.DISABLE_LASER_FOLLOW | JumpLib.Flags.DISABLE_BOMB_INPUT | JumpLib.Flags.FAMILIAR_FOLLOW_FOLLOWERS | JumpLib.Flags.FAMILIAR_FOLLOW_ORBITALS | JumpLib.Flags.FAMILIAR_FOLLOW_TEARCOPYING | JumpLib.Flags.NO_HURT_PITFALL),
 			TEdithHop = (JumpLib.Flags.COLLISION_GRID | JumpLib.Flags.COLLISION_ENTITY | JumpLib.Flags.OVERWRITABLE | JumpLib.Flags.DISABLE_COOL_BOMBS | JumpLib.Flags.IGNORE_CONFIG_OVERRIDE | JumpLib.Flags.FAMILIAR_FOLLOW_ORBITALS | JumpLib.Flags.DAMAGE_CUSTOM),
-			TEdithJump = (JumpLib.Flags.COLLISION_GRID | JumpLib.Flags.OVERWRITABLE | JumpLib.Flags.DISABLE_COOL_BOMBS | JumpLib.Flags.IGNORE_CONFIG_OVERRIDE | JumpLib.Flags.FAMILIAR_FOLLOW_ORBITALS),
+			TEdithJump = (JumpLib.Flags.COLLISION_GRID | JumpLib.Flags.OVERWRITABLE | JumpLib.Flags.DISABLE_COOL_BOMBS | JumpLib.Flags.IGNORE_CONFIG_OVERRIDE | JumpLib.Flags.FAMILIAR_FOLLOW_ORBITALS | JumpLib.Flags.DISABLE_BOMB_INPUT),
 		},
 		MovementBasedActives = {
 			[CollectibleType.COLLECTIBLE_SUPLEX] = true,
@@ -394,7 +384,7 @@ EdithRebuilt.Enums = {
 			[2] = {
 				SoundID = SoundEffect.SOUND_BEEP,
 				Pitch = 0.8
-			} 
+			}
 		},
 		RemoveTargetItems = {
 			[CollectibleType.COLLECTIBLE_ESAU_JR] = true,
@@ -418,6 +408,11 @@ EdithRebuilt.Enums = {
 			[10] = { Suffix = "_straight", Size = 1 },
 			[11] = { Suffix = "_CommanderVideo", Size = 1 },
 			[12] = { Suffix = "_italy", Size = 1 },
+		},
+		MortisBackdrop = {
+			MORGUE = 1,
+			MOIST = 2,
+			FLESH = 3,
 		}
 	},
 	Misc = {
@@ -436,6 +431,7 @@ EdithRebuilt.Enums = {
 		JumpReadyColor = Color(1, 1, 1, 1, 0.5, 0.5, 0.5),
 		PerfectParryRadius = 28,
 		ImpreciseParryRadius = 45,
+		BaseHopChargeAdder = 9,
 		TearParryRadius = 35,
 		BurntSaltColor = Color(0.3, 0.3, 0.3),
 		ChargeBarleftVector = Vector(-8, 10),

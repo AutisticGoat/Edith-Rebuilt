@@ -11,8 +11,8 @@ local function ParryRockwaves(player)
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_TERRA) then return end
 
     local hasBirthright = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT)
-    local totalRocks     = hasBirthright and 8 or 6
-    local totalRings     = hasBirthright and 2 or 1
+    local totalRocks = hasBirthright and 8 or 6
+    local totalRings = hasBirthright and 2 or 1
     local shockwaveDamage = (hasBirthright and player.Damage * 1.4 or player.Damage) / 2
 
     for ring = 1, totalRings do
