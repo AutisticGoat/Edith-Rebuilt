@@ -8,7 +8,6 @@ local StatusEffects = modules.STATUS_EFFECTS
 local Helpers = modules.HELPERS
 local Player = modules.PLAYER
 local BitMask = modules.BIT_MASK
-local SaltShakerSalts = saltTypes.SALT_SHAKER | saltTypes.SALT_SHAKER_JUDAS
 local data = mod.DataHolder.GetEntityData
 
 local ModCreeps = {
@@ -42,19 +41,6 @@ mod:AddCallback(ModCallbacks.MC_POST_EFFECT_INIT, function(_, effect)
     effect:GetSprite():Play("SmallBlood0" .. tostring(effect:GetDropRNG():RandomInt(1, 6)), true)
 end, EffectVariant.PLAYER_CREEP_RED)
 
-local function HandleSaltShakerPush(effect, player)
-    local effectData = data(effect)
-    effectData.SaltShakerCentralPos = data(player).SpawnCentralPosition --[[@as Vector]]
-    local pos = effectData.SaltShakerCentralPos
-    local capsule = Capsule(pos, Vector.One, 0, 70)
-
-    for _, entity in pairs(Isaac.FindInCapsule(capsule, EntityPartition.ENEMY)) do
-        if not Helpers.IsEnemy(entity) then goto continue end
-        Helpers.TriggerPushPos(effect, entity, entity.Position, pos, 6, 15, false)
-        ::continue::
-    end
-end
-
 local function ApplySaltToEntity(entity, spawnType, player)
     StatusEffects.SetStatusEffect(enums.EdithStatusEffects.SALTED, entity, SaltedTimes[spawnType] or 120, player)
 
@@ -71,14 +57,6 @@ local function SaltCreepUpdate(effect)
     local spawnType = effectData.SpawnType ---@cast spawnType SaltTypes
     if not spawnType then return end
 
-    local isSaltShakerSalt = BitMask.HasAnyBitFlags(spawnType, SaltShakerSalts)
-
-    if isSaltShakerSalt then
-        HandleSaltShakerPush(effect, player)
-    else
-        effectData.SaltShakerCentralPos = nil
-    end
-
     local isVestige = Helpers.IsVestigeChallenge()
 
     for _, entity in pairs(GetNearbyEnemies(effect)) do
@@ -86,6 +64,7 @@ local function SaltCreepUpdate(effect)
             entity:AddFear(EntityRef(player), 120)
         else
             ApplySaltToEntity(entity, spawnType, player)
+            Helpers.TriggerPush(entity, effect, 20)
         end
     end
 end

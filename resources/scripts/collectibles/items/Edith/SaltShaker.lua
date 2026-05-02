@@ -75,6 +75,14 @@ local function SpawnSaltCloud(player, rng)
     cloud:GetSprite().PlaybackSpeed = ModRNG.RandomFloat(rng, 1.4, 1.8)
 end 
 
+local function PushNearbyEnemies(player)
+    for _, enemy in ipairs(Isaac.FindInRadius(player.Position, 40, EntityPartition.ENEMY)) do 
+        if Helpers.IsEnemy(enemy) then
+            Helpers.TriggerPush(enemy, player, 50)
+        end
+    end
+end 
+
 ---@param rng RNG
 ---@param player EntityPlayer
 ---@param flag UseFlag
@@ -88,8 +96,8 @@ mod:AddCallback(ModCallbacks.MC_USE_ITEM, function(_, _, rng, player, flag)
     DespawnExistingSaltCreeps(player)
     SpawnSaltCloud(player, rng)
     SpawnSaltCircle(player, spawnType, color, hasCarBattery)
+    PushNearbyEnemies(player)
 
-    data(player).SpawnCentralPosition = player.Position
     sfx:Play(sounds.SOUND_SALT_SHAKER, 2, 0, false, ModRNG.RandomFloat(rng, 0.9, 1.1), 0)
     return true
 end, items.COLLECTIBLE_SALTSHAKER)
