@@ -41,8 +41,7 @@ function Trail.SpawnTEdithTrail(player)
     trail:AddEntityFlags(EntityFlag.FLAG_PERSISTENT)
 
 	local sprite = trail:GetSprite()
-	local blendMode = sprite:GetLayer(0):GetBlendMode()
-	blendMode:SetMode(BlendType.NORMAL)
+	sprite:GetLayer(0):GetBlendMode():SetMode(BlendType.NORMAL)
 
     sprite:ReplaceSpritesheet(0, misc.TrailPath .. trailParams.Suffix .. ".png", true)
 
@@ -72,7 +71,7 @@ mod:AddCallback(ModCallbacks.MC_POST_PLAYER_RENDER, Trail.TrailManagement)
 function Trail:OnTrailSpriteChange(trail)
     if not trail then return end
     if not SaveManager then return end
-    
+
     local Settings = SaveManager:GetSettingsSave()
     if not Settings then return end
 

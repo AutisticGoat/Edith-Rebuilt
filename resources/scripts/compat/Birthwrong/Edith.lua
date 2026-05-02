@@ -27,7 +27,7 @@ local waterAmount = 0
 ---@param player EntityPlayer
 mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function (_, player)
     local runSave = saveManager.GetRunSave(player)
-    
+
     if not runSave then return end
     if not Birthwrong.hasCharacterBW(player, enums.PlayerType.PLAYER_EDITH) then return end
 
@@ -36,7 +36,7 @@ mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function (_, player)
     if waterAmount < 1 then 
         waterAmount = math.min(waterAmount + 0.05, 1)
         game:GetRoom():SetWaterAmount(waterAmount)
-        return 
+        return
     end
 
     if Jump.IsJumping(player) then return end
