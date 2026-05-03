@@ -4,7 +4,6 @@ local items = enums.CollectibleType
 local Helpers = mod.Modules.HELPERS
 local Player = mod.Modules.PLAYER
 local SaveManager = mod.SaveManager
-local SulfuricFire = {}
 
 local SULFURIC = {
     RADIUS_BASE = 100,
@@ -63,7 +62,9 @@ local function TriggerDamageEnemies(player, judasMult, carBatteryMult, ref, hitE
     end
 end
 
-function SulfuricFire:UseSulfuricFire(_, _, player, flag)
+---@param player EntityPlayer
+---@param flag UseFlag
+mod:AddCallback(ModCallbacks.MC_USE_ITEM, function (_, _, _, player, flag)
     if flag & UseFlag.USE_CARBATTERY == UseFlag.USE_CARBATTERY then return end
 
     local judasMult, carBatteryMult = GetSulfuricMultipliers(player)
@@ -77,9 +78,9 @@ function SulfuricFire:UseSulfuricFire(_, _, player, flag)
 
     enums.Utils.Game:ShakeScreen(SULFURIC.SHAKE_INTENSITY)
     return true
-end
-mod:AddCallback(ModCallbacks.MC_USE_ITEM, SulfuricFire.UseSulfuricFire, items.COLLECTIBLE_SULFURIC_FIRE)
+end, items.COLLECTIBLE_SULFURIC_FIRE)
 
+---@param tear EntityTear
 mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, function(_, tear)
     local player = Helpers.GetPlayerFromTear(tear)
     if not player then return end
@@ -87,6 +88,8 @@ mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, function(_, tear)
     tear.Color = Color(1, 0.2, 0.2, 1, 0, 0, 0, 0, 0, 0, 0.34)
 end)
 
+---@param ent Entity
+---@param source EntityRef
 mod:AddCallback(ModCallbacks.MC_POST_ENTITY_KILL, function(_, ent, source)
     if not ent:ToNPC() then return end
     local player = Helpers.GetPlayerFromRef(source)
