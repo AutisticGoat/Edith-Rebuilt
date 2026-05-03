@@ -69,6 +69,8 @@ end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
 	if not Player.IsEdith(player, false) then return end
 
+	print(player:GetSprite().PlaybackSpeed)
+
 	if player:IsDead() or helpers.IsDSSMenuOpen() then
 		TargetArrow.RemoveEdithTarget(player)
 		return
@@ -138,8 +140,9 @@ end
 
 ---@param player EntityPlayer
 local function ManageVestigeLandAnim(player)
-    -- if not helpers.IsVestigeChallenge() then return end
+    if IsInTrapdoor(player) then return end
     player:PlayExtraAnimation("BigJumpFinish")
+	player:GetSprite().PlaybackSpeed = EdithMod.GetLandAnimationSpeed(player)
 end
 
 ---@param player EntityPlayer

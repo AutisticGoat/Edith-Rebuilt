@@ -66,6 +66,12 @@ function Edith.GetStompCooldown(speed)
 	return math.ceil(15 + (speed - 1) * -7.5)
 end
 
+---@param player EntityPlayer
+function Edith.GetLandAnimationSpeed(player)
+	local cooldown = Edith.GetStompCooldown(player.MoveSpeed)
+	return 15 / cooldown
+end
+
 ---@param jumpParams EdithJumpStompParams
 ---@param keyStomp boolean
 ---@param jumping boolean
