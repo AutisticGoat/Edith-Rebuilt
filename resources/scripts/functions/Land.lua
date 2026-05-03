@@ -192,7 +192,6 @@ local function PickupLandHandler(parent, ent)
 	local pickup = ent:ToPickup() ---@cast pickup EntityPickup
 
 	if not pickup then return end
-	if pickup.Variant == PickupVariant.PICKUP_COLLECTIBLE then return end
 
 	local room = game:GetRoom()
 	local IsPickedUp = pickup:GetSprite():IsPlaying("Collect")
