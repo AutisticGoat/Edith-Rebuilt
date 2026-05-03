@@ -18,8 +18,7 @@ local SaltEffect = {
     En = IDToMarkup(Collectibles.COLLECTIBLE_SALTSHAKER) .. "Any enemy that walks or pass over the salt will get salted#" .. IDToMarkup(Collectibles.COLLECTIBLE_SALTSHAKER) .. "Salted enemies will move slower and receive x1.2 times more damage", 
 }
 
-local iconSprite = Sprite()
-iconSprite:Load("gfx/EdithRebuiltIcon.anm2", true)
+local iconSprite = Sprite("gfx/EdithRebuiltIcon.anm2", true)
 EID:setModIndicatorName("Edith: Rebuilt")
 EID:addIcon("Edith Rebuilt Icon", "EdithRebuiltIcon", 0, 32, 32, -2, -3, iconSprite)
 EID:setModIndicatorIcon("Edith Rebuilt Icon")
