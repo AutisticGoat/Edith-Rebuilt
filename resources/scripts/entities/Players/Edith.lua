@@ -138,7 +138,7 @@ end
 
 ---@param player EntityPlayer
 local function ManageVestigeLandAnim(player)
-    if not helpers.IsVestigeChallenge() then return end
+    -- if not helpers.IsVestigeChallenge() then return end
     player:PlayExtraAnimation("BigJumpFinish")
 end
 

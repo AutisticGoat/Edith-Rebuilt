@@ -196,9 +196,9 @@ local function PickupLandHandler(parent, ent)
 	local room = game:GetRoom()
 	local IsPickedUp = pickup:GetSprite():IsPlaying("Collect")
 
-	if mod.Modules.HELPERS.IsVestigeChallenge() then
+	-- if mod.Modules.HELPERS.IsVestigeChallenge() then
 		Land.PickupManager(parent, pickup)
-	end
+	-- end
 
 	if IsPickedUp then return end
 
