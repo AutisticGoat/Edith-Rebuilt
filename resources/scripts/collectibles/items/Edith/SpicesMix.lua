@@ -34,10 +34,10 @@ local Descriptions = {
 local SpicesJar = Sprite("gfx/EdithRebuiltSpicesMixJar.anm2", true)
 SpicesJar:Play("Idle", true)
 
----@param name string
----@param desc string
-local function ShowSpiceInfo(name, desc)
-    game:GetHUD():ShowItemText(name, desc)
+---@param spice SpiceEffect
+local function ShowSpiceInfo(spice)
+    local spiceID = spice.ID
+    game:GetHUD():ShowItemText(spiceID, Descriptions[spiceID])
 end
 
 ---@param player EntityPlayer
@@ -45,7 +45,7 @@ end
 local function InitializeSpiceData(player, slot)
     if player:GetActiveItemDesc(slot).VarData ~= 0 then return end
     player:SetActiveVarData(SPICES.FIRST, slot)
-    ShowSpiceInfo(effects.SALTED, Descriptions[effects.SALTED])
+    ShowSpiceInfo(StsEffects.GetSpiceEffect(1))
 end
 
 ---@param player EntityPlayer
@@ -53,7 +53,7 @@ end
 local function HandleSpiceInfoDisplay(player, slot)
     if not Input.IsActionTriggered(ButtonAction.ACTION_MAP, player.ControllerIndex) then return end
     local spice = StsEffects.GetSpiceEffect(player:GetActiveItemDesc(slot).VarData)
-    ShowSpiceInfo(spice.ID, Descriptions[spice.ID])
+    ShowSpiceInfo(spice)
 end
 
 ---@param player EntityPlayer
@@ -66,7 +66,7 @@ local function HandleSpiceCycle(player, slot)
     player:SetActiveVarData(next, slot)
 
     local spice = StsEffects.GetSpiceEffect(next)
-    ShowSpiceInfo(spice.ID, Descriptions[spice.ID])
+    ShowSpiceInfo(spice)
 end
 
 ---@param player EntityPlayer
