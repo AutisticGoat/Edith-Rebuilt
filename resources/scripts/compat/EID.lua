@@ -1,12 +1,10 @@
 if not EID then return end
 local enums = EdithRebuilt.Enums
-
 local Collectibles = enums.CollectibleType
 local Trinkets = enums.TrinketType
 local Cards = enums.Card
 
 table.insert(EID.TextReplacementPairs, {"ERSalt","MierdaMierdamierdaMierda"})
-
 
 ---@param ID CollectibleType
 ---@return string
