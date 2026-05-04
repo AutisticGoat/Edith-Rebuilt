@@ -36,8 +36,82 @@ local function EdithTeleportManager(player)
 	TargetArrow.RemoveEdithTarget(player, false)
 end
 
+---@param player EntityPlayer
+mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, function(_, player)
+	local pData = data(player)
+	
+	pData.BaseSpriteScale = player.SpriteScale
+	pData.JumpCount = 0
+end)
+
+local FrameScale = {
+	[1] = Vector(1.1, 0.95),
+	[2] = Vector(1.15, 0.85),
+	[3] = Vector(1.15, 0.8),
+}
+
+---@param player EntityPlayer
+local function SetInitJumpState(player)
+	if not helpers.IsKeyStompPressed(player) then return end
+	if Jump.IsJumping(player) then return end
+	data(player).InitJump = true
+end
+
+---@param player EntityPlayer
+---@param pData table
+---@param jumpParams EdithJumpStompParams
+local function TriggerEdithJump(player, pData, jumpParams)
+	if pData.JumpCount ~= 0 then return end
+	pData.InitJump = false
+	player.SpriteScale = pData.BaseSpriteScale
+	EdithMod.JumpTriggerManager(player, helpers.IsVestigeChallenge())
+	jumpParams.CanJump = false
+end
+
+---@param pData table
+local function ManageStretchSquashCounter(pData)
+	pData.JumpCount = pData.JumpCount or 0
+	pData.JumpCount = math.min(pData.JumpCount + 1, 4)
+
+	if pData.JumpCount < 4 then return end
+	pData.JumpCount = 0
+end
+
+---@param player EntityPlayer
+---@param pData table
+local function ManageStretchSquashScale(player, pData)
+	local VecScale = FrameScale[pData.JumpCount]
+
+	if not VecScale then return end
+	player.SpriteScale = pData.BaseSpriteScale * VecScale
+end
+
+---@param player EntityPlayer
+local function ManageJumpStretchSquash(player)	
+	if Jump.IsJumping(player) then return end
+
+	local pData = data(player)
+
+	if not pData.InitJump then return end
+
+	local jumpParams = params(player)
+
+	if jumpParams.Cooldown ~= 0 then return end
+
+	ManageStretchSquashCounter(pData)
+	TriggerEdithJump(player, pData, jumpParams)
+	ManageStretchSquashScale(player, pData)
+end
+
+---@param player EntityPlayer
+mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(_, player)
+	data(player).BaseSpriteScale = player.SpriteScale
+end, CacheFlag.CACHE_SIZE)
+
+---@param player EntityPlayer
 local function HandleEdithInit(player)
 	if player.FrameCount ~= 0 then return end
+
 	Player.SetCustomSprite(player, false)
 	if helpers.GetConfigData(enums.ConfigDataTypes.EDITH).SaltShakerSlot == 1 then
 		player:RemoveCollectible(enums.CollectibleType.COLLECTIBLE_SALTSHAKER)
@@ -61,20 +135,26 @@ end
 local function HandleTargetManagers(player, target, state)
 	if not target then return end
 	EdithMod.TargetMovementManager(player, target, state.isMoving)
-	EdithMod.JumpTriggerManager(player, state.jumpParams, state.isKeyStompPressed, state.isJumping, state.isVestige)
 	EdithMod.HeadDirectionManager(player, state.isJumping, state.isShooting, state.isKeyStompPressed)
+end
+
+---@param player EntityPlayer
+local function TriggerEdithJumpAnim(player)
+	if not helpers.IsKeyStompPressed(player) then return end
+	if player:GetSprite():IsPlaying("JumpStart") then return end
+	if Jump.IsJumping(player) then return end
 end
 
 ---@param player EntityPlayer
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
 	if not Player.IsEdith(player, false) then return end
 
-	print(player:GetSprite().PlaybackSpeed)
-
 	if player:IsDead() or helpers.IsDSSMenuOpen() then
 		TargetArrow.RemoveEdithTarget(player)
 		return
 	end
+
+	data(player).BaseSpriteScale = data(player).BaseSpriteScale or Vector.One
 
 	local state = {
 		isMoving = TargetArrow.IsEdithTargetMoving(player),
@@ -88,9 +168,11 @@ mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
 		jumpParams = params(player),
 	} ---@cast state EdithUpdateState
 
+	SetInitJumpState(player)
+	ManageJumpStretchSquash(player)
 	HandleEdithInit(player)
 	HandleTargetSpawn(player, state)
-
+	TriggerEdithJumpAnim(player)
 	EdithTeleportManager(player)
 	EdithMod.CustomDropBehavior(player, state.jumpParams)
 	Player.ManageEdithWeapons(player)
@@ -139,13 +221,6 @@ local function ManageFeedback(player)
 end
 
 ---@param player EntityPlayer
-local function ManageLandAnimation(player)
-    if IsInTrapdoor(player) then return end
-    player:PlayExtraAnimation("BigJumpFinish")
-	player:GetSprite().PlaybackSpeed = math.max(EdithMod.GetLandAnimationSpeed(player), 1)
-end
-
----@param player EntityPlayer
 ---@param jumpParams EdithJumpStompParams
 local function ExecuteStompSequence(player, jumpParams)
     EdithMod.StompKnockbackManager(player, jumpParams)
@@ -186,8 +261,8 @@ mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, function(_, player, _, pitfall)
 
     local jumpParams = params(player)
 
+	Land.TriggerLandAnimation(player)
     ManageFeedback(player)
-    ManageLandAnimation(player)
     ExecuteStompSequence(player, jumpParams)
     ApplyLandingState(player, edithTarget)
     ResetPropulsionState(player)

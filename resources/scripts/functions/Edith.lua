@@ -66,12 +66,6 @@ function Edith.GetStompCooldown(speed)
 	return math.ceil(15 + (speed - 1) * -7.5)
 end
 
----@param player EntityPlayer
-function Edith.GetLandAnimationSpeed(player)
-	local cooldown = Edith.GetStompCooldown(player.MoveSpeed)
-	return 15 / cooldown
-end
-
 ---@param jumpParams EdithJumpStompParams
 ---@param keyStomp boolean
 ---@param jumping boolean
@@ -82,12 +76,8 @@ local function CanTriggerJump(jumpParams, keyStomp, jumping, vestige)
 end
 
 ---@param player EntityPlayer
----@param jumpParams EdithJumpStompParams
----@param keyStomp boolean
----@param jumping boolean
 ---@param vestige boolean
-function Edith.JumpTriggerManager(player, jumpParams, keyStomp, jumping, vestige)
-    if not CanTriggerJump(jumpParams, keyStomp, jumping, vestige) then return end
+function Edith.JumpTriggerManager(player, vestige)
 	mod.Modules.JUMP.InitEdithJump(player, JumpTags.EdithJump, vestige)
 end
 

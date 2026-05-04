@@ -721,6 +721,25 @@ function Land.TriggerLandenemyJump(player, enemyTable, knockback, height, speed)
 end
 
 ---@param player EntityPlayer
+local function GetLandAnimationSpeed(player)
+	local modules = mod.Modules
+	local isEdith = modules.PLAYER.IsEdith(player, false)
+	local cooldown = (
+		isEdith and 15 / mod.Modules.EDITH.GetStompCooldown(player.MoveSpeed) or
+		1
+	)
+	return cooldown
+end
+
+---@param player EntityPlayer
+function Land.TriggerLandAnimation(player)
+	if not mod.Modules.PLAYER.IsAnyEdith(player) then return end
+
+	player:PlayExtraAnimation("BigJumpFinish")
+	player:GetSprite().PlaybackSpeed = math.max(GetLandAnimationSpeed(player), 1)
+end	
+
+---@param player EntityPlayer
 function Land.TriggerFlatStoneMiniJumps(player, height, speed)
 	if not player:ToPlayer() then return end
 
