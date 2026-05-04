@@ -1,3 +1,4 @@
+---@diagnostic disable: undefined-field
 local mod = EdithRebuilt
 local modules = mod.Modules
 local effects = mod.Enums.EdithStatusEffects
@@ -24,10 +25,10 @@ end
 local function OnHydrargyrumCurseUpdate(npc)
     if not Status.EntHasStatusEffect(npc, effects.HYDRARGYRUM_CURSE) then return end
 
-    local data = Status.GetStatusEffectData(npc, effects.HYDRARGYRUM_CURSE)
-    if data.Countdown % 15 ~= 0 then return end
+    local statusData = Status.GetStatusEffectData(npc, effects.HYDRARGYRUM_CURSE)
+    if statusData.Countdown % 10 ~= 0 then return end
 
-    local player = Helpers.GetPlayerFromRef(data.Source) 
+    local player = Helpers.GetPlayerFromRef(statusData.Source)
     if not player then return end
 
     local rng = RNG(math.max(Random(), 1))
@@ -37,11 +38,20 @@ end
 
 ---@param player EntityPlayer
 ---@param tear EntityTear
----@param tearParams TearParams
-local function SpawnMercuryCreep(player, tear, tearParams)
-    local Creep = player:SpawnAquariusCreep(tearParams)
-    Creep.Position = tear.Position
+local function SpawnMercuryCreep(player, tear)
+    local Creep = Isaac.Spawn(
+        EntityType.ENTITY_EFFECT,
+        EffectVariant.PLAYER_CREEP_HOLYWATER_TRAIL,
+        0,
+        tear.Position,
+        Vector.Zero,
+        player
+    ):ToEffect() ---@cast Creep EntityEffect
+
     Creep.Color = CreepColor
+    Creep.SpriteScale = Creep.SpriteScale * 1.5
+    Creep:SetTearFlags(TearFlags.TEAR_NORMAL | TearFlags.TEAR_BURN)
+    Creep:Update()
 end
 
 ---@param tear EntityTear
@@ -49,16 +59,12 @@ mod:AddCallback(ModCallbacks.MC_POST_TEAR_DEATH, function(_, tear)
     if not data(tear).IsHydrargyrumTear then return end
 
     local player = Helpers.GetPlayerFromTear(tear)
-
     if not player then return end
 
     local weapon = player:GetWeapon(1)
     if not weapon then return end
 
-    local tearParams = player:GetTearHitParams(weapon:GetWeaponType())
-    tearParams.TearFlags = TearFlags.TEAR_NORMAL | TearFlags.TEAR_BURN
-
-    SpawnMercuryCreep(player, tear, tearParams)
+    SpawnMercuryCreep(player, tear)
 end)
 
 ---@param npc EntityNPC
