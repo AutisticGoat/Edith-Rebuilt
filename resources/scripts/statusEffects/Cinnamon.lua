@@ -34,22 +34,25 @@ local function SpawnCinnamonCloud(player, npc)
     data(DustCloud).CinnamonCloud = true
 end
 
----@param npc EntityNPC
-mod:AddCallback(ModCallbacks.MC_NPC_UPDATE, function(_, npc)
-    if not Status.EntHasStatusEffect(npc, effects.CINNAMON) then return end
-    
-    
-    local stsdata = Status.GetStatusEffectData(npc, effects.CINNAMON)
-    local player = Helpers.GetPlayerFromRef(stsdata.Source)
-    
-    if not player then return end
-    if stsdata.Countdown % 20 ~= 0 then return end
-    
-    SpawnCinnamonPuff(npc, rng)
-
+local function TriggerCoughPush(npc)
     for _, enemy in ipairs(Isaac.FindInRadius(npc.Position, 40, EntityPartition.ENEMY)) do
         Helpers.TriggerPush(enemy, npc, 30)
     end
+end
+
+---@param npc EntityNPC
+mod:AddCallback(ModCallbacks.MC_NPC_UPDATE, function(_, npc)
+    if not Status.EntHasStatusEffect(npc, effects.CINNAMON) then return end
+
+    local stsdata = Status.GetStatusEffectData(npc, effects.CINNAMON)
+    local player = Helpers.GetPlayerFromRef(stsdata.Source)
+
+    if not player then return end
+    if stsdata.Countdown % 20 ~= 0 then return end
+
+    SpawnCinnamonPuff(npc, rng)
+    SpawnCinnamonCloud(player, npc)
+    TriggerCoughPush(npc)
 end)
 
 ---@param effect EntityEffect
