@@ -66,7 +66,7 @@ end)
 function RumblingPebble:ShootTear(tear, _, grid)
 	if not grid:ToRock() then return end
 	if not data(tear).IsPebbleTear then return end
-		
+
 	grid:DestroyWithSource(false, EntityRef(Helpers.GetPlayerFromTear(tear)))
 end
 mod:AddCallback(ModCallbacks.MC_PRE_TEAR_GRID_COLLISION, RumblingPebble.ShootTear)
