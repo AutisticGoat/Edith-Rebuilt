@@ -1,5 +1,5 @@
 local mod = EdithRebuilt
-local enums = mod.Enums 
+local enums = mod.Enums
 local card = enums.Card
 local sounds = enums.SoundEffect
 local utils = enums.Utils
@@ -8,13 +8,13 @@ local rng = utils.RNG
 local jumpFlags = enums.Tables.JumpFlags
 local modules = mod.Modules
 local Helpers = modules.HELPERS
+local Creep = modules.CREEPS
 local Land = modules.LAND
 local ModRNG = modules.RNG
 local data = mod.DataHolder.GetEntityData
 local damageBase = 13.5
-local SoulOfEdith = {}
 
-function SoulOfEdith.InitEdithJump(player)
+local function InitEdithJump(player)
 	local soundeffect = player.CanFly and SoundEffect.SOUND_ANGEL_WING or SoundEffect.SOUND_SHELLGAME
 	local DustCloud = Isaac.Spawn(
 		EntityType.ENTITY_EFFECT,
@@ -39,12 +39,10 @@ function SoulOfEdith.InitEdithJump(player)
 	JumpLib:Jump(player, config)
 end
 
-function SoulOfEdith:OnUse(_, player)
-    SoulOfEdith.InitEdithJump(player)
-
+mod:AddCallback(ModCallbacks.MC_PRE_USE_CARD, function (_, _, player)
+	InitEdithJump(player)
     sfx:Play(sounds.SOUND_SOUL_OF_EDITH)
-end
-mod:AddCallback(ModCallbacks.MC_PRE_USE_CARD, SoulOfEdith.OnUse, card.CARD_SOUL_EDITH)
+end, card.CARD_SOUL_EDITH)
 
 local SoundPick = {
 	[1] = SoundEffect.SOUND_STONE_IMPACT, ---@type SoundEffect
@@ -53,23 +51,9 @@ local SoundPick = {
 	[4] = sounds.SOUND_VINE_BOOM,
 }
 
----@param player EntityPlayer
-function SoulOfEdith:ParryJump(player)
-	local rawFormula = ((damageBase + player.Damage) / 1.5) 
-    local playerData = data(player)
-
-	for _, ent in pairs(Isaac.FindInCapsule(Capsule(player.Position, Vector.One, 0, 50), EntityPartition.ENEMY)) do
-		ent:TakeDamage(rawFormula, 0, EntityRef(player), 0)
-		Helpers.TriggerPush(ent, player, 20)
-	end
-    
-    playerData.IsSoulOfEdithJump = true
-	Land.LandFeedbackManager(player, SoundPick, Color(1, 1, 1, 0))
-    playerData.IsSoulOfEdithJump = false
-
-	local tear 
-    for _ = 1, rng:RandomInt(18, 36) do 
-        tear = Isaac.Spawn(EntityType.ENTITY_TEAR, TearVariant.ROCK, 0, Isaac.GetRandomPosition(), Vector.Zero, player):ToTear()
+local function SpawnSaltTears(player)
+	for _ = 1, rng:RandomInt(18, 36) do 
+        local tear = Isaac.Spawn(EntityType.ENTITY_TEAR, TearVariant.ROCK, 0, Isaac.GetRandomPosition(), Vector.Zero, player):ToTear()
 		if not tear then return end
 		tear.CollisionDamage = tear.CollisionDamage * 1.2
         tear.Height = -600 * ModRNG.RandomFloat(rng, 0.9, 1.1)
@@ -80,4 +64,26 @@ function SoulOfEdith:ParryJump(player)
 		data(tear).IsSoulOfEdithTear = true
     end
 end
-mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, SoulOfEdith.ParryJump, { tag = "SoulOfEdithJump" })
+
+---@param player EntityPlayer
+mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, function (_, player)
+	local rawFormula = ((damageBase + player.Damage) / 1.5)
+    local playerData = data(player)
+
+	for _, ent in pairs(Isaac.FindInCapsule(Capsule(player.Position, Vector.One, 0, 50), EntityPartition.ENEMY)) do
+		ent:TakeDamage(rawFormula, 0, EntityRef(player), 0)
+		Helpers.TriggerPush(ent, player, 20)
+	end
+
+    playerData.IsSoulOfEdithJump = true
+	Land.LandFeedbackManager(player, SoundPick, Color(1, 1, 1, 0))
+    playerData.IsSoulOfEdithJump = false
+
+    SpawnSaltTears(player)
+end, { tag = "SoulOfEdithJump" })
+
+mod:AddCallback(ModCallbacks.MC_POST_TEAR_DEATH, function(_, tear)
+	if not data(tear).IsSoulOfEdithTear then return end
+
+	Creep.SpawnSaltCreep(tear, tear.Position, 3, 5, 5, 3, enums.SaltTypes.SALT_SHAKER, false, false)
+end)
