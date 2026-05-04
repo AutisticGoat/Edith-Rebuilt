@@ -16,7 +16,7 @@ local Helpers = modules.HELPERS
 local Creeps = modules.CREEPS
 local degree = 360 / SaltQuantity
 local data = mod.DataHolder.GetEntityData
-local SaltShaker = {}
+local flags = saltTypes.SALT_SHAKER | saltTypes.SALT_SHAKER_JUDAS
 
 local SALT_SHAKER = {
     CREEP_DURATION_BASE = 6,
@@ -101,17 +101,14 @@ end, items.COLLECTIBLE_SALTSHAKER)
 
 ---@param npc EntityNPC
 ---@param source EntityRef
-function SaltShaker:OnSaltedDeath(npc, source)
+mod:AddCallback(PRE_NPC_KILL.ID, function (_, npc, source)
     if not StsEffects.EntHasStatusEffect(npc, enums.EdithStatusEffects.SALTED) then return end
 
     local player = Helpers.GetPlayerFromRef(source)
     if not player then return end
-
-    local saltedType = data(npc).SaltType ---@cast saltedType SaltTypes
-    if not Helpers.When(saltedType, SALT_SHAKER.TYPES, false) then return end
+    if not BitMask.HasBitFlags(data(npc).SaltType, flags --[[@as BitSet128]]) then return end
 
     local saltParams = GetSaltShakerParams(player)
     local spawnType, color = saltParams.SaltType, saltParams.Color
     SpawnSaltShakerCreep(player, npc.Position, 5, spawnType, color)
-end
-mod:AddCallback(PRE_NPC_KILL.ID, SaltShaker.OnSaltedDeath)
+end)
