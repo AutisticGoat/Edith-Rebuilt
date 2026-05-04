@@ -208,5 +208,4 @@ SEL.Callbacks.AddCallback(StatusEffectLibrary.Callbacks.ID.PRE_ADD_ENTITY_STATUS
     npcData.SaltType = npcData.SaltType or 0
 end, Flags.Salt)
 
-
 return StatusEffects
