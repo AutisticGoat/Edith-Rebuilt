@@ -139,10 +139,10 @@ local function ManageFeedback(player)
 end
 
 ---@param player EntityPlayer
-local function ManageVestigeLandAnim(player)
+local function ManageLandAnimation(player)
     if IsInTrapdoor(player) then return end
     player:PlayExtraAnimation("BigJumpFinish")
-	player:GetSprite().PlaybackSpeed = EdithMod.GetLandAnimationSpeed(player)
+	player:GetSprite().PlaybackSpeed = math.max(EdithMod.GetLandAnimationSpeed(player), 1)
 end
 
 ---@param player EntityPlayer
@@ -187,7 +187,7 @@ mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, function(_, player, _, pitfall)
     local jumpParams = params(player)
 
     ManageFeedback(player)
-    ManageVestigeLandAnim(player)
+    ManageLandAnimation(player)
     ExecuteStompSequence(player, jumpParams)
     ApplyLandingState(player, edithTarget)
     ResetPropulsionState(player)
