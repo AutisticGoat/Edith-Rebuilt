@@ -8,7 +8,6 @@ local modules = mod.Modules
 local Helpers = modules.HELPERS
 local EdithMod = modules.EDITH
 local Player = modules.PLAYER
-local ChunkOfBasalt = {}
 local data = mod.DataHolder.GetEntityData
 
 local CHUNK_OF_BASALT = {
@@ -53,7 +52,7 @@ local function CreateAfterimages(player, playerData)
 end
 
 ---@param player EntityPlayer
-function ChunkOfBasalt:TriggerBasaltDash(player)
+mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function (_, player)
     if not player:HasCollectible(items.COLLECTIBLE_CHUNK_OF_BASALT) then return end
     local playerData = data(player)
 
@@ -62,8 +61,7 @@ function ChunkOfBasalt:TriggerBasaltDash(player)
     ResetBasaltDash(player, playerData)
     CreateAfterimages(player, playerData)
     InitBasaltDash(player, playerData)
-end
-mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, ChunkOfBasalt.TriggerBasaltDash)
+end)
 
 ---@param playerData table
 local function ManageCooldownDowncount(playerData)
@@ -144,8 +142,8 @@ end
 ---@param player EntityPlayer
 ---@param collider Entity
 ---@return boolean?
-function ChunkOfBasalt:OnCollidingWithEnemy(player, collider)
-    if not Helpers.IsEnemy(collider) then return end
+mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_COLLISION, function (_, player, collider)
+            if not Helpers.IsEnemy(collider) then return end
     if not player:HasCollectible(items.COLLECTIBLE_CHUNK_OF_BASALT) then return end
     if not data(player).IsBasaltDash then return end
 
@@ -153,8 +151,7 @@ function ChunkOfBasalt:OnCollidingWithEnemy(player, collider)
     SpawnShockwaves(player)
 
     player:SetMinDamageCooldown(30)
-end
-mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_COLLISION, ChunkOfBasalt.OnCollidingWithEnemy)
+end)
 
 mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG, function(_, player)
     local playerData = data(player)
