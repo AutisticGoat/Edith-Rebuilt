@@ -202,4 +202,11 @@ SEL.Callbacks.AddCallback(SEL.Callbacks.ID.POST_REMOVE_ENTITY_STATUS_EFFECT, fun
     npcData.SaltType = mod.Modules.BIT_MASK.RemoveBitFlags(npcData.SaltType, SaltType)
 end, Flags.Salt)
 
+---@param ent EntityNPC
+SEL.Callbacks.AddCallback(StatusEffectLibrary.Callbacks.ID.PRE_ADD_ENTITY_STATUS_EFFECT, function (_, ent)
+    local npcData = data(ent)
+    npcData.SaltType = npcData.SaltType or 0
+end, Flags.Salt)
+
+
 return StatusEffects
