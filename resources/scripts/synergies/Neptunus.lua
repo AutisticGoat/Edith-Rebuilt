@@ -29,8 +29,8 @@ local function SpawnWaterCreep(player, chargePercent, damageMult, durationMult)
     ):ToEffect() ---@cast water EntityEffect
 
     water.CollisionDamage = (NEPTUNUS.BASE_DAMAGE * damageMult) * chargePercent
-    water.Size =  water.Size * (NEPTUNUS.BASE_SIZE * chargePercent)
-    water.SpriteScale =  water.SpriteScale * water.Size
+    water.Size = water.Size * (NEPTUNUS.BASE_SIZE * chargePercent)
+    water.SpriteScale = water.SpriteScale * water.Size
     water:SetTimeout(math.ceil((NEPTUNUS.BASE_DURATION * durationMult) * chargePercent))
     water:Update()
 end
