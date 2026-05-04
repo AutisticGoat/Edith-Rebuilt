@@ -25,8 +25,3 @@ end)
 mod:AddCallback(Callbacks.PERFECT_PARRY, function (_, player, _, hopParryParams)
     
 end)
-
-
-mod:AddCallback(ModCallbacks.MC_EVALUATE_CUSTOM_CACHE, function (_, player, cache)
-    print(cache)
-end)
