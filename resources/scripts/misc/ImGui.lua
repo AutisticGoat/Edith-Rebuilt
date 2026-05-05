@@ -377,7 +377,9 @@ local function UpdateImGuiData()
 		ImGui.UpdateData(option, ImGuiData.Value, newValue)
 	end
 
-	ImGui.UpdateData(MiscOptions.CustomActionKey, ImGuiData.Value, MiscData.CustomActionKey)
+	if ImGui.ElementExists(MiscOptions.CustomActionKey) then
+		ImGui.UpdateData(MiscOptions.CustomActionKey, ImGuiData.Value, MiscData.CustomActionKey)
+	end
 end
 
 local function ResetSaveData(isTainted)
@@ -441,8 +443,8 @@ local function recorrerTablaImGui(tabla, prefijo)
         end
     end
 end
-recorrerTablaImGui(Elements)
 
+recorrerTablaImGui(Elements)
 local function CheckImGuiIntegrity()
 	for _, ID in pairs(elementTab) do
 		if not ImGui.ElementExists(ID) then return false end
@@ -464,6 +466,8 @@ local function AddTabBars()
 end
 
 local function AddEdithOptions()
+	if not isEdithUnlocked(false) then return end
+
 	local EdithTabBar = Elements.Menu.TabBars.Edith
 	local EdithTab = Elements.Menu.Tabs.Edith.Main
 	local EdithVisuals = Elements.Menu.Tabs.Edith.Visuals
@@ -586,6 +590,7 @@ end
 
 local function AddTaintedEdithOptions()
 	if not isEdithUnlocked(true) then return end
+
 	local TEdithTabBar = Elements.Menu.TabBars.TEdith
 	local TEdithTab = Elements.Menu.Tabs.TEdith.Main
 	local TEdithVisuals = Elements.Menu.Tabs.TEdith.Visuals
@@ -730,6 +735,8 @@ local function AddTaintedEdithOptions()
 end
 
 local function AddMiscOptions()
+	if not isEdithUnlocked(false) then return end
+
 	local MiscTab = Menu.Tabs.Misc.Main
 	local MiscOptions = Options.Misc
 	local Separator = Menu.Separator.Misc
