@@ -316,7 +316,7 @@ local function UpdateImGuiData()
 
 		local targetColor = EdithData.TargetColor
 
-		if targetColor then
+		if ImGui.ElementExists(EdithOptions.Visuals.TargetColor) then
 			ImGui.UpdateData(EdithOptions.Visuals.TargetColor, ImGuiData.ColorValues, 
 			{
 				targetColor.Red,
@@ -351,30 +351,40 @@ local function UpdateImGuiData()
 		local trailColor = TEdithData.TrailColor
 		local ParryFlashColor = TEdithData.ParryFlashColor
 
-		ImGui.UpdateData(TEdithOptions.Visuals.ArrowColor, ImGuiData.ColorValues, 
-		{
-			arrowcolor.Red,
-			arrowcolor.Green,
-			arrowcolor.Blue,
-		})
-		ImGui.UpdateData(TEdithOptions.Visuals.TrailColor, ImGuiData.ColorValues, 
-		{
-			trailColor.Red,
-			trailColor.Green,
-			trailColor.Blue,
-			
-		})
-		ImGui.UpdateData(TEdithOptions.Visuals.ParryFlashColor, ImGuiData.ColorValues, 
-		{
-			ParryFlashColor.r,
-			ParryFlashColor.g,
-			ParryFlashColor.b,
-			ParryFlashColor.a,
-		})
+		if ImGui.ElementExists(TEdithOptions.Visuals.ArrowColor) then
+			ImGui.UpdateData(TEdithOptions.Visuals.ArrowColor, ImGuiData.ColorValues, 
+			{
+				arrowcolor.Red,
+				arrowcolor.Green,
+				arrowcolor.Blue,
+			})
+		end
+
+		if ImGui.ElementExists(TEdithOptions.Visuals.TrailColor) then
+			ImGui.UpdateData(TEdithOptions.Visuals.TrailColor, ImGuiData.ColorValues, 
+			{
+				trailColor.Red,
+				trailColor.Green,
+				trailColor.Blue,
+				
+			})
+		end
+
+		if ImGui.ElementExists(TEdithOptions.Visuals.ParryFlashColor) then
+			ImGui.UpdateData(TEdithOptions.Visuals.ParryFlashColor, ImGuiData.ColorValues, 
+			{
+				ParryFlashColor.r,
+				ParryFlashColor.g,
+				ParryFlashColor.b,
+				ParryFlashColor.a,
+			})
+		end
 	end
 
 	for option, newValue in pairs(optionsData) do
-		ImGui.UpdateData(option, ImGuiData.Value, newValue)
+		if ImGui.ElementExists(option) then
+			ImGui.UpdateData(option, ImGuiData.Value, newValue)
+		end
 	end
 
 	if ImGui.ElementExists(MiscOptions.CustomActionKey) then
@@ -992,7 +1002,7 @@ local function InitSaveData()
 	EdithData.TargetDesign = EdithData.TargetDesign or 1
 	EdithData.DisableSaltGibs = EdithData.DisableSaltGibs or false
 	EdithData.RGBMode = EdithData.RGBMode or false
-	EdithData.RGBSpeed = EdithData.RGBSpeed or 0.5
+	EdithData.RGBSpeed = EdithData.RGBSpeed or 0.005
 	EdithData.TargetLine = EdithData.TargetLine or false
 	EdithData.DefensiveStompWindow = EdithData.DefensiveStompWindow or 18
 	EdithData.SaltShakerSlot = EdithData.SaltShakerSlot or 0 
