@@ -173,9 +173,8 @@ function Edith.DashItemBehavior(player)
 end
 
 ---@param player EntityPlayer
----@param jumpIntData InternalJumpData
 ---@param jumpParams EdithJumpStompParams
-function Edith.DefensiveStompManager(player, jumpIntData, jumpParams)
+function Edith.DefensiveStompManager(player, jumpParams)
 	local modules = mod.Modules
 	local Helpers = modules.HELPERS
 	local config = Helpers.GetConfigData("EdithData") ---@cast config EdithData
@@ -183,7 +182,7 @@ function Edith.DefensiveStompManager(player, jumpIntData, jumpParams)
 	if not config then return end
 	if Helpers.IsVestigeChallenge() then return end
 	if not Helpers.IsKeyStompPressed(player) then return end
-	if jumpIntData.UpdateFrame ~= config.DefensiveStompWindow then return end
+	if mod.Modules.JUMP.GetJumpFrame(player) ~= config.DefensiveStompWindow then return end
 
 	jumpParams.IsDefensiveStomp = true
 
