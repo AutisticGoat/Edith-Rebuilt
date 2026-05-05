@@ -83,6 +83,9 @@ local function PushNearbyEnemies(player)
     end
 end
 
+---@param rng RNG
+---@param player EntityPlayer
+---@param flag UseFlag
 mod:AddCallback(ModCallbacks.MC_USE_ITEM, function(_, _, rng, player, flag)
     if BitMask.HasBitFlags(flag, UseFlag.USE_CARBATTERY --[[@as BitSet128]]) then return end
 
