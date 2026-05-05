@@ -388,7 +388,7 @@ local function UpdateImGuiData()
 	end
 
 	if ImGui.ElementExists(MiscOptions.CustomActionKey) then
-		ImGui.UpdateData(MiscOptions.CustomActionKey, ImGuiData.Value, MiscData.CustomActionKey)
+		ImGui.UpdateData(MiscOptions.CustomActionKey, ImGuiData.Value, MiscData.CustomActionKey or Keyboard.KEY_Z)
 	end
 end
 
@@ -758,7 +758,7 @@ local function AddMiscOptions()
 		function(ID)
 			MiscData.CustomActionKey = ID
 		end, 
-	MiscData.CustomActionKey or Keyboard.KEY_Z)
+	Keyboard.KEY_Z)
 
 	ImGui.AddElement(MiscTab, Separator.ResetData, ImGuiElement.SeparatorText, "Reset Data")
 	ImGui.AddButton(MiscTab, MiscOptions.ResetEdithData, "Reset Edith Settings", 
