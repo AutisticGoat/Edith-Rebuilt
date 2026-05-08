@@ -5,15 +5,36 @@ local items = enums.CollectibleType
 local modules = mod.Modules
 local ModRNG = modules.RNG
 local Helpers = modules.HELPERS
-local plyMan = PlayerManager
+local Maths = modules.MATHS
 
 local RockRewards = {
-    { weight = 70, Variant = PickupVariant.PICKUP_COIN, SubType = CoinSubType.COIN_PENNY },
+    { weight = 40, Variant = PickupVariant.PICKUP_COIN, SubType = CoinSubType.COIN_PENNY },
+    { weight = 25, Variant = PickupVariant.PICKUP_COIN, SubType = CoinSubType.COIN_DOUBLEPACK },
     { weight = 15, Variant = PickupVariant.PICKUP_COIN, SubType = CoinSubType.COIN_NICKEL },
     { weight = 10, Variant = PickupVariant.PICKUP_COIN, SubType = CoinSubType.COIN_DIME },
+    { weight = 5, Variant = PickupVariant.PICKUP_COIN, SubType = CoinSubType.COIN_LUCKYPENNY },
     { weight = 4, Variant = PickupVariant.PICKUP_COLLECTIBLE, SubType = CollectibleType.COLLECTIBLE_QUARTER },
     { weight = 1, Variant = PickupVariant.PICKUP_COLLECTIBLE, SubType = CollectibleType.COLLECTIBLE_DOLLAR },
 }
+
+---@param player EntityPlayer
+local function GetChanceToShootRock(player)
+    local luck = player.Luck
+    local coins = player:GetNumCoins()
+    local formula = ((coins + math.max(luck * 5, 0)) + 10) / 100
+
+    return Maths.Clamp(formula, 0, 0.75)
+end
+
+---@param player EntityPlayer
+---@return number
+local function GetRockRewardChance(player)
+    local luck = player.Luck
+    local coins = player:GetNumCoins()
+    local formula = (((coins * 2.5) + math.max(luck * 0.5, 0)) - 3) / 100
+
+    return Maths.Clamp(formula, 0, 0.5)
+end
 
 local function BuildCumulativeTable(rewards)
     local sorted = {}
@@ -42,24 +63,6 @@ local function GetRandomReward(rng)
     end
 end
 
----@return { luck: number, coins: number, rng: RNG }
-local function GetCollectivePlayerStats()
-    local stats = { luck = 0, coins = 0, rng = nil }
-    for _, player in ipairs(plyMan.GetPlayers()) do
-        stats.luck  = stats.luck + player.Luck
-        stats.coins = stats.coins + player:GetNumCoins()
-        stats.rng   = stats.rng or player:GetCollectibleRNG(items.COLLECTIBLE_GILDED_STONE)
-    end
-    return stats
-end
-
----@param coins number
----@param luck number
----@return number
-local function GetRockRewardChance(coins, luck)
-    return ((coins / 2) + (math.min(luck, 1) - 1)) / 100
-end
-
 ---@param reward table
 ---@param rng RNG
 ---@return Vector
@@ -74,19 +77,24 @@ mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, function(_, tear)
     if not player:HasCollectible(items.COLLECTIBLE_GILDED_STONE) then return end
 
     local rng = player:GetCollectibleRNG(items.COLLECTIBLE_GILDED_STONE)
-    if not ModRNG.RandomBoolean(rng, player:GetNumCoins() / 100) then return end
+    if not ModRNG.RandomBoolean(rng, GetChanceToShootRock(player)) then return end
 
     Helpers.TurnTearToTerraTear(tear, rng)
 end)
 
 ---@param rock GridEntityRock
-mod:AddCallback(ModCallbacks.MC_POST_GRID_ROCK_DESTROY, function(_, rock)
-	if not plyMan.AnyoneHasCollectible(items.COLLECTIBLE_GILDED_STONE) then return end
+---@param source EntityRef
+mod:AddCallback(ModCallbacks.MC_POST_GRID_ROCK_DESTROY, function(_, rock, _, _, source)
+	local player = Helpers.GetPlayerFromRef(source)
 
-    local stats = GetCollectivePlayerStats()
-    if not stats.rng then return end
-    if not ModRNG.RandomBoolean(stats.rng, GetRockRewardChance(stats.coins, stats.luck)) then return end
+    if not player then return end
+    if not player:HasCollectible(items.COLLECTIBLE_GILDED_STONE) then return end
 
-    local reward = GetRandomReward(stats.rng)
-    Isaac.Spawn(EntityType.ENTITY_PICKUP, reward.Variant, reward.SubType, rock.Position, GetRewardVelocity(reward, stats.rng), nil)
+    local rng = player:GetCollectibleRNG(items.COLLECTIBLE_GILDED_STONE)
+
+    if not ModRNG.RandomBoolean(rng, GetRockRewardChance(player)) then return end
+
+    local reward = GetRandomReward(rng)
+
+    Isaac.Spawn(EntityType.ENTITY_PICKUP, reward.Variant, reward.SubType, rock.Position, Velocity, nil)
 end)
