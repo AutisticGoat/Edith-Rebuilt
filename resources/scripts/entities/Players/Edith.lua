@@ -215,9 +215,10 @@ mod:AddCallback(JumpLib.Callbacks.POST_ENTITY_JUMP, function(_, player)
 end, JumpParams.EdithJump)
 
 ---@param player EntityPlayer
-local function ManageFeedback(player)
+---@param jumpData JumpData
+local function ManageFeedback(player, jumpData)
     if IsInTrapdoor(player) then return end
-    Land.LandFeedbackManager(player, Land.GetLandSoundTable(false), player.Color, false)
+    Land.LandFeedbackManager(player, Land.GetLandSoundTable(false), player.Color, jumpData)
 end
 
 ---@param player EntityPlayer
@@ -250,7 +251,10 @@ local function ResetPropulsionState(player)
     playerData.BombPropulsion = false
 end
 
-mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, function(_, player, _, pitfall)
+---@param player any
+---@param jumpData JumpData
+---@param pitfall any
+mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, function(_, player, jumpData, pitfall)
     local edithTarget = TargetArrow.GetEdithTarget(player)
     if not edithTarget then return end
 
@@ -262,7 +266,7 @@ mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, function(_, player, _, pitfall)
     local jumpParams = params(player)
 
 	Land.TriggerLandAnimation(player)
-    ManageFeedback(player)
+    ManageFeedback(player, jumpData)
     ExecuteStompSequence(player, jumpParams)
     ApplyLandingState(player, edithTarget)
     ResetPropulsionState(player)
@@ -300,11 +304,10 @@ end)
 mod:AddCallback(JumpLib.Callbacks.ENTITY_UPDATE_60, function (_, player, jumpdata)
 	if not Player.IsEdith(player, false) then return end
 
-	local jumpIntData = JumpLib.Internal:GetData(player)
 	local jumpParams = params(player)
 
 	EdithMod.JumpMovement(player, helpers.IsVestigeChallenge())
-	EdithMod.DefensiveStompManager(player, jumpIntData, jumpParams)
+	EdithMod.DefensiveStompManager(player, jumpParams)
 	EdithMod.FlightFallBehavior(player, jumpdata, jumpParams)
 	Jump.SetBombJump(player, jumpParams)
 	EdithMod.BombFall(player, jumpdata, jumpParams)

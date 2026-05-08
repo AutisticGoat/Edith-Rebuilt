@@ -42,7 +42,7 @@ mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, function(_, ent, data, pitfall)
     if not player then return end
     if not Player.IsEdith(player, true) then return end
 
-    Land.LandFeedbackManager(player, Land.GetLandSoundTable(true, true), player.Color)
+    Land.LandFeedbackManager(player, Land.GetLandSoundTable(true, true), player.Color, data)
     Land.ParryLandManager(player, TEdithMod.GetHopParryParams(player), true)
     player:MultiplyFriction(0.05)
 end, {tag = "EdithRebuilt_FlatStoneLand_Parry"})
@@ -58,7 +58,7 @@ mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, function(_, ent, data, pitfall)
     local mult = Player.PlayerHasBirthright(player) and 0.9 or 0.75
 
     params.Damage = params.Damage * mult
-    Land.LandFeedbackManager(player, Land.GetLandSoundTable(false, false), player.Color)
+    Land.LandFeedbackManager(player, Land.GetLandSoundTable(false, false), player.Color, data)
     Land.EdithStomp(player, params, true)
     Land.TriggerLandenemyJump(player, params.StompedEntities, params.Knockback, 6, 1.5)
     player:MultiplyFriction(0.05)

@@ -285,7 +285,7 @@ local function OnHopLand(player, jumpData, params)
 	params.HopRadius = math.min((30 + (tearRange - 9)), 35)
 
 	player:SpawnWaterImpactEffects(player.Position, Vector(1, 1), 1)
-	land.LandFeedbackManager(player, land.GetLandSoundTable(true), misc.BurntSaltColor)
+	land.LandFeedbackManager(player, land.GetLandSoundTable(true), misc.BurntSaltColor, jumpData)
 	land.TaintedEdithHop(player, params)
 end
 
@@ -302,7 +302,7 @@ local function OnParryLand(player, jumpData, params)
 	local perfectParry, EnemiesInImpreciseParry = land.ParryLandManager(player, params, true)
 	local parryAdd = perfectParry and 30 or ((EnemiesInImpreciseParry and 15) or 0)
 
-	land.LandFeedbackManager(player, land.GetLandSoundTable(true, perfectParry), misc.BurntSaltColor, perfectParry)
+	land.LandFeedbackManager(player, land.GetLandSoundTable(true, perfectParry), misc.BurntSaltColor, jumpData, perfectParry)
 
 	if not parryAdd then return end
 	TEdithMod.AddHopDashCharge(player, parryAdd, 0.75)

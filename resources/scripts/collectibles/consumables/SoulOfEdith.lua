@@ -66,7 +66,8 @@ local function SpawnSaltTears(player)
 end
 
 ---@param player EntityPlayer
-mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, function (_, player)
+---@param jumpData JumpData
+mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, function (_, player, jumpData)
 	local rawFormula = ((damageBase + player.Damage) / 1.5)
     local playerData = data(player)
 
@@ -76,7 +77,7 @@ mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, function (_, player)
 	end
 
     playerData.IsSoulOfEdithJump = true
-	Land.LandFeedbackManager(player, SoundPick, Color(1, 1, 1, 0))
+	Land.LandFeedbackManager(player, SoundPick, Color(1, 1, 1, 0), jumpData)
     playerData.IsSoulOfEdithJump = false
 
     SpawnSaltTears(player)

@@ -556,11 +556,25 @@ local function GetEffectVariantAndSubType(hasWater, IsChap4)
     return EffectVariant.POOF02, (IsChap4 and 3 or 1)
 end
 
----@param player EntityPlayer
----@return boolean
-local function IsEdithJump(player)
-    local d = data(player)
-    return Player.IsEdith(player, false) or d.IsSoulOfEdithJump or d.HoodLand
+local jumpTags = enums.Tables.JumpTags
+
+local EdithJumps = {
+	jumpTags.EdithJump,
+	jumpTags.EdithsHoodJump,
+	jumpTags.EffigyHop,
+	jumpTags.EffigyJump,
+}
+
+---@param jumpData JumpData
+-- -@return boolean
+local function IsEdithJump(jumpData)
+	for _, tag in ipairs(EdithJumps) do
+		if jumpData.Tags[tag] == true then
+			return true
+		end
+	end
+
+	return false
 end
 
 ---@class FeedbackLandParams
@@ -670,8 +684,9 @@ end
 ---@param player EntityPlayer
 ---@param soundTable table
 ---@param GibColor Color
+---@param jumpData JumpData
 ---@param IsParryLand? boolean
-function Land.LandFeedbackManager(player, soundTable, GibColor, IsParryLand)
+function Land.LandFeedbackManager(player, soundTable, GibColor, jumpData, IsParryLand)
     local saveManager = mod.SaveManager
     if not saveManager:IsLoaded() then return end
     if not saveManager:GetSettingsSave() then return end
@@ -679,9 +694,10 @@ function Land.LandFeedbackManager(player, soundTable, GibColor, IsParryLand)
     local Helpers = mod.Modules.HELPERS
     local IsChap4 = Helpers.IsChap4()
 
-    local landParams = IsEdithJump(player)
-        and GetEdithLandParams(player)
-        or GetTEdithLandParams(IsParryLand)
+    local landParams = (
+		IsEdithJump(jumpData) and GetEdithLandParams(player) or 
+		GetTEdithLandParams(IsParryLand)
+	)
 
     SpawnLandGFX(player, landParams, IsChap4)
 

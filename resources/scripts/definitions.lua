@@ -6,6 +6,8 @@ local tedithJumpTag = "edithRebuilt_TaintedEdithJump"
 local tedithHopTag = "edithRebuilt_TaintedEdithHop"
 local edithHoodJumpTag = "edithRebuilt_EdithsHoodJump"
 local enemyJumpTag = "edithRebuilt_EnemyJump"
+local effigyHop = "edithRebuilt_EffigyHop"
+local effigyJump = "edithRebuilt_EffigyJump"
 
 EdithRebuilt.Enums = {
 	PlayerType = {
@@ -267,6 +269,8 @@ EdithRebuilt.Enums = {
 			TEdithJump = tedithJumpTag,
 			EdithsHoodJump = edithHoodJumpTag,
 			EnemyJump = enemyJumpTag,
+			EffigyHop = effigyHop,
+			EffigyJump = effigyJump,
 		},
 		JumpFlags = {
 			EdithJump = (JumpLib.Flags.DISABLE_SHOOTING_INPUT | JumpLib.Flags.DISABLE_LASER_FOLLOW | JumpLib.Flags.DISABLE_BOMB_INPUT | JumpLib.Flags.FAMILIAR_FOLLOW_FOLLOWERS | JumpLib.Flags.FAMILIAR_FOLLOW_ORBITALS | JumpLib.Flags.FAMILIAR_FOLLOW_TEARCOPYING | JumpLib.Flags.NO_HURT_PITFALL),

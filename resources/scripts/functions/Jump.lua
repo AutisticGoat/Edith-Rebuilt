@@ -117,7 +117,7 @@ function Jump.InitEdithJump(player, jumpTag, vestige)
 	sfx:Play(soundEffect)
 	SpawnJumpDustCloud(player, room:HasWater(), modules.HELPERS.IsChap4())
 
-	JumpLib:Jump(player, {
+	JumpLib:TryJump(player, {
 		Height = jumpHeight,
 		Speed  = jumpSpeed,
 		Tags   = jumpTag,
