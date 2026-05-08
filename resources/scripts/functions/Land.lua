@@ -176,9 +176,13 @@ function Land.PickupManager(player, pickup)
 	elseif IsMegaChest then
 		MegaChestManager(player, pickup)
 	elseif IsKeyRequiredChest(pickup) then
-		if CanUseKey(player) then
-			player:TryUseKey()
+		if player:HasTrinket(TrinketType.TRINKET_PAPER_CLIP) then
 			pickup:TryOpenChest(player)
+		else
+			if CanUseKey(player) then
+				player:TryUseKey()
+				pickup:TryOpenChest(player)
+			end
 		end
 	else
 		pickup:TryOpenChest()
