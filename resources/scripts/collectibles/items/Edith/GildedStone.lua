@@ -95,6 +95,7 @@ mod:AddCallback(ModCallbacks.MC_POST_GRID_ROCK_DESTROY, function(_, rock, _, _, 
     if not ModRNG.RandomBoolean(rng, GetRockRewardChance(player)) then return end
 
     local reward = GetRandomReward(rng)
+    local Velocity = GetRewardVelocity(reward, rng)
 
     Isaac.Spawn(EntityType.ENTITY_PICKUP, reward.Variant, reward.SubType, rock.Position, Velocity, nil)
 end)
