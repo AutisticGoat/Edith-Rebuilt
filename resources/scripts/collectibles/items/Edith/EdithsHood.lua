@@ -87,10 +87,10 @@ end
 
 ---@param player EntityPlayer
 ---@param params EdithJumpStompParams
-local function TriggerLandEffects(player, params)
+local function TriggerLandEffects(player, params, jumpData)
     local playerData = data(player)
     playerData.HoodLand = true
-    Land.LandFeedbackManager(player, Land.GetLandSoundTable(false), Color.Default, false)
+    Land.LandFeedbackManager(player, Land.GetLandSoundTable(false), Color.Default, jumpData)
     playerData.HoodLand = false
     Land.EdithStomp(player, params, false)
     Land.TriggerLandenemyJump(player, params.StompedEntities, params.Knockback, 10, 1.8)
@@ -103,12 +103,14 @@ local function SpawnSaltCreep(player)
     end
 end
 
-mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, function(_, player)
+---@param player EntityPlayer
+---@param jumpData JumpData
+mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, function(_, player, jumpData)
     if Player.IsAnyEdith(player) then return end
 
     local params = Edith.GetJumpStompParams(player)
     SetJumpParams(player, params)
-    TriggerLandEffects(player, params)
+    TriggerLandEffects(player, params, jumpData)
     SpawnSaltCreep(player)
     player:SetMinDamageCooldown(30)
 end, jumpParams.EdithsHoodJump)

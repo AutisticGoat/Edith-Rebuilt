@@ -417,7 +417,12 @@ EdithRebuilt.Enums = {
 			MORGUE = 1,
 			MOIST = 2,
 			FLESH = 3,
-		}
+		},
+		TriggerDamageSlots = {
+			[SlotVariant.BLOOD_DONATION_MACHINE] = true,
+			[SlotVariant.DEVIL_BEGGAR] = true,
+			[SlotVariant.CONFESSIONAL] = true,
+		},
 	},
 	Misc = {
 		TearPath = "gfx/tears/",

@@ -115,12 +115,8 @@ function Helpers.ShootArchedTear(player, rng, minTears, maxTears, config)
             player
         ):ToTear() ---@cast tear EntityTear
 
-        if not tear then goto continue end
-
         ApplySharedTearPhysics(tear, rng)
         config.apply(tear, player)
-
-		::continue::
     end
 end
 

@@ -191,18 +191,18 @@ end
 
 ---@param parent EntityPlayer
 ---@param ent EntityPickup
-local function PickupLandHandler(parent, ent)
+---@param includeCol? boolean
+local function PickupLandHandler(parent, ent, includeCol)
 	local var = ent.Variant
 	local pickup = ent:ToPickup() ---@cast pickup EntityPickup
 
 	if not pickup then return end
+	if (not includeCol and pickup.Variant == PickupVariant.PICKUP_COLLECTIBLE) then return end
 
 	local room = game:GetRoom()
 	local IsPickedUp = pickup:GetSprite():IsPlaying("Collect")
 
-	-- if mod.Modules.HELPERS.IsVestigeChallenge() then
-		Land.PickupManager(parent, pickup)
-	-- end
+	Land.PickupManager(parent, pickup)
 
 	if IsPickedUp then return end
 
@@ -232,17 +232,10 @@ end)
 local function SlotLandManager(parent, ent)
 	local var = ent.Variant
 	local slot = ent:ToSlot() ---@cast slot EntitySlot
-	
-	if not slot then return end
-	
-	local TriggerDamageSlots = {
-		[SlotVariant.BLOOD_DONATION_MACHINE] = true,
-		[SlotVariant.DEVIL_BEGGAR] = true,
-		[SlotVariant.CONFESSIONAL] = true,
-	}
 
+	if not slot then return end
 	if slot:GetState() == SlotState.DESTROYED then return end
-	if not mod.Modules.HELPERS.When(var, TriggerDamageSlots, false) then return end
+	if not mod.Modules.HELPERS.When(var, tables.TriggerDamageSlots, false) then return end
 	parent:ForceCollide(ent, false)
 	parent:TakeDamage(1, 0, EntityRef(ent), 0)
 end
@@ -487,7 +480,7 @@ function Land.TaintedEdithHop(parent, HopParams)
 
 	for _, ent in ipairs(Isaac.FindInCapsule(PickupCapsule)) do
 		if ent:ToPickup() then
-			PickupLandHandler(parent, ent)
+			-- PickupLandHandler(parent, ent, false)
 		end
 	end
 
@@ -570,7 +563,7 @@ local EdithJumps = {
 }
 
 ---@param jumpData JumpData
--- -@return boolean
+---@return boolean
 local function IsEdithJump(jumpData)
 	for _, tag in ipairs(EdithJumps) do
 		if jumpData.Tags[tag] == true then

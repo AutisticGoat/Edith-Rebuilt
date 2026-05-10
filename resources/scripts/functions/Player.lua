@@ -222,14 +222,14 @@ end
 ---@param p EntityPlayer
 ---@param tainted boolean
 function Player.SetCustomSprite(p, tainted)
-	Player.SetChallengeSprite(p, Isaac.GetChallenge())	
+	-- Player.SetChallengeSprite(p, Isaac.GetChallenge())	
 
 	if not mod.Modules.HELPERS.IsModChallenge() then return end
 
-	local costumeDesc = p:GetCostumeSpriteDescs()[1]
-	local hoodPath = tainted and enums.Misc.GrudgeHoodPath or enums.Misc.VestigeHoodPath
+	-- local costumeDesc = p:GetCostumeSpriteDescs()[1]
+	-- local hoodPath = tainted and enums.Misc.GrudgeHoodPath or enums.Misc.VestigeHoodPath
 
-	costumeDesc:GetSprite():ReplaceSpritesheet(0, hoodPath, true)
+	-- costumeDesc:GetSprite():ReplaceSpritesheet(0, hoodPath, true)
 end
 
 return Player

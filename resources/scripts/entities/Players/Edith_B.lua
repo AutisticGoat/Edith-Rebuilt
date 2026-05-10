@@ -96,7 +96,8 @@ end)
 ---@param playerData table
 ---@param HopParams table
 ---@param IsGrudge boolean
-local function ManageParryInput(player, playerData, HopParams, IsGrudge)
+---@param jumpData JumpData
+local function ManageParryInput(player, playerData, HopParams, IsGrudge, jumpData)
 	HopParams.IsParryJump = HopParams.IsParryJump or false
 
 	if Helpers.IsKeyStompTriggered(player) then
@@ -105,13 +106,13 @@ local function ManageParryInput(player, playerData, HopParams, IsGrudge)
 		local maxCooldown =  playerData.MaxParryCooldown
 
 		if cooldown == 0 and not isParryJump and not HopParams.IsParryJump then
-			TEdithMod.ParryTriggerManager(player, IsGrudge, HopParams)
+			TEdithMod.ParryTriggerManager(player, IsGrudge, HopParams, jumpData)
 		elseif maxCooldown and (HopParams.ParryCooldown > 0 and HopParams.ParryCooldown >= maxCooldown - 6) then
 			player:SetColor(Color(1, 1, 1, 1, 0.3), 3, 1, true, false)
 			playerData.StoredInput = true
 		end
 	elseif playerData.StoredInput and HopParams.ParryCooldown <= 0 then
-		TEdithMod.ParryTriggerManager(player, IsGrudge, HopParams)
+		TEdithMod.ParryTriggerManager(player, IsGrudge, HopParams, jumpData)
 		playerData.StoredInput = false
 	end
 end
@@ -221,6 +222,8 @@ end
 
 ---@param player EntityPlayer
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
+	print(player:GetSprite():GetAnimation())
+	
 	if not Player.IsEdith(player, true) then return end
 
 	Player.ManageEdithWeapons(player)
@@ -234,7 +237,7 @@ mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
 
 	TEdithMod.ArrowMovementManager(player, HopParams)
 
-	ManageParryInput(player, data(player), HopParams, IsGrudge)
+	ManageParryInput(player, data(player), HopParams, IsGrudge, JumpLib:GetData(player))
 
 	if HopParams.IsHoping then
 		TEdithMod.ResetHopDashCharge(player, false, true)
@@ -424,19 +427,34 @@ local function IsWisp(fam)
 	return var == FamiliarVariant.WISP or var == FamiliarVariant.ITEM_WISP
 end
 
+---@param player EntityPlayer
+---@param ent Entity
+local function StopVel(player, ent)
+	if not Player.IsEdith(player, true) then return end
+	if ent.Velocity:Length() <= 50 then return end
+	ent.Velocity = Vector.Zero
+end
+
 ---@param fam EntityFamiliar
 mod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, fam)
 	if not IsWisp(fam) then return end
-	if not Player.IsEdith(fam.Player, true) then return end
-	if fam.Velocity:Length() <= 50 then return end
-	fam.Velocity = Vector.Zero
+	StopVel(player, fam)
 end)
 
 ---@param npc EntityNPC
 mod:AddCallback(ModCallbacks.MC_NPC_UPDATE, function (_, npc)
-	Player.ForEachPlayerType(function (player)
-		if not VecDir.VectorEquals(player.Position, npc:CalcTargetPosition(100)) then return end
-		if npc.Velocity:Length() <= 50 then return end
-		npc.Velocity = Vector.Zero
-	end, enums.PlayerType.PLAYER_EDITH_B)
+	StopVel(npc:GetPlayerTarget():ToPlayer() --[[@as EntityPlayer]], npc)
 end, EntityType.ENTITY_WILLO)
+
+---@param player EntityPlayer
+---@param ent Entity
+mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_COLLISION, function (_, player, ent)
+	local pickup = ent:ToPickup()
+
+	if not pickup then return end
+	if pickup.Variant ~= PickupVariant.PICKUP_COLLECTIBLE then return end
+	if pickup.SubType == 0 then return end
+
+	-- TEdithMod.StopTEdithHops(player, 20, true, false, false)
+	-- Helpers.TriggerPush(player, pickup, 1)
+end)

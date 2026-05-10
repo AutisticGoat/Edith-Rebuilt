@@ -52,6 +52,7 @@ local FrameScale = {
 
 ---@param player EntityPlayer
 local function SetInitJumpState(player)
+	if helpers.IsVestigeChallenge() then return end
 	if not helpers.IsKeyStompPressed(player) then return end
 	if Jump.IsJumping(player) then return end
 	data(player).InitJump = true

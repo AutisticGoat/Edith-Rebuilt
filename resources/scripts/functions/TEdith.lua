@@ -358,39 +358,43 @@ end
 ---@param player EntityPlayer
 ---@param hopParams TEdithHopParryParams
 ---@param forceParry boolean
-local function HandleParryLanding(player, hopParams, forceParry)
+---@param jumpData JumpData
+local function HandleParryLanding(player, hopParams, forceParry, jumpData)
 	local Land = mod.Modules.LAND
     local PerfectParry = Land.ParryLandManager(player, hopParams, true)
     local parryResult = forceParry or PerfectParry
-    Land.LandFeedbackManager(player, Land.GetLandSoundTable(true, parryResult), misc.BurntSaltColor, parryResult)
+    Land.LandFeedbackManager(player, Land.GetLandSoundTable(true, parryResult), misc.BurntSaltColor, jumpData, parryResult)
 end
 
 ---@param player EntityPlayer
 ---@param hopParams TEdithHopParryParams
-local function HandleNormalParry(player, hopParams)
+---@param jumpData JumpData
+local function HandleNormalParry(player, hopParams, jumpData)
     if not hopParams.IsHoping then
         mod.Modules.JUMP.InitTaintedEdithParryJump(player, jumpTags.TEdithJump)
 	else
 		TEdith.StopTEdithHops(player, 0, true, true, false)
-		HandleParryLanding(player, hopParams, false)
+		HandleParryLanding(player, hopParams, false, jumpData)
     end
 end
 
 ---@param player EntityPlayer
 ---@param hopParams TEdithHopParryParams
-local function HandleGrudgeParry(player, hopParams)
+---@param jumpData JumpData
+local function HandleGrudgeParry(player, hopParams, jumpData)
     TEdith.StopTEdithHops(player, 0, true, true, false)
-    HandleParryLanding(player, hopParams, true)
+    HandleParryLanding(player, hopParams, true, jumpData)
 end
 
 ---@param player EntityPlayer
 ---@param IsGrudge boolean
 ---@param hopParams TEdithHopParryParams
-function TEdith.ParryTriggerManager(player, IsGrudge, hopParams)
+---@param jumpData JumpData
+function TEdith.ParryTriggerManager(player, IsGrudge, hopParams, jumpData)
     if IsGrudge then
-        HandleGrudgeParry(player, hopParams)
+        HandleGrudgeParry(player, hopParams, jumpData)
     else
-        HandleNormalParry(player, hopParams)
+        HandleNormalParry(player, hopParams, jumpData)
     end
     player:MultiplyFriction(0.1)
 end
