@@ -39,16 +39,10 @@ end
 ---@param player EntityPlayer
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, function(_, player)
 	local pData = data(player)
-	
+
 	pData.BaseSpriteScale = player.SpriteScale
 	pData.JumpCount = 0
 end)
-
-local FrameScale = {
-	[1] = Vector(1.1, 0.95),
-	[2] = Vector(1.15, 0.85),
-	[3] = Vector(1.15, 0.8),
-}
 
 ---@param player EntityPlayer
 local function SetInitJumpState(player)
@@ -72,23 +66,59 @@ end
 ---@param pData table
 local function ManageStretchSquashCounter(pData)
 	pData.JumpCount = pData.JumpCount or 0
-	pData.JumpCount = math.min(pData.JumpCount + 1, 4)
+	pData.JumpCount = math.min(pData.JumpCount + 1, 8)
 
-	if pData.JumpCount < 4 then return end
+	if pData.JumpCount < 8 then return end
 	pData.JumpCount = 0
 end
+
+local FrameScale = {
+	BeforeJump = {
+		[1] = Vector(1.05, 0.95),
+		[2] = Vector(1.1, 0.9),
+		[3] = Vector(1.15, 0.85),
+		[4] = Vector(1.2, 0.8),
+		[5] = Vector(1.25, 0.75),
+		[6] = Vector(1.3, 0.7),
+		[7] = Vector(1.35, 0.65),
+	},
+	AfterJump = {
+		[1] = Vector(0.95, 1.05),
+		[2] = Vector(0.9, 1.1),
+		[3] = Vector(0.85, 1.15),
+		[4] = Vector(0.8, 1.2),
+		[5] = Vector(0.85, 1.15),
+		[6] = Vector(0.9, 1.1),
+		[7] = Vector(0.95, 1.05),
+	},
+	OnFalling = {
+		[false] = {
+			[5] = Vector(0.95, 1.05),
+			[6] = Vector(0.9, 1.1),
+			[7] = Vector(0.85, 1.15),
+			[8] = Vector(0.8, 1.2),
+			[9] = Vector(0.75, 1.25),
+			[10] = Vector(0.7, 1.3),
+		},
+		[true] = {
+			[1] = Vector(0.9, 1.1),
+			[2] = Vector(0.8, 1.2),
+			[3] = Vector(0.7, 1.3),
+		}
+	}
+}
 
 ---@param player EntityPlayer
 ---@param pData table
 local function ManageStretchSquashScale(player, pData)
-	local VecScale = FrameScale[pData.JumpCount]
+	local VecScale = FrameScale.BeforeJump[pData.JumpCount]
 
 	if not VecScale then return end
 	player.SpriteScale = pData.BaseSpriteScale * VecScale
 end
 
 ---@param player EntityPlayer
-local function ManageJumpStretchSquash(player)	
+local function ManageJumpStretchSquash(player)
 	if Jump.IsJumping(player) then return end
 
 	local pData = data(player)
@@ -182,13 +212,6 @@ mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
 	HandleTargetManagers(player, TargetArrow.GetEdithTarget(player), state)
 end)
 
----@param player EntityPlayer
----@return boolean
-local function IsInTrapdoor(player)
-	local grid = game:GetRoom():GetGridEntityFromPos(player.Position)
-	return grid and grid:GetType() == GridEntityType.GRID_TRAPDOOR or false
-end
-
 ---@param pos Vector
 ---@return boolean
 local function IsFleshTrapdoorAtPos(pos)
@@ -218,7 +241,7 @@ end, JumpParams.EdithJump)
 ---@param player EntityPlayer
 ---@param jumpData JumpData
 local function ManageFeedback(player, jumpData)
-    if IsInTrapdoor(player) then return end
+    if Player.IsInTrapdoor(player) then return end
     Land.LandFeedbackManager(player, Land.GetLandSoundTable(false), player.Color, jumpData)
 end
 
@@ -252,12 +275,19 @@ local function ResetPropulsionState(player)
     playerData.BombPropulsion = false
 end
 
+---@param player EntityPlayer
+local function ResetEdithScale(player)
+	player.SpriteScale = data(player).BaseSpriteScale
+end	
+
 ---@param player any
 ---@param jumpData JumpData
 ---@param pitfall any
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, function(_, player, jumpData, pitfall)
     local edithTarget = TargetArrow.GetEdithTarget(player)
-    if not edithTarget then return end
+	ResetEdithScale(player)
+
+	if not edithTarget then return end
 
     if pitfall then
         TargetArrow.RemoveEdithTarget(player)
@@ -300,6 +330,32 @@ mod:AddCallback(ModCallbacks.MC_PRE_NPC_UPDATE, function (_, npc)
 	return true
 end)
 
+local function JumpInitScale(player)
+	local frame = Jump.GetJumpFrame(player)
+	local VecScale = FrameScale.AfterJump[frame]
+
+	if not VecScale then 
+		player.SpriteScale = data(player).BaseSpriteScale	
+		return
+	end
+	player.SpriteScale = data(player).BaseSpriteScale * VecScale
+end
+
+---@param player EntityPlayer
+local function JumpFallScale(player)
+	local frame = Jump.GetFallFrame(player)
+	local canFly = player.CanFly
+	local startframe = canFly and 1 or 5
+
+	if frame < startframe then return end
+	if canFly and params(player).IsDefensiveStomp then return end
+
+	local mainTable = FrameScale.OnFalling
+	local VecScale = mainTable[canFly][frame] or Vector(0.7, 1.3)
+
+	player.SpriteScale = data(player).BaseSpriteScale * VecScale
+end
+
 ---@param player EntityPlayer
 ---@param jumpdata JumpData
 mod:AddCallback(JumpLib.Callbacks.ENTITY_UPDATE_60, function (_, player, jumpdata)
@@ -307,7 +363,11 @@ mod:AddCallback(JumpLib.Callbacks.ENTITY_UPDATE_60, function (_, player, jumpdat
 
 	local jumpParams = params(player)
 
-	EdithMod.JumpMovement(player, helpers.IsVestigeChallenge())
+	jumpParams.JumpDest = TargetArrow.GetEdithTarget(player, false).Position
+
+	JumpInitScale(player)
+	JumpFallScale(player)
+	EdithMod.JumpMovement(player, helpers.IsVestigeChallenge(), jumpParams, jumpdata)
 	EdithMod.DefensiveStompManager(player, jumpParams)
 	EdithMod.FlightFallBehavior(player, jumpdata, jumpParams)
 	Jump.SetBombJump(player, jumpParams)
