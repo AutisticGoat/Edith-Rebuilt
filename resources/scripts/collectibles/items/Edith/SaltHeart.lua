@@ -9,7 +9,6 @@ local ModRNG = modules.RNG
 local StsEffects = modules.STATUS_EFFECTS
 local Helpers = modules.HELPERS
 local Creeps = modules.CREEPS
-local Maths = modules.MATHS
 local BitMask = modules.BIT_MASK
 local effects = enums.EdithStatusEffects
 
@@ -51,7 +50,7 @@ mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function (_, entity, amount, fl
     local player = entity:ToPlayer()
     if not player then return end
     if not player:HasCollectible(items.COLLECTIBLE_SALT_HEART) then return end
-    if Maths.HasBitFlags(flags, invalidDamageFlags) then return end
+    if BitMask.HasBitFlags(flags, invalidDamageFlags--[[@as BitSet128]]) then return end
 
     local playerData = data(player)
 

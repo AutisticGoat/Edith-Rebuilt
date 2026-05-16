@@ -7,7 +7,7 @@ local modules = mod.Modules
 local Helpers = modules.HELPERS
 local ModRNG = modules.RNG
 local Player = modules.PLAYER
-local Maths = modules.MATHS
+local BitMask = modules.BIT_MASK
 local sfx = utils.SFX
 
 local DR = {
@@ -64,7 +64,7 @@ end
 ---@param flags UseFlag
 ---@return boolean?
 mod:AddCallback(ModCallbacks.MC_USE_ITEM, function(_, _, rng, player, flags)
-    if Maths.HasBitFlags(flags, UseFlag.USE_CARBATTERY) then return end
+    if BitMask.HasBitFlags(flags, UseFlag.USE_CARBATTERY --[[@as BitSet128]]) then return end
 
     local isJudasWithBirthright = Player.IsJudasWithBirthright(player)
 

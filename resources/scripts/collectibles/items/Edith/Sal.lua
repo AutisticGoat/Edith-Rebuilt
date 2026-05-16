@@ -33,7 +33,7 @@ local function ShootSalTear(player, entity)
         variant  = 0,
         position = entity.Position,
         velocity = rng:RandomVector():Resized(20),
-        apply    = function(tear)
+        apply = function(tear)
             Helpers.ForceSaltTear(tear, false)
             tear:AddTearFlags(TearFlags.TEAR_PIERCING)
             data(tear).IsSalTear = true

@@ -5,6 +5,7 @@ local game, sfx = utils.Game, utils.SFX
 local items = enums.CollectibleType
 local modules = mod.Modules
 local ModRNG = modules.RNG
+local BitMask = modules.BIT_MASK
 local Maths = modules.MATHS
 local Helpers = modules.HELPERS
 
@@ -43,7 +44,7 @@ end
 ---@param flag UseFlag
 ---@return boolean?
 mod:AddCallback(ModCallbacks.MC_USE_ITEM, function(_, _, rng, player, flag)
-    if Maths.HasBitFlags(flag, UseFlag.USE_CARBATTERY) then return end
+    if BitMask.HasBitFlags(flag, UseFlag.USE_CARBATTERY --[[@as BitSet128]]) then return end
 
     TriggerEffects(rng)
     TriggerDamage(player)
