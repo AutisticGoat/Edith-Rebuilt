@@ -166,22 +166,25 @@ end
 
 ---@param player EntityPlayer
 function Helpers.GetNearestEnemy(player)
-	local closestDistance = math.huge
+    local closestDistance = math.huge
+    local closestEnemy
     local playerPos = player.Position
-	local room = game:GetRoom()
-	local closestEnemy, enemyPos, distanceToPlayer, checkline
+    local room = game:GetRoom()
 
-	for _, enemy in ipairs(Helpers.GetEnemies()) do
-		if enemy:HasEntityFlags(EntityFlag.FLAG_CHARM) then goto continue end
-		enemyPos = enemy.Position
-		distanceToPlayer = enemyPos:Distance(playerPos)
-		checkline = room:CheckLine(playerPos, enemyPos, LineCheckMode.PROJECTILE, 0, false, false)
-		if not checkline then goto continue end
+    for _, enemy in ipairs(Helpers.GetEnemies()) do
+        if enemy:HasEntityFlags(EntityFlag.FLAG_CHARM) then goto continue end
+
+        local enemyPos = enemy.Position
+        local distanceToPlayer = enemyPos:Distance(playerPos)
+
         if distanceToPlayer >= closestDistance then goto continue end
+        if not room:CheckLine(playerPos, enemyPos, LineCheckMode.PROJECTILE, 0, false, false) then goto continue end
+
         closestEnemy = enemy
         closestDistance = distanceToPlayer
         ::continue::
-	end
+    end
+
     return closestEnemy
 end
 
