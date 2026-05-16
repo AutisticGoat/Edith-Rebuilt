@@ -236,6 +236,7 @@ local function SlotLandManager(parent, ent)
 	if not slot then return end
 	if slot:GetState() == SlotState.DESTROYED then return end
 	if not mod.Modules.HELPERS.When(var, tables.TriggerDamageSlots, false) then return end
+	
 	parent:ForceCollide(ent, false)
 	parent:TakeDamage(1, 0, EntityRef(ent), 0)
 end
@@ -406,7 +407,7 @@ function Land.EdithStomp(parent, params, breakGrid)
 	end
 
 	for _, ent in ipairs(Isaac.FindInCapsule(Capsules.Pickup, EntityPartition.PICKUP)) do
-		if ent:ToPickup() then PickupLandHandler(parent, ent) end
+		if ent:ToPickup() then PickupLandHandler(parent, ent, true) end
 	end
 
 	for _, ent in ipairs(Isaac.FindInCapsule(Capsules.Slot)) do
@@ -746,7 +747,10 @@ end
 
 ---@param player EntityPlayer
 function Land.TriggerLandAnimation(player)
-	if not mod.Modules.PLAYER.IsAnyEdith(player) then return end
+	local modules = mod.Modules 
+
+	if not modules.PLAYER.IsAnyEdith(player) then return end
+	if modules.PLAYER.IsInTrapdoor(player) then return end
 
 	player:PlayExtraAnimation("BigJumpFinish")
 	player:GetSprite().PlaybackSpeed = math.max(GetLandAnimationSpeed(player), 1)
