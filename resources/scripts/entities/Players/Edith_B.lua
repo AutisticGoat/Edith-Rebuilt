@@ -221,9 +221,7 @@ end
 
 
 ---@param player EntityPlayer
-mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
-	print(player:GetSprite():GetAnimation())
-	
+mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)	
 	if not Player.IsEdith(player, true) then return end
 
 	Player.ManageEdithWeapons(player)
