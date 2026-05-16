@@ -42,11 +42,18 @@ mod:AddCallback(ModCallbacks.MC_INPUT_ACTION, function(_, entity, input, action)
     return tables.OverrideActions[action]
 end)
 
+
+---@param player EntityPlayer
+local function IsLilith(player)
+    local type = player:GetPlayerType()
+    return type == PlayerType.PLAYER_LILITH or type == PlayerType.PLAYER_LILITH_B
+end 
+
 ---@param player EntityPlayer
 ---@param VarData integer
-local function ChangeEffigyState(player, VarData, slot)
-    player:SetActiveVarData(VarData == 0 and 1 or 0, slot)
-    return VarData
+local function UpdateShotCapacity(player, VarData)
+    if IsLilith(player) then return end
+    player:SetCanShoot(VarData == 1)
 end
 
 ---@param player EntityPlayer
@@ -57,6 +64,16 @@ local function EffigyCostumeManager(player, VarData)
     elseif VarData == 1 then
         player:TryRemoveNullCostume(enums.NullItemID.EDITH)
     end
+end
+
+---@param player EntityPlayer
+---@param VarData integer
+local function ChangeEffigyState(player, VarData, slot)
+    player:SetActiveVarData(VarData == 0 and 1 or 0, slot)
+    UpdateShotCapacity(player, VarData)
+    EffigyCostumeManager(player, VarData)
+
+    return VarData
 end
 
 ---@param jumpData JumpData
@@ -98,7 +115,6 @@ mod:AddCallback(ModCallbacks.MC_USE_ITEM, function (_, _, _, player, flag, slot)
     local varData = ChangeEffigyState(player, player:GetActiveItemDesc(slot).VarData, slot)
     EffigyCostumeManager(player, varData)
 
-    player:SetCanShoot(varData == 1)
     player:SetMinDamageCooldown(30)
     return true
 end, items.COLLECTIBLE_EFFIGY)
@@ -221,3 +237,17 @@ end, items.COLLECTIBLE_EFFIGY)
 mod:AddCallback(ModCallbacks.MC_POST_TRIGGER_COLLECTIBLE_REMOVED, function (_, player)
     player:TryRemoveNullCostume(enums.NullItemID.EDITH)
 end, items.COLLECTIBLE_EFFIGY)
+
+mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function ()
+    for _, player in ipairs(PlayerManager.GetPlayers()) do
+        local effigySlot = player:GetActiveItemSlot(items.COLLECTIBLE_EFFIGY)
+        local VarData = player:GetActiveItemDesc(effigySlot).VarData
+
+        if effigySlot == -1 then goto continue end
+        if GetEffigyState(player) ~= 1 then goto continue end
+
+        ChangeEffigyState(player, VarData, effigySlot)
+
+        ::continue::
+    end
+end)    
