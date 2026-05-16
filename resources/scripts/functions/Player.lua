@@ -22,9 +22,9 @@ end
 function Player.GetMovementInput(player)
     local ci = player.ControllerIndex
     return {
-        up    = Input.GetActionValue(ButtonAction.ACTION_UP, ci),
-        down  = Input.GetActionValue(ButtonAction.ACTION_DOWN, ci),
-        left  = Input.GetActionValue(ButtonAction.ACTION_LEFT, ci),
+        up = Input.GetActionValue(ButtonAction.ACTION_UP, ci),
+        down = Input.GetActionValue(ButtonAction.ACTION_DOWN, ci),
+        left = Input.GetActionValue(ButtonAction.ACTION_LEFT, ci),
         right = Input.GetActionValue(ButtonAction.ACTION_RIGHT, ci),
     }
 end
@@ -38,23 +38,6 @@ function Player.WaterCurrentManager(player)
 
 	if not (not modules.JUMP.IsJumping(player) and RoomHasWaterCurrent) then return end
 	player.Velocity = player.Velocity * (waterCurrent * 0.3)
-end	
-
----@param player EntityPlayer
----@param challenge Challenge
-function Player.SetChallengeSprite(player, challenge)
-	if challenge == Challenge.CHALLENGE_NULL then return end
-
-	local sprite = (
-		challenge == challenges.CHALLENGE_GRUDGE and misc.GrudgeSpritePath or 
-		challenge == challenges.CHALLENGE_VESTIGE and misc.VestigeSpritePath
-	)
-
-	if not sprite then return end
-
-	for i = 0, 14 do
-		player:GetSprite():ReplaceSpritesheet(i, sprite, true)
-	end
 end
 
 ---@param player EntityPlayer
@@ -65,7 +48,7 @@ end
 ---@param player EntityPlayer
 ---@return boolean
 function Player.HasBombTearItem(player)
-	return (player:HasCollectible(CollectibleType.COLLECTIBLE_DR_FETUS) or	player:HasCollectible(CollectibleType.COLLECTIBLE_EPIC_FETUS))
+	return (player:HasCollectible(CollectibleType.COLLECTIBLE_DR_FETUS) or player:HasCollectible(CollectibleType.COLLECTIBLE_EPIC_FETUS))
 end
 
 ---@param player EntityPlayer
@@ -138,7 +121,14 @@ function Player.SetNewANM2(player, FilePath)
 
 	if not (playerSprite:GetFilename() ~= FilePath and not player:IsCoopGhost()) then return end
 	playerSprite:Load(FilePath, true)
-	playerSprite:Update()
+	-- playerSprite:Update()
+end
+
+---@param player EntityPlayer
+---@return boolean
+function Player.IsInTrapdoor(player)
+	local grid = game:GetRoom():GetGridEntityFromPos(player.Position)
+	return grid and grid:GetType() == GridEntityType.GRID_TRAPDOOR or false
 end
 
 ---Helper function for Edith's cooldown color manager
@@ -219,17 +209,40 @@ function Player.HasTanukiStatueEffect(p)
 	return p:GetGnawedLeafTimer() >= 60
 end
 
----@param p EntityPlayer
+---@param player EntityPlayer
+---@param challenge Challenge
+function Player.SetChallengeSprite(player, challenge)
+	if challenge == Challenge.CHALLENGE_NULL then return end
+
+	local spritePath = (
+		challenge == challenges.CHALLENGE_GRUDGE and misc.GrudgeSpritePath or 
+		challenge == challenges.CHALLENGE_VESTIGE and misc.VestigeSpritePath
+	)
+
+	if not spritePath then return end
+
+	local playerSprite = player:GetSprite()
+
+	for i = 0, 14 do
+		playerSprite:ReplaceSpritesheet(i, spritePath, true)
+	end
+end
+
+---@param player EntityPlayer
+---@param path string
+function Player.SetHoodSprite(player, path)
+	local costumeDesc = player:GetCostumeSpriteDescs()[1]
+	costumeDesc:GetSprite():ReplaceSpritesheet(0, path, true)
+end
+
+---@param player EntityPlayer
 ---@param tainted boolean
-function Player.SetCustomSprite(p, tainted)
-	-- Player.SetChallengeSprite(p, Isaac.GetChallenge())	
-
+function Player.SetCustomSprite(player, tainted)
 	if not mod.Modules.HELPERS.IsModChallenge() then return end
+	local hoodPath = tainted and enums.Misc.GrudgeHoodPath or enums.Misc.VestigeHoodPath
 
-	-- local costumeDesc = p:GetCostumeSpriteDescs()[1]
-	-- local hoodPath = tainted and enums.Misc.GrudgeHoodPath or enums.Misc.VestigeHoodPath
-
-	-- costumeDesc:GetSprite():ReplaceSpritesheet(0, hoodPath, true)
+	Player.SetChallengeSprite(player, Isaac.GetChallenge())
+	Player.SetHoodSprite(player, hoodPath)
 end
 
 return Player
