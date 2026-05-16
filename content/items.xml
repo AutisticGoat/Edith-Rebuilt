@@ -182,7 +182,6 @@
 		name="Effigy"
 		description="A vestige of the past"
 		gfx="collectibles_Effigy.png"
-		maxcharges="2"
 		achievement="EdithRebuilt_Effigy"
 	/>
 	<passive
