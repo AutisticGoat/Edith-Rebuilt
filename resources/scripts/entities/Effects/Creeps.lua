@@ -8,6 +8,7 @@ local StatusEffects = modules.STATUS_EFFECTS
 local Helpers = modules.HELPERS
 local Player = modules.PLAYER
 local BitMask = modules.BIT_MASK
+local Creeps = modules.CREEPS
 local data = mod.DataHolder.GetEntityData
 
 local ModCreeps = {
@@ -53,18 +54,18 @@ local function SaltCreepUpdate(effect)
     local player = Helpers.GetPlayerFromTear(effect)
     if not player then return end
 
-    local effectData = data(effect)
-    local spawnType = effectData.SpawnType ---@cast spawnType SaltTypes
-    if not spawnType then return end
-
+    local spawnType = Creeps.GetSaltSpawnType(effect)
     local isVestige = Helpers.IsVestigeChallenge()
 
+    if not BitMask.HasAnyBitFlags(spawnType, saltTypes.SALT_SHAKER | saltTypes.SALT_SHAKER_JUDAS) then return end
+    
     for _, entity in pairs(GetNearbyEnemies(effect)) do
         if isVestige then
             entity:AddFear(EntityRef(player), 120)
         else
             ApplySaltToEntity(entity, spawnType, player)
-            Helpers.TriggerPush(entity, effect, 20)
+            entity.Velocity = Vector.Zero
+            Helpers.TriggerPush(entity, effect, 10)
         end
     end
 end

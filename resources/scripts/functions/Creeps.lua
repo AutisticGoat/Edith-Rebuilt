@@ -44,6 +44,13 @@ function Creeps.SpawnSaltCreep(parent, position, damage, timeout, gibAmount, gib
 	data(salt).SpawnType = modules.BIT_MASK.AddBitFlags(data(salt).SpawnType, spawnType)
 end
 
+---@param salt EntityEffect
+---@return SaltTypes
+function Creeps.GetSaltSpawnType(salt)
+---@diagnostic disable-next-line: return-type-mismatch
+	return data(salt).SpawnType or 0
+end
+
 ---Spawns Pepper creep, used for Pepper Grinder
 ---@param parent Entity
 ---@param position Vector
