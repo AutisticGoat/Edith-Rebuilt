@@ -21,6 +21,28 @@ function Jump.GetJumpFrame(entity)
     return Jump.IsJumping(entity) and JumpLib.Internal:GetData(entity).UpdateFrame or 0
 end
 
+---@param entity Entity
+---@return integer
+function Jump.GetFallFrame(entity)
+	if not JumpLib:IsFalling(entity) then return 0 end
+
+	return data(entity).FallFrames
+end
+
+---@param entity any
+mod:AddCallback(JumpLib.Callbacks.ENTITY_UPDATE_60, function(_, entity)
+	if not JumpLib:IsFalling(entity) then return end
+
+	local entData = data(entity)
+
+	entData.FallFrames = entData.FallFrames or 0
+	entData.FallFrames = entData.FallFrames + 1
+end)
+
+mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, function (_, entity)
+	data(entity).FallFrames = 0
+end)
+
 ---@param player EntityPlayer
 ---@param hasWater boolean
 ---@param isChap4 boolean
@@ -82,16 +104,14 @@ end
 ---@param player EntityPlayer
 ---@param tag string
 function Jump.InitTaintedEdithParryJump(player, tag)
-	local room = game:GetRoom()
-
 	sfx:Play(SoundEffect.SOUND_SHELLGAME)
-	SpawnJumpDustCloud(player, room:HasWater(), mod.Modules.HELPERS.IsChap4())
+	SpawnJumpDustCloud(player, game:GetRoom():HasWater(), mod.Modules.HELPERS.IsChap4())
 
 	JumpLib:Jump(player, {
 		Height = 8,
-		Speed  = 5.5,
-		Tags   = tag,
-		Flags  = jumpFlags.TEdithJump,
+		Speed = 5.5,
+		Tags = tag,
+		Flags = jumpFlags.TEdithJump,
 	})
 
 	data(player).IsParryJump = true
@@ -105,23 +125,19 @@ function Jump.InitEdithJump(player, jumpTag, vestige)
 	jumpTag = jumpTag or jumpTags.EdithJump
 
 	local canFly = player.CanFly
-	local room = game:GetRoom()
-	local modules = mod.Modules
-	local jumpSpeed = vestige and (4 + (player.MoveSpeed - 1)) or canFly and 1.3 or 1.85
 	local soundEffect = canFly and SoundEffect.SOUND_ANGEL_WING or SoundEffect.SOUND_SHELLGAME
-	local div = vestige and 1 or (canFly and 25 or 15)
-	local base = vestige and 40 or (canFly and 15 or 13)
-	local epicFetusMult = player:HasCollectible(CollectibleType.COLLECTIBLE_EPIC_FETUS) and 3 or 1
-	local jumpHeight = not vestige and ((base + (modules.TARGET_ARROW.GetEdithTargetDistance(player) / 40) / div) * epicFetusMult) or base
+	local vestigeSpeed = 4 + (player.MoveSpeed - 1)
+	local jumpHeight = vestige and 40 or (canFly and 20 or 15)
+	local jumpSpeed = vestige and vestigeSpeed or (canFly and 1.5 or 2)
 
 	sfx:Play(soundEffect)
-	SpawnJumpDustCloud(player, room:HasWater(), modules.HELPERS.IsChap4())
+	SpawnJumpDustCloud(player, game:GetRoom():HasWater(), mod.Modules.HELPERS.IsChap4())
 
 	JumpLib:TryJump(player, {
 		Height = jumpHeight,
-		Speed  = jumpSpeed,
-		Tags   = jumpTag,
-		Flags  = jumpFlags.EdithJump,
+		Speed = jumpSpeed,
+		Tags = jumpTag,
+		Flags = jumpFlags.EdithJump,
 	})
 end
 
