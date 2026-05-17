@@ -185,6 +185,7 @@
 		chargetype="special"
 		gfx="collectibles_Effigy.png"
 		achievement="EdithRebuilt_Effigy"
+		tags="nocantrip nolostbr"
 	/>
 	<passive
 		id="15" 
@@ -195,7 +196,6 @@
 		tags="offensive summonable"
 		achievement="EdithRebuilt_Chunk of Basalt"
 	/>
-
 	<null
 		id="1" 
 		name="Edith_Rebuilt_Edith" 
@@ -203,7 +203,6 @@
 		damagemult="1.5"
 		range="100"
 	/>
-
 	<null
 		id="2" 
 		name="Edith_Rebuilt_TEdith" 

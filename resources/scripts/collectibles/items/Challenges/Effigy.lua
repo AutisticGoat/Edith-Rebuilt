@@ -15,69 +15,83 @@ local Land = modules.LAND
 local sfx = enums.Utils.SFX
 local data = mod.DataHolder.GetEntityData
 
-mod:AddCallback(ModCallbacks.MC_PLAYER_GET_ACTIVE_MIN_USABLE_CHARGE, function ()
-    return 0
+local EFFIGY = {
+    MIN_USE_CHARGE = 1,
+    MAX_CHARGE = 64,
+    HOP_COOLDOWN = 15,
+    JUMP_COOLDOWN = 120,
+    HOP_CHARGE_COST = 1,
+    JUMP_CHARGE_COST = 6,
+    HOP_DAMAGE_MULT = 3,
+    JUMP_DAMAGE_MULT = 10,
+    JUMP_DAMAGE_FLAT = 5,
+    BLINK_INTERVAL = 20,
+    STATE = {
+        NORMAL = 0,
+        STATUE = 1,
+    },
+}
+
+mod:AddCallback(ModCallbacks.MC_PLAYER_GET_ACTIVE_MIN_USABLE_CHARGE, function()
+    return EFFIGY.MIN_USE_CHARGE
 end, items.COLLECTIBLE_EFFIGY)
 
 ---@param player EntityPlayer
-local function GetEffigyState(player)
-    local EffigySlot = player:GetActiveItemSlot(items.COLLECTIBLE_EFFIGY)
-
-    if EffigySlot == -1 then return 0 end
-
-    return player:GetActiveItemDesc(EffigySlot).VarData
+---@return integer
+local function GetEffigySlot(player)
+    return player:GetActiveItemSlot(items.COLLECTIBLE_EFFIGY)
 end
 
----@param entity Entity
----@param input InputHook
----@param action ButtonAction|KeySubType
----@return integer|boolean?
-mod:AddCallback(ModCallbacks.MC_INPUT_ACTION, function(_, entity, input, action)
-    if not entity then return end
-
-    local player = entity:ToPlayer()
-
-    if not player then return end
-    if GetEffigyState(player) == 0 then return end
-    if not data(player).EffigyHopCooldown then return end
-    if data(player).EffigyHopCooldown <= 0 then return end
-    if input ~= InputHook.GET_ACTION_VALUE then return end
-
-    return tables.OverrideActions[action]
-end)
-
+---@param player EntityPlayer
+---@return integer
+local function GetEffigyState(player)
+    local slot = GetEffigySlot(player)
+    if slot == -1 then return EFFIGY.STATE.NORMAL end
+    return player:GetActiveItemDesc(slot).VarData
+end
 
 ---@param player EntityPlayer
+---@return integer
+local function GetEffigyCharge(player)
+    local slot = GetEffigySlot(player)
+    if slot == -1 then return 0 end
+    return player:GetActiveCharge(slot) + player:GetBatteryCharge(slot)
+end
+
+---@param player EntityPlayer
+---@return boolean
 local function IsLilith(player)
     local type = player:GetPlayerType()
     return type == PlayerType.PLAYER_LILITH or type == PlayerType.PLAYER_LILITH_B
-end 
-
----@param player EntityPlayer
----@param VarData integer
-local function UpdateShotCapacity(player, VarData)
-    if IsLilith(player) then return end
-    player:SetCanShoot(VarData == 1)
 end
 
 ---@param player EntityPlayer
----@param VarData integer
-local function EffigyCostumeManager(player, VarData)
-    if VarData == 0 then
+---@param varData integer
+local function UpdateShotCapacity(player, varData)
+    if IsLilith(player) then return end
+    player:SetCanShoot(varData == EFFIGY.STATE.STATUE)
+end
+
+---@param player EntityPlayer
+---@param varData integer
+local function EffigyCostumeManager(player, varData)
+    if varData == EFFIGY.STATE.NORMAL then
         player:AddNullCostume(enums.NullItemID.EDITH)
-    elseif VarData == 1 then
+    else
         player:TryRemoveNullCostume(enums.NullItemID.EDITH)
     end
 end
 
 ---@param player EntityPlayer
----@param VarData integer
-local function ChangeEffigyState(player, VarData, slot)
-    player:SetActiveVarData(VarData == 0 and 1 or 0, slot)
-    UpdateShotCapacity(player, VarData)
-    EffigyCostumeManager(player, VarData)
-
-    return VarData
+---@param varData integer
+---@param slot ActiveSlot
+---@return integer
+local function ChangeEffigyState(player, varData, slot)
+    local newState = varData == EFFIGY.STATE.NORMAL and EFFIGY.STATE.STATUE or EFFIGY.STATE.NORMAL
+    player:SetActiveVarData(newState, slot)
+    UpdateShotCapacity(player, varData)
+    EffigyCostumeManager(player, varData)
+    return varData
 end
 
 ---@param jumpData JumpData
@@ -89,70 +103,53 @@ end
 local function ManageEffigyBigJump(player)
     if not Helpers.IsKeyStompTriggered(player) then return end
     if data(player).EffigyJumpCooldown > 0 then return end
-
     Jump.InitEdithJump(player, jumpTags.EffigyJump, true)
 end
 
----@param player EntityPlayer
 local function ManageEffigyHop(player)
     if not TargetArrow.IsEdithTargetMoving(player) then return end
     if data(player).EffigyHopCooldown > 0 then return end
-
     Jump.InitEdithJump(player, jumpTags.EffigyHop, false)
 end
 
-local function GetEffigySlot(player)
-    return player:GetActiveItemSlot(items.COLLECTIBLE_EFFIGY)
-end
-
----@param player EntityPlayer
----@return integer
-local function GetEffigyCharge(player)
-    local EffigySlot = GetEffigySlot(player)
-
-    if EffigySlot == -1 then return 0 end
-
-    return player:GetActiveCharge(EffigySlot) + player:GetBatteryCharge(EffigySlot)
-end
-
 local function JumpUpdateManager(player)
-    if GetEffigyState(player) == 0 then return end
+    if GetEffigyState(player) == EFFIGY.STATE.NORMAL then return end
     if Jump.IsJumping(player) then return end
-
     ManageEffigyHop(player)
     ManageEffigyBigJump(player)
 end
 
 local function ResetStatueStateOnDischarge(player)
     if GetEffigyCharge(player) > 0 then return end
-    if GetEffigyState(player) == 0 then return end
-
-    ChangeEffigyState(player, GetEffigyState(player), GetEffigySlot(player))
+    local state = GetEffigyState(player)
+    if state == EFFIGY.STATE.NORMAL then return end
+    ChangeEffigyState(player, state, GetEffigySlot(player))
 end
 
----@param player EntityPlayer
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
     JumpUpdateManager(player)
     ResetStatueStateOnDischarge(player)
 end)
 
----@param player EntityPlayer
----@param flag UseFlag
----@param slot ActiveSlot
-mod:AddCallback(ModCallbacks.MC_USE_ITEM, function (_, _, _, player, flag, slot)
+mod:AddCallback(ModCallbacks.MC_USE_ITEM, function(_, _, _, player, flag, slot)
     if BitMask.HasBitFlags(flag, UseFlag.USE_CARBATTERY --[[@as BitSet128]]) then return end
 
-    local varData = ChangeEffigyState(player, player:GetActiveItemDesc(slot).VarData, slot)
-    EffigyCostumeManager(player, varData)
+    ChangeEffigyState(player, player:GetActiveItemDesc(slot).VarData, slot)
     player:SetMinDamageCooldown(30)
 
-    return {
-        Discharge = false,
-        Remove = false,
-        ShowAnim = true
-    }
-
+    return { Discharge = false, Remove = false, ShowAnim = true }
 end, items.COLLECTIBLE_EFFIGY)
+
+mod:AddCallback(ModCallbacks.MC_INPUT_ACTION, function(_, entity, input, action)
+    if not entity then return end
+    local player = entity:ToPlayer()
+    if not player then return end
+    if GetEffigyState(player) == EFFIGY.STATE.NORMAL then return end
+    if not data(player).EffigyHopCooldown then return end
+    if data(player).EffigyHopCooldown <= 0 then return end
+    if input ~= InputHook.GET_ACTION_VALUE then return end
+    return tables.OverrideActions[action]
+end)
 
 ---@param player EntityPlayer
 ---@param jumpParams EdithJumpStompParams
@@ -160,12 +157,11 @@ end, items.COLLECTIBLE_EFFIGY)
 local function EffigyHopLand(player, jumpParams, jumpData)
     if not Jump.IsSpecificJump(jumpData, jumpTags.EffigyHop) then return end
 
-    jumpParams.Damage = player.Damage * 3
-    jumpParams.Knockback = 30
-    jumpParams.Radius = 40
+    jumpParams.Damage = player.Damage * EFFIGY.HOP_DAMAGE_MULT
+    jumpParams.Knockback = 20
+    jumpParams.Radius = 30
 
-
-    player:SetActiveCharge(GetEffigyCharge(player) - 1, GetEffigySlot(player))
+    player:SetActiveCharge(GetEffigyCharge(player) - EFFIGY.HOP_CHARGE_COST, GetEffigySlot(player))
 end
 
 ---@param player EntityPlayer
@@ -174,10 +170,12 @@ end
 local function EffigyJumpLand(player, jumpParams, jumpData)
     if not Jump.IsSpecificJump(jumpData, jumpTags.EffigyJump) then return end
 
-    jumpParams.Damage = (player.Damage * 10) + 15
-    data(player).EffigyJumpCooldown = 240
+    jumpParams.Damage = (player.Damage * EFFIGY.JUMP_DAMAGE_MULT) + EFFIGY.JUMP_DAMAGE_FLAT
+    jumpParams.Knockback = 30
+    jumpParams.Radius = 50
 
-    player:SetActiveCharge(GetEffigyCharge(player) - 10, GetEffigySlot(player))
+    data(player).EffigyJumpCooldown = EFFIGY.JUMP_COOLDOWN
+    player:SetActiveCharge(GetEffigyCharge(player) - EFFIGY.JUMP_CHARGE_COST, GetEffigySlot(player))
 end
 
 ---@param player EntityPlayer
@@ -188,33 +186,25 @@ local function EffigyGeneralLand(player, jumpParams, jumpData)
     Land.EdithStomp(player, jumpParams, true)
     player:MultiplyFriction(0.1)
     player:SetMinDamageCooldown(20)
-    data(player).EffigyHopCooldown = 15
+    data(player).EffigyHopCooldown = EFFIGY.HOP_COOLDOWN
 end
 
----@param entity Entity
----@param jumpData JumpData
-mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, function (_, entity, jumpData)
+mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, function(_, entity, jumpData)
     if not IsEffigyJump(jumpData) then return end
-
     local player = entity:ToPlayer()
     if not player then return end
 
     local jumpParams = EdithMod.GetJumpStompParams(player)
-
     EffigyHopLand(player, jumpParams, jumpData)
     EffigyJumpLand(player, jumpParams, jumpData)
     EffigyGeneralLand(player, jumpParams, jumpData)
 end)
 
 ---@param pData table
-local function EffigyJumpCooldownManager(pData)
-    if not pData.EffigyJumpCooldown then return end
-    pData.EffigyJumpCooldown = math.max(pData.EffigyJumpCooldown - 1, 0)
-end
-
-local function EffigyHopCooldownManager(pData)
-    if not pData.EffigyHopCooldown then return end
-    pData.EffigyHopCooldown = math.max(pData.EffigyHopCooldown - 1, 0)
+---@param field string
+local function DecreaseCooldown(pData, field)
+    if not pData[field] then return end
+    pData[field] = math.max(pData[field] - 1, 0)
 end
 
 ---@param player EntityPlayer
@@ -222,7 +212,6 @@ end
 local function HopCooldownIndicator(player, pData)
     if not pData.EffigyHopCooldown then return end
     if pData.EffigyHopCooldown ~= 1 then return end
-
     Player.SetColorCooldown(player, -0.8, 5)
     sfx:Play(SoundEffect.SOUND_BEEP)
 end
@@ -233,61 +222,46 @@ local function JumpCooldownIndicator(player, pData)
     if not pData.EffigyJumpCooldown then return end
     if pData.EffigyJumpCooldown > 0 then return end
 
-    pData.EffigyJumpBlink = pData.EffigyJumpBlink or 0
-    pData.EffigyJumpBlink = Maths.Clamp(pData.EffigyJumpBlink + 1, 0, 20)
+    pData.EffigyJumpBlink = Maths.Clamp((pData.EffigyJumpBlink or 0) + 1, 0, EFFIGY.BLINK_INTERVAL)
 
-    if pData.EffigyJumpBlink == 20 then
+    if pData.EffigyJumpBlink == EFFIGY.BLINK_INTERVAL then
         Player.SetColorCooldown(player, 0.5, 5)
         pData.EffigyJumpBlink = 0
     end
 end
 
----@param player EntityPlayer
 mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(_, player)
-    if GetEffigyState(player) == 0 then return end
-
+    if GetEffigyState(player) == EFFIGY.STATE.NORMAL then return end
     local pData = data(player)
 
     JumpCooldownIndicator(player, pData)
-    EffigyJumpCooldownManager(pData)
-    EffigyHopCooldownManager(pData)
+    DecreaseCooldown(pData, "EffigyJumpCooldown")
+    DecreaseCooldown(pData, "EffigyHopCooldown")
     HopCooldownIndicator(player, pData)
 end)
 
----@param ent Entity
----@param jumpData JumpData
-mod:AddCallback(JumpLib.Callbacks.ENTITY_UPDATE_60, function (_, ent, jumpData)
+mod:AddCallback(JumpLib.Callbacks.ENTITY_UPDATE_60, function(_, ent, jumpData)
     if not Jump.IsSpecificJump(jumpData, jumpTags.EffigyHop) then return end
-
     ent.Velocity = ent.Velocity * 1.05
 end)
 
----@param first boolean
----@param player EntityPlayer
-mod:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, function (_, _, _, first, _, _, player)
+mod:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, function(_, _, _, first, _, _, player)
     if not first then return end
     local pData = data(player)
-
     pData.EffigyJumpCooldown = 0
-    pData.EffigyHopCooldown = 0
+    pData.EffigyHopCooldown  = 0
     pData.BigJumpUses = 0
 end, items.COLLECTIBLE_EFFIGY)
 
----@param player EntityPlayer
-mod:AddCallback(ModCallbacks.MC_POST_TRIGGER_COLLECTIBLE_REMOVED, function (_, player)
+mod:AddCallback(ModCallbacks.MC_POST_TRIGGER_COLLECTIBLE_REMOVED, function(_, player)
     player:TryRemoveNullCostume(enums.NullItemID.EDITH)
 end, items.COLLECTIBLE_EFFIGY)
 
----@param player EntityPlayer
----@param levelInit boolean
-mod:AddCallback(ModCallbacks.MC_POST_PLAYER_NEW_LEVEL, function (_, player, _, levelInit)    
+mod:AddCallback(ModCallbacks.MC_POST_PLAYER_NEW_LEVEL, function(_, player, _, levelInit)
     if not levelInit then return end
-    local effigySlot = GetEffigySlot(player)
-    
-    if effigySlot == -1 then return end
+    local slot = GetEffigySlot(player)
+    if slot == -1 then return end
 
-    local batteryMult = player:HasCollectible(CollectibleType.COLLECTIBLE_BATTERY) and 2 or 1    
-    local maxCharge = 64 * batteryMult
-
-    player:SetActiveCharge(maxCharge, effigySlot)
+    local batteryMult = player:HasCollectible(CollectibleType.COLLECTIBLE_BATTERY) and 2 or 1
+    player:SetActiveCharge(EFFIGY.MAX_CHARGE * batteryMult, slot)
 end)
