@@ -83,12 +83,4 @@ function Maths.HopHeightCalc(const, var, params)
     return const * Maths.Clamp(progresion, 0, limit)
 end
 
----Not exactly a math function but i haven't found other module to include this
----@param flags integer
----@param checkFlag integer
----@return boolean
-function Maths.HasBitFlags(flags, checkFlag)
-	return flags & checkFlag == checkFlag
-end
-
 return Maths
