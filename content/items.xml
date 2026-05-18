@@ -179,13 +179,15 @@
 	<!-- Challenges -->
 	<active
 		id="14"
-		name="Effigy"
 		description="A vestige of the past"
+		name="Effigy"
 		maxcharges="64"
 		chargetype="special"
 		gfx="collectibles_Effigy.png"
 		achievement="EdithRebuilt_Effigy"
 		tags="nocantrip nolostbr"
+		persistent="true"
+		quality="4"
 	/>
 	<passive
 		id="15" 
@@ -196,6 +198,8 @@
 		tags="offensive summonable"
 		achievement="EdithRebuilt_Chunk of Basalt"
 	/>
+
+	<!-- Null items -->
 	<null
 		id="1" 
 		name="Edith_Rebuilt_Edith" 

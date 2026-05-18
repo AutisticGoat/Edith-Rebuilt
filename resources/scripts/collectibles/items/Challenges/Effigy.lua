@@ -77,9 +77,20 @@ end
 local function EffigyCostumeManager(player, varData)
     if varData == EFFIGY.STATE.NORMAL then
         player:AddNullCostume(enums.NullItemID.EDITH)
+        Player.SetHoodSprite(player, enums.Misc.VestigeHoodPath)
     else
         player:TryRemoveNullCostume(enums.NullItemID.EDITH)
+        player:GetEffects():RemoveCollectibleEffect(items.COLLECTIBLE_EFFIGY, -1)
     end
+end
+
+---@param player EntityPlayer
+---@param varData integer
+local function CostumeManagerFailSafe(player, varData)
+    if varData == EFFIGY.STATE.STATUE then return end
+    if not player:GetEffects():HasCollectibleEffect(items.COLLECTIBLE_EFFIGY) then return end
+
+    player:GetEffects():RemoveCollectibleEffect(items.COLLECTIBLE_EFFIGY, -1)
 end
 
 ---@param player EntityPlayer
@@ -100,21 +111,30 @@ local function IsEffigyJump(jumpData)
     return Jump.IsSpecificJump(jumpData, jumpTags.EffigyHop) or Jump.IsSpecificJump(jumpData, jumpTags.EffigyJump)
 end
 
+---@param player EntityPlayer
 local function ManageEffigyBigJump(player)
     if not Helpers.IsKeyStompTriggered(player) then return end
     if data(player).EffigyJumpCooldown > 0 then return end
     Jump.InitEdithJump(player, jumpTags.EffigyJump, true)
 end
 
+---@param player EntityPlayer
 local function ManageEffigyHop(player)
     if not TargetArrow.IsEdithTargetMoving(player) then return end
     if data(player).EffigyHopCooldown > 0 then return end
     Jump.InitEdithJump(player, jumpTags.EffigyHop, false)
 end
 
+---@param player EntityPlayer
 local function JumpUpdateManager(player)
     if GetEffigyState(player) == EFFIGY.STATE.NORMAL then return end
     if Jump.IsJumping(player) then return end
+
+    local pData = data(player)
+
+    pData.EffigyHopCooldown = pData.EffigyHopCooldown or 0
+    pData.EffigyJumpCooldown = pData.EffigyJumpCooldown or 0
+
     ManageEffigyHop(player)
     ManageEffigyBigJump(player)
 end
@@ -231,6 +251,8 @@ local function JumpCooldownIndicator(player, pData)
 end
 
 mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(_, player)
+    CostumeManagerFailSafe(player, GetEffigyState(player))
+
     if GetEffigyState(player) == EFFIGY.STATE.NORMAL then return end
     local pData = data(player)
 
