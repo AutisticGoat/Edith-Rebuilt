@@ -13,7 +13,6 @@ local effects = modules.STATUS_EFFECTS
 local helpers = modules.HELPERS
 local Player = modules.PLAYER
 local ModRNG = modules.RNG
-local VecDir = modules.VEC_DIR
 local Jump = modules.JUMP
 local data = mod.DataHolder.GetEntityData
 local params = EdithMod.GetJumpStompParams
@@ -445,5 +444,18 @@ end)
 mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_POCKET_ITEMS_SWAP, function(_, player)
 	if not Player.IsEdith(player, false) then return end
 	if Jump.IsJumping(player) then return end
+
 	return true
 end)
+
+---@param fam EntityFamiliar
+---@param jumpData JumpData
+mod:AddCallback(JumpLib.Callbacks.ENTITY_UPDATE_60, function(_, fam, jumpData)
+	if not JumpLib:IsFalling(fam) then return end	
+	if EdithMod.GetJumpStompParams(fam:ToFamiliar().Player).IsDefensiveStomp then return end
+
+	EdithMod.ApplyFallPhysics(fam, jumpData)
+end, {
+	tag = tables.JumpTags.EdithJump,
+	type = EntityType.ENTITY_FAMILIAR,
+})

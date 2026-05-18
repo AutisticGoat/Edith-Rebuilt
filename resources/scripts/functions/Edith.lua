@@ -197,11 +197,11 @@ local function GetFallSpeed(jumpdata)
     return 15 + (jumpdata.Height / 10)
 end
 
----@param player EntityPlayer
+---@param ent Entity
 ---@param jumpdata JumpData
-local function ApplyFallPhysics(player, jumpdata)
-    player:MultiplyFriction(0.5)
-    JumpLib:SetSpeed(player, GetFallSpeed(jumpdata))
+function Edith.ApplyFallPhysics(ent, jumpdata)
+    ent:MultiplyFriction(0.5)
+    JumpLib:SetSpeed(ent, GetFallSpeed(jumpdata))
 end
 
 ---@param jumpdata JumpData
@@ -221,7 +221,7 @@ function Edith.FlightFallBehavior(player, jumpdata, jumpParams)
     if not ShouldTriggerFall(player, distance) then return end
     if not JumpLib:IsFalling(player) then return end
 
-    ApplyFallPhysics(player, jumpdata)
+    Edith.ApplyFallPhysics(player, jumpdata)
     PlayFallSound(jumpdata)
 end
 
