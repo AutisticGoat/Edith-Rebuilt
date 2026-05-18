@@ -11,15 +11,15 @@ local Player = modules.PLAYER
 local data = mod.DataHolder.GetEntityData
 
 local CHUNK_OF_BASALT = {
-    ROCK_DAMAGE_MULT       = 2,
-    DASH_COOLDOWN          = 60,
-    DASH_SPEED             = 60,
-    COOLDOWN_COLOR         = Color(0.3, 0.3, 0.3),
-    TOTAL_ROCKS            = 8,
+    ROCK_DAMAGE_MULT = 2,
+    DASH_COOLDOWN = 60,
+    DASH_SPEED = 60,
+    COOLDOWN_COLOR = Color(0.3, 0.3, 0.3),
+    TOTAL_ROCKS = 8,
     VELOCITY_RESET_THRESHOLD = 7,
-    VELOCITY_DAMAGE_DIVISOR  = 5,
-    SPLASH_DAMAGE_MULT       = 0.75,
-    FLICKER_INTERVAL         = 20,
+    VELOCITY_DAMAGE_DIVISOR = 5,
+    SPLASH_DAMAGE_MULT = 0.75,
+    FLICKER_INTERVAL = 20,
 }
 
 ---@param player EntityPlayer
