@@ -108,8 +108,13 @@ mod:AddCallback(PRE_NPC_KILL.ID, function (_, npc, source)
     if not StsEffects.EntHasStatusEffect(npc, enums.EdithStatusEffects.SALTED) then return end
 
     local player = Helpers.GetPlayerFromRef(source)
+
     if not player then return end
-    if not BitMask.HasBitFlags(data(npc).SaltType, flags --[[@as BitSet128]]) then return end
+
+    local saltType = data(npc).SaltType
+
+    if not saltType then return end
+    if not BitMask.HasBitFlags(saltType, flags --[[@as BitSet128]]) then return end
 
     local saltParams = GetSaltShakerParams(player)
     local spawnType, color = saltParams.SaltType, saltParams.Color

@@ -46,7 +46,10 @@ mod:AddCallback(PRE_NPC_KILL.ID, function (_, npc, source)
 
     local player = Helpers.GetPlayerFromRef(source)
     if not player then return end
-    if not BitMask.HasBitFlags(data(npc).SaltType, saltTypes.SALT_ROCKS --[[@as BitSet128]]) then return end
+    local saltType = data(npc).SaltType
+
+    if not saltType then return end
+    if not BitMask.HasBitFlags(saltType, saltTypes.SALT_ROCKS --[[@as BitSet128]]) then return end
 
     local rng = RNG(math.max(Random(), 1))
     ShootSaltTears(player, npc, rng)
