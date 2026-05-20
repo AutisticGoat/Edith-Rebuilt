@@ -56,16 +56,18 @@ local function SaltCreepUpdate(effect)
 
     local spawnType = Creeps.GetSaltSpawnType(effect)
     local isVestige = Helpers.IsVestigeChallenge()
+    local isShakerSalt = BitMask.HasAnyBitFlags(spawnType, saltTypes.SALT_SHAKER | saltTypes.SALT_SHAKER_JUDAS)
 
-    if not BitMask.HasAnyBitFlags(spawnType, saltTypes.SALT_SHAKER | saltTypes.SALT_SHAKER_JUDAS) then return end
-    
     for _, entity in pairs(GetNearbyEnemies(effect)) do
         if isVestige then
             entity:AddFear(EntityRef(player), 120)
         else
             ApplySaltToEntity(entity, spawnType, player)
-            entity.Velocity = Vector.Zero
-            Helpers.TriggerPush(entity, effect, 10)
+
+            if isShakerSalt then
+                entity.Velocity = Vector.Zero
+                Helpers.TriggerPush(entity, effect, 10)
+            end
         end
     end
 end
