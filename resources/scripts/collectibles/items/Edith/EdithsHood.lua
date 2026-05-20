@@ -28,7 +28,7 @@ local HOOD = {
     TIMER_COMBAT_ROOM = 240,
 }
 
-local maxCreep   = 10
+local maxCreep = 10
 local saltDegrees = 360 / maxCreep
 
 mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, function(_, tear)
@@ -133,5 +133,6 @@ mod:AddCallback(PRE_NPC_KILL.ID, function(_, npc, source)
     if not player then return end
 	if not data(npc).SaltType then return end
     if not BitMask.HasBitFlags(data(npc).SaltType, saltTypes.EDITHS_HOOD --[[@as BitSet128]]) then return end
+
     SpawnSaltTears(player, npc)
 end)
