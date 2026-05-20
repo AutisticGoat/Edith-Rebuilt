@@ -56,7 +56,7 @@ mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(_, entity)
 
     local entData = data(entity)
     PepperHitsManager(entData)
- 
+
     if entData.PepperHits % 2 ~= 0 then return end
 
     TriggerPepperEffects(entity, RNG)
