@@ -13,10 +13,11 @@ mod:AddCallback(ModCallbacks.MC_USE_ITEM, function (_, _, _, player)
 end, items.COLLECTIBLE_BURNT_HOOD)
 
 ---@param player EntityPlayer
+---@param jumpData JumpData
 ---@return boolean
-local function TriggerParry(player)
+local function TriggerParry(player, jumpData)
 	local PerfectParry = Land.ParryLandManager(player, TEdith.GetHopParryParams(player), false)
-	Land.LandFeedbackManager(player, Land.GetLandSoundTable(true, PerfectParry), Color(1, 1, 1), PerfectParry)
+	Land.LandFeedbackManager(player, Land.GetLandSoundTable(true, PerfectParry), Color(1, 1, 1), jumpData, PerfectParry)
 
 	return PerfectParry
 end
@@ -28,8 +29,9 @@ local function TriggerPerfectParryReward(player)
 end	
 
 ---@param player EntityPlayer
-mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, function (_, player)
-	local PerfectParry = TriggerParry(player)
+---@param jumpData JumpData
+mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, function (_, player, jumpData)
+	local PerfectParry = TriggerParry(player, jumpData)
 
 	if not PerfectParry then return end
 
