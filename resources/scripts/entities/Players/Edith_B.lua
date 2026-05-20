@@ -169,7 +169,7 @@ local function ManageTargetCleanup(player, pData, arrow, isArrowMoving)
 	if not arrow or isArrowMoving then return end
 
 	if pData.IsRedirectioningMove then
-		if pData.PressCount <= 2 then
+		if pData.PressCount <= 4 then
 			TargetArrow.RemoveEdithTarget(player, true)
 			TEdithMod.StopTEdithHops(player, 20, false, true, true)
 			player:MultiplyFriction(0.05)
