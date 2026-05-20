@@ -24,7 +24,7 @@ end
 ---@param source EntityRef
 local function DamageEnemies(player, entity, amount, source)
     local paprikaMult = player:GetTrinketMultiplier(trinket.TRINKET_PAPRIKA)
-    local scaledDamage = amount * (0.0125 * (paprikaMult - 1))
+    local scaledDamage = amount * (0.0125 * paprikaMult)
     local enemies = Isaac.FindInCapsule(Capsule(entity.Position, Vector.One, 0, 40), EntityPartition.ENEMY)
 
     for _, ent in ipairs(enemies) do
