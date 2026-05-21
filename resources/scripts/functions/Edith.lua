@@ -280,8 +280,8 @@ function Edith.ExplosionRecoil(player, jumpParams, bomb)
 	if not mod.Modules.JUMP.IsJumping(player) then return end
 
 	JumpLib:Jump(player, {
-		Height = 10,
-		Speed = 1.5,
+		Height = 15,
+		Speed = 2,
 		Tags = JumpTags.EdithJump,
 		Flags = jumpFlags.EdithJump,
 	})
@@ -510,7 +510,7 @@ local function PutEdithInTarget(player, jumpData)
 	if mod.Modules.MATHS.Round(jumpData.Height, 1) ~= 21.6 then return end
 
 	player:MultiplyFriction(0.2)
-	print(JumpLib:SetSpeed(player, 30))
+	JumpLib:SetSpeed(player, 30)
 end
 
 ---@param player EntityPlayer
