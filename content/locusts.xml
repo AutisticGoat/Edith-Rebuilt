@@ -1,34 +1,36 @@
-<locusts gfxroot="gfx_dedith/familiars/locusts/">
+<locusts gfxroot="gfx/familiar/locusts/">
 	<!--
-		Vanilla color presets
+		Color presets
 	-->
 	<color name="default" />
-	<color name="fly_red" r="768" g="512" b="512" or="0" og="-255" ob="-255"/>
-	<color name="fly_green" r="512" g="768" b="512" or="-255" og="0" ob="-255"/>
-	<color name="fly_blue" r="512" g="512" b="768" or="-255" og="-255" ob="0"/>
-	<color name="fly_yellow" r="1024" g="768" b="512" or="0" og="0" ob="-255"/>
-	<color name="fly_orange" r="1024" g="512" b="512" or="0" og="0" ob="-255"/>
-	<color name="fly_black" r="255" g="255" b="255"/>
-	<color name="fly_purple" r="768" g="512" b="1024" or="0" og="-255" ob="0"/>
-	<color name="fly_pink" r="1024" g="512" b="768" or="0" og="-255" ob="0"/>
-	<color name="fly_cyan" r="680" g="1024" b="1024" or="0" og="0" ob="0"/>
+	<color name="fly_red" r="255" g="0" b="0" or="50" og="0" ob="0"/>
+	<color name="fly_lightred" r="215" g="75" b="75" or="50" og="10" ob="10"/>
+	<color name="fly_green" r="0" g="255" b="0" or="0" og="0" ob="0"/>
+	<color name="fly_blue" r="0" g="0" b="255" or="0" og="0" ob="10"/>
+	<color name="fly_brown" r="80" g="50" b="30" or="25" og="12" ob="10"/>
+	<color name="fly_yellow" r="241" g="179" b="12" or="0" og="0" ob="0"/>
+	<color name="fly_gold" r="202" g="178" b="0" or="150" og="150" ob="-255"/>
+	<color name="fly_magnet" r="219" g="204" b="94" or="0" og="0" ob="0"/>
+	<color name="fly_orange" r="255" g="115" b="0" or="100" og="60" ob="0"/>
+	<color name="fly_black" r="1" g="1" b="1"/>
+	<color name="fly_grey" r="120" g="120" b="120" or="10" og="10" ob="10"/>
+	<color name="fly_darkred" r="255" g="0" b="0"/>
+	<color name="fly_purple" r="126" g="12" b="174" or="50" og="-255" ob="50"/>
+	<color name="fly_darkpurple" r="126" g="12" b="174" or="0" og="-150" ob="0"/>
+	<color name="fly_pink" r="255" g="84" b="148" or="50" og="-255" ob="10"/>
+	<color name="fly_cyan" r="12" g="217" b="241" or="0" og="20" ob="50"/>
+	<color name="fly_lightblue" r="122" g="242" b="238" or="0" og="20" ob="50"/>
+	<color name="fly_white" r="255" g="255" b="255" or="150" og="150" ob="150"/>
+	<color name="fly_gas" r="0" g="155" b="0" or="0" og="0" ob="0"/>
+	<color name="fly_fart" r="184" g="191" b="134" or="24" og="24" ob="24"/>
 
-	<!--
-		D!Edith color presets
-	-->
-	<color name="fly_lightgrey" r="200" g="200" b="200" or="50" og="50" ob="50"/>
-	<color name="fly_darkpurple" r="472" g="284" b="692" or="0" og="-128" ob="0"/>
-	<color name="fly_pale" r="828" g="624" b="620" or="0" og="0" ob="0"/>
-	<color name="fly_gold" r="850" g="550" b="275" or="0" og="0" ob="0"/>
-	<color name="fly_shadyred" r="-255" g="-255" b="-255" or="255" og="0" ob="0"/>
-	<color name="fly_white" r="255" g="255" b="255" or="0" og="0" ob="0"/>
 
-	<!--
-		Locusts
+<!--
+		Default scales
 	-->
-	<!-- Salty Baby -->
-	<!-- <locust id="0" tearFlags2="20" procChance="0.75" color="fly_white" /> -->
-	
-	<!-- The Blue Berry -->
-	<!--<locust id="21" damageMultiplier="1" speed="1" collisionInterval="7" tearFlags="0" color="fly_red" />-->
+	<scale quality="0" scale="0.8"/>
+	<scale quality="1" scale="0.9"/>
+	<scale quality="2" scale="1.0"/>
+	<scale quality="3" scale="1.1"/>
+	<scale quality="4" scale="1.2"/>
 </locusts>
