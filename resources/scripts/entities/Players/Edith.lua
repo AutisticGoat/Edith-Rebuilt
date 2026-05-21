@@ -401,6 +401,13 @@ mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function (_, _, damage, _, sour
 	return false
 end)
 
+mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG, function(_, player, amount, flag, source, count)
+	if not Player.IsEdith(player, false) then return end
+	if data(player).JumpCount <= 0 then return end
+
+	return false
+end)
+
 ---@param player EntityPlayer
 mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_RENDER, function(_, player)
 	if not Player.IsEdith(player, false) then return end
