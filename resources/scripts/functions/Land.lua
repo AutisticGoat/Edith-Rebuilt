@@ -869,7 +869,7 @@ end
 
 local function ProjectilePerfectParry(player, proj, shouldTriggerFireJets)
 	local spawner = proj.Parent or proj.SpawnerEntity
-	local targetEnt = spawner or Helpers.GetNearestEnemy(player) or proj
+	local targetEnt = spawner or mod.Modules.HELPERS.GetNearestEnemy(player) or proj
 	local flags = misc.NewProjectilFlags | (shouldTriggerFireJets and ProjectileFlags.FIRE_SPAWN or 0)
 
 	proj.FallingAccel = -0.1
