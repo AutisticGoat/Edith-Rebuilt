@@ -1,27 +1,8 @@
+---@diagnostic disable: undefined-field
 local DSSModName = "Dead Sea Scrolls (Edith: Rebuilt)"
-local DSSCoreVersion = 7
 local mod = EdithRebuilt
 local saveManager = mod.SaveManager
 local MenuProvider = {}
-
-local BREAK_LINE = {str = "", fsize = 1, nosel = true}
-
-local function GenerateTooltip(str)
-    local endTable = {}
-    local currentString = ""
-    for w in str:gmatch("%S+") do
-        local newString = currentString .. w .. " "
-        if newString:len() >= 15 then
-            table.insert(endTable, currentString)
-            currentString = ""
-        end
-
-        currentString = currentString .. w .. " "
-    end
-
-    table.insert(endTable, currentString)
-    return {strset = endTable}
-end
 
 function MenuProvider.SaveSaveData()
     saveManager.GetPersistentSave()
@@ -90,7 +71,6 @@ local edithDir = {
         title = "edith: rebuilt",
         buttons = {
             {str = "resume game", action = "resume"},
-            -- {str = "settings", dest = "settings"},
             dssmod.changelogsButton
         },
         tooltip = dssmod.menuOpenToolTip

@@ -1,4 +1,10 @@
 DeadSeaScrollsMenu.AddChangelog("Edith: Rebuilt", "v1.8.0", [[
+- Still indev please wait
+]]
+)
+
+DeadSeaScrollsMenu.AddChangelog("Edith: Rebuilt", "v1.7.1a", [[
+- Fixed some abyss locusts being completely invisible for no reason
 ]]
 )
 
