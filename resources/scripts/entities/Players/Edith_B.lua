@@ -1,4 +1,3 @@
----@diagnostic disable: undefined-global
 local mod = EdithRebuilt
 local enums = mod.Enums
 local utils = enums.Utils
@@ -35,7 +34,7 @@ end)
 ---@param player EntityPlayer
 ---@param forceStopHops boolean
 local function ResetTEdithPlayer(player, forceStopHops)
-	Helpers.ChangeColor(player, _, _, _, 1)
+	Helpers.ChangeColor(player, nil, nil, nil, 1)
 	data(player).PressCount = 0
 	if forceStopHops then
 		TEdithMod.StopTEdithHops(player, 0, true, true, true)
@@ -89,7 +88,6 @@ mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(_, player)
 	ManageLeoEffect(player)
 	ManageHopDashCharge(player, arrow, HopParams)
 	TEdithMod.ParryCooldownManager(player, HopParams)
-	TEdithMod.WaterCurrentManager(player)
 end)
 
 ---@param player EntityPlayer
@@ -250,7 +248,8 @@ mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
 	ManageStopAnimations(player)
 end)
 
-local function RoomFloorStopManager(_, isLevelCallback)
+---@param isLevelCallback boolean
+local function RoomFloorStopManager(isLevelCallback)
 	local isDungeon = game:GetRoom():GetType() == RoomType.ROOM_DUNGEON
 	local forceStop = isLevelCallback or isDungeon
 
@@ -260,10 +259,10 @@ local function RoomFloorStopManager(_, isLevelCallback)
 end
 
 mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function ()
-	RoomFloorStopManager(_, false)
+	RoomFloorStopManager(false)
 end)
 mod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, function ()
-	RoomFloorStopManager(_, true)
+	RoomFloorStopManager(true)
 end)
 
 local damageBase = 5.25
@@ -378,7 +377,6 @@ mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
 		local playerpos = GetPlayerRenderPos(player)
 		local offset = GetMainChargeOffset(player, playerData)
 
-
 		RenderChargeBars(playerData, playerpos, offset, dashCharge, dashBRCharge)
 	end, enums.PlayerType.PLAYER_EDITH_B)
 end)
@@ -436,23 +434,10 @@ end
 ---@param fam EntityFamiliar
 mod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, fam)
 	if not IsWisp(fam) then return end
-	StopVel(player, fam)
+	StopVel(fam.Player, fam)
 end)
 
 ---@param npc EntityNPC
 mod:AddCallback(ModCallbacks.MC_NPC_UPDATE, function (_, npc)
 	StopVel(npc:GetPlayerTarget():ToPlayer() --[[@as EntityPlayer]], npc)
 end, EntityType.ENTITY_WILLO)
-
----@param player EntityPlayer
----@param ent Entity
-mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_COLLISION, function (_, player, ent)
-	local pickup = ent:ToPickup()
-
-	if not pickup then return end
-	if pickup.Variant ~= PickupVariant.PICKUP_COLLECTIBLE then return end
-	if pickup.SubType == 0 then return end
-
-	-- TEdithMod.StopTEdithHops(player, 20, true, false, false)
-	-- Helpers.TriggerPush(player, pickup, 1)
-end)
