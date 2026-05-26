@@ -309,7 +309,6 @@ mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(_, player)
 	if not Player.IsEdith(player, false) then return end
 
 	local jumpParams = params(player)
-	Player.WaterCurrentManager(player)
 
 	if jumpParams.RocketLaunch then return end
 	EdithMod.CooldownUpdate(player, jumpParams)
@@ -361,8 +360,6 @@ mod:AddCallback(JumpLib.Callbacks.ENTITY_UPDATE_60, function (_, player, jumpdat
 	if not Player.IsEdith(player, false) then return end
 
 	local jumpParams = params(player)
-
-	jumpParams.JumpDest = TargetArrow.GetEdithTarget(player, false).Position
 
 	JumpInitScale(player)
 	JumpFallScale(player)
@@ -458,8 +455,11 @@ end)
 ---@param fam EntityFamiliar
 ---@param jumpData JumpData
 mod:AddCallback(JumpLib.Callbacks.ENTITY_UPDATE_60, function(_, fam, jumpData)
-	if not JumpLib:IsFalling(fam) then return end	
-	if EdithMod.GetJumpStompParams(fam:ToFamiliar().Player).IsDefensiveStomp then return end
+	if not JumpLib:IsFalling(fam) then return end
+	local player = fam:ToFamiliar().Player
+
+	if EdithMod.GetJumpStompParams(player).IsDefensiveStomp then return end
+	if not player.CanFly then return end
 
 	EdithMod.ApplyFallPhysics(fam, jumpData)
 end, {
