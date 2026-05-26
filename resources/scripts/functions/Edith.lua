@@ -17,7 +17,6 @@ local Edith = {}
 ---@field CanJump false
 ---@field Cooldown integer
 ---@field JumpStartPos Vector
----@field JumpDest Vector
 ---@field JumpStartDist number
 ---@field CoalBonus number
 ---@field BombStomp boolean
@@ -33,7 +32,6 @@ local function NewJumpStompParams()
 		CanJump = false,
 		Cooldown = 0,
 		JumpStartPos = Vector(0, 0),
-		JumpDest = Vector(0, 0),
 		JumpStartDist = 0,
 		CoalBonus = 0,
 		BombStomp = false,
