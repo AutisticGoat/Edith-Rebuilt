@@ -66,6 +66,12 @@ mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_REMOVE_COSTUME, function(_, itemconfi
     return true
 end)
 
+---@param player EntityPlayer
+mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(_, player)
+    if not Player.IsAnyEdith(player) then return end
+	Player.WaterCurrentManager(player)
+end)
+
 mod:AddCallback(ModCallbacks.MC_POST_TEAR_UPDATE, function(_, tear)
     local player = Helpers.GetPlayerFromTear(tear)
 

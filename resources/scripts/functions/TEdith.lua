@@ -305,15 +305,6 @@ function TEdith.HopDashChargeManager(player, arrow, hopParams)
         TEdith.AddHopDashCharge(player, chargeAdd, 0.5)
     end
 end
----@param player EntityPlayer
-function TEdith.WaterCurrentManager(player)
-	local current = game:GetRoom():GetWaterCurrent()
-	local roomHasCurrent = current:Length() ~= 0
-
-	if not roomHasCurrent then return end
-	if mod.Modules.JUMP.IsJumping(player) then return end
-	player.Velocity = player.Velocity * (current * 0.3)
-end
 
 ---Function used to trigger Tainted Edith and Burnt Hood's parry-jump
 ---@param player EntityPlayer
