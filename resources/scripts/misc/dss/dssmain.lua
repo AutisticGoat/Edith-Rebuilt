@@ -1,108 +1,129 @@
----@diagnostic disable: undefined-field
+local DSSModName = "Dead Sea Scrolls (Edith: Rebuilt)"
+local DSSCoreVersion = 7
 local mod = EdithRebuilt
 local saveManager = mod.SaveManager
-local menuProvider = {}
+local MenuProvider = {}
 
-function menuProvider.SaveSaveData()
-    saveManager.Save()
-end
+local BREAK_LINE = {str = "", fsize = 1, nosel = true}
 
-function menuProvider.GetPaletteSetting()
-    return saveManager.GetDeadSeaScrollsSave().MenuPalette
-end
-function menuProvider.SavePaletteSetting(var)
-    saveManager.GetDeadSeaScrollsSave().MenuPalette = var
-end
+local function GenerateTooltip(str)
+    local endTable = {}
+    local currentString = ""
+    for w in str:gmatch("%S+") do
+        local newString = currentString .. w .. " "
+        if newString:len() >= 15 then
+            table.insert(endTable, currentString)
+            currentString = ""
+        end
 
-function menuProvider.GetHudOffsetSetting()
-    return Options.HUDOffset * 10
-end
+        currentString = currentString .. w .. " "
+    end
 
-function menuProvider.GetGamepadToggleSetting()
-    return saveManager.GetDeadSeaScrollsSave().GamepadToggle
-end
-
-function menuProvider.SaveGamepadToggleSetting(var)
-    saveManager.GetDeadSeaScrollsSave().GamepadToggle = var
+    table.insert(endTable, currentString)
+    return {strset = endTable}
 end
 
-function menuProvider.GetMenuKeybindSetting()
-    return saveManager.GetDeadSeaScrollsSave().MenuKeybind
-end
-function menuProvider.SaveMenuKeybindSetting(var)
-    saveManager.GetDeadSeaScrollsSave().MenuKeybind = var
+function MenuProvider.SaveSaveData()
+    saveManager.GetPersistentSave()
 end
 
-function menuProvider.GetMenuHintSetting()
-    return saveManager.GetDeadSeaScrollsSave().MenuHint
-end
-function menuProvider.SaveMenuHintSetting(var)
-    saveManager.GetDeadSeaScrollsSave().MenuHint = var
+function MenuProvider.GetPaletteSetting()
+    return saveManager.GetPersistentSave().MenuPalette
 end
 
-function menuProvider.GetMenuBuzzerSetting()
-    return saveManager.GetDeadSeaScrollsSave().MenuBuzzer
-end
-function menuProvider.SaveMenuBuzzerSetting(var)
-    saveManager.GetDeadSeaScrollsSave().MenuBuzzer = var
+function MenuProvider.SavePaletteSetting(var)
+    saveManager.GetPersistentSave().MenuPalette = var
 end
 
-function menuProvider.GetMenusNotified()
-    return saveManager.GetDeadSeaScrollsSave().MenusNotified
-end
-function menuProvider.SaveMenusNotified(var)
-    saveManager.GetDeadSeaScrollsSave().MenusNotified = var
+function MenuProvider.GetGamepadToggleSetting()
+    return saveManager.GetPersistentSave().GamepadToggle
 end
 
-function menuProvider.GetMenusPoppedUp()
-    return saveManager.GetDeadSeaScrollsSave().MenusPoppedUp
-end
-function menuProvider.SaveMenusPoppedUp(var)
-    saveManager.GetDeadSeaScrollsSave().MenusPoppedUp = var
+function MenuProvider.SaveGamepadToggleSetting(var)
+    saveManager.GetPersistentSave().GamepadToggle = var
 end
 
-local dssInitializerFunction = include("resources.scripts.misc.dss.dssmenucore")
-local dssMod = dssInitializerFunction.init("Dead Sea Scrolls (D!Edith)", menuProvider)
-local menu = {}
+function MenuProvider.GetMenuKeybindSetting()
+    return saveManager.GetPersistentSave().MenuKeybind
+end
 
-menu.main = {
-    title = "edith: rebuilt",
-    tooltip = dssMod.menuOpenToolTip,
-    buttons = {
-        dssMod.changelogsButton,
-    }
+function MenuProvider.SaveMenuKeybindSetting(var)
+    saveManager.GetPersistentSave().MenuKeybind = var
+end
+
+function MenuProvider.GetMenuHintSetting()
+    return saveManager.GetPersistentSave().MenuHint
+end
+
+function MenuProvider.SaveMenuHintSetting(var)
+    saveManager.GetPersistentSave().MenuHint = var
+end
+
+function MenuProvider.GetMenuBuzzerSetting()
+    return saveManager.GetPersistentSave().MenuBuzzer
+end
+
+function MenuProvider.SaveMenuBuzzerSetting(var)
+    saveManager.GetPersistentSave().MenuBuzzer = var
+end
+
+function MenuProvider.GetMenusNotified()
+    return saveManager.GetPersistentSave().MenusNotified
+end
+
+function MenuProvider.SaveMenusNotified(var)
+    saveManager.GetPersistentSave().MenusNotified = var
+end
+
+function MenuProvider.GetMenusPoppedUp()
+    return saveManager.GetPersistentSave().MenusPoppedUp
+end
+
+function MenuProvider.SaveMenusPoppedUp(var)
+    saveManager.GetPersistentSave().MenusPoppedUp = var
+end
+
+local dssmenucore = include("resources.scripts.misc.dss.dssmenucore")
+local dssmod = dssmenucore.init(DSSModName, MenuProvider)
+local edithDir = {
+    main = {
+        title = "edith: rebuilt",
+        buttons = {
+            {str = "resume game", action = "resume"},
+            -- {str = "settings", dest = "settings"},
+            dssmod.changelogsButton
+        },
+        tooltip = dssmod.menuOpenToolTip
+    },
+    menuOptions = {
+        title = "menu options",
+        buttons = {
+            dssmod.gamepadToggleButton,
+            dssmod.menuKeybindButton,
+            dssmod.paletteButton,
+            dssmod.menuHintButton,
+            dssmod.menuBuzzerButton
+        },
+    },
 }
 
-menu.menuSettings = {
-    title = "menu settings",
-    buttons = {
-        dssMod.hudOffsetButton,
-        dssMod.gamepadToggleButton,
-        dssMod.menuKeybindButton,
-        dssMod.menuHintButton,
-        dssMod.menuBuzzerButton,
-        dssMod.paletteButton
-    }
-}
-
-local directoryKey = {
-    Item = menu.main,
+local edithDirKey = {
+    Item = edithDir.main,
     Main = "main",
     Idle = false,
     MaskAlpha = 1,
     Settings = {},
     SettingsChanged = false,
-    Path = {},
+    Path = {}
 }
 
-DeadSeaScrollsMenu.AddMenu("Edith: Rebuilt", {
-    Run = dssMod.runMenu,
-
-    Open = dssMod.openMenu,
-
-    Close = dssMod.closeMenu,
-
-    UseSubMenu = false,
-    Directory = menu,
-    DirectoryKey = directoryKey
-})
+DeadSeaScrollsMenu.AddMenu(
+    "Edith: Rebuilt",
+    {
+        Run = dssmod.runMenu,
+        Open = dssmod.openMenu,
+        Close = dssmod.closeMenu,
+        Directory = edithDir,
+        DirectoryKey = edithDirKey
+    }
+)
