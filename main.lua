@@ -28,7 +28,11 @@ EdithRebuilt.SaveManager = require("resources.scripts.libs.EdithRebuiltSaveManag
 EdithRebuilt.SaveManager.Init(mod)
 EdithRebuilt.Hsx = require("resources.scripts.libs.lhsx")
 
-EdithRebuilt.Version = "v1.8.0beta"
+local version = {
+	1,
+	8,
+	0,
+}
 
 include("resources.scripts.misc.dss.dssmain")
 include("resources.scripts.misc.dss.changelogs")
@@ -62,6 +66,8 @@ local utils = mod.Enums.Utils
 mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, function()
 	utils.RNG:SetSeed(utils.Game:GetSeeds():GetStartSeed())
 end)
+
+EdithRebuilt.Version = "v" .. version[1].. "." .. version[2] .. "." .. version[3] .. "beta"
 
 Isaac.DebugString("Edith Rebuilt " .. EdithRebuilt.Version .. " loaded correctly")
 print("Edith Rebuilt " .. EdithRebuilt.Version .. " loaded correctly")
