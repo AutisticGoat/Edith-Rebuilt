@@ -13,6 +13,7 @@ local sfx = utils.SFX
 local DR = {
     DAMAGE_BASE = 40,
     DAMAGE_JUDAS_MULT = 1.5,
+    SHAKE_INTENSITY = 12
 }
 
 ---@param player EntityPlayer
