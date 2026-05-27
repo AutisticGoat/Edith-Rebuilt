@@ -33,14 +33,17 @@ end
 ---@param player EntityPlayer
 function Player.WaterCurrentManager(player)
 	local modules = mod.Modules
-	local waterCurrent = game:GetRoom():GetWaterCurrent()
-	local RoomHasWaterCurrent = not modules.VEC_DIR.VectorEquals(waterCurrent, Vector.Zero)
+	local current = game:GetRoom():GetWaterCurrent()
+	local RoomHasWaterCurrent = not (current.X == 0 and current.Y == 0)
+
+	if not RoomHasWaterCurrent then return end
 	local TEdithParams = modules.TEDITH.GetHopParryParams(player)
 	local isTEdithMoving = TEdithParams.IsHoping or TEdithParams.GrudgeDash
 	local isMoving = isTEdithMoving or modules.JUMP.IsJumping(player)
 
-	if not (not isMoving and RoomHasWaterCurrent) then return end
-	player.Velocity = player.Velocity * (waterCurrent * 0.3)
+	if isMoving then return end
+
+	player.Velocity = player.Velocity * (current * 0.3)
 end
 
 ---@param player EntityPlayer
