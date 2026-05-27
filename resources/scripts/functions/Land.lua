@@ -526,17 +526,15 @@ local function SfxFeedbackManager(sound, volume, IsChap4, hasWater)
         sound = enums.SoundEffect.SOUND_EDITH_STOMP
     end
 
-    local sounds = {
-        { sound = sound, volume = volume, pitch = 0, loop = false },
-        IsChap4  and { sound = SoundEffect.SOUND_MEATY_DEATHS, volume = volume - 0.5, pitch = 0, loop = false, a = 1, b = 0 },
-        hasWater and { sound = enums.SoundEffect.SOUND_EDITH_STOMP_WATER, volume = volume,       pitch = 0, loop = false },
-    }
+	sfx:Play(sound, volume)
 
-    for _, s in ipairs(sounds) do
-        if s then
-            sfx:Play(s.sound, s.volume, s.pitch, s.loop, s.a, s.b)
-        end
-    end
+	if hasWater then
+		sfx:Play(enums.SoundEffect.SOUND_EDITH_STOMP_WATER, volume - 0.5)
+	end
+
+	if IsChap4 then
+		sfx:Play(SoundEffect.SOUND_MEATY_DEATHS, volume)
+	end
 end
 
 local EFFECT = {
@@ -691,6 +689,7 @@ function Land.LandFeedbackManager(player, soundTable, GibColor, jumpData, IsParr
 
     local Helpers = mod.Modules.HELPERS
     local IsChap4 = Helpers.IsChap4()
+	local hasWater = game:GetRoom():HasWater()
 
     local landParams = (
 		IsEdithJump(jumpData) and GetEdithLandParams(player) or 
