@@ -25,6 +25,7 @@ local function TriggerDamage(player)
 
     for _, ent in ipairs(Helpers.GetEnemies()) do
         local enemyDist = playerPos:Distance(ent.Position)
+
         ent:TakeDamage(playerDamage * (Maths.exp(40 / enemyDist, 1, 1.2)), 0, playerRef, 0)
         ent:AddBurn(EntityRef(player), 83, fireDamage)
 
@@ -34,7 +35,7 @@ local function TriggerDamage(player)
     end
 end
 
-local function TriggerEffects(rng)
+local function TriggerSpecialEffects(rng)
     game:ShakeScreen(10)
     sfx:Play(SoundEffect.SOUND_FIREDEATH_HISS, 1, 0, false, ModRNG.RandomFloat(rng, 0.95, 1.05))
 end
@@ -46,7 +47,7 @@ end
 mod:AddCallback(ModCallbacks.MC_USE_ITEM, function(_, _, rng, player, flag)
     if BitMask.HasBitFlags(flag, UseFlag.USE_CARBATTERY --[[@as BitSet128]]) then return end
 
-    TriggerEffects(rng)
+    TriggerSpecialEffects(rng)
     TriggerDamage(player)
 
     return true
