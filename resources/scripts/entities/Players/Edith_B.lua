@@ -176,7 +176,6 @@ local function ManageTargetCleanup(player, pData, arrow, isArrowMoving)
 		elseif pData.PressCount >= 9 then
 			TargetArrow.RemoveEdithTarget(player, true)
 		end
-		print(pData.PressCount)
 	else
 		TargetArrow.RemoveEdithTarget(player, true)
 	end
