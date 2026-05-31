@@ -76,7 +76,7 @@ end)
 ---@param player EntityPlayer
 mod:AddCallback(ModCallbacks.MC_EVALUATE_CACHE, function(_, player)
     if not player:HasCollectible(items.COLLECTIBLE_SALT_HEART) then return end
-    player.Damage = (player.Damage + ((0.5 * player:GetCollectibleNum(items.COLLECTIBLE_SALT_HEART)) - 1)) * 1.75
+    player.Damage = (player.Damage + ((0.5 * player:GetCollectibleNum(items.COLLECTIBLE_SALT_HEART)))) * 1.75
 end, CacheFlag.CACHE_DAMAGE)
 
 ---@param npc EntityNPC
