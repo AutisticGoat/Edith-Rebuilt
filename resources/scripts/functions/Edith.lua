@@ -22,6 +22,7 @@ local Edith = {}
 ---@field BombStomp boolean
 ---@field RocketLaunch boolean
 ---@field IsDefensiveStomp boolean
+---@field IsCriticalStomp boolean
 ---@field StompedEntities Entity[]
 
 local function NewJumpStompParams()
@@ -37,6 +38,7 @@ local function NewJumpStompParams()
 		BombStomp = false,
 		RocketLaunch = false,
 		IsDefensiveStomp = false,
+		IsCriticalStomp = false,
 		StompedEntities = {},
 	} --[[@as EdithJumpStompParams]]
 end
@@ -63,7 +65,7 @@ end
 ---@param speed number
 ---@return integer
 function Edith.GetStompCooldown(speed)
-	return math.ceil(15 + (speed - 1) * -7.5)
+	return math.ceil(16 + (speed - 1) * -8)
 end
 
 ---@param player EntityPlayer
@@ -369,7 +371,7 @@ end
 ---@param player EntityPlayer
 ---@param jumpParams EdithJumpStompParams
 function Edith.StompRadiusManager(player, jumpParams)
-    local base = 35
+    local base = 29
     local flightMult = player.CanFly and 1.25 or 1
     local range = mod.Modules.PLAYER.GetPlayerRange(player)
 	local rangeMult = range / 9
@@ -379,8 +381,8 @@ function Edith.StompRadiusManager(player, jumpParams)
     jumpParams.Radius = ((base + factor) * flightMult) * RocketLaunchMult
 end
 
-local DAMAGE_BASE_INIT = 12
-local DAMAGE_BASE_STEP = 6
+local DAMAGE_BASE_INIT = 12.75
+local DAMAGE_BASE_STEP = 5
 local DAMAGE_STAT_DIVISOR = 5.25
 local VESTIGE_FLAT = 40
 
@@ -428,11 +430,12 @@ local function GetStompMultipliers(player, jumpParams)
         MultiShot = Math.Round(Math.exp(PlayerMod.GetNumTears(player), 1, 0.5), 2),
         Birthright = PlayerMod.PlayerHasBirthright(player) and 1.2 or 1,
         BloodClot = CollectibleMult(player, CollectibleType.COLLECTIBLE_BLOOD_CLOT, 1.1),
-        Flight = player.CanFly and 1.25 or 1,
+        Flight = player.CanFly and 1.3 or 1,
         RocketLaunch = jumpParams.RocketLaunch and 1.2 or 1,
         TanukiStatue = PlayerMod.HasTanukiStatueEffect(player) and 1.5 or 1,
         Terra = GetTerraMult(player),
-    }
+		CritStomp = jumpParams.IsCriticalStomp and 1.5 or 1
+	}
 end
 
 ---@param player EntityPlayer
@@ -451,7 +454,8 @@ local function ComputeRawDamage(player, params)
         mults.Flight *
         mults.RocketLaunch *
         mults.TanukiStatue *
-        mults.Terra
+        mults.Terra *
+		mults.CritStomp
     ) + (params.CoalBonus or 0)
 end
 
@@ -477,18 +481,32 @@ function Edith.StompDamageManager(player, params)
 end
 
 ---@param player EntityPlayer
----@param params EdithJumpStompParams
-function Edith.StompKnockbackManager(player, params)
+---@param jumpParams EdithJumpStompParams
+function Edith.StompKnockbackManager(player, jumpParams)
     local flightMult = player.CanFly and 1.15 or 1
-	params.Knockback = math.min(50, (7 ^ 1.2) * flightMult) * player.ShotSpeed
+	local criticalStompMult = jumpParams.IsCriticalStomp and 1.15 or 1
+	jumpParams.Knockback = math.min(50, (7 ^ 1.2) * flightMult * criticalStompMult) * player.ShotSpeed
+end
+
+---@param luck number
+---@return number
+local function GetCriticalStompChance(luck)
+	return math.min(0.1 + (0.02 * luck), 0.5)
 end
 
 ---@param player EntityPlayer
----@param params EdithJumpStompParams
-function Edith.StompCooldownManager(player, params)
+---@param jumpParams EdithJumpStompParams
+function Edith.CriticalStompManager(player, jumpParams)
+	if jumpParams.IsDefensiveStomp then return end
+	jumpParams.IsCriticalStomp = mod.Modules.RNG.RandomBoolean(player:GetDropRNG(), GetCriticalStompChance(player.Luck))
+end
+
+---@param player EntityPlayer
+---@param jumpParams EdithJumpStompParams
+function Edith.StompCooldownManager(player, jumpParams)
     local Cooldown = Edith.GetStompCooldown(player.MoveSpeed)
 
-    params.Cooldown = (params.IsDefensiveStomp and math.max(Cooldown - 5, 10) or Cooldown)
+    jumpParams.Cooldown = (jumpParams.IsDefensiveStomp and math.max(Cooldown - 5, 10) or Cooldown)
 end
 
 ---@param player EntityPlayer
@@ -535,5 +553,27 @@ mod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, familiar)
 	if not mod.Modules.JUMP.IsJumping(player) then return end
 	familiar.Velocity = player.Velocity
 end, FamiliarVariant.BLOOD_BABY)
+
+local critColor = Color(1, 1, 1, 1, 0.5)
+
+---@param player EntityPlayer
+---@param jumpParams EdithJumpStompParams
+mod:AddCallback(enums.Callbacks.OFFENSIVE_STOMP_HIT, function (_, player, ent, jumpParams)
+	if not jumpParams.IsCriticalStomp then return end
+
+	jumpParams.Cooldown = math.ceil(jumpParams.Cooldown * 0.75)
+	player:SetColor(critColor, 5, 1000, true, true)
+	sfx:Play(SoundEffect.SOUND_DEATH_BURST_LARGE, 1.5, 2, false, 1.25)
+
+	game:ShakeScreen(game:GetScreenShakeCountdown() + 4)
+end)
+
+---@param ent Entity
+---@param jumpParams EdithJumpStompParams
+mod:AddCallback(enums.Callbacks.OFFENSIVE_STOMP_KILL, function (_, _, ent, jumpParams)
+	if not jumpParams.IsCriticalStomp then return end
+
+	ent:AddEntityFlags(EntityFlag.FLAG_EXTRA_GORE)
+end)
 
 return Edith

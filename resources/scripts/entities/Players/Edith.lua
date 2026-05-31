@@ -247,6 +247,7 @@ end
 ---@param player EntityPlayer
 ---@param jumpParams EdithJumpStompParams
 local function ExecuteStompSequence(player, jumpParams)
+	EdithMod.CriticalStompManager(player, jumpParams)
     EdithMod.StompKnockbackManager(player, jumpParams)
     EdithMod.StompCooldownManager(player, jumpParams)
     EdithMod.StompDamageManager(player, jumpParams)
@@ -300,6 +301,8 @@ mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, function(_, player, jumpData, pit
     ExecuteStompSequence(player, jumpParams)
     ApplyLandingState(player, edithTarget)
     ResetPropulsionState(player)
+
+	jumpParams.IsCriticalStomp = false
 
     EdithMod.StompTargetRemover(player)
 end, JumpParams.EdithJump)
