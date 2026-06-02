@@ -8,6 +8,7 @@ local edithHoodJumpTag = "edithRebuilt_EdithsHoodJump"
 local enemyJumpTag = "edithRebuilt_EnemyJump"
 local effigyHop = "edithRebuilt_EffigyHop"
 local effigyJump = "edithRebuilt_EffigyJump"
+local soulOfEdithJump = "edithRebuilt_SoulOfEdith"
 
 EdithRebuilt.Enums = {
 	PlayerType = {
@@ -268,6 +269,7 @@ EdithRebuilt.Enums = {
 			TEdithHop = tedithHopTag,
 			TEdithJump = tedithJumpTag,
 			EdithsHoodJump = edithHoodJumpTag,
+			SoulOfEdith = soulOfEdithJump,
 			EnemyJump = enemyJumpTag,
 			EffigyHop = effigyHop,
 			EffigyJump = effigyJump,

@@ -11,45 +11,16 @@ local Helpers = modules.HELPERS
 local Creep = modules.CREEPS
 local Land = modules.LAND
 local ModRNG = modules.RNG
+local EdithMod = modules.EDITH
 local data = mod.DataHolder.GetEntityData
+local SoulOfEdithJumpTag = enums.Tables.JumpTags.SoulOfEdith
 local damageBase = 13.5
 
-local function InitEdithJump(player)
-	local soundeffect = player.CanFly and SoundEffect.SOUND_ANGEL_WING or SoundEffect.SOUND_SHELLGAME
-	local DustCloud = Isaac.Spawn(
-		EntityType.ENTITY_EFFECT,
-		EffectVariant.POOF01,
-		1,
-		player.Position,
-		Vector.Zero,
-		player
-	)
-
-    sfx:Play(soundeffect)
-
-	DustCloud.DepthOffset = -100
-
-	local config = {
-		Height = 15,
-		Speed = 1.5,
-		Tags = "SoulOfEdithJump",
-		Flags = jumpFlags.EdithJump,
-	}
-
-	JumpLib:Jump(player, config)
-end
-
 mod:AddCallback(ModCallbacks.MC_PRE_USE_CARD, function (_, _, player)
-	InitEdithJump(player)
+	-- InitEdithJump(player)
+	modules.JUMP.InitEdithJump(player, SoulOfEdithJumpTag, false)
     sfx:Play(sounds.SOUND_SOUL_OF_EDITH)
 end, card.CARD_SOUL_EDITH)
-
-local SoundPick = {
-	[1] = SoundEffect.SOUND_STONE_IMPACT, ---@type SoundEffect
-	[2] = sounds.SOUND_EDITH_STOMP,
-	[3] = sounds.SOUND_FART_REVERB,
-	[4] = sounds.SOUND_VINE_BOOM,
-}
 
 local function SpawnSaltTears(player)
 	for _ = 1, rng:RandomInt(18, 36) do 
@@ -68,20 +39,17 @@ end
 ---@param player EntityPlayer
 ---@param jumpData JumpData
 mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, function (_, player, jumpData)
-	local rawFormula = ((damageBase + player.Damage) / 1.5)
-    local playerData = data(player)
+	local stompParams = EdithMod.GetJumpStompParams(player)
 
-	for _, ent in pairs(Isaac.FindInCapsule(Capsule(player.Position, Vector.One, 0, 50), EntityPartition.ENEMY)) do
-		ent:TakeDamage(rawFormula, 0, EntityRef(player), 0)
-		Helpers.TriggerPush(ent, player, 20)
-	end
+	stompParams.Damage = ((damageBase + player.Damage) / 1.5)
+	stompParams.Radius = 50
+	stompParams.Knockback = 20
 
-    playerData.IsSoulOfEdithJump = true
-	Land.LandFeedbackManager(player, SoundPick, Color(1, 1, 1, 0), jumpData)
-    playerData.IsSoulOfEdithJump = false
+	Land.EdithStomp(player, stompParams, true)
+	Land.LandFeedbackManager(player, Land.GetLandSoundTable(false), Color(1, 1, 1, 0), jumpData)
 
     SpawnSaltTears(player)
-end, { tag = "SoulOfEdithJump" })
+end, { tag = SoulOfEdithJumpTag })
 
 mod:AddCallback(ModCallbacks.MC_POST_TEAR_DEATH, function(_, tear)
 	if not data(tear).IsSoulOfEdithTear then return end
