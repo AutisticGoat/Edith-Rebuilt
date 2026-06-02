@@ -318,6 +318,7 @@ mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, function(_, ent, jumpData)
 
 	local HopParams = TEdithMod.GetHopParryParams(player)
 
+	TEdithMod.BlazingParryManager(player, HopParams)
 	OnHopLand(player, jumpData, HopParams)
 	OnParryLand(player, jumpData, HopParams)
 end)

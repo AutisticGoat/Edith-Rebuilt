@@ -662,4 +662,9 @@ function Helpers.IsModChallenge()
 	return Helpers.IsVestigeChallenge() or Helpers.IsGrudgeChallenge()
 end
 
+---@param luck number
+---@return number
+function Helpers.GetLuckInteractionChance(luck)
+	return math.min(0.1 + (0.02 * luck), 0.5)
+end
 return Helpers

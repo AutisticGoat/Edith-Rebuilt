@@ -27,6 +27,7 @@ local data = mod.DataHolder.GetEntityData
 ---@field ParriedEnemies Entity[]
 ---@field IsHoping boolean
 ---@field IsParryJump boolean
+---@field IsBlazingParry boolean
 ---@field ParryBomb boolean
 ---@field GrudgeDash boolean
 
@@ -50,7 +51,7 @@ local function NewHopParryParams()
 		ImpreciseParriedEnemies = {},
 		GrudgeDash = false,
 		ParryBomb = false,
-
+		IsBlazingParry = false
 	} --[[@as TEdithHopParryParams]]
 end
 
@@ -214,6 +215,14 @@ function TEdith.StopTEdithHops(player, cooldown, useQuitJump, resetCharge, keepF
 	end
 
 	player:SetMinDamageCooldown(cooldown)
+end
+
+---@param player EntityPlayer
+---@param HopParams TEdithHopParryParams
+function TEdith.BlazingParryManager(player, HopParams)
+	local modules = mod.Modules
+
+	HopParams.IsBlazingParry = modules.RNG.RandomBoolean(player:GetDropRNG(), modules.HELPERS.GetLuckInteractionChance(player.Luck))
 end
 
 function TEdith.HopCurve(t)

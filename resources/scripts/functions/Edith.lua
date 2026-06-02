@@ -488,17 +488,14 @@ function Edith.StompKnockbackManager(player, jumpParams)
 	jumpParams.Knockback = math.min(50, (7 ^ 1.2) * flightMult * criticalStompMult) * player.ShotSpeed
 end
 
----@param luck number
----@return number
-local function GetCriticalStompChance(luck)
-	return math.min(0.1 + (0.02 * luck), 0.5)
-end
-
 ---@param player EntityPlayer
 ---@param jumpParams EdithJumpStompParams
 function Edith.CriticalStompManager(player, jumpParams)
 	if jumpParams.IsDefensiveStomp then return end
-	jumpParams.IsCriticalStomp = mod.Modules.RNG.RandomBoolean(player:GetDropRNG(), GetCriticalStompChance(player.Luck))
+	
+	local modules = mod.Modules
+
+	jumpParams.IsCriticalStomp = modules.RNG.RandomBoolean(player:GetDropRNG(), modules.HELPERS.GetLuckInteractionChance(player.Luck))
 end
 
 ---@param player EntityPlayer
@@ -524,6 +521,7 @@ end
 local function PutEdithInTarget(player, jumpData)
 	if not JumpLib:IsFalling(player) then return end
 	if mod.Modules.MATHS.Round(jumpData.Height, 1) ~= 21.6 then return end
+	if mod.Modules.TARGET_ARROW.GetEdithTargetDistance(player) > 19 then return end
 
 	player:MultiplyFriction(0.2)
 	JumpLib:SetSpeed(player, 30)
@@ -565,7 +563,7 @@ mod:AddCallback(enums.Callbacks.OFFENSIVE_STOMP_HIT, function (_, player, ent, j
 	player:SetColor(critColor, 5, 1000, true, true)
 	sfx:Play(SoundEffect.SOUND_DEATH_BURST_LARGE, 1.5, 2, false, 1.25)
 
-	game:ShakeScreen(game:GetScreenShakeCountdown() + 4)
+	game:ShakeScreen(14)
 end)
 
 ---@param ent Entity
