@@ -80,6 +80,7 @@ local includeFiles = {
 	ent .. "Wisps/SaltShaker",
 
 	ent .. "Locusts/SaltShaker",
+	ent .. "Locusts/PepperGrinder",
 
 	"challenges/Vestige",
 	"challenges/Grudge",
