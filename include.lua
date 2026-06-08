@@ -79,6 +79,8 @@ local includeFiles = {
 
 	ent .. "Wisps/SaltShaker",
 
+	ent .. "Locusts/SaltShaker",
+
 	"challenges/Vestige",
 	"challenges/Grudge",
 

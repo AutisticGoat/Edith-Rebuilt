@@ -51,8 +51,6 @@ function Edith.GetJumpStompParams(player)
     return playerData.JumpParams
 end
 
-local params = Edith.GetJumpStompParams
-
 ---Method used for Edith's dash behavior (Like A Pony/White Pony or Mars usage)
 ---@param player EntityPlayer
 ---@param dir Vector

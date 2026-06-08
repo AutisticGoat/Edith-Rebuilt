@@ -631,6 +631,11 @@ function Helpers.IsModItemWisp(wisp, ID)
 	return wisp.Variant == FamiliarVariant.WISP and wisp.SubType == ID
 end
 
+function Helpers.IsModItemLocust(locust, ID)
+	if not locust:ToFamiliar() then return false end
+	return locust.Variant == FamiliarVariant.ABYSS_LOCUST and locust.SubType == ID
+end
+
 function Helpers.TriggerPerfectParryFlash(player)
 	ItemOverlay.Show(enums.Giantbook.PERFECT_PARRY, 3, player)
 	ItemOverlay.GetSprite().Color = Color(0, 0, 0, 0)

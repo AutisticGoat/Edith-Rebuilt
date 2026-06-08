@@ -33,4 +33,6 @@
 	<scale quality="2" scale="1.0"/>
 	<scale quality="3" scale="1.1"/>
 	<scale quality="4" scale="1.2"/>
+
+	<locust id="0" color="fly_white" />
 </locusts>

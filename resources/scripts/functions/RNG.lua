@@ -12,7 +12,7 @@ function modRNG.GetRandomRune(rng)
 end
 
 ---Returns a chance based boolean
----@param rng? RNG -- if `nil`, the function will use Mod's `RNG` object instead
+---@param rng? RNG if `nil`, the function will use Mod's `RNG` object instead
 ---@param chance? number if `nil`, default chance will be 0.5 (50%)
 function modRNG.RandomBoolean(rng, chance)
 	return (rng or utils.RNG):RandomFloat() <= (chance or 0.5)
