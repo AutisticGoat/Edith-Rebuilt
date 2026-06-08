@@ -47,7 +47,7 @@ end
 
 local function PepperHitsManager(entData)
     entData.PepperHits = entData.PepperHits or 1
-    entData.PepperHits = entData + 1
+    entData.PepperHits = entData.PepperHits + 1
 end
 
 ---@param entity EntityNPC
