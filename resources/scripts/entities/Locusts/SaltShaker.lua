@@ -13,8 +13,3 @@ mod:AddCallback(ModCallbacks.MC_PRE_FAMILIAR_COLLISION, function(_, fam, col)
 
     statusEffects.SetStatusEffect(enums.EdithStatusEffects.SALTED, col, 120, fam.Player)
 end)
-
----@param fam EntityFamiliar
-mod:AddCallback(ModCallbacks.MC_FAMILIAR_UPDATE, function (_, fam)
-    print(fam.State)
-end)
