@@ -25,7 +25,7 @@
 	<color name="fly_fart" r="184" g="191" b="134" or="24" og="24" ob="24"/>
 
 
-<!--
+	<!--
 		Default scales
 	-->
 	<scale quality="0" scale="0.8"/>
@@ -34,6 +34,30 @@
 	<scale quality="3" scale="1.1"/>
 	<scale quality="4" scale="1.2"/>
 
-	<locust id="0" color="fly_white" />
-	<locust id="1" color="fly_brown" />
+	<locust 
+		id="0" 
+		color="fly_white" 
+	/>
+	<locust 
+		id="1" 
+		color="fly_brown" 
+	/>
+	<locust 
+		id="2" 
+		backColor="fly_black" 
+		color="fly_red" 
+		locustFlags="12" 
+		procChance="0.25" 
+		gfx="anm2=locust_brim.anm2&animation=locust_brim"
+		damageMultiplier="0"
+		speed="0.8"
+	/>
+	<locust 
+		id="3" 
+		color="fly_brown" 
+	/>
+	<locust 
+		id="4" 
+		color="fly_white" 
+	/>
 </locusts>
