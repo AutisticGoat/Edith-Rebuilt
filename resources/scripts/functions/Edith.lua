@@ -369,7 +369,7 @@ end
 ---@param player EntityPlayer
 ---@param jumpParams EdithJumpStompParams
 function Edith.StompRadiusManager(player, jumpParams)
-    local base = 29
+    local base = 32
     local flightMult = player.CanFly and 1.25 or 1
     local range = mod.Modules.PLAYER.GetPlayerRange(player)
 	local rangeMult = range / 9
