@@ -5,55 +5,58 @@ local sfx = enums.Utils.SFX
 local effects = enums.EdithStatusEffects
 local data = mod.DataHolder.GetEntityData
 local StatusEffects = {}
+
+local spritePath = "gfx/ui/StatusEffects/"
+
 local Effects = {
     Salt = {
         ID = "EDITH_REBUILT_SALT",
-        Sprite = Sprite("gfx/EdithRebuiltSalted.anm2", true),
+        Sprite = Sprite(spritePath .. "EdithRebuiltSalted.anm2", true),
         Color = Color(1, 1, 1, 1, 0.3, 0.3, 0.3),
     },
     Pepper = {
         ID = "EDITH_REBUILT_PEPPERED",
-        Sprite = Sprite("gfx/EdithRebuiltPeppered.anm2", true),
+        Sprite = Sprite(spritePath .. "EdithRebuiltPeppered.anm2", true),
         Color = Color(0.5, 0.5, 0.5),
     },
     Garlic = {
         ID = "EDITH_REBUILT_GARLIC",
-        Sprite = Sprite("gfx/EdithRebuiltGarlic.anm2", true),
+        Sprite = Sprite(spritePath .. "EdithRebuiltGarlic.anm2", true),
         Color = Color(1, 1, 1, 1, 1, 238/255, 188/255),
     },
     Oregano = {
         ID = "EDITH_REBUILT_OREGANO",
-        Sprite = Sprite("gfx/EdithRebuiltOregano.anm2", true),
+        Sprite = Sprite(spritePath .. "EdithRebuiltOregano.anm2", true),
         Color = Color(1, 1, 1, 1, 113/255, 120/255, 82/255),
     },
     Cumin = {
         ID = "EDITH_REBUILT_CUMIN",
-        Sprite = Sprite("gfx/EdithRebuiltCumin.anm2", true),
+        Sprite = Sprite(spritePath .. "EdithRebuiltCumin.anm2", true),
         Color = Color(1, 1, 1, 1, 115/255, 84/255, 67/355),
     },
     Turmeric = {
         ID = "EDITH_REBUILT_TURMERIC",
-        Sprite = Sprite("gfx/EdithRebuiltTurmeric.anm2", true),
+        Sprite = Sprite(spritePath .. "EdithRebuiltTurmeric.anm2", true),
         Color = Color(1, 1, 1, 1, 250/255, 198/255, 49/255),
     },
     Cinnamon = {
         ID = "EDITH_REBUILT_CINNAMON",
-        Sprite = Sprite("gfx/EdithRebuiltCinnamon.anm2", true),
+        Sprite = Sprite(spritePath .. "EdithRebuiltCinnamon.anm2", true),
         Color = Color(1, 1, 1, 1, 210/255, 105/255, 30/255),
     },
     Ginger = {
         ID = "EDITH_REBUILT_GINGER",
-        Sprite = Sprite("gfx/EdithRebuiltGinger.anm2", true),
+        Sprite = Sprite(spritePath .. "EdithRebuiltGinger.anm2", true),
         Color = Color(1, 1, 1, 1, 239/255, 159/255, 89/255),
     },
     Cinder = {
         ID = "EDITH_REBUILT_CINDER",
-        Sprite = Sprite("gfx/EdithRebuiltCinder.anm2", true),
+        Sprite = Sprite(spritePath .. "EdithRebuiltCinder.anm2", true),
         Color = Color(0.3, 0.3, 0.3),
     },
     HydrargyrumCurse = {
         ID = "EDITH_REBUILT_HYDRARGYRUM_CURSE",
-        Sprite = Sprite("gfx/EdithRebuiltHydrargyrum.anm2", true),
+        Sprite = Sprite(spritePath .. "EdithRebuiltHydrargyrum.anm2", true),
         Color = Color(1, 1, 1, 1, 0.5, 0.06, 0.06, 0.91, 0.72, 0.72, 1)
     },
 }

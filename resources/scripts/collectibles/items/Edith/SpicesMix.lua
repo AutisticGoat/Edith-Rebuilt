@@ -31,7 +31,7 @@ local Descriptions = {
     [effects.CINNAMON] = "Dusty Cough, persistent damaging and slowing cinnamon clouds",
 }
 
-local SpicesJar = Sprite("gfx/EdithRebuiltSpicesMixJar.anm2", true)
+local SpicesJar = Sprite("gfx/ui/StatusEffects/EdithRebuiltSpicesMixJar.anm2", true)
 SpicesJar:Play("Idle", true)
 
 ---@param spice SpiceEffect
