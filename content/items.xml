@@ -214,4 +214,9 @@
 		damagemult="1.5"
 		range="100"
 	/>
+	<null
+		id="3" 
+		name="Edith_Rebuilt_Effigy" 
+		persistent="true"
+	/>
 </items>

@@ -46,8 +46,8 @@ end
 ---@return integer
 local function GetEffigyState(player)
     local slot = GetEffigySlot(player)
-    if slot == -1 then return EFFIGY.STATE.NORMAL end
-    return player:GetActiveItemDesc(slot).VarData
+
+    return GetEffigySlot(player) == -1 and EFFIGY.STATE.NORMAL or player:GetActiveItemDesc(slot).VarData
 end
 
 ---@param player EntityPlayer
@@ -76,21 +76,10 @@ end
 ---@param varData integer
 local function EffigyCostumeManager(player, varData)
     if varData == EFFIGY.STATE.NORMAL then
-        player:AddNullCostume(enums.NullItemID.EDITH)
-        Player.SetHoodSprite(player, enums.Misc.VestigeHoodPath)
+        player:AddNullItemEffect(enums.NullItemID.EFFIGY, true)
     else
-        player:TryRemoveNullCostume(enums.NullItemID.EDITH)
-        player:GetEffects():RemoveCollectibleEffect(items.COLLECTIBLE_EFFIGY, -1)
+        player:GetEffects():RemoveNullEffect(enums.NullItemID.EFFIGY, -1)
     end
-end
-
----@param player EntityPlayer
----@param varData integer
-local function CostumeManagerFailSafe(player, varData)
-    if varData == EFFIGY.STATE.STATUE then return end
-    if not player:GetEffects():HasCollectibleEffect(items.COLLECTIBLE_EFFIGY) then return end
-
-    player:GetEffects():RemoveCollectibleEffect(items.COLLECTIBLE_EFFIGY, -1)
 end
 
 ---@param player EntityPlayer
@@ -251,8 +240,6 @@ local function JumpCooldownIndicator(player, pData)
 end
 
 mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(_, player)
-    CostumeManagerFailSafe(player, GetEffigyState(player))
-
     if GetEffigyState(player) == EFFIGY.STATE.NORMAL then return end
     local pData = data(player)
 
