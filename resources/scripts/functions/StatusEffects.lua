@@ -195,6 +195,21 @@ function StatusEffects.SpawnSpicePuff(entity, rng)
 	return Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.POOF02, 2, entity.Position, Vector.Zero, entity)
 end
 
+---@param player EntityPlayer
+---@param spice SpiceEffect
+---@param radius number
+---@param knockback number
+function StatusEffects.TriggerSpiceEffect(player, spice, radius, knockback)
+    local Helpers = mod.Modules.HELPERS
+
+    for _, enemy in ipairs(Isaac.FindInRadius(player.Position, radius, EntityPartition.ENEMY)) do
+        if not Helpers.IsEnemy(enemy) then goto continue end
+        Helpers.TriggerPush(enemy, player, knockback)
+        StatusEffects.SetStatusEffect(spice.ID, enemy, spice.Duration, player)
+        ::continue::
+    end
+end
+
 ---@param ent EntityNPC
 SEL.Callbacks.AddCallback(SEL.Callbacks.ID.POST_REMOVE_ENTITY_STATUS_EFFECT, function (_, ent)
     local npcData = data(ent)

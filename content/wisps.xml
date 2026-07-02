@@ -192,18 +192,64 @@
 	-->
 
 	<!-- Edith unlocks -->
-	<wisp id="0" flameColor="flame_white"/>  <!-- Salt Shaker -->
-	<wisp id="1" flameColor="color_pepper"/>  <!-- Pepper Grinder -->
-	<wisp id="2" flameColor="flame_white"/>  <!-- Sulfuric Fire -->
-	<wisp id="7" flameColor="flame_white"/>  <!-- Fate of the Unfaithful -->
-	<wisp id="9" flameColor="flame_white"/>  <!-- Divine Retribution -->
-	<wisp id="10" flameColor="flame_white"/> <!-- Spices Mix -->
+	<wisp id="0" 
+		flameColor="flame_white"
+	/>  <!-- Salt Shaker -->
+	
+	<wisp id="1" 
+		flameColor="color_pepper"
+	/>  <!-- Pepper Grinder -->
+	
+	<wisp 
+		id="2" 
+		canShoot="false"
+		coreColor="core_black"
+		flameColor="flame_dark_red"
+		firedelay="0"
+	/>  <!-- Sulfuric Fire -->
+	
+	<wisp 
+		id="7"
+		coreColor="core_black"
+		flameColor="flame_dark_red" 
+		tearFlags="22"
+		tearVariant="5"
+	/>  <!-- Fate of the Unfaithful -->
+	
+	<wisp 
+		id="9"
+		flameColor="flame_white"
+		tearFlags="2"
+		tearFlags2="39"
+		procChance="0.25"
+	/> <!-- Divine Retribution -->
+
+	<wisp 
+		id="10" 
+		canShoot="false"
+		flameColor="flame_white"
+	/> <!-- Spices Mix -->
 
 	<!-- Tainted Edith unlocks -->
-	<wisp id="12" flameColor="flame_white"/> <!-- Divine Wrath -->
-	<wisp id="13" flameColor="flame_white"/> <!-- Burnt Hood -->
+	<wisp 
+		id="12" 
+		flameColor="flame_white"
+		tearFlags2="22"
+		procChance="0.25"
+		tearVariant="42"
+	/> <!-- Divine Wrath -->
+	
+	<wisp 
+		id="13" 
+		flameColor="flame_white"
+		hp="12"
+	/> <!-- Burnt Hood -->
 
 	<!-- Challenges -->
-	<wisp id="14" flameColor="flame_white"/> <!-- Effigy -->
-
+	<wisp 
+		id="14" 
+		flameColor="flame_white"
+		canShoot="false"
+		hp="15"
+	/> <!-- Effigy -->
 </wisps>

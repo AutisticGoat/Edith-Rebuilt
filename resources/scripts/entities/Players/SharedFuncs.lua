@@ -3,6 +3,7 @@ local enums = mod.Enums
 local tables = enums.Tables
 local utils = enums.Utils
 local game = utils.Game
+local pool = utils.ItemPool
 local modules = mod.Modules
 local Player = modules.PLAYER
 local Helpers = modules.HELPERS
@@ -46,14 +47,8 @@ local whiteListCostumes = {
 ---@param player EntityPlayer
 ---@return boolean?
 mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_ADD_COSTUME, function(_, itemconfig, player)
-    if not Player.IsAnyEdith(player) then return end
-    
-    local ID = itemconfig.Costume.ID    
-    
+    if not Player.IsAnyEdith(player) then return end    
     if Helpers.When(itemconfig.Costume.ID, whiteListCostumes, false) then return end
-
-
-    
     return true
 end)
 
@@ -148,8 +143,6 @@ end)
 
 mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, function()
     if not Player.AnyoneIsEdith() then return end
-
-    local pool = game:GetItemPool()
 
     pool:RemoveCollectible(CollectibleType.COLLECTIBLE_NIGHT_LIGHT)
     pool:RemoveCollectible(CollectibleType.COLLECTIBLE_MONTEZUMAS_REVENGE)

@@ -59,7 +59,7 @@ mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(_, entity)
 
     if entData.PepperHits % 2 ~= 0 then return end
 
-    TriggerPepperEffects(entity, RNG)
+    TriggerPepperEffects(entity, rng)
 
     if damageFlag then return end
 

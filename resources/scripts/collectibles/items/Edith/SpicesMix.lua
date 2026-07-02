@@ -87,17 +87,6 @@ local function SpawnSpiceCloud(player, spice, RNG)
     puff:SetColor(newColor, -1, 1000, false, false)
 end
 
----@param player EntityPlayer
----@param spice SpiceEffect
-local function TriggerSpiceEffect(player, spice)
-    for _, enemy in ipairs(Isaac.FindInRadius(player.Position, SPICES.EFFECT_RADIUS, EntityPartition.ENEMY)) do
-        if not Helpers.IsEnemy(enemy) then goto continue end
-        Helpers.TriggerPush(enemy, player, SPICES.PUSH_FORCE)
-        StsEffects.SetStatusEffect(spice.ID, enemy, spice.Duration, player)
-        ::continue::
-    end
-end
-
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
     local slot = player:GetActiveItemSlot(spicesMixID)
     if slot == -1 then return end
@@ -110,7 +99,7 @@ end)
 mod:AddCallback(ModCallbacks.MC_USE_ITEM, function(_, _, RNG, player, _, slot)
     local spice = StsEffects.GetSpiceEffect(player:GetActiveItemDesc(slot).VarData)
     SpawnSpiceCloud(player, spice, RNG)
-    TriggerSpiceEffect(player, spice)
+    StsEffects.TriggerSpiceEffect(player, spice, SPICES.EFFECT_RADIUS, SPICES.PUSH_FORCE)
     return true
 end, spicesMixID)
 

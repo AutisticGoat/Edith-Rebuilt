@@ -11,13 +11,7 @@ local damageFlag = false
 ---@param Cooldown integer
 mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(_, entity, amount, flags, source, Cooldown)
     if not Status.EntHasStatusEffect(entity, effects.SALTED) then return end
-    if not amount == (amount * 1.2) then return end
-    if damageFlag == true then return end
-
-    damageFlag = true
-    entity:TakeDamage(amount * 1.2, flags, source, Cooldown)
-    damageFlag = false
-    return false
+    return {Damage = amount * 1.2, DamageFlags = flags, DamageCountdown = Cooldown}
 end)
 
 mod:AddCallback(ModCallbacks.MC_NPC_UPDATE, function (_, npc)

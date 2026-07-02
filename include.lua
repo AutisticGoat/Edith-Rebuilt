@@ -78,6 +78,12 @@ local includeFiles = {
 	-- Personajes fin
 
 	ent .. "Wisps/SaltShaker",
+	ent .. "Wisps/SulfuricFire",
+	ent .. "Wisps/DivineRetribution",
+	ent .. "Wisps/SpicesMix",
+	ent .. "Wisps/PepperGrinder",
+	ent .. "Wisps/DivineWrath",
+	ent .. "Wisps/BurntHood",
 
 	ent .. "Locusts/SaltShaker",
 	ent .. "Locusts/PepperGrinder",

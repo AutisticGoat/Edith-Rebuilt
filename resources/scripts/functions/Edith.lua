@@ -355,7 +355,7 @@ end
 function Edith.TargetMovementManager(player, target, isMoving)
     if isMoving then
         local input = mod.Modules.PLAYER.GetMovementInput(player)
-        target.Velocity = target.Velocity + mod.Modules.VEC_DIR.GetMovementVector(input, true)
+        target.Velocity = target.Velocity + mod.Modules.VEC_DIR.GetMovementVector(input, 4.25)
         target:MultiplyFriction(GetMovementFriction(target))
     else
         target:MultiplyFriction(0.8)

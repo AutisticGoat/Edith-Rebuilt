@@ -173,7 +173,8 @@ EdithRebuilt.Enums = {
 		SFX = SFXManager(),
 		RNG = RNG(),
 		Level = game:GetLevel(),
-		PGD = Isaac.GetPersistentGameData()
+		PGD = Isaac.GetPersistentGameData(),
+		ItemPool = game:GetItemPool(),
 	},
 	---@enum SaltTypes
 	SaltTypes = {

@@ -32,7 +32,6 @@ function VecDir.VectorEquals(v1, v2)
 end
 
 local DEAD_ZONE = 0.3
-local MOVE_SPEED = 4.25
 
 ---@param negative number
 ---@param positive number
@@ -45,16 +44,16 @@ end
 
 ---Target/Arrow movement manager
 ---@param input table
----@param resize boolean
+---@param resizer? number
 ---@return Vector
-function VecDir.GetMovementVector(input, resize)
+function VecDir.GetMovementVector(input, resizer)
     local mirrorSign = EdithRebuilt.Modules.HELPERS.IsMirrorRoom() and -1 or 1
     local x = GetAxisValue(input.left, input.right) * mirrorSign
     local y = GetAxisValue(input.up, input.down)
 	local vec = Vector(x, y):Normalized()
 
-	if resize then
-		vec:Resize(MOVE_SPEED)
+	if resizer then
+		vec:Resize(resizer)
 	end
 
     return vec

@@ -229,10 +229,10 @@ mod:AddCallback(ModCallbacks.MC_POST_PICKUP_UPDATE, function (_, pickup)
 end)
 
 ---@param parent EntityPlayer
----@param ent EntitySlot
+---@param ent Entity
 local function SlotLandManager(parent, ent)
 	local var = ent.Variant
-	local slot = ent:ToSlot() ---@cast slot EntitySlot
+	local slot = ent:ToSlot()
 
 	if not slot then return end
 	if slot:GetState() == SlotState.DESTROYED then return end
@@ -458,10 +458,9 @@ end
 ---@param player EntityPlayer
 ---@param params EdithJumpStompParams|TEdithHopParryParams
 function Land.BombLandManager(player, params)
-	local modules = mod.Modules
-
-	local isEdith = modules.PLAYER.IsEdith(player, false)
-	local isTEdith = modules.PLAYER.IsEdith(player, true)
+	local Player = mod.Modules.PLAYER
+	local isEdith = Player.IsEdith(player, false)
+	local isTEdith = Player.IsEdith(player, true)
 
 	local isBombLand = isEdith and params.BombStomp or isTEdith and params.ParryBomb or false
 
@@ -471,32 +470,42 @@ function Land.BombLandManager(player, params)
     UpdateBombState(player, params, isEdith, isTEdith)
 end
 
+local function ForEachEntInCapsule(capsule, fn)
+	for _, ent in ipairs(Isaac.FindInCapsule(capsule)) do
+		
+	end
+end
+
 ---Tainted Edith hop land behavior
 ---@param parent EntityPlayer
 ---@param HopParams TEdithHopParryParams
 function Land.TaintedEdithHop(parent, HopParams)
-	local capsule = Capsule(parent.Position, Vector.One, 0, HopParams.HopRadius)
-	local PickupCapsule = Capsule(parent.Position, Vector.One, 0, 30)
-	local SlotCapsule = Capsule(parent.Position, Vector.One, 0, parent.Size)
 	local Charge = HopParams.HopMoveCharge / 100
 	local BRCharge = HopParams.HopMoveBRCharge / 100
 	local burnDamage, burnDuration = BRCharge * parent.Damage / 2, math.ceil(BRCharge * 123)
 	local PlayerRef = EntityRef(parent)
 	local CinderDuration = mod.Modules.MATHS.SecondsToFrames(4 * (Charge + BRCharge))
+	local playerPos = parent.Position
+	local VecOne = Vector.One
+	local Capsules = {
+		Enemy = Capsule(playerPos, VecOne, 0, HopParams.HopRadius),
+		Slot = Capsule(playerPos, VecOne, 0, parent.Size),
+		Pickup = Capsule(playerPos, VecOne, 0, 30),
+	}
 
-	for _, ent in ipairs(Isaac.FindInCapsule(PickupCapsule)) do
+	for _, ent in ipairs(Isaac.FindInCapsule(Capsules.Pickup)) do
 		if ent:ToPickup() then
 			-- PickupLandHandler(parent, ent, false)
 		end
 	end
 
-	for _, ent in ipairs(Isaac.FindInCapsule(SlotCapsule)) do
+	for _, ent in ipairs(Isaac.FindInCapsule(Capsules.Slot)) do
 		if ent:ToSlot() then
 			SlotLandManager(parent, ent)
 		end
 	end
 
-	for _, ent in ipairs(Isaac.FindInCapsule(capsule)) do
+	for _, ent in ipairs(Isaac.FindInCapsule(Capsules.Enemy)) do
 		Land.HandleEntityInteraction(ent, parent, HopParams.HopKnockback)
 		Land.LandDamage(ent, parent, HopParams.HopDamage, HopParams.HopKnockback)
 
@@ -543,10 +552,10 @@ local function SfxFeedbackManager(sound, volume, IsChap4, hasWater)
 end
 
 local EFFECT = {
-    PLAYBACK_BASE     = 1.3,
+    PLAYBACK_BASE = 1.3,
     PLAYBACK_VARIANCE = 1.5,
-    RAND_SIZE_MIN     = 0.8,
-    RAND_SIZE_MAX     = 1.0,
+    RAND_SIZE_MIN = 0.8,
+    RAND_SIZE_MAX = 1.0,
 }
 
 ---@param hasWater boolean
@@ -884,13 +893,15 @@ end
 local function ProjectilePerfectParry(player, proj, shouldTriggerFireJets)
 	local spawner = proj.Parent or proj.SpawnerEntity
 	local targetEnt = spawner or mod.Modules.HELPERS.GetNearestEnemy(player) or proj
-	local flags = misc.NewProjectilFlags | (shouldTriggerFireJets and ProjectileFlags.FIRE_SPAWN or 0)
 
 	proj.FallingAccel = -0.1
 	proj.FallingSpeed = 0
 	proj.Height = -23
-	proj:AddProjectileFlags(flags)
-	proj:AddKnockback(EntityRef(player), (targetEnt.Position - player.Position):Resized(25), 5, false)
+	proj:Deflect((targetEnt.Position - player.Position):Resized(25))
+
+	if shouldTriggerFireJets then
+		proj:AddProjectileFlags(ProjectileFlags.FIRE_SPAWN)
+	end
 end
 
 ---@param player EntityPlayer
@@ -961,8 +972,16 @@ local function TriggerParryShockwave(player, isenemy)
 	game:MakeShockwave(player.Position, 0.035, 0.025, 2)
 end
 
+---@param player EntityPlayer
+---@param hopParams TEdithHopParryParams
+---@param isTaintedEdith boolean
+---@return number
+---@return boolean
 local function CalcParryDamage(player, hopParams, isTaintedEdith)
+	print(player.Type)
+
     local damageBase = 13.5
+
     local rawFormula = (damageBase + player.Damage) / 1.5
     local birthrightMult = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and 1.25 or 1
     local hasBirthcake = BirthcakeRebaked and player:HasTrinket(BirthcakeRebaked.Birthcake.ID) or false
@@ -1015,10 +1034,12 @@ end
 ---@param player EntityPlayer
 ---@param hopParams TEdithHopParryParams
 ---@param isTaintedEdith? boolean
----@return boolean perfectParry
----@return boolean enemiesInImpreciseParry
+---@return boolean? perfectParry
+---@return boolean? enemiesInImpreciseParry
 function Land.ParryLandManager(player, hopParams, isTaintedEdith)
-    local capsules = {
+	if not player:ToPlayer() then return end
+
+	local capsules = {
         imprecise = Capsule(player.Position, Vector.One, 0, misc.ImpreciseParryRadius),
         perfect = Capsule(player.Position, Vector.One, 0, misc.PerfectParryRadius),
         tear = Capsule(player.Position, Vector.One, 0, misc.TearParryRadius),
@@ -1030,6 +1051,8 @@ function Land.ParryLandManager(player, hopParams, isTaintedEdith)
     hopParams.ImpreciseParriedEnemies = Isaac.FindInCapsule(capsules.imprecise, misc.ParryPartitions)
 
     local perfectParry, enemiesInImpreciseParry = ProcessParryHits(player, hopParams, isTaintedEdith, capsules)
+
+	Isaac.RunCallback(callbacks.POST_PARRY_LAND, player)
 
     TriggerParryKnockback(player, hopParams.ImpreciseParriedEnemies, hopParams.ParryKnockback)
     TriggerParryKnockback(player, hopParams.ParriedEnemies, hopParams.ParryKnockback)
@@ -1056,4 +1079,5 @@ function Land.ParryLandManager(player, hopParams, isTaintedEdith)
     hopParams.ImpreciseParriedEnemies = {}
     return perfectParry, enemiesInImpreciseParry
 end
+
 return Land

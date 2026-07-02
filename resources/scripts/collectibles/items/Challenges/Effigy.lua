@@ -145,6 +145,16 @@ mod:AddCallback(ModCallbacks.MC_USE_ITEM, function(_, _, _, player, flag, slot)
 
     ChangeEffigyState(player, player:GetActiveItemDesc(slot).VarData, slot)
     player:SetMinDamageCooldown(30)
+    
+    if GetEffigyState(player) == EFFIGY.STATE.STATUE then
+        for _ = 1, 6 do
+            Isaac.Spawn(EntityType.ENTITY_FAMILIAR, FamiliarVariant.WISP, items.COLLECTIBLE_EFFIGY, player.Position, Vector.Zero, player)
+        end
+    else
+        for _, ent in ipairs(Isaac.FindByType(EntityType.ENTITY_FAMILIAR, FamiliarVariant.WISP, items.COLLECTIBLE_EFFIGY)) do
+            ent:Kill()
+        end
+    end
 
     return { Discharge = false, Remove = false, ShowAnim = true }
 end, items.COLLECTIBLE_EFFIGY)
@@ -185,6 +195,13 @@ local function EffigyJumpLand(player, jumpParams, jumpData)
 
     data(player).EffigyJumpCooldown = EFFIGY.JUMP_COOLDOWN
     player:SetActiveCharge(GetEffigyCharge(player) - EFFIGY.JUMP_CHARGE_COST, GetEffigySlot(player))
+
+    for _, ent in ipairs(Isaac.FindByType(EntityType.ENTITY_FAMILIAR, FamiliarVariant.WISP, items.COLLECTIBLE_EFFIGY)) do
+        ent:Kill()
+        for i = 1, 6 do
+            local tear = Isaac.Spawn(EntityType.ENTITY_TEAR, 0, 0, ent.Position, Vector.FromAngle((360/6) * i):Resized(10), ent):ToTear() ---@cast tear EntityTear
+        end
+    end
 end
 
 ---@param player EntityPlayer

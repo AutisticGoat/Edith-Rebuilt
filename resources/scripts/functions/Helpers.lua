@@ -672,4 +672,25 @@ end
 function Helpers.GetLuckInteractionChance(luck)
 	return math.min(0.1 + (0.02 * luck), 0.5)
 end
+
+local SULFURIC = {
+    DAMAGE_SCALE = 0.175,
+    PUSH_FORCE = 20,
+    BRIMSTONE_DURATION = 150,
+}
+
+---@param player EntityPlayer
+---@param judasMult number
+---@param carBatteryMult number
+---@param ref EntityRef
+---@param hitEnemies Entity[]
+function Helpers.TriggerSulfuricFireDamage(player, judasMult, carBatteryMult, ref, hitEnemies)
+    for _, enemy in pairs(hitEnemies) do
+        local damage = player.Damage + (enemy.MaxHitPoints * SULFURIC.DAMAGE_SCALE)
+        Helpers.SpawnFireJet(enemy.Position, damage * judasMult * carBatteryMult)
+        Helpers.TriggerPush(enemy, player, SULFURIC.PUSH_FORCE)
+        enemy:AddBrimstoneMark(ref, SULFURIC.BRIMSTONE_DURATION)
+    end
+end
+
 return Helpers

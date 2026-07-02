@@ -35,13 +35,6 @@ end
 ---@param Cooldown integer
 mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(_, entity, amount, flags, source, Cooldown)
     if not Status.EntHasStatusEffect(entity, effects.TURMERIC) then return end
-    if not amount == (amount * 1.25) then return end
-    if damageFlag == true then return end
-
-    damageFlag = true
-    entity:TakeDamage(amount * 1.25, flags, source, Cooldown)
     SetTurmeric(entity)
-    damageFlag = false
-
-    return false
+    return {Damage = amount * 1.2, DamageFlags = flags, DamageCountdown = Cooldown}
 end)

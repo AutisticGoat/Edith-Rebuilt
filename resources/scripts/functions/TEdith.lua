@@ -1,6 +1,7 @@
 ---@diagnostic disable: undefined-global, param-type-mismatch
 local mod = EdithRebuilt
 local enums = mod.Enums
+local parryTypes = enums.ParryTypes
 local misc = enums.Misc
 local utils = enums.Utils
 local game = utils.Game
@@ -173,7 +174,7 @@ function TEdith.ArrowMovementManager(player, hopParams)
 	if not arrow then return end
 
 	local input = modules.PLAYER.GetMovementInput(player)
-	local arrowVel = modules.VEC_DIR.GetMovementVector(input, false)
+	local arrowVel = modules.VEC_DIR.GetMovementVector(input)
 
 	ArrowVelocityManager(player, arrow, arrowVel, hopParams)
 end
@@ -397,6 +398,19 @@ function TEdith.ParryTriggerManager(player, IsGrudge, hopParams, jumpData)
         HandleNormalParry(player, hopParams, jumpData)
     end
     player:MultiplyFriction(0.1)
+end
+
+---@param hopParams TEdithHopParryParams
+---@return ParryTypes
+function TEdith.GetParryType(hopParams)
+	local impreciseCount = #hopParams.ImpreciseParriedEnemies
+	local perfectCount = #hopParams.ParriedEnemies
+
+	if impreciseCount > 0 then
+		return perfectCount > 0 and parryTypes.PERFECT or parryTypes.IMPRECISE
+	end
+
+	return parryTypes.FAILED
 end
 
 return TEdith

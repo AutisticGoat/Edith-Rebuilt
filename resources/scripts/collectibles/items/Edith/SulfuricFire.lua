@@ -49,20 +49,6 @@ local function TriggerTempDamageUp(player, totalDamageBoost)
 end
 
 ---@param player EntityPlayer
----@param judasMult number
----@param carBatteryMult number
----@param ref EntityRef
----@param hitEnemies Entity[]
-local function TriggerDamageEnemies(player, judasMult, carBatteryMult, ref, hitEnemies)
-    for _, enemy in pairs(hitEnemies) do
-        local damage = player.Damage + (enemy.MaxHitPoints * SULFURIC.DAMAGE_SCALE)
-        Helpers.SpawnFireJet(enemy.Position, damage * judasMult * carBatteryMult)
-        Helpers.TriggerPush(enemy, player, SULFURIC.PUSH_FORCE)
-        enemy:AddBrimstoneMark(ref, SULFURIC.BRIMSTONE_DURATION)
-    end
-end
-
----@param player EntityPlayer
 ---@param flag UseFlag
 mod:AddCallback(ModCallbacks.MC_USE_ITEM, function (_, _, _, player, flag)
     if flag & UseFlag.USE_CARBATTERY == UseFlag.USE_CARBATTERY then return end
@@ -73,7 +59,7 @@ mod:AddCallback(ModCallbacks.MC_USE_ITEM, function (_, _, _, player, flag)
 
     if #hitEnemies <= 0 then return end
 
-    TriggerDamageEnemies(player, judasMult, carBatteryMult, EntityRef(player), hitEnemies)
+    Helpers.TriggerSulfuricFireDamage(player, judasMult, carBatteryMult, EntityRef(player), hitEnemies)
     TriggerTempDamageUp(player, SULFURIC.DAMAGE_BOOST_BASE * judasMult * carBatteryMult * #hitEnemies)
 
     enums.Utils.Game:ShakeScreen(SULFURIC.SHAKE_INTENSITY)

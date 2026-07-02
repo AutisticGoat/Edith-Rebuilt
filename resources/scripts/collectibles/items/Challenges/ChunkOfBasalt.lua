@@ -143,7 +143,7 @@ end
 ---@param collider Entity
 ---@return boolean?
 mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_COLLISION, function (_, player, collider)
-            if not Helpers.IsEnemy(collider) then return end
+    if not Helpers.IsEnemy(collider) then return end
     if not player:HasCollectible(items.COLLECTIBLE_CHUNK_OF_BASALT) then return end
     if not data(player).IsBasaltDash then return end
 

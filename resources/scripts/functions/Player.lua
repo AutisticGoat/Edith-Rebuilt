@@ -18,7 +18,7 @@ function Player.ForEachPlayerType(fn, type)
 end
 
 ---@param player EntityPlayer
----@return table
+---@return {up: number, down: number, left: number, right: number}
 function Player.GetMovementInput(player)
     local ci = player.ControllerIndex
     return {

@@ -33,5 +33,5 @@
 
 (Team members)
 - gigamouse: finished Tainted Edith sprite, items sprites
-- Pattowolfx220: Testing, First Tainted Edith sprite, items sprites
+- Pattowolfx220: Testing, First Tainted Edith sprite, items sprites\
 - Kotry: Project leader, coder, unlock sheets sprite
