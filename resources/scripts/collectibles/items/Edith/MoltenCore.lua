@@ -38,6 +38,8 @@ end
 ---@param enemy Entity
 local function ProcessCoreHeat(player, enemy)
     local coreCount = data(enemy).CoreCount
+    if not coreCount then return end
+
     local formula = GetCoreHeatFormula(player, coreCount)
 
     if formula < GetMaxCoreDamage(player) then
