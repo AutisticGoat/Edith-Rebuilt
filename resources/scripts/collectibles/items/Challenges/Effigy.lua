@@ -254,7 +254,15 @@ mod:AddCallback(JumpLib.Callbacks.ENTITY_UPDATE_60, function(_, ent, jumpData)
     ent.Velocity = ent.Velocity * 1.05
 end)
 
+---@param player EntityPlayer
+local function OnEffigyGetCostume(player)
+    if GetEffigyState(player) == EFFIGY.STATE.NORMAL then return end 
+    player:AddNullItemEffect(enums.NullItemID.EFFIGY, true)
+end
+
 mod:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, function(_, _, _, first, _, _, player)
+    OnEffigyGetCostume(player)
+
     if not first then return end
     local pData = data(player)
     pData.EffigyJumpCooldown = 0
@@ -262,8 +270,9 @@ mod:AddCallback(ModCallbacks.MC_POST_ADD_COLLECTIBLE, function(_, _, _, first, _
     pData.BigJumpUses = 0
 end, items.COLLECTIBLE_EFFIGY)
 
+---@param player EntityPlayer
 mod:AddCallback(ModCallbacks.MC_POST_TRIGGER_COLLECTIBLE_REMOVED, function(_, player)
-    player:TryRemoveNullCostume(enums.NullItemID.EDITH)
+    player:GetEffects():RemoveNullEffect(enums.NullItemID.EFFIGY, -1)
 end, items.COLLECTIBLE_EFFIGY)
 
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_NEW_LEVEL, function(_, player, _, levelInit)
