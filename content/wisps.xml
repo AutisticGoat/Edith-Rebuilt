@@ -194,10 +194,12 @@
 	<!-- Edith unlocks -->
 	<wisp id="0" 
 		flameColor="flame_white"
+		canShoot="false"
 	/>  <!-- Salt Shaker -->
 	
 	<wisp id="1" 
 		flameColor="color_pepper"
+		canShoot="false"
 	/>  <!-- Pepper Grinder -->
 	
 	<wisp 

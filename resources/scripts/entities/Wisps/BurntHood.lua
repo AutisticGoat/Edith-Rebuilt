@@ -42,3 +42,9 @@ mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(_, ent)
 
     return false
 end, EntityType.ENTITY_FAMILIAR)
+
+mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function ()
+    for _, fam in ipairs(Isaac.FindByType(EntityType.ENTITY_FAMILIAR, FamiliarVariant.WISP, BurntHoodID)) do
+        fam:Kill()
+    end
+end)

@@ -19,3 +19,9 @@ mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function (_, ent, amount)
 
     Creeps.SpawnSaltCreep(wisp, ent.Position, 0, 5, 2, 4, saltType)
 end)
+
+mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function ()
+    for _, fam in ipairs(Isaac.FindByType(EntityType.ENTITY_FAMILIAR, FamiliarVariant.WISP, shakerID)) do
+        fam:Kill()
+    end
+end)

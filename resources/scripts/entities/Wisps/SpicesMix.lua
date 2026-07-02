@@ -38,3 +38,9 @@ mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function(_, ent, amount)
 
     StatusEffects.TriggerSpiceEffect(player, spiceData, 30, 20)
 end, EntityType.ENTITY_FAMILIAR)
+
+mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function ()
+    for _, fam in ipairs(Isaac.FindByType(EntityType.ENTITY_FAMILIAR, FamiliarVariant.WISP, spicesMixID)) do
+        fam:Kill()
+    end
+end)
