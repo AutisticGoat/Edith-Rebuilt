@@ -51,6 +51,7 @@ EdithRebuilt.Enums = {
 	NullItemID = {
 		EDITH = Isaac.GetNullItemIdByName("Edith_Rebuilt_Edith"),
 		T_EDITH = Isaac.GetNullItemIdByName("Edith_Rebuilt_TEdith"),
+		EFFIGY = Isaac.GetNullItemIdByName("Edith_Rebuilt_Effigy"),
 	},
 	EffectVariant = {
 		EFFECT_EDITH_TARGET = Isaac.GetEntityVariantByName("Edith Target"),
@@ -61,7 +62,7 @@ EdithRebuilt.Enums = {
 		CHALLENGE_GRUDGE = Isaac.GetChallengeIdByName("[Edith: Rebuilt] Grudge")
 	},
 	Callbacks = {
-		-- Called everytime a Perfect Parry is triggered (player: EntityPlayer, entity: Entity)
+		-- Called everytime a Perfect Parry is triggered
 		---* player `EntityPlayer`
 		---* entity `Entity`
 		---* params `TEdithHopParryParams`
@@ -72,6 +73,9 @@ EdithRebuilt.Enums = {
 		---* entity `Entity`
 		PERFECT_PARRY_KILL = "EdithRebuilt_PERFECT_PARRY_KILL",
 
+		-- Called every time a parry land is triggered (there's no need to hit the parry)
+		---* player `EntityPlayer`
+		POST_PARRY_LAND = "EdithRebuilt_POST_PARRY_LAND",
 		-- Called everytime Edith does an offensive stomp
 		---* player `EntityPlayer`
 		---* params `EdithJumpStompParams`
@@ -169,6 +173,7 @@ EdithRebuilt.Enums = {
 		SFX = SFXManager(),
 		RNG = RNG(),
 		Level = game:GetLevel(),
+		PGD = Isaac.GetPersistentGameData()
 	},
 	---@enum SaltTypes
 	SaltTypes = {
@@ -178,6 +183,12 @@ EdithRebuilt.Enums = {
 		SALT_HEART = 1 << 3,
 		EDITHS_HOOD = 1 << 4,
 		SALT_ROCKS = 1 << 5,
+	},
+	---@enum ParryTypes
+	ParryTypes = {
+		FAILED = 0,
+		IMPRECISE = 1,
+		PERFECT = 2
 	},
 	---@enum ConfigDataTypes
 	ConfigDataTypes = {
@@ -450,6 +461,5 @@ EdithRebuilt.Enums = {
 		ChargeBarrightVector = Vector(8, 10),
 		PaprikaColor = Color(0.8, 0.2, 0),
 		ParryPartitions = EntityPartition.ENEMY | EntityPartition.BULLET | EntityPartition.TEAR, --[[@as EntityPartition|integer]]
-		NewProjectilFlags = ProjectileFlags.HIT_ENEMIES | ProjectileFlags.CANT_HIT_PLAYER,
 	},
 }

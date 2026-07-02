@@ -5,7 +5,10 @@ local achievements = enums.Achievements
 local utils = enums.Utils
 local game = utils.Game
 local level = utils.Level
-local Helpers = mod.Modules.HELPERS
+local pgd = utils.PGD
+local modules = mod.Modules
+local Helpers = modules.HELPERS
+local Player = modules.PLAYER
 local UnlockTable = {
     Edith = {
         [CompletionType.MOMS_HEART] = {
@@ -92,7 +95,6 @@ local GreedierUnlocks = {
 }
 
 local function ThankYou()
-    local pgd = Isaac.GetPersistentGameData()
     local isComplete = true
 
     for _, v in pairs(achievements) do
@@ -169,7 +171,6 @@ end
 ---@param mark CompletionType
 ---@param player PlayerType
 mod:AddCallback(ModCallbacks.MC_POST_COMPLETION_MARK_GET, function(_, mark, player)
-    local pgd = Isaac.GetPersistentGameData()
     local difficulty = game.Difficulty
 
     GreedierUnlockManager(player, pgd, difficulty)
@@ -178,55 +179,44 @@ mod:AddCallback(ModCallbacks.MC_POST_COMPLETION_MARK_GET, function(_, mark, play
     ThankYou()
 end)
 
-local taintedAchievement = {
-    [players.PLAYER_EDITH] = {unlock = achievements.ACHIEVEMENT_TAINTED_EDITH, gfx = "gfx/characters/costumes/characterTaintedEdith.png"}
-}
+mod:AddCallback(ModCallbacks.MC_POST_SLOT_INIT, function(_, slot)
+    local player = Isaac.GetPlayer()
 
-mod:AddCallback(ModCallbacks.MC_POST_SLOT_UPDATE, function(_, slot)
-    if not slot:GetSprite():IsFinished("PayPrize") then return end
-    local d = slot:GetData().Tainted
+    if not Player.IsEdith(player, false) then return end
+    local playerConfig = EntityConfig.GetPlayer(player:GetPlayerType()):GetTaintedCounterpart()
 
-    if not d then return end
-
-    Isaac.GetPersistentGameData():TryUnlock(d.unlock)
+    if not playerConfig then return end
+    slot:GetSprite():ReplaceSpritesheet(0, playerConfig:GetSkinPath(), true)
 end, SlotVariant.HOME_CLOSET_PLAYER)
 
-local function SetupSlot(slot, gfx, data)
-    slot:GetSprite():ReplaceSpritesheet(0, gfx, true)
-    slot:GetData().Tainted = data
-end
+---@param slot EntitySlot
+mod:AddCallback(ModCallbacks.MC_POST_SLOT_UPDATE, function(_, slot)
+    if not slot:IsDead() then return end
+    if not slot:GetSprite():IsFinished() then return end
+    if not Player.IsEdith(Isaac.GetPlayer(), false) then return end
+
+    pgd:TryUnlock(achievements.ACHIEVEMENT_TAINTED_EDITH)
+end, SlotVariant.HOME_CLOSET_PLAYER)
 
 mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function()
     if level:GetStage() ~= LevelStage.STAGE8 then return end
     if level:GetCurrentRoomDesc().SafeGridIndex ~= 94 then return end
     if game:AchievementUnlocksDisallowed() then return end
-
-    local playerType = Isaac.GetPlayer():GetPlayerType()
-    local data = taintedAchievement[playerType]
-
-    if not data then return end
-    if Isaac.GetPersistentGameData():Unlocked(data.unlock) then return end
+    if not Player.IsEdith(Isaac.GetPlayer(), false) then return end
+    if pgd:Unlocked(achievements.ACHIEVEMENT_TAINTED_EDITH) then return end
 
     local room = game:GetRoom()
 
-    if room:IsFirstVisit() then
-        for _, k in ipairs(Isaac.FindByType(17)) do k:Remove() end
-        for _, i in ipairs(Isaac.FindByType(5)) do i:Remove() end
+    if not room:IsFirstVisit() then return end
 
-        local slot = Isaac.Spawn(6, 14, 0, room:GetCenterPos(), Vector.Zero, nil)
-        SetupSlot(slot, data.gfx, data)
-    else
-        for _, slot in ipairs(Isaac.FindByType(6, 14)) do
-            SetupSlot(slot, data.gfx, data)
-        end
-    end
+    for _, k in ipairs(Isaac.FindByType(17)) do k:Remove() end
+    for _, i in ipairs(Isaac.FindByType(5)) do i:Remove() end
+
+    Isaac.Spawn(6, 14, 0, room:GetCenterPos(), Vector.Zero, nil)
 end)
 
 ---@param player EntityPlayer
 mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(_, player)
-    local PGD = Isaac.GetPersistentGameData()
-
-    if PGD:Unlocked(achievements.ACHIEVEMENT_EDITH) then return end
     if player:GetNumBombs() < 25 then return end
-    PGD:TryUnlock(achievements.ACHIEVEMENT_EDITH)
+    pgd:TryUnlock(achievements.ACHIEVEMENT_EDITH)
 end)
