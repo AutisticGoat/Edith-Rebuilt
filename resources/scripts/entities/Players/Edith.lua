@@ -184,7 +184,8 @@ mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
 		return
 	end
 
-	data(player).BaseSpriteScale = data(player).BaseSpriteScale or Vector.One
+	local pData = data(player)
+	pData.BaseSpriteScale = pData.BaseSpriteScale or Vector.One
 
 	local state = {
 		isMoving = TargetArrow.IsEdithTargetMoving(player),

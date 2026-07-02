@@ -102,10 +102,11 @@ end
 ---@param player EntityPlayer
 ---@param jumpParams EdithJumpStompParams
 function Edith.CustomDropBehavior(player, jumpParams)
-	if not mod.Modules.PLAYER.IsEdith(player, false) then return end
+	if not mod.Modules.PLAYER.IsEdith(player, false) then return end	
 	if not Input.IsActionTriggered(ButtonAction.ACTION_DROP, player.ControllerIndex) then return end
-	if jumpParams.Cooldown > 0 then return end
+	if jumpParams.Cooldown < 1 then return end
 
+	print("trigger drop")
 	player:SetActionHoldDrop(119)
 end
 
