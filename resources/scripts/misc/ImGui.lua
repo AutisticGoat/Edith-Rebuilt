@@ -870,8 +870,6 @@ The changelog has been moved to pastebin, check it here: https://pastebin.com/Hu
 	]])
 end
 
-local game = Game()
-
 local function OptionsUpdate()
 	if not RenderMenu then return end
 	if not SaveManager.IsLoaded() then return end

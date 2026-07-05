@@ -140,12 +140,15 @@ mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
     ResetStatueStateOnDischarge(player)
 end)
 
+---@param player EntityPlayer
+---@param flag UseFlag
+---@param slot ActiveSlot
 mod:AddCallback(ModCallbacks.MC_USE_ITEM, function(_, _, _, player, flag, slot)
     if BitMask.HasBitFlags(flag, UseFlag.USE_CARBATTERY --[[@as BitSet128]]) then return end
 
     ChangeEffigyState(player, player:GetActiveItemDesc(slot).VarData, slot)
     player:SetMinDamageCooldown(30)
-    
+
     if GetEffigyState(player) == EFFIGY.STATE.STATUE then
         for _ = 1, 6 do
             Isaac.Spawn(EntityType.ENTITY_FAMILIAR, FamiliarVariant.WISP, items.COLLECTIBLE_EFFIGY, player.Position, Vector.Zero, player)

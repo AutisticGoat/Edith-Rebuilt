@@ -6,7 +6,6 @@ local misc = enums.Misc
 local players = enums.PlayerType
 local Player = {}
 
-
 ---@param fn fun(player: EntityPlayer)
 ---@param type PlayerType
 function Player.ForEachPlayerType(fn, type)

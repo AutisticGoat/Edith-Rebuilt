@@ -2,7 +2,6 @@ local mod = EdithRebuilt
 local modules = mod.Modules
 local effects = mod.Enums.EdithStatusEffects
 local Status = modules.STATUS_EFFECTS
-local damageFlag = false
 
 ---@param entity Entity
 ---@param amount number

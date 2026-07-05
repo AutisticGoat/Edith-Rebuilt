@@ -106,7 +106,6 @@ function Edith.CustomDropBehavior(player, jumpParams)
 	if not Input.IsActionTriggered(ButtonAction.ACTION_DROP, player.ControllerIndex) then return end
 	if jumpParams.Cooldown < 1 then return end
 
-	print("trigger drop")
 	player:SetActionHoldDrop(119)
 end
 

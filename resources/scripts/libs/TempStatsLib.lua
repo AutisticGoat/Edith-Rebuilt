@@ -1,5 +1,3 @@
-
-
 --[[
     Temporary Stat Library by Kerkel
     Version 1.0
