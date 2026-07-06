@@ -64,7 +64,7 @@ function targetArrow.SpawnEdithTarget(player, tainted)
 	):ToEffect() ---@cast target EntityEffect
 	target.DepthOffset = -100
 	target.SortingLayer = SortingLayer.SORTING_NORMAL
-	
+
 	if tainted then
 		Data.TaintedEdithTarget = target
 	else
@@ -102,7 +102,6 @@ function targetArrow.GetEdithTargetDirection(player, tainted)
 	return (target.Position - player.Position):Normalized()
 end
 
-
 local function RestorePlayerAlpha(player)
     if player.Color.A >= 1 then return end
     mod.Modules.HELPERS.ChangeColor(player, nil, nil, nil, 1)
@@ -113,7 +112,7 @@ end
 ---@param maxDistanceSquared number
 ---@return boolean
 local function IsTargetNearDoor(origin, target, maxDistanceSquared)
-    return target ~= nil and origin:DistanceSquared(target) <= maxDistanceSquared^2
+    return target ~= nil and origin:DistanceSquared(target) <= maxDistanceSquared*maxDistanceSquared
 end
 
 local function GetDoorFlags(door)
@@ -144,16 +143,16 @@ local function OpenMausoleumDoor(door, sprite, player)
     end
 end
 
-local function OpenStrangeDoor(door, player, playerHasPhoto)
-    if not playerHasPhoto then return end
+local function OpenStrangeDoor(door, player)
+    if not (player:HasCollectible(CollectibleType.COLLECTIBLE_POLAROID) or player:HasCollectible(CollectibleType.COLLECTIBLE_NEGATIVE)) then return end
     door:TryUnlock(player)
 end
 
-local function TryOpenDoor(door, flags, player, roomClear, playerHasPhoto)
+local function TryOpenDoor(door, flags, player, roomClear)
     if not roomClear then return end
 
     if flags.Strange then
-        OpenStrangeDoor(door, player, playerHasPhoto)
+        OpenStrangeDoor(door, player)
         return
     end
 
@@ -178,21 +177,11 @@ function targetArrow.TargetDoorManager(effect, player, triggerDistance)
     local roomClear = room:IsClear()
     local roomName = level:GetCurrentRoomDesc().Data.Name
     local isTainted = mod.Modules.PLAYER.IsEdith(player, true)
-
-    local mirrorRoom =
-        roomName == "Mirror Room"
-        and player:HasInstantDeathCurse()
-
-    local playerHasPhoto =
-        player:HasCollectible(CollectibleType.COLLECTIBLE_POLAROID)
-        or player:HasCollectible(CollectibleType.COLLECTIBLE_NEGATIVE)
-
+    local mirrorRoom = roomName == "Mirror Room" and player:HasInstantDeathCurse()
     local effectPos = effect.Position
-
     local playerNearDoor = false
 
     for slot = 0, DoorSlot.DOWN1 do
-
         local door = room:GetDoor(slot)
         if not door then goto continue end
 
@@ -208,9 +197,8 @@ function targetArrow.TargetDoorManager(effect, player, triggerDistance)
         if door:IsOpen() or mirrorRoom or flags.StrangeOpened then
             MovePlayerThroughDoor(player, doorPos, isTainted)
         else
-            TryOpenDoor(door, flags, player, roomClear, playerHasPhoto)
+            TryOpenDoor(door, flags, player, roomClear)
         end
-
         ::continue::
     end
 
