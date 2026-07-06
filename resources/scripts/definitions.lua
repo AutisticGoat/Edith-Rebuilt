@@ -10,6 +10,8 @@ local effigyHop = "edithRebuilt_EffigyHop"
 local effigyJump = "edithRebuilt_EffigyJump"
 local soulOfEdithJump = "edithRebuilt_SoulOfEdith"
 
+local jumpFlags = JumpLib.Flags
+
 EdithRebuilt.Enums = {
 	PlayerType = {
 		PLAYER_EDITH = EdithPlayer,
@@ -67,12 +69,10 @@ EdithRebuilt.Enums = {
 		---* entity `Entity`
 		---* params `TEdithHopParryParams`
 		PERFECT_PARRY = "EdithRebuilt_PERFECT_PARRY",
-
 		-- Called everytime an enemy is killed by a Perfect Parry is triggered
 		---* player `EntityPlayer`
 		---* entity `Entity`
 		PERFECT_PARRY_KILL = "EdithRebuilt_PERFECT_PARRY_KILL",
-
 		-- Called every time a parry land is triggered (there's no need to hit the parry)
 		---* player `EntityPlayer`
 		POST_PARRY_LAND = "EdithRebuilt_POST_PARRY_LAND",
@@ -80,23 +80,19 @@ EdithRebuilt.Enums = {
 		---* player `EntityPlayer`
 		---* params `EdithJumpStompParams`
 		OFFENSIVE_STOMP = "EdithRebuilt_OFFENSIVE_STOMP",
-
 		-- Called everytime Edith does an offensive stomp and damages at least `One` Enemy
 		---* player `EntityPlayer`
 		---* entity `Entity`
 		---* params `EdithJumpStompParams`
 		OFFENSIVE_STOMP_HIT = "EdithRebuilt_OFFENSIVE_STOMP_HIT",
-
 		-- Called everytime Edith does an offensive stomp and kills at least `One` Enemy
 		---* player `EntityPlayer`
 		---* entity `Entity`
 		---* params `EdithJumpStompParams`
 		OFFENSIVE_STOMP_KILL = "EdithRebuilt_OFFENSIVE_STOMP_KILL",
-
-		-- Called everytime Edith's Target (or Tainted Edith's arrow) changes its design		
+		-- Called everytime Edith's Target (or Tainted Edith's arrow) changes its design
 		TARGET_SPRITE_CHANGE = "EdithRebuilt_TARGET_SPRITE_CHANGE",
-
-		-- Called everytime Tainted Edith's trail sprite is changed	
+		-- Called everytime Tainted Edith's trail sprite is changed
 		TRAIL_SPRITE_CHANGE = "EdithRebuilt_TRAIL_SPRITE_CHANGE",
 	},
 	SubTypes = {
@@ -147,7 +143,7 @@ EdithRebuilt.Enums = {
 		ACHIEVEMENT_HYDRARGYRUM = Isaac.GetAchievementIdByName("EdithRebuilt_Hydrargyrum"),
 		ACHIEVEMENT_TAINTED_EDITH = Isaac.GetAchievementIdByName("EdithRebuilt_The Punished"),
 		-- Edith unlocks end
-		
+
 		-- Tainted Edith unlocks
 		ACHIEVEMENT_SALT_ROCKS = Isaac.GetAchievementIdByName("EdithRebuilt_Salt Rocks"),
 		ACHIEVEMENT_BURNT_SALT = Isaac.GetAchievementIdByName("EdithRebuilt_Burnt Salt"),
@@ -287,9 +283,34 @@ EdithRebuilt.Enums = {
 			EffigyJump = effigyJump,
 		},
 		JumpFlags = {
-			EdithJump = (JumpLib.Flags.DISABLE_SHOOTING_INPUT | JumpLib.Flags.DISABLE_LASER_FOLLOW | JumpLib.Flags.DISABLE_BOMB_INPUT | JumpLib.Flags.FAMILIAR_FOLLOW_FOLLOWERS | JumpLib.Flags.FAMILIAR_FOLLOW_ORBITALS | JumpLib.Flags.FAMILIAR_FOLLOW_TEARCOPYING | JumpLib.Flags.NO_HURT_PITFALL),
-			TEdithHop = (JumpLib.Flags.COLLISION_GRID | JumpLib.Flags.COLLISION_ENTITY | JumpLib.Flags.OVERWRITABLE | JumpLib.Flags.DISABLE_COOL_BOMBS | JumpLib.Flags.IGNORE_CONFIG_OVERRIDE | JumpLib.Flags.FAMILIAR_FOLLOW_ORBITALS | JumpLib.Flags.DAMAGE_CUSTOM),
-			TEdithJump = (JumpLib.Flags.COLLISION_GRID | JumpLib.Flags.OVERWRITABLE | JumpLib.Flags.DISABLE_COOL_BOMBS | JumpLib.Flags.IGNORE_CONFIG_OVERRIDE | JumpLib.Flags.FAMILIAR_FOLLOW_ORBITALS | JumpLib.Flags.DISABLE_BOMB_INPUT),
+			EdithJump = (
+				jumpFlags.DISABLE_SHOOTING_INPUT |
+				jumpFlags.DISABLE_LASER_FOLLOW |
+				jumpFlags.DISABLE_BOMB_INPUT |
+				jumpFlags.FAMILIAR_FOLLOW_FOLLOWERS |
+				jumpFlags.FAMILIAR_FOLLOW_ORBITALS |
+				jumpFlags.FAMILIAR_FOLLOW_TEARCOPYING |
+				jumpFlags.NO_HURT_PITFALL |
+				jumpFlags.GRIDCOLL_NO_WALLS
+			),
+			TEdithHop = (
+				jumpFlags.COLLISION_GRID |
+				jumpFlags.COLLISION_ENTITY |
+				jumpFlags.OVERWRITABLE |
+				jumpFlags.DISABLE_COOL_BOMBS |
+				jumpFlags.IGNORE_CONFIG_OVERRIDE |
+				jumpFlags.FAMILIAR_FOLLOW_ORBITALS |
+				jumpFlags.DAMAGE_CUSTOM
+			),
+			TEdithJump = (
+				jumpFlags.COLLISION_GRID |
+				jumpFlags.OVERWRITABLE |
+				jumpFlags.DISABLE_COOL_BOMBS |
+				jumpFlags.IGNORE_CONFIG_OVERRIDE |
+				jumpFlags.FAMILIAR_FOLLOW_ORBITALS |
+				jumpFlags.DISABLE_BOMB_INPUT |
+				jumpFlags.DISABLE_TEARHEIGHT
+			),
 		},
 		MovementBasedActives = {
 			[CollectibleType.COLLECTIBLE_SUPLEX] = true,
@@ -334,12 +355,12 @@ EdithRebuilt.Enums = {
 		},
 		ImGuiTables = {
 			TargetDesign = {
-				"Choose Color", 
-				"Trans", 
+				"Choose Color",
+				"Trans",
 				"Rainbow",
 				"Lesbian",
-				"Bisexual", 
-				"Gay", 
+				"Bisexual",
+				"Gay",
 				"Ace",
 				"Enby",
 				"Venezuela",
@@ -347,14 +368,14 @@ EdithRebuilt.Enums = {
 				"Mexico",
 			},
 			StompSound = {
-				"Stone", 
-				"Antibirth", 
+				"Stone",
+				"Antibirth",
 				"Fart Reverb",
 				"Vine Boom"
-			}, 	
+			},
 			ArrowDesign = {
-				"Arrow", 
-				"Grudge", 
+				"Arrow",
+				"Grudge",
 			},
 			TrailDesign = {
 				"Choose color",
@@ -371,13 +392,13 @@ EdithRebuilt.Enums = {
 				"Italy",
 			},
 			HopSound = {
-				"Stone", 
-				"Yippee", 
+				"Stone",
+				"Yippee",
 				"Spring",
-			}, 
+			},
 			ParrySound = {
-				"Stone", 
-				"Taunt", 
+				"Stone",
+				"Taunt",
 				"Vine Boom",
 				"Fart Reverb",
 				"Solarian",
@@ -387,7 +408,7 @@ EdithRebuilt.Enums = {
 				"Bloqueo",
 				"Nautrash",
 				"Hawk",
-			}, 
+			},
 		},
 		PhysicsFamiliar = {
 			[FamiliarVariant.SAMSONS_CHAINS] = true,
