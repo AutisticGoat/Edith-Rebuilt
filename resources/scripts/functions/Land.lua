@@ -1,12 +1,14 @@
----@diagnostic disable: undefined-global, param-type-mismatch
+---@diagnostic disable: undefined-global, param-type-mismatch, missing-return-value
 local mod = EdithRebuilt
 local enums = mod.Enums
 local utils = enums.Utils
 local game = utils.Game
 local sfx = utils.SFX
+local pgd = utils.PGD
 local misc = enums.Misc
 local ConfigDataTypes = enums.ConfigDataTypes
 local tables = enums.Tables
+local saveManager = mod.SaveManager
 local MortisBackdrop = tables.MortisBackdrop
 local sounds = enums.SoundEffect
 local callbacks = enums.Callbacks
@@ -237,57 +239,55 @@ local function SlotLandManager(parent, ent)
 	if not slot then return end
 	if slot:GetState() == SlotState.DESTROYED then return end
 	if not mod.Modules.HELPERS.When(var, tables.TriggerDamageSlots, false) then return end
-	
+
 	parent:ForceCollide(ent, false)
 	parent:TakeDamage(1, 0, EntityRef(ent), 0)
 end
+
+local stompBehavior = {
+    [EntityType.ENTITY_TEAR] = function(ent, parent, _, _)
+        if mod.Modules.PLAYER.IsEdith(parent, true) then return end
+        local tear = ent:ToTear()
+        if not tear then return end
+        mod.Modules.HELPERS.BoostTear(tear, 25, 1.5)
+    end,
+    [EntityType.ENTITY_FIREPLACE] = function(ent, _, _, var)
+        if var == 4 then return end
+        ent:Die()
+    end,
+    [EntityType.ENTITY_FAMILIAR] = function(ent, parent, knockback, var)
+		local Helpers = mod.Modules.HELPERS
+
+        if not Helpers.When(var, tables.PhysicsFamiliar, false) then return end
+        Helpers.TriggerPush(ent, parent, knockback * 1.3)
+
+        local fam = ent:ToFamiliar()
+        if not fam then return end
+
+        if var == FamiliarVariant.CUBE_BABY then
+            fam:TryThrow(EntityRef(parent), fam.Velocity, 0)
+        end
+    end,
+    [EntityType.ENTITY_BOMB] = function(ent, parent, knockback, _)
+        if mod.Modules.PLAYER.IsEdith(parent, true) then return end
+        Helpers.TriggerPush(ent, parent, knockback)
+    end,
+    [EntityType.ENTITY_SHOPKEEPER] = function(ent, parent, _, _)
+        if mod.Modules.PLAYER.IsEdith(parent, true) then return end
+        ent:Kill()
+    end,
+    [EntityType.ENTITY_MOVABLE_TNT] = function(ent, _, _, _)
+        ent:Kill()
+    end,
+}
 
 ---@param ent Entity
 ---@param parent EntityPlayer
 ---@param knockback number
 function Land.HandleEntityInteraction(ent, parent, knockback)
-	local var = ent.Variant
-
-	local modules = mod.Modules
-	local Helpers = modules.HELPERS
-	local Player = modules.PLAYER
-
-    local stompBehavior = {
-        [EntityType.ENTITY_TEAR] = function()
-            local tear = ent:ToTear()
-            if not tear then return end
-			if Player.IsEdith(parent, true) then return end
-
-			Helpers.BoostTear(tear, 25, 1.5)
-        end,
-        [EntityType.ENTITY_FIREPLACE] = function()
-            if var == 4 then return end
-            ent:Die()
-        end,
-        [EntityType.ENTITY_FAMILIAR] = function()
-            if not Helpers.When(var, tables.PhysicsFamiliar, false) then return end
-            Helpers.TriggerPush(ent, parent, knockback * 1.3)
-
-			local fam = ent:ToFamiliar() 
-			if not fam then return end
-
-			if var == FamiliarVariant.CUBE_BABY then
-				fam:TryThrow(EntityRef(parent), fam.Velocity, 0)
-			end
-        end,
-        [EntityType.ENTITY_BOMB] = function()
-			if Player.IsEdith(parent, true) then return end
-            Helpers.TriggerPush(ent, parent, knockback)
-        end,        
-		[EntityType.ENTITY_SHOPKEEPER] = function()
-			if Player.IsEdith(parent, true) then return end
-            ent:Kill()
-        end,
-        [EntityType.ENTITY_MOVABLE_TNT] = function()
-            ent:Kill()
-        end,
-    }
-	Helpers.WhenEval(ent.Type, stompBehavior)
+    local fn = stompBehavior[ent.Type]
+    if not fn then return end
+    fn(ent, parent, knockback, ent.Variant)
 end
 
 ---@param parent EntityPlayer
@@ -333,12 +333,11 @@ local function EntityInteractHandler(ent, parent, knockback)
 	end
 end
 
+local VestigeAch = enums.Achievements.ACHIEVEMENT_VESTIGE
+
 local function VestigeUnlockManager()
-	local pgd = Isaac.GetPersistentGameData()
-	local VestigeAch = enums.Achievements.ACHIEVEMENT_VESTIGE
 	if pgd:Unlocked(VestigeAch) then return end
 
-	local saveManager = mod.SaveManager
 	local PersistentData = saveManager.GetPersistentSave()
 
 	if not PersistentData then return end
@@ -702,7 +701,6 @@ end
 ---@param jumpData JumpData
 ---@param IsParryLand? boolean
 function Land.LandFeedbackManager(player, soundTable, GibColor, jumpData, IsParryLand)
-    local saveManager = mod.SaveManager
     if not saveManager:IsLoaded() then return end
     if not saveManager:GetSettingsSave() then return end
 
@@ -711,7 +709,7 @@ function Land.LandFeedbackManager(player, soundTable, GibColor, jumpData, IsParr
 	local hasWater = game:GetRoom():HasWater()
 
     local landParams = (
-		IsEdithJump(jumpData) and GetEdithLandParams(player) or 
+		IsEdithJump(jumpData) and GetEdithLandParams(player) or
 		GetTEdithLandParams(IsParryLand)
 	)
 
@@ -810,20 +808,18 @@ local function IsEntInTwoCapsules(ent, capsule1, capsule2)
 
 	return IsInsideCapsule1 and IsInsideCapsule2
 end
+local GrudgeAch = enums.Achievements.ACHIEVEMENT_GRUDGE
 
 ---@param PerfectParry boolean
 local function GrudgeUnlockManager(PerfectParry)
-	local pgd = Isaac.GetPersistentGameData()
-	local GrudgeAch = enums.Achievements.ACHIEVEMENT_GRUDGE
 	if pgd:Unlocked(GrudgeAch) then return end
 
-	local saveManager = mod.SaveManager
 	local PersistentData = saveManager.GetPersistentSave()
 
 	if not PersistentData then return end
 
 	PersistentData.ConsecutiveParries = PersistentData.ConsecutiveParries or 0
-	
+
 	if PerfectParry then
 		PersistentData.ConsecutiveParries = PersistentData.ConsecutiveParries + 1
 	else
@@ -1034,8 +1030,8 @@ end
 ---@param player EntityPlayer
 ---@param hopParams TEdithHopParryParams
 ---@param isTaintedEdith? boolean
----@return boolean? perfectParry
----@return boolean? enemiesInImpreciseParry
+---@return boolean perfectParry
+---@return boolean enemiesInImpreciseParry
 function Land.ParryLandManager(player, hopParams, isTaintedEdith)
 	if not player:ToPlayer() then return end
 
