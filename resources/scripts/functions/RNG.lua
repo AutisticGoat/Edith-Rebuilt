@@ -1,7 +1,7 @@
 local mod = EdithRebuilt
 local enums = mod.Enums
 local tables = enums.Tables
-local utils = enums.Utils 
+local utils = enums.Utils
 local modRNG = {}
 
 ---Returns a random rune (Used for Geode trinket)
