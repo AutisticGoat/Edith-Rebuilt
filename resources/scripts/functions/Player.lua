@@ -109,13 +109,13 @@ function Player.ManageEdithWeapons(player)
 
 	if not mod.Modules.HELPERS.When(weaponType, enums.Tables.OverrideWeapons, false) then return end
 
-	local newWeapon = Isaac.CreateWeapon(WeaponType.WEAPON_TEARS, player)
 	Isaac.DestroyWeapon(weapon)
 
 	if weaponType == WeaponType.WEAPON_LUDOVICO_TECHNIQUE then return end
 
+	local newWeapon = Isaac.CreateWeapon(WeaponType.WEAPON_TEARS, player)
 	player:EnableWeaponType(WeaponType.WEAPON_TEARS, true)
-	player:SetWeapon(newWeapon, 1)	
+	player:SetWeapon(newWeapon, 1)
 end
 
 ---Changes `player`'s ANM2 file
@@ -140,7 +140,7 @@ end
 ---@param player EntityPlayer
 ---@param intensity number
 ---@param duration integer
-function Player.SetColorCooldown(player, intensity, duration)	
+function Player.SetColorCooldown(player, intensity, duration)
 	local pcolor = player.Color
 	local col = pcolor:GetColorize()
 	local tint = pcolor:GetTint()

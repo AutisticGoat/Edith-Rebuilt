@@ -65,6 +65,7 @@ end)
 mod:AddCallback(ModCallbacks.MC_POST_PEFFECT_UPDATE, function(_, player)
     if not Player.IsAnyEdith(player) then return end
 	Player.WaterCurrentManager(player)
+    Player.ManageEdithWeapons(player)
 end)
 
 mod:AddCallback(ModCallbacks.MC_POST_TEAR_UPDATE, function(_, tear)

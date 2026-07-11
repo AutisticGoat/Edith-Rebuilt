@@ -206,7 +206,6 @@ mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
 	TriggerEdithJumpAnim(player)
 	EdithTeleportManager(player)
 	EdithMod.CustomDropBehavior(player, state.jumpParams)
-	Player.ManageEdithWeapons(player)
 	EdithMod.DashItemBehavior(player)
 
 	HandleTargetManagers(player, TargetArrow.GetEdithTarget(player), state)

@@ -167,7 +167,6 @@ local function ManageTargetCleanup(player, pData, arrow, isArrowMoving)
 	if not arrow or isArrowMoving then return end
 
 	if pData.IsRedirectioningMove then
-
 		if pData.PressCount <= 8 then
 			TargetArrow.RemoveEdithTarget(player, true)
 			TEdithMod.StopTEdithHops(player, 20, false, true, true)
@@ -223,8 +222,6 @@ end
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)	
 	if not Player.IsEdith(player, true) then return end
 
-	Player.ManageEdithWeapons(player)
-
 	local HopParams = TEdithMod.GetHopParryParams(player)
 	local MiscConfig = Helpers.GetConfigData("MiscData") ---@cast MiscConfig MiscData
 	local arrow = TargetArrow.GetEdithTarget(player, true)
@@ -235,7 +232,6 @@ mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
 	TEdithMod.ArrowMovementManager(player, HopParams)
 
 	ManageParryInput(player, data(player), HopParams, IsGrudge, JumpLib:GetData(player))
-
 	if HopParams.IsHoping then
 		TEdithMod.ResetHopDashCharge(player, false, true)
 	end

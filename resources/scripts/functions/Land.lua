@@ -269,8 +269,10 @@ local stompBehavior = {
         end
     end,
     [EntityType.ENTITY_BOMB] = function(ent, parent, knockback, _)
-        if mod.Modules.PLAYER.IsEdith(parent, true) then return end
-        Helpers.TriggerPush(ent, parent, knockback)
+		local modules = mod.Modules
+
+        if modules.PLAYER.IsEdith(parent, true) then return end
+        modules.PLAYER.TriggerPush(ent, parent, knockback)
     end,
     [EntityType.ENTITY_SHOPKEEPER] = function(ent, parent, _, _)
         if mod.Modules.PLAYER.IsEdith(parent, true) then return end
@@ -469,9 +471,16 @@ function Land.BombLandManager(player, params)
     UpdateBombState(player, params, isEdith, isTEdith)
 end
 
-local function ForEachEntInCapsule(capsule, fn)
+local CapsuleFunction = {
+	
+}
+
+---@param parent EntityPlayer
+---@param capsule Capsule
+---@param fn function
+local function ForEachEntInCapsule(parent, capsule, fn)
 	for _, ent in ipairs(Isaac.FindInCapsule(capsule)) do
-		
+		fn()
 	end
 end
 
@@ -494,7 +503,7 @@ function Land.TaintedEdithHop(parent, HopParams)
 
 	for _, ent in ipairs(Isaac.FindInCapsule(Capsules.Pickup)) do
 		if ent:ToPickup() then
-			-- PickupLandHandler(parent, ent, false)
+			PickupLandHandler(parent, ent, false)
 		end
 	end
 
