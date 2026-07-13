@@ -12,9 +12,14 @@ local GEODE = {
     CHANCE_DESTROY = 0.25,
     CHANCE_KILL_BASE = 0.025,
     CHANCE_KILL_EXP = 1.75,
-    BASE_RUNES = 2,
+    BASE_RUNES = 3,
     SPAWN_RADIUS = 1.3,
 }
+
+---@param rng RNG
+local function GetRune(rng)
+    return enums.Utils.ItemPool:GetCard(rng:Next(), true, true, true)
+end
 
 ---@param position Vector
 ---@param velocity Vector
@@ -24,7 +29,7 @@ local function SpawnRune(position, velocity, rng, player)
     Isaac.Spawn(
         EntityType.ENTITY_PICKUP,
         PickupVariant.PICKUP_TAROTCARD,
-        ModRNG.GetRandomRune(rng),
+        GetRune(rng),
         position,
         velocity,
         player

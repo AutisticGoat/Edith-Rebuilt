@@ -260,18 +260,6 @@ EdithRebuilt.Enums = {
 			[BackdropType.CORPSE] = Color(0, 0, 0, 1, 0.62, 0.65, 0.62),
 			[BackdropType.CORPSE2] = Color(0, 0, 0, 1, 0.55, 0.57, 0.55),
 		},
-		Runes = {
-			Card.RUNE_HAGALAZ,
-			Card.RUNE_JERA,
-			Card.RUNE_EHWAZ,
-			Card.RUNE_DAGAZ,
-			Card.RUNE_ANSUZ,
-			Card.RUNE_PERTHRO,
-			Card.RUNE_BERKANO,
-			Card.RUNE_ALGIZ,
-			Card.RUNE_BLANK,
-			Card.RUNE_BLACK,
-		},
 		JumpTags = {
 			EdithJump = edithJumpTag,
 			TEdithHop = tedithHopTag,

@@ -1,15 +1,7 @@
 local mod = EdithRebuilt
 local enums = mod.Enums
-local tables = enums.Tables
 local utils = enums.Utils
 local modRNG = {}
-
----Returns a random rune (Used for Geode trinket)
----@param rng RNG
----@return integer
-function modRNG.GetRandomRune(rng)
-	return mod.Modules.HELPERS.When(rng:RandomInt(1, #tables.Runes), tables.Runes)
-end
 
 ---Returns a chance based boolean
 ---@param rng? RNG if `nil`, the function will use Mod's `RNG` object instead
