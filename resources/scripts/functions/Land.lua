@@ -70,20 +70,16 @@ end
 ---@param ent Entity
 ---@param player EntityPlayer
 function Land.AddExtraGore(ent, player)
+	if not ent:ToNPC() then return end
+
 	local modules = mod.Modules
 	local Helpers = modules.HELPERS
 	local Player = modules.PLAYER
+	local ConfigType = Player.IsEdith(player, true) and ConfigDataTypes.TEDITH or ConfigDataTypes.EDITH
 
-	local enabledExtraGore
-
-	if Player.IsEdith(player, false) then
-		enabledExtraGore = Helpers.GetConfigData(ConfigDataTypes.EDITH).EnableExtraGore
-	elseif Player.IsEdith(player, true) then
-		enabledExtraGore = Helpers.GetConfigData(ConfigDataTypes.TEDITH).EnableExtraGore
-	end
+	local enabledExtraGore = Helpers.GetConfigData(ConfigType).EnableExtraGore
 
 	if not enabledExtraGore then return end
-	if not ent:ToNPC() then return end
 
 	ent:AddEntityFlags(EntityFlag.FLAG_EXTRA_GORE)
 	ent:MakeBloodPoof(nil, nil, 0.5)
@@ -97,20 +93,6 @@ local KeyRequiredChests = {
 	[PickupVariant.PICKUP_MEGACHEST] = true,
 }
 
-local Chests = {
-	[PickupVariant.PICKUP_CHEST] = true,
-	[PickupVariant.PICKUP_BOMBCHEST] = true,
-	[PickupVariant.PICKUP_SPIKEDCHEST] = true,
-	[PickupVariant.PICKUP_ETERNALCHEST] = true,
-	[PickupVariant.PICKUP_MIMICCHEST] = true,
-	[PickupVariant.PICKUP_OLDCHEST] = true,
-	[PickupVariant.PICKUP_WOODENCHEST] = true,
-	[PickupVariant.PICKUP_MEGACHEST] = true,
-	[PickupVariant.PICKUP_HAUNTEDCHEST] = true,
-	[PickupVariant.PICKUP_LOCKEDCHEST] = true,
-	[PickupVariant.PICKUP_REDCHEST] = true
-}
-
 ---@param pickup EntityPickup
 ---@return boolean
 function IsKeyRequiredChest(pickup)
@@ -118,9 +100,10 @@ function IsKeyRequiredChest(pickup)
 end
 
 ---@param pickup EntityPickup
----@return boolean
+-- -@return boolean
 local function IsChest(pickup)
-	return mod.Modules.HELPERS.When(pickup.Variant, Chests, false)
+	local entName = EntityConfig.GetEntity(pickup.Type, pickup.Variant, pickup.SubType):GetName()
+	return string.find(entName, "Chest") ~= nil
 end
 
 ---@param player EntityPlayer
@@ -157,88 +140,77 @@ local NonTriggerAnimPickupVar = {
 	[PickupVariant.PICKUP_TROPHY] = true,
 }
 
+local function ChestManager(pickup, player)
+	if not IsChest(pickup) then return end
+
+	if game:GetRoom():GetType() == RoomType.ROOM_CHALLENGE then
+		player:StopExtraAnimation()
+		return
+	end
+
+	if pickup.Variant == PickupVariant.PICKUP_MEGACHEST then
+		MegaChestManager(player, pickup)
+		return
+	end
+
+	if pickup.Variant == PickupVariant.PICKUP_BOMBCHEST then
+		if mod.Modules.PLAYER.IsEdith(player, false) then
+			pickup:TryOpenChest(player)
+		end
+	end
+
+	if IsKeyRequiredChest(pickup) then
+		local hasClip = player:HasTrinket(TrinketType.TRINKET_PAPER_CLIP)
+		if hasClip or CanUseKey(player) then
+			if not hasClip then
+				player:TryUseKey()
+			end
+			pickup:TryOpenChest(player)
+		end
+		return
+	end
+
+	pickup:TryOpenChest()
+end
+
 ---@param player EntityPlayer
 ---@param pickup EntityPickup
-function Land.PickupManager(player, pickup)
-	local room = game:GetRoom()
+---@param includeCol boolean
+local function TriggerPickupCollide(player, pickup, includeCol)
+	if pickup:IsDead() then return end
+	if (not includeCol and pickup.Variant == PickupVariant.PICKUP_COLLECTIBLE) then return end
+
+	player:ForceCollide(pickup, true)
+end
+
+---@param player EntityPlayer
+---@param ent Entity
+---@param includeCol boolean
+local function PickupManager(player, ent, includeCol)
+	local pickup = ent:ToPickup()
+
+	if not pickup then return end
+
 	local IsStopAnimPickup = mod.Modules.HELPERS.When(pickup.Variant, NonTriggerAnimPickupVar, false)
 	local IsEternalHeart = (pickup.Variant == PickupVariant.PICKUP_HEART and pickup.SubType == HeartSubType.HEART_ETERNAL)
-	local IsMegaChest = (pickup.Variant == PickupVariant.PICKUP_MEGACHEST)
 
 	if (IsStopAnimPickup or IsEternalHeart) then
 		player:StopExtraAnimation()
-	end
-
-	if not IsChest(pickup) then return end
-	if room:GetType() == RoomType.ROOM_CHALLENGE then
-		player:StopExtraAnimation()
-		pickup.Position = player.Position
-		pickup.Velocity = Vector(0, 0)
-	elseif IsMegaChest then
-		MegaChestManager(player, pickup)
-	elseif IsKeyRequiredChest(pickup) then
-		if player:HasTrinket(TrinketType.TRINKET_PAPER_CLIP) then
-			pickup:TryOpenChest(player)
-		else
-			if CanUseKey(player) then
-				player:TryUseKey()
-				pickup:TryOpenChest(player)
-			end
-		end
 	else
-		pickup:TryOpenChest()
+		ChestManager(pickup, player)
 	end
+
+	TriggerPickupCollide(player, pickup, includeCol)
 end
-
----@param parent EntityPlayer
----@param ent EntityPickup
----@param includeCol? boolean
-local function PickupLandHandler(parent, ent, includeCol)
-	local var = ent.Variant
-	local pickup = ent:ToPickup() ---@cast pickup EntityPickup
-
-	if not pickup then return end
-	if (not includeCol and pickup.Variant == PickupVariant.PICKUP_COLLECTIBLE) then return end
-
-	local room = game:GetRoom()
-	local IsPickedUp = pickup:GetSprite():IsPlaying("Collect")
-
-	Land.PickupManager(parent, pickup)
-
-	if IsPickedUp then return end
-
-	local Player = mod.Modules.PLAYER
-
-	data(pickup).HopLandedPlayer = parent
-
-	if not Player.IsEdith(parent, false) then return end
-
-	if not (var == PickupVariant.PICKUP_BOMBCHEST and Player.IsEdith(parent, false)) then return end
-	pickup:TryOpenChest(parent)
-
-	if room:GetType() == RoomType.ROOM_CHALLENGE then
-		Ambush.StartChallenge()
-	end
-end
-
-mod:AddCallback(ModCallbacks.MC_POST_PICKUP_UPDATE, function (_, pickup)
-	local player = data(pickup).HopLandedPlayer ---@cast player EntityPlayer
-
-	if not player then return end
-
-	player:ForceCollide(pickup, true)
-	data(pickup).HopLandedPlayer = nil
-end)
 
 ---@param parent EntityPlayer
 ---@param ent Entity
 local function SlotLandManager(parent, ent)
-	local var = ent.Variant
 	local slot = ent:ToSlot()
 
 	if not slot then return end
 	if slot:GetState() == SlotState.DESTROYED then return end
-	if not mod.Modules.HELPERS.When(var, tables.TriggerDamageSlots, false) then return end
+	if not mod.Modules.HELPERS.When(ent.Variant, tables.TriggerDamageSlots, false) then return end
 
 	parent:ForceCollide(ent, false)
 	parent:TakeDamage(1, 0, EntityRef(ent), 0)
@@ -272,7 +244,7 @@ local stompBehavior = {
 		local modules = mod.Modules
 
         if modules.PLAYER.IsEdith(parent, true) then return end
-        modules.PLAYER.TriggerPush(ent, parent, knockback)
+        modules.HELPERS.TriggerPush(ent, parent, knockback)
     end,
     [EntityType.ENTITY_SHOPKEEPER] = function(ent, parent, _, _)
         if mod.Modules.PLAYER.IsEdith(parent, true) then return end
@@ -357,10 +329,9 @@ end
 ---@param ent Entity
 ---@param params EdithJumpStompParams
 ---@param saltedTime number
----@param terraMult number
 ---@param numTears number
 ---@param maths table
-local function HandleStompedEnemy(parent, ent, params, saltedTime, terraMult, numTears, maths)
+local function HandleStompedEnemy(parent, ent, params, saltedTime, numTears, maths)
 	EntityInteractHandler(ent, parent, params.Knockback)
 	SaltEnemyManager(parent, ent, params.IsDefensiveStomp, saltedTime)
 
@@ -396,7 +367,6 @@ function Land.EdithStomp(parent, params, breakGrid)
 	local maths = modules.MATHS
 	local Helpers = modules.HELPERS
 	local Player = modules.PLAYER
-
 	local saltedTime = maths.Round(maths.Clamp(120 * (Player.GetplayerTears(parent) / 2.73), 60, 360))
 	local numTears = Player.GetNumTears(parent)
 
@@ -413,16 +383,16 @@ function Land.EdithStomp(parent, params, breakGrid)
 	end
 
 	for _, ent in ipairs(Isaac.FindInCapsule(Capsules.Pickup, EntityPartition.PICKUP)) do
-		if ent:ToPickup() then PickupLandHandler(parent, ent, true) end
+		PickupManager(parent, ent, true)
 	end
 
 	for _, ent in ipairs(Isaac.FindInCapsule(Capsules.Slot)) do
-		if ent:ToSlot() then SlotLandManager(parent, ent) end
+		SlotLandManager(parent, ent)
 	end
 
 	for _, ent in ipairs(params.StompedEntities) do
 		if GetPtrHash(parent) == GetPtrHash(ent) then goto continue end
-		HandleStompedEnemy(parent, ent, params, saltedTime, terraMult, numTears, maths)
+		HandleStompedEnemy(parent, ent, params, saltedTime, numTears, maths)
 		::continue::
 	end
 
@@ -462,26 +432,12 @@ function Land.BombLandManager(player, params)
 	local Player = mod.Modules.PLAYER
 	local isEdith = Player.IsEdith(player, false)
 	local isTEdith = Player.IsEdith(player, true)
-
 	local isBombLand = isEdith and params.BombStomp or isTEdith and params.ParryBomb or false
 
 	if not isBombLand then return end
 
 	TriggerBombExplosion(player, params)
     UpdateBombState(player, params, isEdith, isTEdith)
-end
-
-local CapsuleFunction = {
-	
-}
-
----@param parent EntityPlayer
----@param capsule Capsule
----@param fn function
-local function ForEachEntInCapsule(parent, capsule, fn)
-	for _, ent in ipairs(Isaac.FindInCapsule(capsule)) do
-		fn()
-	end
 end
 
 ---Tainted Edith hop land behavior
@@ -496,24 +452,20 @@ function Land.TaintedEdithHop(parent, HopParams)
 	local playerPos = parent.Position
 	local VecOne = Vector.One
 	local Capsules = {
-		Enemy = Capsule(playerPos, VecOne, 0, HopParams.HopRadius),
+		Hop = Capsule(playerPos, VecOne, 0, HopParams.HopRadius),
 		Slot = Capsule(playerPos, VecOne, 0, parent.Size),
 		Pickup = Capsule(playerPos, VecOne, 0, 30),
 	}
 
 	for _, ent in ipairs(Isaac.FindInCapsule(Capsules.Pickup)) do
-		if ent:ToPickup() then
-			PickupLandHandler(parent, ent, false)
-		end
+		PickupManager(parent, ent, fals)
 	end
 
 	for _, ent in ipairs(Isaac.FindInCapsule(Capsules.Slot)) do
-		if ent:ToSlot() then
-			SlotLandManager(parent, ent)
-		end
+		SlotLandManager(parent, ent)
 	end
 
-	for _, ent in ipairs(Isaac.FindInCapsule(Capsules.Enemy)) do
+	for _, ent in ipairs(Isaac.FindInCapsule(Capsules.Hop)) do
 		Land.HandleEntityInteraction(ent, parent, HopParams.HopKnockback)
 		Land.LandDamage(ent, parent, HopParams.HopDamage, HopParams.HopKnockback)
 
@@ -867,18 +819,14 @@ local function ImpreciseParryManager(player, ent, HopParams, ImpreciseParryCapsu
 	local StatusEffect = mod.Modules.STATUS_EFFECTS
 
 	for _, entity in ipairs(Isaac.FindInCapsule(PickupCapsule)) do
-		if entity:ToPickup() then
-			PickupLandHandler(player, ent)
-		end
+		PickupManager(player, entity, false)
 	end
 
 	for _, entity in ipairs(Isaac.FindInCapsule(SlotCapsule)) do
-		if entity:ToSlot() then
-			SlotLandManager(player, ent)
-		end
+		SlotLandManager(player, entity)
 	end
 
-	if ent:ToTear() then return  end
+	if ent:ToTear() then return end
 	local pushMult = StatusEffect.EntHasStatusEffect(ent, enums.EdithStatusEffects.CINDER) and 1.5 or 1
 	local Helpers = mod.Modules.HELPERS
 	Helpers.TriggerPush(ent, player, 20 * pushMult)
@@ -983,14 +931,10 @@ end
 ---@return number
 ---@return boolean
 local function CalcParryDamage(player, hopParams, isTaintedEdith)
-	print(player.Type)
-
-    local damageBase = 13.5
-
-    local rawFormula = (damageBase + player.Damage) / 1.5
+	local Maths = mod.Modules.MATHS
+    local rawFormula = (13.5 + player.Damage) / 1.5
     local birthrightMult = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT) and 1.25 or 1
     local hasBirthcake = BirthcakeRebaked and player:HasTrinket(BirthcakeRebaked.Birthcake.ID) or false
-	local Maths = mod.Modules.MATHS
     local multishotMult = Maths.Round(Maths.exp(mod.Modules.PLAYER.GetNumTears(player), 1, 0.5), 2)
     local damageFormula = (rawFormula * birthrightMult) * (hasBirthcake and 1.15 or 1) * multishotMult
 
