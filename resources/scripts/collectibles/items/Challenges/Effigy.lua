@@ -150,8 +150,10 @@ mod:AddCallback(ModCallbacks.MC_USE_ITEM, function(_, _, _, player, flag, slot)
     player:SetMinDamageCooldown(30)
 
     if GetEffigyState(player) == EFFIGY.STATE.STATUE then
-        for _ = 1, 6 do
-            Isaac.Spawn(EntityType.ENTITY_FAMILIAR, FamiliarVariant.WISP, items.COLLECTIBLE_EFFIGY, player.Position, Vector.Zero, player)
+        if player:HasCollectible(CollectibleType.COLLECTIBLE_BOOK_OF_VIRTUES) then
+            for _ = 1, 6 do
+                player:AddWisp(items.COLLECTIBLE_EFFIGY, player.Position, true, true)
+            end
         end
     else
         for _, ent in ipairs(Isaac.FindByType(EntityType.ENTITY_FAMILIAR, FamiliarVariant.WISP, items.COLLECTIBLE_EFFIGY)) do
