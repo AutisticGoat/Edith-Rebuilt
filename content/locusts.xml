@@ -34,6 +34,83 @@
 	<scale quality="3" scale="1.1"/>
 	<scale quality="4" scale="1.2"/>
 
+	<!-- Tear flag reference:
+		0 : SPECTRAL
+		1 : PIERCING
+		2 : HOMING
+		3 : SLOW
+		4 : POISON
+		5 : FREEZE
+		6 : SPLIT
+		7 : GROW
+		8 : BOOMERANG
+		9 : PERSISTENT
+		10: WIGGLE
+		11: MULLIGAN
+		12: EXPLOSIVE
+		13: CHARM
+		14: CONFUSION
+		15: HP_DROP
+		16: ORBIT
+		17: WAIT
+		18: QUADSPLIT
+		19: BOUNCE
+		20: FEAR
+		21: SHRINK
+		22: BURN
+		23: ATTRACTOR
+		24: KNOCKBACK
+		25: PULSE
+		26: SPIRAL
+		27: FLAT
+		28: SAD_BOMB
+		29: BUTT_BOMB
+		30: SQUARE
+		31: GLOW
+		32: GISH
+		33: MYSTERIOUS_LIQUID_CREEP
+		34: SHIELDED
+		35: GLITTER_BOMB
+		36: SCATTER_BOMB
+		37: STICKY
+		38: CONTINUUM
+		39: LIGHT_FROM_HEAVEN
+		40: COIN_DROP
+		41: BLACK_HP_DROP
+		42: TRACTOR_BEAM
+		43: GODS_FLESH
+		44: GREED_COIN
+		45: CROSS_BOMB
+		46: BIG_SPIRAL
+		47: PERMANENT_CONFUSION
+		48: BOOGER
+		49: EGG
+		50: ACID
+		51: BONE
+		52: BELIAL
+		53: MIDAS
+		54: NEEDLE
+		55: JACOBS
+		56: HORN
+		57: LASER
+		58: POP
+		59: ABSORB
+		60: LASERSHOT
+		61: HYDROBOUNCE
+		62: BURSTSPLIT
+		63: CREEP_TRAIL
+		64: PUNCH
+		65: ICE
+		66: MAGNETIZE
+		67: BAIT
+		68: OCCULT
+		69: ORBIT_ADVANCED
+		70: ROCK
+		71: TURN_HORIZONTAL
+		72: BLOOD_BOMB
+		73: ECOLI 
+	-->
+
 	<locust 
 		id="0" 
 		color="fly_white" 
@@ -54,10 +131,75 @@
 	/>
 	<locust 
 		id="3" 
-		color="fly_brown" 
+		color="fly_white" 
+		speed="0.8"
+		damageMultiplier="1.2"
 	/>
 	<locust 
 		id="4" 
 		color="fly_white" 
+		speed="1.25"
+		damageMultiplier="0.75"
+	/>
+	<locust 
+		id="5" 
+		color="fly_gold" 
+	/>
+	<locust 
+		id="6" 
+		color="fly_orange"
+		tearFlags="22"
+		procChance="0.25"
+	/>
+	<locust 
+		id="7" 
+		color="fly_orange"
+		tearFlags="22"
+		procChance="0.25"
+		damageMultiplier="1.25"
+	/>
+	<locust 
+		id="8" 
+		color="fly_white" 
+		speed="1.5"
+		damageMultiplier="0.5"
+	/>
+	<locust 
+		id="9" 
+		color="fly_white"
+		tearFlags="39"
+		procChance="0.5"
+	/>
+	<locust 
+		id="10" 
+		color="fly_white" 
+	/>
+	<locust 
+		id="11" 
+		color="fly_red" 
+	/>
+	<locust 
+		id="12" 
+		color="fly_orange" 
+		tearFlags="22"
+		procChance="0.25"
+	/>
+	<locust 
+		id="13" 
+		color="fly_cyan" 
+		tearFlags="22"
+		speed="0.5"
+	/>
+	<locust 
+		id="14" 
+		color="fly_white" 
+		speed="1.25"
+		damageMultiplier="0.75"
+	/>
+	<locust 
+		id="15" 
+		speed="1.25"
+		damageMultiplier="1.25"
+		color="fly_red" 
 	/>
 </locusts>

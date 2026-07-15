@@ -73,11 +73,8 @@ function Land.AddExtraGore(ent, player)
 	if not ent:ToNPC() then return end
 
 	local modules = mod.Modules
-	local Helpers = modules.HELPERS
-	local Player = modules.PLAYER
-	local ConfigType = Player.IsEdith(player, true) and ConfigDataTypes.TEDITH or ConfigDataTypes.EDITH
-
-	local enabledExtraGore = Helpers.GetConfigData(ConfigType).EnableExtraGore
+	local ConfigType = modules.PLAYER.IsEdith(player, true) and ConfigDataTypes.TEDITH or ConfigDataTypes.EDITH
+	local enabledExtraGore = modules.HELPERS.GetConfigData(ConfigType).EnableExtraGore
 
 	if not enabledExtraGore then return end
 
@@ -814,9 +811,6 @@ end
 local function ImpreciseParryManager(player, ent, HopParams, ImpreciseParryCapsule, PerfectParryCapsule)
 	local PickupCapsule = Capsule(player.Position, Vector.One, 0, 20)
 	local SlotCapsule = Capsule(player.Position, Vector.One, 0, player.Size)
-	local tearsMult = (mod.Modules.PLAYER.GetplayerTears(player) / 2.73) 
-	local CinderTime = mod.Modules.MATHS.SecondsToFrames(math.min(4 * tearsMult, 12))
-	local StatusEffect = mod.Modules.STATUS_EFFECTS
 
 	for _, entity in ipairs(Isaac.FindInCapsule(PickupCapsule)) do
 		PickupManager(player, entity, false)
@@ -827,8 +821,14 @@ local function ImpreciseParryManager(player, ent, HopParams, ImpreciseParryCapsu
 	end
 
 	if ent:ToTear() then return end
+
+	local modules = mod.Modules
+	local tearsMult = modules.PLAYER.GetplayerTears(player) / 2.73 
+	local CinderTime = modules.MATHS.SecondsToFrames(math.min(4 * tearsMult, 12))
+	local Helpers = modules.HELPERS
+	local StatusEffect = modules.STATUS_EFFECTS
 	local pushMult = StatusEffect.EntHasStatusEffect(ent, enums.EdithStatusEffects.CINDER) and 1.5 or 1
-	local Helpers = mod.Modules.HELPERS
+
 	Helpers.TriggerPush(ent, player, 20 * pushMult)
 
 	if not Helpers.IsEnemy(ent) then return end
@@ -840,7 +840,6 @@ local function ImpreciseParryManager(player, ent, HopParams, ImpreciseParryCapsu
 
 	ent:TakeDamage(HopParams.ParryDamage * 0.25, 0, EntityRef(player), 0)
 	StatusEffect.SetStatusEffect(enums.EdithStatusEffects.CINDER, ent, CinderTime, player)
-	EnemiesInImpreciseParry = true
 end
 
 local function ProjectilePerfectParry(player, proj, shouldTriggerFireJets)

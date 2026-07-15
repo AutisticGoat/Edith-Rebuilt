@@ -1,4 +1,5 @@
 local VecDir = {}
+local game = EdithRebuilt.Enums.Utils.Game
 
 --- Helper function to convert a given amount of angle degrees into the corresponding `Direction` enum (From Library of Isaac, tweaked a bit)
 ---@param angleDegrees number
@@ -47,8 +48,8 @@ end
 ---@param resizer? number
 ---@return Vector
 function VecDir.GetMovementVector(input, resizer)
-    local mirrorSign = EdithRebuilt.Modules.HELPERS.IsMirrorRoom() and -1 or 1
-    local x = GetAxisValue(input.left, input.right) * mirrorSign
+    local mirrorMult = game:GetRoom():IsMirrorWorld() and -1 or 1
+    local x = GetAxisValue(input.left, input.right) * mirrorMult
     local y = GetAxisValue(input.up, input.down)
 	local vec = Vector(x, y):Normalized()
 

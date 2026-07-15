@@ -277,11 +277,14 @@ end
 function Edith.ExplosionRecoil(player, jumpParams, bomb)
 	if not mod.Modules.JUMP.IsJumping(player) then return end
 
+	local edithFlags = jumpFlags.EdithJump
+	local newFlags = mod.Modules.BIT_MASK.RemoveBitFlags(edithFlags, JumpLib.Flags.GRIDCOLL_NO_WALLS)
+
 	JumpLib:Jump(player, {
 		Height = 15,
 		Speed = 2,
 		Tags = JumpTags.EdithJump,
-		Flags = jumpFlags.EdithJump,
+		Flags = newFlags,
 	})
 
 	local velTarget = (

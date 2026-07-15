@@ -87,6 +87,14 @@ local includeFiles = {
 
 	ent .. "Locusts/SaltShaker",
 	ent .. "Locusts/PepperGrinder",
+	ent .. "Locusts/EdithsHood",
+	ent .. "Locusts/Sal",
+	ent .. "Locusts/SaltHeart",
+	ent .. "Locusts/GildedStone",
+	ent .. "Locusts/SpicesMix",
+	ent .. "Locusts/ChunkOfBasalt",
+	ent .. "Locusts/DivineWrath",
+	ent .. "Locusts/Hydrargyrum",
 
 	"challenges/Vestige",
 	"challenges/Grudge",

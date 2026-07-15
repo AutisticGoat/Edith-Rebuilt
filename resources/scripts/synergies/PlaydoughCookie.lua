@@ -2,9 +2,6 @@ local mod = EdithRebuilt
 local Helpers = mod.Modules.HELPERS
 local Callbacks = mod.Enums.Callbacks
 
--- La lógica es idéntica entre parry y stomp; solo difiere el nombre del campo
--- de daño en params. Se normaliza igual que Damage.lua.
-
 ---@param params TEdithHopParryParams|EdithJumpStompParams
 local function GetDamage(params)
     return params.Damage or params.ParryDamage

@@ -63,7 +63,7 @@ end
 ---@param radius number
 function Helpers.DestroyGrid(entity, radius)
     local room = game:GetRoom()
-    radius = radius or 10
+    radius = radius or entity.Size
     for i = 0, (room:GetGridSize()) do
 		local grid = room:GetGridEntity(i)
 
@@ -125,7 +125,7 @@ end
 ---@param speed number
 ---@param dmgMult number
 function Helpers.BoostTear(tear, speed, dmgMult)
-	local player = Helpers.GetPlayerFromTear(tear) ---@cast player EntityPlayer	
+	local player = Helpers.GetPlayerFromTear(tear)
 
 	if not player then return end
 
@@ -142,7 +142,6 @@ end
 
 --- returns a `ConfigDataTypes`, used for mod's menu data management
 ---@param Type ConfigDataTypes
----@return EdithData|TEdithData|MiscData?
 function Helpers.GetConfigData(Type)
 	if not saveManager:IsLoaded() then return end
 	local config = saveManager:GetSettingsSave()
@@ -332,10 +331,6 @@ function Helpers.ChangeColor(entity, red, green, blue, alpha)
 	entity.Color = color
 end
 
-function Helpers.IsMirrorRoom()
-	return game:GetRoom():IsMirrorWorld()
-end
-
 local backdropColors = tables.BackdropColors
 local MortisBackdrop = tables.MortisBackdrop
 
@@ -415,8 +410,7 @@ function Helpers.IsKeyStompPressed(player)
         Input.IsButtonPressed(Keyboard.KEY_RIGHT_SHIFT, player.ControllerIndex) or
 		Input.IsButtonPressed(Keyboard.KEY_RIGHT_CONTROL, player.ControllerIndex) or
         Input.IsActionPressed(ButtonAction.ACTION_DROP, player.ControllerIndex)
-		
-	return k_stomp
+		return k_stomp
 end
 
 ---Checks if player triggered Edith's jump button
@@ -431,7 +425,7 @@ function Helpers.IsKeyStompTriggered(player)
         Input.IsButtonTriggered(Keyboard.KEY_RIGHT_SHIFT, player.ControllerIndex) or
 		Input.IsButtonTriggered(Keyboard.KEY_RIGHT_CONTROL, player.ControllerIndex) or
         Input.IsActionTriggered(ButtonAction.ACTION_DROP, player.ControllerIndex)
-		
+
 	return k_stomp
 end
 
@@ -459,7 +453,7 @@ end
 ---@param color Color?
 ---@param inheritParentVel boolean?
 function Helpers.SpawnSaltGib(parent, Number, speed, color, inheritParentVel)
-    local finalColor = color and BlendGibColor(parent.Color, color) or Color(1, 1, 1)
+    local finalColor = color and BlendGibColor(parent.Color, color) or Color.Default
 
     for _ = 1, Number do
         local saltGib = Isaac.Spawn(
@@ -472,7 +466,6 @@ function Helpers.SpawnSaltGib(parent, Number, speed, color, inheritParentVel)
         ):ToEffect() ---@cast saltGib EntityEffect
 
         saltGib.Color = finalColor
-        saltGib.Timeout = 5
 
         if inheritParentVel then
             saltGib.Velocity = saltGib.Velocity + parent.Velocity
@@ -631,14 +624,18 @@ function Helpers.IsModItemWisp(wisp, ID)
 	return wisp.Variant == FamiliarVariant.WISP and wisp.SubType == ID
 end
 
+---@param locust Entity
+---@param ID CollectibleType
 function Helpers.IsModItemLocust(locust, ID)
 	if not locust:ToFamiliar() then return false end
 	return locust.Variant == FamiliarVariant.ABYSS_LOCUST and locust.SubType == ID
 end
 
+local NoColor = Color(0, 0, 0, 0)
+
 function Helpers.TriggerPerfectParryFlash(player)
 	ItemOverlay.Show(enums.Giantbook.PERFECT_PARRY, 3, player)
-	ItemOverlay.GetSprite().Color = Color(0, 0, 0, 0)
+	ItemOverlay.GetSprite().Color = NoColor
 end
 
 mod:AddCallback(ModCallbacks.MC_POST_RENDER, function()
@@ -690,6 +687,20 @@ function Helpers.TriggerSulfuricFireDamage(player, judasMult, carBatteryMult, re
         Helpers.SpawnFireJet(enemy.Position, damage * judasMult * carBatteryMult)
         Helpers.TriggerPush(enemy, player, SULFURIC.PUSH_FORCE)
         enemy:AddBrimstoneMark(ref, SULFURIC.BRIMSTONE_DURATION)
+    end
+end
+
+---@param player EntityPlayer
+---@param npc EntityNPC
+function Helpers.SpawnSaltTears(player, npc, rng, min, max)
+    rng = rng or player:GetCollectibleRNG(enums.CollectibleType.COLLECTIBLE_EDITHS_HOOD)
+    local randomTears = rng:RandomInt(min, max)
+    local shotSpeed = player.ShotSpeed
+
+    for _ = 1, randomTears do
+        local tear = player:FireTear(npc.Position, rng:RandomVector():Resized(shotSpeed * 10), false, false, false, player, 1.2)
+		Helpers.ForceSaltTear(tear, false)
+        tear:AddTearFlags(player.TearFlags)
     end
 end
 

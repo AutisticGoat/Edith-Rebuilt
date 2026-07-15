@@ -94,8 +94,7 @@ end
 ---@param player EntityPlayer
 ---@param params table
 local function UpdateTargetAnimation(effect, player, params)
-	local isActive = Helpers.IsKeyStompPressed(player)
-		or (Jump.IsJumping(player) and params.Cooldown == 0)
+	local isActive = Helpers.IsKeyStompPressed(player) or (Jump.IsJumping(player) and params.Cooldown == 0)
 	local anim = isActive and "Blink" or "Idle"
 	effect:GetSprite():Play(anim)
 end

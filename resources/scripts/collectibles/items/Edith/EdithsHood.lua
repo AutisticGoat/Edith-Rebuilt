@@ -115,24 +115,11 @@ mod:AddCallback(JumpLib.Callbacks.ENTITY_LAND, function(_, player, jumpData)
     player:SetMinDamageCooldown(30)
 end, jumpParams.EdithsHoodJump)
 
----@param player EntityPlayer
----@param npc EntityNPC
-local function SpawnSaltTears(player, npc)
-    local rng = player:GetCollectibleRNG(items.COLLECTIBLE_EDITHS_HOOD)
-    local randomTears = rng:RandomInt(4, 8)
-    local shotSpeed = player.ShotSpeed
-
-    for _ = 1, randomTears do
-        local tear = player:FireTear(npc.Position, rng:RandomVector():Resized(shotSpeed * HOOD.TEAR_SPEED_MULT), false, false, false, player, 1.2)
-        tear:AddTearFlags(player.TearFlags)
-    end
-end
-
 mod:AddCallback(PRE_NPC_KILL.ID, function(_, npc, source)
     local player = helpers.GetPlayerFromRef(source)
     if not player then return end
 	if not data(npc).SaltType then return end
     if not BitMask.HasBitFlags(data(npc).SaltType, saltTypes.EDITHS_HOOD --[[@as BitSet128]]) then return end
 
-    SpawnSaltTears(player, npc)
+    helpers.SpawnSaltTears(player, npc, player:GetCollectibleRNG(items.COLLECTIBLE_EDITHS_HOOD), 4, 8)
 end)

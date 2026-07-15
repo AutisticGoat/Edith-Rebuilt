@@ -20,7 +20,7 @@ local DISSOLUTION = {
     KILL_SPEED_RESTORE = -5,
 }
 
-Birthwrong.registerDescription(enums.PlayerType.PLAYER_EDITH, "Dissolution, flooded rooms", "algo debe de hacer luego lo voy a pensar")
+Birthwrong.registerDescription(enums.PlayerType.PLAYER_EDITH, "Dissolution, flooded rooms", "Rooms will become flooded, Edith will lose speed when touching water")
 
 local waterAmount = 0
 

@@ -142,8 +142,8 @@ function Jump.InitEdithJump(player, jumpTag, vestige)
 end
 
 local JumpHeightParams = {
-	growth = 0.35, 
-	offset = 0.65, 
+	growth = 0.35,
+	offset = 0.65,
 	curve = 1
 }
 
