@@ -109,7 +109,7 @@ function Jump.InitTaintedEdithParryJump(player, tag)
 
 	JumpLib:Jump(player, {
 		Height = 8,
-		Speed = 5.5,
+		Speed = 4.75,
 		Tags = tag,
 		Flags = jumpFlags.TEdithJump,
 	})
