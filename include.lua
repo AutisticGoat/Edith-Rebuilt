@@ -121,6 +121,7 @@ local includeFiles = {
 	syn .. "StatusEffects",
 	syn .. "Technology",
 	syn .. "TechX",
+	syn .. "Effigy",
 }
 
 for _, v in ipairs(includeFiles) do

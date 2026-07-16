@@ -38,25 +38,11 @@ end, items.COLLECTIBLE_EFFIGY)
 
 ---@param player EntityPlayer
 ---@return integer
-local function GetEffigySlot(player)
-    return player:GetActiveItemSlot(items.COLLECTIBLE_EFFIGY)
-end
-
----@param player EntityPlayer
----@return integer
 local function GetEffigyState(player)
-    local slot = GetEffigySlot(player)
-
-    return GetEffigySlot(player) == -1 and EFFIGY.STATE.NORMAL or player:GetActiveItemDesc(slot).VarData
+    local slot = Helpers.GetEffigySlot(player)
+    return slot == -1 and EFFIGY.STATE.NORMAL or player:GetActiveItemDesc(slot).VarData
 end
 
----@param player EntityPlayer
----@return integer
-local function GetEffigyCharge(player)
-    local slot = GetEffigySlot(player)
-    if slot == -1 then return 0 end
-    return player:GetActiveCharge(slot) + player:GetBatteryCharge(slot)
-end
 
 ---@param player EntityPlayer
 ---@return boolean
@@ -116,6 +102,7 @@ end
 
 ---@param player EntityPlayer
 local function JumpUpdateManager(player)
+    if Player.IsAnyEdith(player) then return end
     if GetEffigyState(player) == EFFIGY.STATE.NORMAL then return end
     if Jump.IsJumping(player) then return end
 
@@ -129,10 +116,10 @@ local function JumpUpdateManager(player)
 end
 
 local function ResetStatueStateOnDischarge(player)
-    if GetEffigyCharge(player) > 0 then return end
+    if Helpers.GetEffigyCharge(player) > 0 then return end
     local state = GetEffigyState(player)
     if state == EFFIGY.STATE.NORMAL then return end
-    ChangeEffigyState(player, state, GetEffigySlot(player))
+    ChangeEffigyState(player, state, Helpers.GetEffigySlot(player))
 end
 
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
@@ -168,6 +155,7 @@ mod:AddCallback(ModCallbacks.MC_INPUT_ACTION, function(_, entity, input, action)
     if not entity then return end
     local player = entity:ToPlayer()
     if not player then return end
+    if Player.IsAnyEdith(player) then return end
     if GetEffigyState(player) == EFFIGY.STATE.NORMAL then return end
     if not data(player).EffigyHopCooldown then return end
     if data(player).EffigyHopCooldown <= 0 then return end
@@ -185,7 +173,7 @@ local function EffigyHopLand(player, jumpParams, jumpData)
     jumpParams.Knockback = 20
     jumpParams.Radius = 30
 
-    player:SetActiveCharge(GetEffigyCharge(player) - EFFIGY.HOP_CHARGE_COST, GetEffigySlot(player))
+    player:SetActiveCharge(Helpers.GetEffigyCharge(player) - EFFIGY.HOP_CHARGE_COST, Helpers.GetEffigySlot(player))
 end
 
 ---@param player EntityPlayer
@@ -199,7 +187,7 @@ local function EffigyJumpLand(player, jumpParams, jumpData)
     jumpParams.Radius = 50
 
     data(player).EffigyJumpCooldown = EFFIGY.JUMP_COOLDOWN
-    player:SetActiveCharge(GetEffigyCharge(player) - EFFIGY.JUMP_CHARGE_COST, GetEffigySlot(player))
+    player:SetActiveCharge(Helpers.GetEffigyCharge(player) - EFFIGY.JUMP_CHARGE_COST, Helpers.GetEffigySlot(player))
 
     for _, ent in ipairs(Isaac.FindByType(EntityType.ENTITY_FAMILIAR, FamiliarVariant.WISP, items.COLLECTIBLE_EFFIGY)) do
         ent:Kill()
@@ -299,7 +287,7 @@ end, items.COLLECTIBLE_EFFIGY)
 
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_NEW_LEVEL, function(_, player, _, levelInit)
     if not levelInit then return end
-    local slot = GetEffigySlot(player)
+    local slot = Helpers.GetEffigySlot(player)
     if slot == -1 then return end
 
     local batteryMult = player:HasCollectible(CollectibleType.COLLECTIBLE_BATTERY) and 2 or 1

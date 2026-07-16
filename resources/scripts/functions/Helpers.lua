@@ -704,4 +704,18 @@ function Helpers.SpawnSaltTears(player, npc, rng, min, max)
     end
 end
 
+---@param player EntityPlayer
+---@return integer
+function Helpers.GetEffigySlot(player)
+    return player:GetActiveItemSlot(enums.CollectibleType.COLLECTIBLE_EFFIGY)
+end
+
+---@param player EntityPlayer
+---@return integer
+function Helpers.GetEffigyCharge(player)
+    local slot = Helpers.GetEffigySlot(player)
+    if slot == -1 then return 0 end
+    return player:GetActiveCharge(slot) + player:GetBatteryCharge(slot)
+end
+
 return Helpers
