@@ -122,7 +122,7 @@ local function GetDoorFlags(door)
     if not layer then return nil end
 
     local path = layer:GetSpritesheetPath()
-    local mausoleum = path:find("mausoleum", 1, true) ~= nil
+    local mausoleum = path:find("mausoleum", 1, true) ~= nil or path:find("gehenna", 1, true) ~= nil
     local strange = path:find("mausoleum_alt", 1, true) ~= nil
 
     return {
