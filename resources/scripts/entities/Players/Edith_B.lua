@@ -204,6 +204,7 @@ end
 ---@param isArrowMoving boolean
 local function ArrowSpawnManager(player, isArrowMoving)
 	if not isArrowMoving then return end 
+	if player.ControlsCooldown > 0 then return end
 	TargetArrow.SpawnEdithTarget(player, true)
 end
 

@@ -153,6 +153,7 @@ end
 ---@param state EdithUpdateState
 local function HandleTargetSpawn(player, state)
 	if player.FrameCount == 0 then return end
+	if player.ControlsCooldown > 0 then return end
 	local shouldSpawn = state.isMoving or state.isKeyStompPressed or (state.hasMarked and state.isShooting)
 	if shouldSpawn and not state.isPitfall and not state.jumpData.Tags.EdithRebuilt_FlatStoneLand then
 		TargetArrow.SpawnEdithTarget(player)
