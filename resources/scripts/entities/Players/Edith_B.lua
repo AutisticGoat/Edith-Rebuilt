@@ -4,6 +4,7 @@ local utils = enums.Utils
 local game = utils.Game
 local sfx = utils.SFX
 local tables = enums.Tables
+local parryTypes = enums.ParryTypes
 local misc = enums.Misc
 local modules = mod.Modules
 local VecDir = modules.VEC_DIR
@@ -297,14 +298,22 @@ local function OnParryLand(player, jumpData, params)
 		TEdithMod.ResetHopDashCharge(player, true, true)
 	end
 
-	local perfectParry, EnemiesInImpreciseParry = land.ParryLandManager(player, params, true)
-	local parryAdd = perfectParry and 30 or ((EnemiesInImpreciseParry and 15) or 0)
+	local perfectParry, _ = land.ParryLandManager(player, params, true)
 
 	land.LandFeedbackManager(player, land.GetLandSoundTable(true, perfectParry), misc.BurntSaltColor, jumpData, perfectParry)
-
-	if not parryAdd then return end
-	TEdithMod.AddHopDashCharge(player, parryAdd, 0.75)
 end
+
+local ParryTypeBonusCharge = {
+	[parryTypes.IMPRECISE] = 15,
+	[parryTypes.PERFECT] = 25,
+}
+
+mod:AddCallback(enums.Callbacks.POST_PARRY_LAND, function(_, player)
+	local parryType = TEdithMod.GetParryType(TEdithMod.GetHopParryParams(player))
+	local chargeBonus = Helpers.When(parryType, ParryTypeBonusCharge, 0)
+
+	TEdithMod.AddHopDashCharge(player, chargeBonus, 0.75)
+end)
 
 ---@param ent Entity
 ---@param jumpData JumpData
