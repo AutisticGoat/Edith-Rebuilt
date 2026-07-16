@@ -195,11 +195,11 @@ function Helpers.IsEnemy(ent)
 end
 
 function Helpers.IsVestigeChallenge()
-	return Isaac.GetChallenge() == enums.Challenge.CHALLENGE_VESTIGE
+	return Isaac.GetChallenge() == enums.Challenge.CHALLENGE_VESTIGE or Helpers.GetConfigData(ConfigDataTypes.EDITH).EnableVestigeMode
 end
 
 function Helpers.IsGrudgeChallenge()
-	return Isaac.GetChallenge() == enums.Challenge.CHALLENGE_GRUDGE
+	return Isaac.GetChallenge() == enums.Challenge.CHALLENGE_GRUDGE or Helpers.GetConfigData(ConfigDataTypes.TEDITH).EnableGrudgeMode
 end
 
 ---The same as `Helpers.TriggerPush` but this accepts a `Vector` for positions instead

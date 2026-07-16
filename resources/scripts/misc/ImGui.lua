@@ -1,12 +1,15 @@
 local mod = EdithRebuilt
 local enums = mod.Enums
+local misc = enums.Misc
 local tables = enums.Tables
+local Player = mod.Modules.PLAYER
 local variants = enums.EffectVariant
 local ImGuiTables = tables.ImGuiTables
 local callbacks = enums.Callbacks
 local achievements = enums.Achievements
 local RenderMenu = true
 local SaveManager = mod.SaveManager
+local pgd = enums.Utils.PGD
 local data = mod.DataHolder.GetEntityData
 local ImGuiMod = {}
 
@@ -17,6 +20,7 @@ local ImGuiMod = {}
 ---@field RGBMode boolean
 ---@field RGBSpeed number
 ---@field EnableExtraGore boolean
+---@field EnableVestigeMode boolean
 ---@field DisableSaltGibs boolean
 ---@field StompSound number
 ---@field StompVolume number
@@ -41,6 +45,7 @@ local ImGuiMod = {}
 ---@field ParryFlashContrast number
 ---@field ParryFlashBrightness number
 ---@field EnableExtraGore boolean
+---@field EnableGrudgeMode boolean
 ---@field DisableSaltGibs boolean
 ---@field HopSound number
 ---@field ParrySound number
@@ -53,7 +58,7 @@ local ImGuiMod = {}
 
 local function isEdithUnlocked(tainted)
 	local ach = tainted and achievements.ACHIEVEMENT_TAINTED_EDITH or achievements.ACHIEVEMENT_EDITH
-	return Isaac.GetPersistentGameData():Unlocked(ach)
+	return pgd:Unlocked(ach)
 end
 
 local MainPrefix = "EdithRebuilt_"
@@ -114,7 +119,7 @@ local Elements = {
 				Main = Prefixes.Tab .. "Tainted_Edith_Main",
 				Visuals = Prefixes.Tab .. "Tainted_Edith_Visuals",
 				Sounds = Prefixes.Tab .. "Tainted_Edith_Sounds",
-				-- Gameplay = Prefixes.Tab .. "TaintedEdith_Gameplay"
+				Gameplay = Prefixes.Tab .. "TaintedEdith_Gameplay"
 			},
 			Misc = {
 				Main = Prefixes.Tab .. "Misc_Main"
@@ -139,8 +144,8 @@ local Elements = {
 				},
 				Gameplay = {
 					Stomp = Prefixes.Separator .. "Edith_Gameplay_Misc",
-					Inputs = Prefixes.Separator .. "Edith_Gameplay_Inputs",
 					Salt_Shaker = Prefixes.Separator .. "Edith_Gameplay_Salt_Shaker",
+					Vestige_Mode = Prefixes.Separator .. "Edith_Gameplay_Vestige_Mode", 
 				}
 			},
 			TEdith = {
@@ -156,10 +161,11 @@ local Elements = {
 					Cooldown = Prefixes.Separator .. "Tainted_Edith_Sounds_Cooldown"
 				},
 				-- I'll eventually add this
-				-- Gameplay = {
-				-- 	Inputs = Prefixes.Separator .. "TEdith_Gameplay_Inputs",
-				-- 	Training = Prefixes.Separator .. "TEdith_GameplayTraining"
-				-- }
+				Gameplay = {
+					-- Inputs = Prefixes.Separator .. "TEdith_Gameplay_Inputs",
+					-- Training = Prefixes.Separator .. "TEdith_GameplayTraining"
+					Grudge_Mode = Prefixes.Separator .. "TEdith_Gameplay_Grudge_Mode"
+				}
 			},
 			Misc = {
 				Input = Prefixes.Separator .. "Misc_Input",
@@ -193,6 +199,7 @@ local Elements = {
 			EnableDropKey2Jump = Prefixes.Edith.Gameplay .. "EnableDropKey2Jump",
 			CustomJumpKey = Prefixes.Edith.Gameplay .. "CustomJumpKey",
 			SaltShakerSlot = Prefixes.Edith.Gameplay .. "SaltShaker",
+			EnableVestigeMode = Prefixes.Edith.Gameplay .. "EnableVestigeMode",
 			-- EnableTrainingMode = Prefixes.Edith.Gameplay .. "EnableTrainingMode",
 			DefensiveStompWindow = Prefixes.Edith.Gameplay .. "DefensiveStompWindow",
 		}
@@ -218,14 +225,17 @@ local Elements = {
 			SetParrySound = Prefixes.TEdith.Sounds .. "SetParrySound",
 			SetVolume = Prefixes.TEdith.Sounds .. "SetVolume",
 			SetParryCooldownSound = Prefixes.TEdith.Sounds .. "SetParryCooldownSound",
-		}
 		},
-		Misc = {
-			CustomActionKey = Prefixes.Misc.Input .. "CustomActionKey",
-			ResetEdithData = Prefixes.Misc.ResetData .. "ResetEdithData",
-			ResetTEdithData = Prefixes.Misc.ResetData .. "ResetTaintedEdithData",
-			EnableShakescreen = Prefixes.Misc.Misc .. "EnableShakescreen",
+		Gameplay = {
+			EnableGrudgeMode = Prefixes.TEdith.Sounds .. "EnableGrudgeMode",
 		}
+	},
+	Misc = {
+		CustomActionKey = Prefixes.Misc.Input .. "CustomActionKey",
+		ResetEdithData = Prefixes.Misc.ResetData .. "ResetEdithData",
+		ResetTEdithData = Prefixes.Misc.ResetData .. "ResetTaintedEdithData",
+		EnableShakescreen = Prefixes.Misc.Misc .. "EnableShakescreen",
+	}
 	}
 }
 
@@ -308,6 +318,7 @@ local function UpdateImGuiData()
 			[EdithOptions.Sounds.SetJumpCooldownSound] = (EdithData.JumpCooldownSound - 1) or 0,
 			[EdithOptions.Gameplay.DefensiveStompWindow] = EdithData.DefensiveStompWindow or 18,
 			[EdithOptions.Gameplay.SaltShakerSlot] = EdithData.SaltShakerSlot or 0,
+			[EdithOptions.Gameplay.EnableVestigeMode] = EdithData.EnableVestigeMode or false,
 		}
 
 		for k, v in pairs(edithData) do
@@ -341,6 +352,7 @@ local function UpdateImGuiData()
 			[TEdithOptions.Sounds.SetHopSound] = (TEdithData.HopSound - 1) or 0,
 			[TEdithOptions.Sounds.SetParrySound] = (TEdithData.ParrySound - 1) or 0,
 			[TEdithOptions.Sounds.SetVolume] = TEdithData.Volume or 100,
+			[TEdithOptions.Gameplay.EnableGrudgeMode] = TEdithData.EnableGrudgeMode or false
 		}
 
 		for k, v in pairs(taintedData) do
@@ -413,6 +425,7 @@ local function ResetSaveData(isTainted)
 		TEdithData.ParryFlashColor = {r = 1, g = 1, b = 1, a = 1}
 		TEdithData.ParryFlashBrightness = 1
 		TEdithData.ParryFlashContrast = 0.4
+		TEdithData.EnableGrudgeMode = false
 	else
 		EdithData.TargetColor = {Red = 1, Green = 1, Blue = 1}
 		EdithData.StompSound = 1
@@ -426,6 +439,7 @@ local function ResetSaveData(isTainted)
 		EdithData.JumpCooldownSound = 1
 		EdithData.DefensiveStompWindow = 18
 		EdithData.SaltShakerSlot = 0
+		EdithData.EnableVestigeMode = false
 	end
 
 	UpdateImGuiData()
@@ -587,14 +601,31 @@ local function AddEdithOptions()
 
 	ImGui.SetHelpmarker(OptionGameplay.SaltShakerSlot, "\u{21} This will only work  a new run")
 
-	-- ImGui.AddElement(EdithGameplay, Separator.Gameplay.Training, ImGuiElement.SeparatorText, "Training")
-	-- ImGui.AddCheckbox(EdithGameplay, OptionGameplay.EnableTrainingMode, "Enable Training Mode", 
-	-- 	function(check)
-	-- 		EdithData.TrainingMode = check
-	-- 		-- DisplayTrainingOptions(check)
-	-- 	end,
-	-- false)
-	-- ImGui.SetHelpmarker(OptionGameplay.EnableTrainingMode, "Enable Edith's training mode, making it able to adjust some values \n\u{21} Mod's achievements will be unobtainable in the run")
+	if pgd:Unlocked(achievements.ACHIEVEMENT_EFFIGY) then
+		ImGui.AddElement(EdithGameplay, Separator.Gameplay.Vestige_Mode, ImGuiElement.SeparatorText, "Vestige Mode")
+
+		ImGui.AddCheckbox(EdithGameplay, OptionGameplay.EnableVestigeMode, "Enable Vestige Mode", 
+			function(check)
+				EdithData.EnableVestigeMode = check
+
+				local hoodPath = check and misc.VestigeHoodPath or misc.EdithHoodPath
+
+				for _, player in ipairs(PlayerManager.GetPlayers()) do
+					if not Player.IsEdith(player, false) then goto continue end
+
+					if check == true then
+						Player.SetChallengeSprite(player, enums.Challenge.CHALLENGE_VESTIGE)
+					else
+						Player.ResetPlayerSprite(player)
+					end
+
+					Player.SetHoodSprite(player, hoodPath)
+					::continue::
+				end
+			end,
+		false)
+		ImGui.SetHelpmarker(OptionGameplay.EnableVestigeMode, "Change Edith gameplay to be the same as the Vestige challenge")
+	end
 -- Gameplay end
 end
 
@@ -605,16 +636,16 @@ local function AddTaintedEdithOptions()
 	local TEdithTab = Elements.Menu.Tabs.TEdith.Main
 	local TEdithVisuals = Elements.Menu.Tabs.TEdith.Visuals
 	local TEdithSounds = Elements.Menu.Tabs.TEdith.Sounds
-	-- local TEdithGameplay = Elements.Menu.Tabs.TEdith.Gameplay
+	local TEdithGameplay = Elements.Menu.Tabs.TEdith.Gameplay
 	local OptionVisuals = Elements.Options.TEdith.Visuals
 	local OptionSounds = Elements.Options.TEdith.Sounds
+	local OptionGameplay = Elements.Options.TEdith.Gameplay
 	local Separator = Elements.Menu.Separator.TEdith
 	local TEdithData = SaveManager:GetSettingsSave().TEdithData --[[@as TEdithData]]
 
 	ImGui.AddTabBar(TEdithTab, TEdithTabBar)
 	ImGui.AddTab(TEdithTabBar, TEdithVisuals, "Visuals")
 	ImGui.AddTab(TEdithTabBar, TEdithSounds, "Sounds")
-	-- ImGui.AddTab(TEdithTabBar, EdithGameplay, "Gameplay")
 
 -- Visuals
 	ImGui.AddElement(TEdithVisuals, Separator.Visuals.Arrow, ImGuiElement.SeparatorText, "Arrow")
@@ -742,6 +773,35 @@ local function AddTaintedEdithOptions()
 		end, 
 	{"Stone", "Beep"}, 0, true)
 -- Sounds end
+
+-- Gameplay
+	if pgd:Unlocked(achievements.ACHIEVEMENT_CHUNK_OF_BASALT) then
+		ImGui.AddTab(TEdithTabBar, TEdithGameplay, "Gameplay")
+
+		ImGui.AddElement(TEdithGameplay, Separator.Gameplay.Grudge_Mode, ImGuiElement.SeparatorText, "Grudge Mode")
+		ImGui.AddCheckbox(TEdithGameplay, OptionGameplay.EnableGrudgeMode, "Enable Grudge Mode", 
+			function(check)
+				TEdithData.EnableGrudgeMode = check
+
+				local hoodPath = check and misc.GrudgeHoodPath or misc.TEdithHoodPath
+
+				for _, player in ipairs(PlayerManager.GetPlayers()) do
+					if not Player.IsEdith(player, true) then goto continue end
+
+					if check == true then
+						Player.SetChallengeSprite(player, enums.Challenge.CHALLENGE_GRUDGE)
+					else
+						Player.ResetPlayerSprite(player)
+					end
+
+					Player.SetHoodSprite(player, hoodPath)
+					::continue::
+				end
+			end,
+		false)
+		ImGui.SetHelpmarker(OptionGameplay.EnableGrudgeMode, "Change Tainted Edith gameplay to be the same as the Grudge challenge")
+	end
+-- Gameplay end
 end
 
 local function AddMiscOptions()
@@ -925,7 +985,7 @@ local ModAchievements = {
 local function GetEdithUnlockedAchs()
 	local count = 0
 	for _, unlock in ipairs(ModAchievements.Edith) do
-		if Isaac.GetPersistentGameData():Unlocked(unlock) then
+		if pgd:Unlocked(unlock) then
 			count = count + 1
 		end
 	end
@@ -935,7 +995,7 @@ end
 local function GetTEdithUnlockedAchs()
 	local count = 0
 	for _, unlock in ipairs(ModAchievements.TEdith) do
-		if Isaac.GetPersistentGameData():Unlocked(unlock) then
+		if pgd:Unlocked(unlock) then
 			count = count + 1
 		end
 	end
@@ -1003,7 +1063,8 @@ local function InitSaveData()
 	EdithData.RGBSpeed = EdithData.RGBSpeed or 0.005
 	EdithData.TargetLine = EdithData.TargetLine or false
 	EdithData.DefensiveStompWindow = EdithData.DefensiveStompWindow or 18
-	EdithData.SaltShakerSlot = EdithData.SaltShakerSlot or 0 
+	EdithData.SaltShakerSlot = EdithData.SaltShakerSlot or 0
+	EdithData.EnableVestigeMode = EdithData.EnableVestigeMode or false
 	
 	TEdithData.ArrowColor = TEdithData.ArrowColor or {Red = 1, Green = 0, Blue = 0}
 	TEdithData.ArrowDesign = TEdithData.ArrowDesign or 1
@@ -1019,6 +1080,7 @@ local function InitSaveData()
 	TEdithData.ParryFlashColor = TEdithData.ParryFlashColor or {r = 1, g = 1, b = 1, a = 1}
 	TEdithData.ParryFlashBrightness = TEdithData.ParryFlashBrightness or 1
 	TEdithData.ParryFlashContrast = TEdithData.ParryFlashContrast or 0.4
+	TEdithData.EnableGrudgeMode = TEdithData.EnableGrudgeMode or false
 
 	MiscData.EnableShakescreen = MiscData.EnableShakescreen or true
 	MiscData.CustomActionKey = MiscData.CustomActionKey or Keyboard.KEY_Z
@@ -1028,7 +1090,7 @@ end
 
 mod:AddCallback(ModCallbacks.MC_POST_ACHIEVEMENT_UNLOCK, function ()
 	RenderMenu = false
-end, achievements.ACHIEVEMENT_TAINTED_EDITH)
+end)
 
 mod:AddCallback(ModCallbacks.MC_MAIN_MENU_RENDER, ImGuiMod.DestroyImGuiOptions)
 mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, InitSaveData)
@@ -1040,7 +1102,3 @@ mod:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT, OptionsUpdate)
 mod:AddCallback(ModCallbacks.MC_PRE_MOD_UNLOAD, OptionsUpdate)
 mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, OptionsUpdate)
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, OptionsUpdate)
-
-mod:AddCallback(ModCallbacks.MC_POST_ACHIEVEMENT_UNLOCK, function()
-	RenderMenu = true
-end, achievements.ACHIEVEMENT_TAINTED_EDITH)

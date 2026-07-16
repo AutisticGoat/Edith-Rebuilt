@@ -234,6 +234,15 @@ function Player.SetChallengeSprite(player, challenge)
 end
 
 ---@param player EntityPlayer
+function Player.ResetPlayerSprite(player)
+	local playerSprite = player:GetSprite()
+
+	for i = 0, 14 do
+		playerSprite:ReplaceSpritesheet(i, EntityConfig.GetPlayer(player:GetPlayerType()):GetSkinPath(), true)
+	end
+end
+
+---@param player EntityPlayer
 ---@param path string
 function Player.SetHoodSprite(player, path)
 	local costumeDesc = player:GetCostumeSpriteDescs()[1]
@@ -244,10 +253,23 @@ end
 ---@param tainted boolean
 function Player.SetCustomSprite(player, tainted)
 	if not mod.Modules.HELPERS.IsModChallenge() then return end
-	local hoodPath = tainted and enums.Misc.GrudgeHoodPath or enums.Misc.VestigeHoodPath
 
-	Player.SetChallengeSprite(player, Isaac.GetChallenge())
-	Player.SetHoodSprite(player, hoodPath)
+	local Helpers = mod.Modules.HELPERS
+
+	local challenge = Isaac.GetChallenge()
+
+	if Player.IsEdith(player, false) and Helpers.GetConfigData("EdithData").EnableVestigeMode == true then
+		challenge = challenges.CHALLENGE_VESTIGE
+	elseif Player.IsEdith(player, true) and Helpers.GetConfigData("TEdithData").EnableGrudgeMode == true then
+		challenge = challenges.CHALLENGE_GRUDGE
+	end
+
+	if challenge ~= Challenge.CHALLENGE_NULL then
+		local hoodPath = tainted and enums.Misc.GrudgeHoodPath or enums.Misc.VestigeHoodPath
+	
+		Player.SetChallengeSprite(player, challenge)
+		Player.SetHoodSprite(player, hoodPath)
+	end
 end
 
 return Player
