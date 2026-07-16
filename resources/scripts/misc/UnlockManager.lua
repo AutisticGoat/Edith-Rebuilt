@@ -112,17 +112,20 @@ end
 mod:AddCallback(ModCallbacks.MC_POST_ACHIEVEMENT_UNLOCK, ThankYou)
 
 ---@param player PlayerType
----@param pgd PersistentGameData
 ---@param difficulty Difficulty
-local function GreedierUnlockManager(player, pgd, difficulty)
+local function GreedierUnlockManager(player, difficulty)
     if difficulty ~= Difficulty.DIFFICULTY_GREEDIER then return end
 
-    for _, ach in ipairs(GreedierUnlocks[player]) do
+    local unlockTable = Helpers.When(player, GreedierUnlocks)
+
+    if not unlockTable then return end
+
+    for _, ach in ipairs(unlockTable) do
         pgd:TryUnlock(ach, true)
     end
 end
 
-local function TaintedMarksGroupUnlockManager(pgd)
+local function TaintedMarksGroupUnlockManager()
     for group, ach in pairs(UnlockTable.TEdith.TaintedMarksGroup) do
         if Isaac.AllTaintedCompletion(players.PLAYER_EDITH_B, group) == 2 then
             pgd:TryUnlock(ach)
@@ -145,9 +148,8 @@ end
 
 ---@param mark CompletionType
 ---@param player PlayerType
----@param pgd PersistentGameData
 ---@param difficulty Difficulty
-local function TriggerMarkUnlock(mark, player, pgd, difficulty)
+local function TriggerMarkUnlock(mark, player, difficulty)
     local unlock = GetUnlockTable(mark, player)
 
     if not unlock then return end
@@ -157,10 +159,9 @@ local function TriggerMarkUnlock(mark, player, pgd, difficulty)
 end
 
 ---@param player PlayerType
----@param pgd PersistentGameData
-local function CompletionBonusManager(player, pgd)
+local function CompletionBonusManager(player)
     if player == players.PLAYER_EDITH_B then
-        TaintedMarksGroupUnlockManager(pgd)
+        TaintedMarksGroupUnlockManager()
     end
 
     if Isaac.AllMarksFilled(players.PLAYER_EDITH) == 2 then
@@ -173,9 +174,9 @@ end
 mod:AddCallback(ModCallbacks.MC_POST_COMPLETION_MARK_GET, function(_, mark, player)
     local difficulty = game.Difficulty
 
-    GreedierUnlockManager(player, pgd, difficulty)
-    TriggerMarkUnlock(mark, player, pgd, difficulty)
-    CompletionBonusManager(player, pgd)
+    GreedierUnlockManager(player, difficulty)
+    TriggerMarkUnlock(mark, player, difficulty)
+    CompletionBonusManager(player)
     ThankYou()
 end)
 
