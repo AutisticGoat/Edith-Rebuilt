@@ -167,8 +167,8 @@
 	<locust 
 		id="9" 
 		color="fly_white"
-		tearFlags="39"
-		procChance="0.5"
+		tearFlags2="39"
+		procChance2="0.5"
 	/>
 	<locust 
 		id="10" 
