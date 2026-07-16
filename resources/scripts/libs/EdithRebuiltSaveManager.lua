@@ -3,7 +3,7 @@
 
 local game = Game()
 local SaveManager = {}
-SaveManager.VERSION = "2.4"
+SaveManager.VERSION = "2.4.1b"
 SaveManager.Utility = {}
 
 SaveManager.Debug = false
@@ -170,6 +170,7 @@ SaveManager.Utility.ValidityState = {
 ---@field unlockApi table @Built in compatibility for UnlockAPI (https://github.com/dsju/unlockapi)
 ---@field deadSeaScrolls table @Built in support for Dead Sea Scrolls (https://github.com/Meowlala/DeadSeaScrollsMenu)
 ---@field minimapAPI table @Built in support for MinimapAPI(https://github.com/TazTxUK/MinimapAPI)
+---@field customHealthAPI string @Built in support for CustomHealthAPI(https://github.com/TaigaTreant/isaac-chapi)
 ---@field settings table @Miscellaneous table for anything settings-related.
 ---@field other table @Miscellaneous table for if you want to use your own unlock system or just need to store random data to the file.
 
@@ -196,6 +197,7 @@ SaveManager.DEFAULT_SAVE = {
 		unlockApi = {},
 		deadSeaScrolls = {},
 		minimapAPI = {},
+		customHealthAPI = "",
 		settings = {},
 		other = {}
 	}
@@ -240,7 +242,7 @@ local ANIMAL_EFFECTS = {
 ---@param variant integer
 ---@param subtype integer
 ---@param spawnerType EntityType | integer
----@param isClear boolean
+---@param isClear? boolean
 ---@return boolean
 local function should_save_effect(variant, subtype, spawnerType, isClear)
 	if EFFECT_WHITELIST[variant] then
@@ -272,7 +274,7 @@ end
 ---@param variant integer
 ---@param subtype integer
 ---@param spawnerType EntityType | integer
----@param isClear boolean
+---@param isClear? boolean
 ---@return boolean
 local function should_save_type(type, variant, subtype, spawnerType, isClear)
 	if type == EntityType.ENTITY_SHOPKEEPER then
@@ -296,7 +298,7 @@ local function should_save_type(type, variant, subtype, spawnerType, isClear)
 	end
 
 	if type == EntityType.ENTITY_GIDEON then
-		return isClear and subtype == 1
+		return isClear and subtype == 1 or false
 	end
 
 	if type == EntityType.ENTITY_GENERIC_PROP then
@@ -310,7 +312,7 @@ end
 ---@param variant integer
 ---@param subtype integer
 ---@param spawnerType EntityType | integer
----@param isClear boolean
+---@param isClear? boolean
 function SaveManager.Utility.ShouldSaveType(entType, variant, subtype, spawnerType, isClear)
 	if entType == EntityType.ENTITY_PICKUP then
 		return not PICKUP_BLACKLIST[variant]
@@ -666,7 +668,7 @@ end
 ---@param saveType DataDuration
 ---@return boolean, string?
 function SaveManager.Utility.IsEntitySaveAllowed(ent, saveType)
-	if not SaveManager.Utility.ShouldSaveType(ent.Type, ent.Variant, ent.SubType, ent.SpawnerType, game:GetRoom():IsClear()) then
+	if not SaveManager.Utility.ShouldSaveType(ent.Type, ent.Variant, ent.SubType, ent.SpawnerType) then
 		return false, SaveManager.Utility.ErrorMessages.INVALID_ENTITY:format(ent.Type, ent.Variant, ent.SubType)
 	end
 	local entType = ent.Type
@@ -1485,9 +1487,8 @@ end
 local function tryRemoveLeftoverData()
 	SaveManager.Utility.DebugLog("leftover ent data check")
 	local availableIndexes = {}
-	local clearedRoom = game:GetRoom():IsClear()
 	for _, ent in ipairs(Isaac.GetRoomEntities()) do
-		if SaveManager.Utility.ShouldSaveType(ent.Type, ent.Variant, ent.SubType, ent.SpawnerType, clearedRoom) then
+		if SaveManager.Utility.ShouldSaveType(ent.Type, ent.Variant, ent.SubType, ent.SpawnerType) then
 			availableIndexes[SaveManager.Utility.GetSaveIndex(ent)] = true
 		end
 	end
@@ -1612,7 +1613,7 @@ end
 ---@param ent Entity
 local function postEntityRemove(_, ent)
 	if not dataCache.game
-		or not SaveManager.Utility.ShouldSaveType(ent.Type, ent.Variant, ent.SubType, ent.SpawnerType, game:GetRoom():IsClear())
+		or not SaveManager.Utility.ShouldSaveType(ent.Type, ent.Variant, ent.SubType, ent.SpawnerType)
 	then
 		return
 	end
@@ -1919,7 +1920,7 @@ end
 
 --#endregion
 
---#region MinimapAI integration
+--#region MinimapAPI integration
 
 -- Registers MinimapAPI as a dependent of SaveManager.
 ---@param minimapAPI table @Reference to MinimapAPI.
@@ -1943,6 +1944,20 @@ function SaveManager.InitMinimapAPI(minimapAPI, branchVersion)
 			end
 		end)
 	end
+end
+
+---@param customHealthAPI table @Reference to CustomHealthAPI.
+function SaveManager.InitCHAPI(customHealthAPI)
+	customHealthAPI.Library.AddCallback(modReference.Name, customHealthAPI.Enums.Callbacks.ON_SAVE, 0, function(savedata, isPreGameExit)
+		dataCache.file.customHealthAPI = savedata
+		SaveManager.Save()
+	end)
+
+	customHealthAPI.Library.AddCallback(modReference.Name, customHealthAPI.Enums.Callbacks.ON_LOAD, 0, function()
+		if modReference:HasData() then
+			return dataCache.file.customHealthAPI
+		end
+	end)
 end
 
 --#endregion
