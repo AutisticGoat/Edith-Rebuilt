@@ -253,10 +253,11 @@ local function RocketInAJarManager(player, jumpParams)
 end	
 
 ---@param player EntityPlayer
----@param jumpConfig JumpData
+---@param jumpData JumpData
 ---@param jumpParams EdithJumpStompParams
-function Edith.BombFall(player, jumpConfig, jumpParams)
-	local Helpers = mod.Modules.HELPERS
+function Edith.BombFall(player, jumpData, jumpParams)
+	local modules = mod.Modules
+	local Helpers = modules.HELPERS
 
 	if Helpers.IsVestigeChallenge() then return end
 	if jumpParams.IsDefensiveStomp then return end
@@ -267,7 +268,15 @@ function Edith.BombFall(player, jumpConfig, jumpParams)
 		return
 	end
 
-	JumpLib:SetSpeed(player, 10 + (jumpConfig.Height / 10))
+	local canFly = player.CanFly
+
+	if canFly and modules.JUMP.GetFallFrame(player) == 0 then
+		sfx:Play(SoundEffect.SOUND_SHELLGAME)
+	end
+
+	local speedBase = canFly and 20 or 10
+
+	JumpLib:SetSpeed(player, speedBase + (jumpData.Height / 10))
 	player:MultiplyFriction(0.5)
 end
 
