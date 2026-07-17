@@ -16,7 +16,7 @@
     <achievement name="EdithRebuilt_Ediths Hood" gfx="achievement_EdithsHood.png" />
     <achievement name="EdithRebuilt_Hydrargyrum" gfx="achievement_Hydrargyrum.png" />
     <achievement name="EdithRebuilt_SpicesMix" gfx="achievement_SpicesMix.png" />
-    <achievement name="EdithRebuilt_The Punished" gfx="achievement_TaintedEdith.png" />
+    <achievement name="EdithRebuilt_The Scorched" gfx="achievement_TaintedEdith.png" />
 
     <!-- Tainted Edith unlocks -->
     <achievement name="EdithRebuilt_Salt Rocks" gfx="achievement_SaltRocks.png" />

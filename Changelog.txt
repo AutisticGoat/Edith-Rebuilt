@@ -338,6 +338,7 @@ v1.8.0
 -- Fixed Bombstomp not being fast enough when having flight
 -- Fixed T. Edith not getting hopdash charge bonus in Grudge Challenge
 -- Fixed T. Edith being invulnerable when falling to a Little's Horn pit while dashing
+-- Fixed T. Edith's sprite being pretty offset when going to the minecart
 -- Added Abyss locusts for all mod items
 -- Added Effigy's costume
 -- Added Edith's Hood's costume
@@ -410,7 +411,8 @@ v1.8.0
 ---- These rocks and fire jets damage enemies, but can also hurt Tainted Edith
 
 - Items: 
--- Now Pepper Grinder is a timed active (4 seconds)
+-- Pepper Grinder changes:
+--- Now Pepper Grinder is a timed active (4 seconds)
 -- Divine Retribution buff:
 --- Increased base damage (25 > 40)
 --- Increased healing (1 > 2)

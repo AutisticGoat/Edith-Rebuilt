@@ -141,7 +141,7 @@ EdithRebuilt.Enums = {
 		ACHIEVEMENT_SPICES_MIX = Isaac.GetAchievementIdByName("EdithRebuilt_SpicesMix"),
 		ACHIEVEMENT_EDITHS_HOOD = Isaac.GetAchievementIdByName("EdithRebuilt_Ediths Hood"),
 		ACHIEVEMENT_HYDRARGYRUM = Isaac.GetAchievementIdByName("EdithRebuilt_Hydrargyrum"),
-		ACHIEVEMENT_TAINTED_EDITH = Isaac.GetAchievementIdByName("EdithRebuilt_The Punished"),
+		ACHIEVEMENT_TAINTED_EDITH = Isaac.GetAchievementIdByName("EdithRebuilt_The Scorched"),
 		-- Edith unlocks end
 
 		-- Tainted Edith unlocks
