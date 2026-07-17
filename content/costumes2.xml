@@ -5,7 +5,5 @@
 
     <costume id="8" anm2path="SaltHeartHead.anm2" type="passive" priority="19" skinColor="0" overwriteColor="true" forceBodyColor="true"/>
 
-
-    
     <costume id="1000" anm2path="EdithEffigy.anm2" type="none" overwriteColor="true" priority="99" forceBodyColor="true"/>
 </costumes>

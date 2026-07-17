@@ -86,6 +86,7 @@ mod:AddCallback(ModCallbacks.MC_POST_ENTITY_KILL, function (_, npc, source)
 
     if not player then return end
     if not StsEffects.EntHasStatusEffect(player, effects.SALTED) then return end
+    if not data(npc).SaltType then return end
     if not BitMask.HasAnyBitFlags(data(npc).SaltType, saltTypes.SALT_HEART) then return end
     if not ModRNG.RandomBoolean(player:GetCollectibleRNG(items.COLLECTIBLE_SALT_HEART), 0.25) then return end
 
