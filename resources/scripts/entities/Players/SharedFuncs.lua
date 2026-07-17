@@ -165,8 +165,9 @@ local GrudgePath = "gfx/ui/stage/TEdithPortraitGrudge.png"
 ---@param sprite Sprite
 ---@param layer integer
 local function replacePortrait(sprite, layer)
-    local isVestige = Helpers.IsVestigeChallenge()
-    local isGrudge = Helpers.IsGrudgeChallenge()
+    local challenge = Isaac.GetChallenge()
+    local isVestige = challenge == enums.Challenge.CHALLENGE_VESTIGE
+    local isGrudge = challenge == enums.Challenge.CHALLENGE_GRUDGE
     local path = isVestige and VestigePath or isGrudge and GrudgePath
 
     if not path then return end
