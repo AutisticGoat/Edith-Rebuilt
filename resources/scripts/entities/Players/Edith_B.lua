@@ -219,6 +219,11 @@ local function SetRedirectValues(player, pData, arrow)
 	pData.PressCount = pData.PressCount or 0
 end
 
+---@param player EntityPlayer
+local function PitfallJumpStop(player)
+	if not player:GetSprite():IsPlaying("FallIn") then return end
+	TEdithMod.StopTEdithHops(player, 9, true, true, true)
+end
 
 ---@param player EntityPlayer
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)	
@@ -238,6 +243,7 @@ mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
 		TEdithMod.ResetHopDashCharge(player, false, true)
 	end
 
+	PitfallJumpStop(player)
 	SetRedirectValues(player, pData, arrow)
 	ManageTargetCleanup(player, pData, arrow, isArrowMoving)
 	ArrowSpawnManager(player, isArrowMoving)
