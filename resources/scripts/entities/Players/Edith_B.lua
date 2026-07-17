@@ -264,6 +264,25 @@ local function RoomFloorStopManager(isLevelCallback)
 end
 
 mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, function ()
+	Player.ForEachPlayerType(function (player)
+		if utils.Level:GetCurrentRoomDesc().Data.Name ~= "Mirror Room" then return end
+
+		local room = game:GetRoom()
+		local params = TEdithMod.GetHopParryParams(player)
+
+		for i = 0, DoorSlot.NUM_DOOR_SLOTS do
+			local door = room:GetDoor(i)
+
+			if not door then goto continue end
+			if not string.find(door:GetSprite():GetLayer(0):GetSpritesheetPath(), "mirror") then break end
+
+			if door.Position:DistanceSquared(player.Position) > 1600 then break end
+			params.HopDirection.X = -params.HopDirection.X
+			player:SetHeadDirection(VecDir.VectorToDirection(params.HopDirection), 2, true)
+			::continue::
+		end
+	end, enums.PlayerType.PLAYER_EDITH_B)
+
 	RoomFloorStopManager(false)
 end)
 mod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, function ()
