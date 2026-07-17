@@ -175,23 +175,29 @@ end
 ---@param includeCol boolean
 local function TriggerPickupCollide(player, pickup, includeCol)
 	if pickup:IsDead() then return end
+	if pickup:GetSprite():IsPlaying("Collect") then return end
 	if (not includeCol and pickup.Variant == PickupVariant.PICKUP_COLLECTIBLE) then return end
 
-	player:ForceCollide(pickup, true)
+	player:ForceCollide(pickup, false)
 end
 
 ---@param player EntityPlayer
 ---@param ent Entity
 ---@param includeCol boolean
-local function PickupManager(player, ent, includeCol)
+---@param stopExtraAnim? boolean
+local function PickupManager(player, ent, includeCol, stopExtraAnim)
 	local pickup = ent:ToPickup()
+
+	if stopExtraAnim == nil then
+		stopExtraAnim = true
+	end
 
 	if not pickup then return end
 
 	local IsStopAnimPickup = mod.Modules.HELPERS.When(pickup.Variant, NonTriggerAnimPickupVar, false)
 	local IsEternalHeart = (pickup.Variant == PickupVariant.PICKUP_HEART and pickup.SubType == HeartSubType.HEART_ETERNAL)
 
-	if (IsStopAnimPickup or IsEternalHeart) then
+	if stopExtraAnim and (IsStopAnimPickup or IsEternalHeart) then
 		player:StopExtraAnimation()
 	else
 		ChestManager(pickup, player)
@@ -455,7 +461,7 @@ function Land.TaintedEdithHop(parent, HopParams)
 	}
 
 	for _, ent in ipairs(Isaac.FindInCapsule(Capsules.Pickup)) do
-		PickupManager(parent, ent, fals)
+		PickupManager(parent, ent, true, false)
 	end
 
 	for _, ent in ipairs(Isaac.FindInCapsule(Capsules.Slot)) do
