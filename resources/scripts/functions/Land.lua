@@ -379,8 +379,6 @@ function Land.EdithStomp(parent, params, breakGrid)
 		Slot = Capsule(parent.Position, Vector.One, 0, parent.Size),
 	}
 
-	DebugRenderer.Get(1, true):Capsule(Capsules.Pickup)
-
 	params.StompedEntities = Isaac.FindInCapsule(Capsules.Stomp)
 
 	if not params.IsDefensiveStomp then
