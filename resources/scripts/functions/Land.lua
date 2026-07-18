@@ -596,6 +596,14 @@ local function GetTEdithLandParams(IsParryLand)
     }
 end
 
+local WaterBlueColor = Color(0.7, 0.75, 1)
+local function GetWaterEffectColor()
+	local waterColor = game:GetRoom():GetFXParams().WaterEffectColor
+
+	return (waterColor.R == 1 and waterColor.G == 1 and waterColor.B == 1) and WaterBlueColor or waterColor
+end
+
+
 ---@param Variant EffectVariant
 ---@param BackDrop BackdropType
 ---@param IsMortis boolean
@@ -607,7 +615,7 @@ local function GetLandEffectColor(Variant, BackDrop, IsMortis)
     local color
 
     if Variant == EffectVariant.BIG_SPLASH then
-        color = Helpers.When(BackDrop, backColor, Color(0.7, 0.75, 1))
+        color = Helpers.GetWaterEffectColor()
     elseif Variant == EffectVariant.POOF02 then
         color = BackDrop == BackdropType.DROSS and defColor or backColor[BackDrop]
     end
@@ -621,7 +629,7 @@ local function GetLandEffectColor(Variant, BackDrop, IsMortis)
         color = Helpers.When(Helpers.GetMortisDrop(), MortisColors, Color.Default)
     end
 
-    return color or defColor
+    return color or Color.Default
 end
 
 ---@param player EntityPlayer

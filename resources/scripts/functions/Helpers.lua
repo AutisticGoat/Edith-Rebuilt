@@ -343,7 +343,7 @@ function Helpers.SetBloodEffectColor(effect)
 	local color = Color(1, 1, 1)
 	local switch = {
 		[EffectVariant.BIG_SPLASH] = function()
-			color = backdropColors[BackDrop] or Color(0.7, 0.75, 1)
+			color = Helpers.GetWaterEffectColor()
 			if IsMortis then
 				color = Color(0, 0.8, 0.76, 1, 0, 0, 0)
 			end
@@ -471,6 +471,13 @@ function Helpers.SpawnSaltGib(parent, Number, speed, color, inheritParentVel)
             saltGib.Velocity = saltGib.Velocity + parent.Velocity
         end
     end
+end
+
+local WaterBlueColor = Color(0.7, 0.75, 1)
+function Helpers.GetWaterEffectColor()
+	local waterColor = game:GetRoom():GetFXParams().WaterEffectColor
+
+	return (waterColor.R == 1 and waterColor.G == 1 and waterColor.B == 1) and WaterBlueColor or waterColor
 end
 
 ---Helper function to find out how large a bomb explosion is based on the damage inflicted.
