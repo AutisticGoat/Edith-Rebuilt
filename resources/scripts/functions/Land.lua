@@ -268,16 +268,6 @@ function Land.HandleEntityInteraction(ent, parent, knockback)
 end
 
 ---@param parent EntityPlayer
----@param isSalted boolean	
-local function EdithBirthcake(parent, isSalted)
-	if not (BirthcakeRebaked and parent:HasTrinket(BirthcakeRebaked.Birthcake.ID) and isSalted) then return end
-	local BCRRNG = parent:GetTrinketRNG(BirthcakeRebaked.Birthcake.ID)
-	for _ = 1, BCRRNG:RandomInt(3, 7) do
-		parent:FireTear(parent.Position, RandomVector():Resized(15))
-	end
-end
-
----@param parent EntityPlayer
 ---@param ent Entity
 ---@param isDefStomp boolean
 ---@param SaltedTime boolean
@@ -357,7 +347,6 @@ local function HandleStompedEnemy(parent, ent, params, saltedTime, numTears, mat
 	local isSalted = mod.Modules.STATUS_EFFECTS.EntHasStatusEffect(ent, enums.EdithStatusEffects.SALTED)
 	if isSalted then VestigeUnlockManager() end
 
-	EdithBirthcake(parent, isSalted)
 	Land.AddExtraGore(ent, parent)
 end
 

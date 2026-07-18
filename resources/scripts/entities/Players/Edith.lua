@@ -1,4 +1,4 @@
----@diagnostic disable: undefined-field
+---@diagnostic disable: undefined-field, undefined-global
 local mod = EdithRebuilt
 local enums = mod.Enums
 local utils = enums.Utils
@@ -14,6 +14,7 @@ local helpers = modules.HELPERS
 local Player = modules.PLAYER
 local ModRNG = modules.RNG
 local Jump = modules.JUMP
+local StatusEffects = modules.STATUS_EFFECTS
 local data = mod.DataHolder.GetEntityData
 local params = EdithMod.GetJumpStompParams
 
@@ -470,3 +471,14 @@ end, {
 	tag = tables.JumpTags.EdithJump,
 	type = EntityType.ENTITY_FAMILIAR,
 })
+
+---@param player EntityPlayer
+---@param ent Entity
+mod:AddCallback(enums.Callbacks.OFFENSIVE_STOMP_HIT, function(_, player, ent)
+	if not (BirthcakeRebaked and player:HasTrinket(BirthcakeRebaked.Birthcake.ID)) then return end
+
+	local rng = player:GetTrinketRNG(BirthcakeRebaked.Birthcake.ID)
+
+	if not ModRNG.RandomBoolean(rng, 0.25) then return end
+	StatusEffects.SetStatusEffect(enums.EdithStatusEffects.SALTED, ent, 120, player)
+end)
