@@ -8,6 +8,10 @@ local DivineWrathID = mod.Enums.CollectibleType.COLLECTIBLE_DIVINE_WRATH
 mod:AddCallback(ModCallbacks.MC_POST_TEAR_UPDATE, function (_, tear)
     if tear.FrameCount ~= 1 then return end
 
+    local spawner = tear.Parent or tear.SpawnerEntity
+
+    if not spawner then return end
+
     local fam = (tear.Parent or tear.SpawnerEntity):ToFamiliar()
 
     if not fam then return end
