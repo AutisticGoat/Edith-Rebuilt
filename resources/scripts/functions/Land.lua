@@ -140,21 +140,23 @@ local NonTriggerAnimPickupVar = {
 local function ChestManager(pickup, player)
 	if not IsChest(pickup) then return end
 	local openedBombChest = false
-	
+	local var = pickup.Variant
+
 	if game:GetRoom():GetType() == RoomType.ROOM_CHALLENGE then
 		player:StopExtraAnimation()
 		return
 	end
 
-	if pickup.Variant == PickupVariant.PICKUP_MEGACHEST then
+	if var == PickupVariant.PICKUP_MEGACHEST then
 		MegaChestManager(player, pickup)
 		return
 	end
 
-	if pickup.Variant == PickupVariant.PICKUP_BOMBCHEST then
+	if var == PickupVariant.PICKUP_BOMBCHEST then
 		if mod.Modules.PLAYER.IsEdith(player, false) then
 			openedBombChest = true
 			pickup:TryOpenChest(player)
+			return
 		end
 	end
 
@@ -169,7 +171,7 @@ local function ChestManager(pickup, player)
 		return
 	end
 
-	if not openedBombChest then
+	if var ~= PickupVariant.PICKUP_BOMBCHEST and not openedBombChest then
 		pickup:TryOpenChest()
 	end
 end
