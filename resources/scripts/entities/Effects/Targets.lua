@@ -95,7 +95,15 @@ end
 ---@param params table
 local function UpdateTargetAnimation(effect, player, params)
 	local isActive = Helpers.IsKeyStompPressed(player) or (Jump.IsJumping(player) and params.Cooldown == 0)
-	local anim = isActive and "Blink" or "Idle"
+	local anim = "Idle"
+	local isVestige = Helpers.IsVestigeChallenge()
+
+	if isVestige then
+		anim = isActive and Jump.IsJumping(player) and "Blink" or "Idle"
+	else
+		anim = isActive and "Blink" or "Idle"
+	end
+
 	effect:GetSprite():Play(anim)
 end
 
