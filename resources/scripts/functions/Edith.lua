@@ -365,15 +365,20 @@ end
 ---@param target EntityEffect
 ---@param isMoving boolean
 function Edith.TargetMovementManager(player, target, isMoving)
-    if isMoving then
-        local input = mod.Modules.PLAYER.GetMovementInput(player)
-        target.Velocity = target.Velocity + mod.Modules.VEC_DIR.GetMovementVector(input, 4.25)
+    local modules = mod.Modules
+	local Player = modules.PLAYER
+	
+	if isMoving then
+        local input = Player.GetMovementInput(player)
+		local velMod = modules.MATHS.exp(player.MoveSpeed, 1, 1.075)
+
+        target.Velocity = (target.Velocity + mod.Modules.VEC_DIR.GetMovementVector(input, 4.5)) * velMod
         target:MultiplyFriction(GetMovementFriction(target))
     else
         target:MultiplyFriction(0.8)
     end
 
-    if mod.Modules.PLAYER.HasTanukiStatueEffect(player) then
+    if Player.HasTanukiStatueEffect(player) then
         target.Velocity = target.Velocity * 0.2
     end
 end
