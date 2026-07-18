@@ -4,6 +4,7 @@ local challenges = enums.Challenge
 local game = enums.Utils.Game
 local misc = enums.Misc
 local players = enums.PlayerType
+local data = mod.DataHolder.GetEntityData
 local Player = {}
 
 ---@param fn fun(player: EntityPlayer)
@@ -31,16 +32,16 @@ end
 ---Basically makes both Edith's be less dragged by water currents
 ---@param player EntityPlayer
 function Player.WaterCurrentManager(player)
-	local modules = mod.Modules
 	local current = game:GetRoom():GetWaterCurrent()
 	local RoomHasWaterCurrent = not (current.X == 0 and current.Y == 0)
 
 	if not RoomHasWaterCurrent then return end
+	local modules = mod.Modules
 	local TEdithParams = modules.TEDITH.GetHopParryParams(player)
 	local isTEdithMoving = TEdithParams.IsHoping or TEdithParams.GrudgeDash
 	local isMoving = isTEdithMoving or modules.JUMP.IsJumping(player)
 
-	if isMoving then return end
+	if isMoving and not data(player).IsRedirectioningMove then return end
 
 	player.Velocity = player.Velocity * (current * 0.3)
 end
