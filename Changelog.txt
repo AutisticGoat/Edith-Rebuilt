@@ -325,20 +325,10 @@ v1.7.1
 v1.8.0
 - General:
 -- Great mod's codebase rewrite 
--- Fixed Death's touch making Salt Tears incredibly giant for one frame
 -- Now both Ediths won't be affected by slippery creep
+-- Now salt types are stored in flags, allowing to combine them
 -- Reworked stomp system
 -- Reworked Land pickup manager
--- Now salt types are stored in flags, allowing to combine them
--- Fixed Geode triggering its destroy function more times than intended
--- Fixed ImGui menu constantly giving errors when Edith is locked
--- Fixed Parprika's clouds not dealing damage when having only 1 copy
--- Fixed Burnt Hood not correctly triggering parry effects
--- Fixed Door manager not opening Reflourished's Gehenna's door
--- Fixed Bombstomp not being fast enough when having flight
--- Fixed T. Edith not getting hopdash charge bonus in Grudge Challenge
--- Fixed T. Edith being invulnerable when falling to a Little's Horn pit while dashing
--- Fixed T. Edith's sprite being pretty offset when going to the minecart
 -- Added Abyss locusts for all mod items
 -- Added Effigy's costume
 -- Added Edith's Hood's costume
@@ -357,6 +347,23 @@ v1.8.0
 -- Improved Sal sprite
 -- Improved Faith of the unfaithful sprite
 -- Improved Unlock manager
+-- Improved water land vfx's color
+-- Fixed Death's touch making Salt Tears incredibly giant for one frame
+-- Fixed Geode triggering its destroy function more times than intended
+-- Fixed ImGui menu constantly giving errors when Edith is locked
+-- Fixed Parprika's clouds not dealing damage when having only 1 copy
+-- Fixed Burnt Hood not correctly triggering parry effects
+-- Fixed Door manager not opening Reflourished's Gehenna's door
+-- Fixed Bombstomp not being fast enough when having flight
+-- Fixed Edith not having a death sound effect
+-- Fixed Edith not spawning a poof effect when going trough a trapdoor
+-- Fixed Edith's target moving slow when holding down the jump button while not jumping and moving it in Vestige
+-- Fixed T. Edith not getting hopdash charge bonus in Grudge Challenge
+-- Fixed T. Edith being invulnerable when falling to a Little's Horn pit while dashing
+-- Fixed T. Edith's sprite being pretty offset when going to the minecart
+-- Fixed T. Edith going backwards when going to the mirror door
+-- Fixed T. Edith being more dragged by water currents while redirecting her hopdash 
+-- Fixed T. Edith triggering Grudge sliding vfx while redirecting in water currents
 
 - Edith: 
 -- Added a jump animation 
@@ -387,6 +394,8 @@ v1.8.0
 ---- Standing on water will slowly decrease edith's movement speed (-0.01 every 20 frames)
 ---- If Movement speed goes below 0.7, Edith won't be able to shoot tears
 ---- Killing salted enemies with the stomp will increase speed by 0.5
+-- Reworked Edith's birthcake effect:
+--- Now offensive stomps have a 25% chance of apply salted status effect
 
 - Tainted Edith:
 -- Parry: 
@@ -445,7 +454,7 @@ v1.8.0
 --- On using, Isaac will switch between his normal state and Statue state
 --- On Statue state:
 ---- Isaac is unable to shoot
----- Isaac will be unable to walk, using Edith-like stomps to move;
+---- Isaac will be unable to walk, using Edith-like stomps to move:
 ----- Stomp damage: 3x Player's damage
 ----- Cooldown: 0.5 seconds (30 update frames)
 ----- 20 i-frames
