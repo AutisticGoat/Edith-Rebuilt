@@ -122,7 +122,7 @@ end
 local function ManageGrudgeEffects(player, HopParams, MiscConfig)
 	if not Helpers.IsGrudgeChallenge() then return end
 	if not HopParams.GrudgeDash then return end
-	if player.Velocity:Length() <= 0.15 then return end
+	if data(player).IsRedirectioningMove then return end
 
 	if MiscConfig and MiscConfig.EnableShakescreen and HopParams.HopMoveCharge > 50 then
 		game:ShakeScreen(2)
