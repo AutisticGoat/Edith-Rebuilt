@@ -139,7 +139,8 @@ local NonTriggerAnimPickupVar = {
 
 local function ChestManager(pickup, player)
 	if not IsChest(pickup) then return end
-
+	local openedBombChest = false
+	
 	if game:GetRoom():GetType() == RoomType.ROOM_CHALLENGE then
 		player:StopExtraAnimation()
 		return
@@ -152,6 +153,7 @@ local function ChestManager(pickup, player)
 
 	if pickup.Variant == PickupVariant.PICKUP_BOMBCHEST then
 		if mod.Modules.PLAYER.IsEdith(player, false) then
+			openedBombChest = true
 			pickup:TryOpenChest(player)
 		end
 	end
@@ -167,7 +169,9 @@ local function ChestManager(pickup, player)
 		return
 	end
 
-	pickup:TryOpenChest()
+	if not openedBombChest then
+		pickup:TryOpenChest()
+	end
 end
 
 ---@param player EntityPlayer
@@ -178,7 +182,7 @@ local function TriggerPickupCollide(player, pickup, includeCol)
 	if pickup:GetSprite():IsPlaying("Collect") then return end
 	if (not includeCol and pickup.Variant == PickupVariant.PICKUP_COLLECTIBLE) then return end
 
-	player:ForceCollide(pickup, false)
+	player:ForceCollide(pickup, true)
 end
 
 ---@param player EntityPlayer
@@ -194,8 +198,9 @@ local function PickupManager(player, ent, includeCol, stopExtraAnim)
 
 	if not pickup then return end
 
-	local IsStopAnimPickup = mod.Modules.HELPERS.When(pickup.Variant, NonTriggerAnimPickupVar, false)
-	local IsEternalHeart = (pickup.Variant == PickupVariant.PICKUP_HEART and pickup.SubType == HeartSubType.HEART_ETERNAL)
+	local var = pickup.Variant
+	local IsStopAnimPickup = mod.Modules.HELPERS.When(var, NonTriggerAnimPickupVar, false)
+	local IsEternalHeart = (var == PickupVariant.PICKUP_HEART and pickup.SubType == HeartSubType.HEART_ETERNAL)
 
 	if stopExtraAnim and (IsStopAnimPickup or IsEternalHeart) then
 		player:StopExtraAnimation()
@@ -289,6 +294,9 @@ local function DamageManager(parent, ent, damage, knockback)
 	Land.LandDamage(ent, parent, damage, knockback * pushMult)
 end
 
+---@param ent Entity
+---@param parent EntityPlayer
+---@param knockback number	
 local function EntityInteractHandler(ent, parent, knockback)
 	local isSalted = mod.Modules.STATUS_EFFECTS.EntHasStatusEffect(ent, status.SALTED)
 	local knockbackMult = isSalted and 1.5 or 1
