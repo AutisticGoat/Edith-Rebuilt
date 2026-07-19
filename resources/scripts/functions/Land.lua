@@ -194,11 +194,12 @@ end
 local function PickupManager(player, ent, includeCol, stopExtraAnim)
 	local pickup = ent:ToPickup()
 
+	if not pickup then return end
+	if pickup:IsShopItem() then return end
+	
 	if stopExtraAnim == nil then
 		stopExtraAnim = true
 	end
-
-	if not pickup then return end
 
 	local var = pickup.Variant
 	local IsStopAnimPickup = mod.Modules.HELPERS.When(var, NonTriggerAnimPickupVar, false)
@@ -291,7 +292,7 @@ end
 ---@param damage number
 ---@param knockback number
 local function DamageManager(parent, ent, damage, knockback)
-	local FrozenMult = ent:HasEntityFlags(EntityFlag.FLAG_FREEZE) and 1.2 or 1 
+	local FrozenMult = ent:HasEntityFlags(EntityFlag.FLAG_FREEZE) and 1.2 or 1
 	damage = (damage * FrozenMult)
 
 	local pushMult = mod.Modules.STATUS_EFFECTS.EntHasStatusEffect(ent, status.SALTED) and 2 or 1
