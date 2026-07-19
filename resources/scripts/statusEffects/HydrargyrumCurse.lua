@@ -4,10 +4,11 @@ local modules = mod.Modules
 local effects = mod.Enums.EdithStatusEffects
 local Status = modules.STATUS_EFFECTS
 local Helpers = modules.HELPERS
-local data = mod.DataHolder.GetEntityData
+local rng = RNG(math.max(Random(), 1))
 local CreepColor = Color(0, 0, 0, 1, 0.6, 0.6, 0.6)
+local data = mod.DataHolder.GetEntityData
 
-local function ShootHydrargyrumTears(player, ent, rng)
+local function ShootHydrargyrumTears(player, ent)
 	local FireRock = {
 		variant = TearVariant.METALLIC,
 		position = ent.Position,
@@ -31,9 +32,7 @@ local function OnHydrargyrumCurseUpdate(npc)
     local player = Helpers.GetPlayerFromRef(statusData.Source)
     if not player then return end
 
-    local rng = RNG(math.max(Random(), 1))
-
-    ShootHydrargyrumTears(player, npc, rng)
+    ShootHydrargyrumTears(player, npc)
 end
 
 ---@param player EntityPlayer

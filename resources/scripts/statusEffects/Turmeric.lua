@@ -4,25 +4,23 @@ local effects = mod.Enums.EdithStatusEffects
 local Status = modules.STATUS_EFFECTS
 local Helpers = modules.HELPERS
 local ModRNG = modules.RNG
-local damageFlag = false
+local rng = RNG(math.max(Random(), 1))
+local TurmericColor = Color(1, 1, 1, 1, 250/255, 198/255, 49/255)
 
 ---@param entity Entity
----@param rng RNG
-local function SpawnTurmericCloud(entity, rng)
+local function SpawnTurmericCloud(entity)
     local Puff = Status.SpawnSpicePuff(entity, rng)
     Puff:GetSprite().PlaybackSpeed = ModRNG.RandomFloat(rng, 0.9, 1.1)
-    Puff.Color = Color(1, 1, 1, 1, 250/255, 198/255, 49/255)
+    Puff.Color = TurmericColor
 end
 
 ---@param entity Entity
 local function SetTurmeric(entity)
-    local rng = RNG(math.max(Random(), 1))
-
     for _, enemy in ipairs(Isaac.FindInRadius(entity.Position, 60, EntityPartition.ENEMY)) do
         if not Helpers.IsEnemy(enemy) then goto continue end
         if not ModRNG.RandomBoolean(rng, 0.35) then goto continue end
 
-        SpawnTurmericCloud(entity, rng)
+        SpawnTurmericCloud(entity)
         Status.SetStatusEffect(effects.TURMERIC, enemy, 90, entity)
         ::continue::
     end

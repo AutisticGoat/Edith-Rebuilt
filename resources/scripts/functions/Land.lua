@@ -228,10 +228,12 @@ end
 
 local stompBehavior = {
     [EntityType.ENTITY_TEAR] = function(ent, parent, _, _)
-        if mod.Modules.PLAYER.IsEdith(parent, true) then return end
+		local modules = mod.Modules
+
+        if modules.PLAYER.IsEdith(parent, true) then return end
         local tear = ent:ToTear()
         if not tear then return end
-        mod.Modules.HELPERS.BoostTear(tear, 25, 1.5)
+        modules.HELPERS.BoostTear(tear, 25, 1.5)
     end,
     [EntityType.ENTITY_FIREPLACE] = function(ent, _, _, var)
         if var == 4 then return end
@@ -596,13 +598,11 @@ local function GetTEdithLandParams(IsParryLand)
     }
 end
 
-local WaterBlueColor = Color(0.7, 0.75, 1)
-local function GetWaterEffectColor()
-	local waterColor = game:GetRoom():GetFXParams().WaterEffectColor
-
-	return (waterColor.R == 1 and waterColor.G == 1 and waterColor.B == 1) and WaterBlueColor or waterColor
-end
-
+local MortisColors = {
+	[MortisBackdrop.MORGUE] = Color(0, 0, 0, 1, 0.45, 0.5, 0.575),
+	[MortisBackdrop.MOIST] = Color(0, 0.8, 0.76, 1, 0, 0, 0),
+	[MortisBackdrop.FLESH] = Color(0, 0, 0, 1, 0.55, 0.5, 0.55),
+}
 
 ---@param Variant EffectVariant
 ---@param BackDrop BackdropType
@@ -611,7 +611,7 @@ end
 local function GetLandEffectColor(Variant, BackDrop, IsMortis)
     local Helpers = mod.Modules.HELPERS
     local backColor = tables.BackdropColors
-    local defColor = Color(1, 1, 1)
+    local defColor = Color.Default
     local color
 
     if Variant == EffectVariant.BIG_SPLASH then
@@ -621,15 +621,10 @@ local function GetLandEffectColor(Variant, BackDrop, IsMortis)
     end
 
     if IsMortis then
-        local MortisColors = {
-            [MortisBackdrop.MORGUE] = Color(0, 0, 0, 1, 0.45, 0.5, 0.575),
-            [MortisBackdrop.MOIST] = Color(0, 0.8, 0.76, 1, 0, 0, 0),
-            [MortisBackdrop.FLESH] = Color(0, 0, 0, 1, 0.55, 0.5, 0.55),
-        }
-        color = Helpers.When(Helpers.GetMortisDrop(), MortisColors, Color.Default)
+        color = Helpers.When(Helpers.GetMortisDrop(), MortisColors, defColor)
     end
 
-    return color or Color.Default
+    return color or defColor
 end
 
 ---@param player EntityPlayer
@@ -638,7 +633,6 @@ end
 ---@param color Color
 local function ApplyEffectVisuals(player, stompGFX, size, color)
 	local modRNG = mod.Modules.RNG
-
     local rng = stompGFX:GetDropRNG()
     local randX = modRNG.RandomFloat(rng, EFFECT.RAND_SIZE_MIN, EFFECT.RAND_SIZE_MAX)
     local randY = modRNG.RandomFloat(rng, EFFECT.RAND_SIZE_MIN, EFFECT.RAND_SIZE_MAX)

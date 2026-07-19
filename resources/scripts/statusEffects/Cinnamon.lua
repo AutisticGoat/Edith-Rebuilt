@@ -2,33 +2,28 @@ local mod = EdithRebuilt
 local enums = mod.Enums
 local modules = mod.Modules
 local utils = enums.Utils
-local game = utils.Game
 local sfx = utils.SFX
 local effects = enums.EdithStatusEffects
 local Status = modules.STATUS_EFFECTS
 local Helpers = modules.HELPERS
 local ModRNG = modules.RNG
-local rng = RNG()
+local rng = RNG(math.max(Random(), 1))
 local data = mod.DataHolder.GetEntityData
 local CinnamonColors = {
     Puff = Color(210/255, 105/255, 30/255),
     Cloud = Color(0.66, 0.34, 0.37, 1, 0.26, 0.12),
 }
 
-mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, function ()
-    rng:SetSeed(game:GetSeeds():GetStartSeed(), 35)
-end)
-
-local function SpawnCinnamonPuff(npc, RNG)
-    local puff = Status.SpawnSpicePuff(npc, RNG)
+local function SpawnCinnamonPuff(npc)
+    local puff = Status.SpawnSpicePuff(npc, rng)
 
     puff.Color = CinnamonColors.Puff
-    sfx:Play(enums.SoundEffect.SOUND_CINNAMON_COUGH, 1, 2, false, ModRNG.RandomFloat(RNG, 0.95, 1.15))
+    sfx:Play(enums.SoundEffect.SOUND_CINNAMON_COUGH, 1, 2, false, ModRNG.RandomFloat(rng, 0.95, 1.15))
 end
 
 local function SpawnCinnamonCloud(player, npc)
     local DustCloud = Isaac.Spawn(EntityType.ENTITY_EFFECT, EffectVariant.SMOKE_CLOUD, 1, npc.Position, Vector.Zero, player):ToEffect() ---@cast DustCloud EntityEffect
-    
+
     DustCloud.Color = CinnamonColors.Cloud
     DustCloud.Timeout = 120
     data(DustCloud).CinnamonCloud = true
@@ -50,7 +45,7 @@ mod:AddCallback(ModCallbacks.MC_NPC_UPDATE, function(_, npc)
     if not player then return end
     if stsdata.Countdown % 20 ~= 0 then return end
 
-    SpawnCinnamonPuff(npc, rng)
+    SpawnCinnamonPuff(npc)
     SpawnCinnamonCloud(player, npc)
     TriggerCoughPush(npc)
 end)

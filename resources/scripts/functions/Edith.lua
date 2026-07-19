@@ -269,12 +269,11 @@ function Edith.BombFall(player, jumpData, jumpParams)
 	end
 
 	local canFly = player.CanFly
+	local speedBase = canFly and 20 or 10
 
 	if canFly and modules.JUMP.GetFallFrame(player) == 0 then
 		sfx:Play(SoundEffect.SOUND_SHELLGAME)
 	end
-
-	local speedBase = canFly and 20 or 10
 
 	JumpLib:SetSpeed(player, speedBase + (jumpData.Height / 10))
 	player:MultiplyFriction(0.5)
@@ -367,7 +366,7 @@ end
 function Edith.TargetMovementManager(player, target, isMoving)
     local modules = mod.Modules
 	local Player = modules.PLAYER
-	
+
 	if isMoving then
         local input = Player.GetMovementInput(player)
 		local velMod = modules.MATHS.exp(player.MoveSpeed, 1, 1.075)
@@ -386,14 +385,13 @@ end
 ---@param player EntityPlayer
 ---@param jumpParams EdithJumpStompParams
 function Edith.StompRadiusManager(player, jumpParams)
-    local base = 32
     local flightMult = player.CanFly and 1.25 or 1
     local range = mod.Modules.PLAYER.GetPlayerRange(player)
 	local rangeMult = range / 9
     local factor = rangeMult - (1 - (rangeMult))
     local RocketLaunchMult = jumpParams.RocketLaunch and 1.2 or 1
 
-    jumpParams.Radius = ((base + factor) * flightMult) * RocketLaunchMult
+    jumpParams.Radius = ((32 + factor) * flightMult) * RocketLaunchMult
 end
 
 local DAMAGE_BASE_INIT = 12.75
@@ -507,7 +505,7 @@ end
 ---@param jumpParams EdithJumpStompParams
 function Edith.CriticalStompManager(player, jumpParams)
 	if jumpParams.IsDefensiveStomp then return end
-	
+
 	local modules = mod.Modules
 
 	jumpParams.IsCriticalStomp = modules.RNG.RandomBoolean(player:GetDropRNG(), modules.HELPERS.GetLuckInteractionChance(player.Luck))

@@ -9,7 +9,7 @@ local Jump = modules.JUMP
 ---@param player EntityPlayer
 mod:AddCallback(ModCallbacks.MC_USE_ITEM, function (_, _, _, player)
 	if Jump.IsJumping(player) then return end
-    TEdith.InitTaintedEdithParryJump(player, "BrokenHoodParry")
+    Jump.InitTaintedEdithParryJump(player, "BrokenHoodParry")
 end, items.COLLECTIBLE_BURNT_HOOD)
 
 ---@param player EntityPlayer

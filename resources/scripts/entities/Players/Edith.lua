@@ -403,24 +403,25 @@ mod:AddCallback(ModCallbacks.MC_ENTITY_TAKE_DMG, function (_, _, damage, _, sour
 	return false
 end)
 
-mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG, function(_, player, amount, flag, source, count)
+mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG, function(_, player)
 	if not Player.IsEdith(player, false) then return end
 	if data(player).JumpCount <= 0 then return end
 
 	return false
 end)
 
----@param player EntityPlayer
-mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_RENDER, function(_, player)
-	if not Player.IsEdith(player, false) then return end
+-- ---@param player EntityPlayer
+-- mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_RENDER, function(_, player)
+-- 	if not Player.IsEdith(player, false) then return end
 
-	local sprite = player:GetSprite()
+-- 	local sprite = player:GetSprite()
 
-	if not sprite:IsPlaying("Trapdoor") then return end
-	if sprite:GetFrame() ~= 4 then return end
-	if not IsFleshTrapdoorAtPos(player.Position) then return end
-	game:StartStageTransition(false, 0, player)
-end)
+-- 	if not sprite:IsPlaying("Trapdoor") then return end
+-- 	-- JumpLib:QuitJump(player)
+-- 	-- if sprite:GetFrame() ~= 4 then return end
+-- 	-- if not IsFleshTrapdoorAtPos(player.Position) then return end
+-- 	-- game:StartStageTransition(false, 0, player)
+-- end)
 
 ---@param ID CollectibleType
 ---@param player EntityPlayer

@@ -12,8 +12,7 @@ local ndegrees = 360/CinderCreeps
 local function OnCinderParry(_, player, ent)
     if not Status.EntHasStatusEffect(ent, effects.CINDER) then return end
 
-    local HasBirthright = Player.PlayerHasBirthright(player)
-    local damage = HasBirthright and 1.25 or 0.75
+    local damage = Player.PlayerHasBirthright(player) and 1.25 or 0.75
 
     for i = 1, CinderCreeps do
     	Creeps.SpawnCinderCreep(player, player.Position + Vector(0, 40):Rotated(i * ndegrees), damage, 6)
