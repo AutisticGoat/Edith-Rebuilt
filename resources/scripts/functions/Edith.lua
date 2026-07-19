@@ -391,7 +391,7 @@ function Edith.StompRadiusManager(player, jumpParams)
     local factor = rangeMult - (1 - (rangeMult))
     local RocketLaunchMult = jumpParams.RocketLaunch and 1.2 or 1
 
-    jumpParams.Radius = ((32 + factor) * flightMult) * RocketLaunchMult
+    jumpParams.Radius = (((32 + factor) * flightMult) * RocketLaunchMult) * player.SpriteScale.X
 end
 
 local DAMAGE_BASE_INIT = 12.75
