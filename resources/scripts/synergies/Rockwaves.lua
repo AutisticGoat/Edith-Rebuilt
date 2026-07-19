@@ -1,11 +1,6 @@
 local mod = EdithRebuilt
 local callbacks = mod.Enums.Callbacks
 
--- Los patrones de rocks difieren intencionalmente entre parry y stomp:
---   Parry:  anillos de tamaño fijo (8 o 6 rocks), dist 40/20, damageMult fijo
---   Stomp:  rocks por anillo variable (6 inner / 12 outer), dist 40/70, damageMult con Birthright
--- Se mantienen como funciones separadas pero en el mismo archivo
-
 ---@param player EntityPlayer
 local function ParryRockwaves(player)
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_TERRA) then return end
@@ -35,9 +30,9 @@ end
 local function StompRockwaves(player)
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_TERRA) then return end
 
-    local hasBirthright  = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT)
-    local totalRings     = hasBirthright and 2 or 1
-    local damageMult     = hasBirthright and 1.5 or 1.25
+    local hasBirthright = player:HasCollectible(CollectibleType.COLLECTIBLE_BIRTHRIGHT)
+    local totalRings = hasBirthright and 2 or 1
+    local damageMult = hasBirthright and 1.5 or 1.25
     local shockwaveDamage = (player.Damage * damageMult) / 2
 
     for ring = 1, totalRings do

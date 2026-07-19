@@ -429,7 +429,7 @@ end
 ---@return number
 local function GetTerraMult(player)
     if not player:HasCollectible(CollectibleType.COLLECTIBLE_TERRA) then return 1 end
-    return mod.Modules.RNG:RandomFloat(0.5, 2)
+    return mod.Modules.RNG.RandomFloat(player:GetCollectibleRNG(CollectibleType.COLLECTIBLE_TERRA), 0.5, 2)
 end
 
 ---@param player EntityPlayer
