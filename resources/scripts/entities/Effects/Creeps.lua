@@ -55,11 +55,10 @@ local function SaltCreepUpdate(effect)
     if not player then return end
 
     local spawnType = Creeps.GetSaltSpawnType(effect)
-    local isVestige = Helpers.IsVestigeChallenge()
     local isShakerSalt = BitMask.HasAnyBitFlags(spawnType, saltTypes.SALT_SHAKER | saltTypes.SALT_SHAKER_JUDAS)
 
     for _, entity in pairs(GetNearbyEnemies(effect)) do
-        if isVestige then
+        if Helpers.IsVestigeChallenge() then
             entity:AddFear(EntityRef(player), 120)
         else
             ApplySaltToEntity(entity, spawnType, player)
@@ -95,6 +94,7 @@ local function CinderCreepUpdate(effect)
     end
 end
 
+local oreganoColor = Color(1, 1, 1, 1, 113/255, 120/255, 82/255)
 ---@param effect EntityEffect
 local function OreganoCreepUpdate(effect)
     if not effect.SpawnerEntity then return end
@@ -102,7 +102,7 @@ local function OreganoCreepUpdate(effect)
     if not player then return end
 
     for _, entity in pairs(GetNearbyEnemies(effect)) do
-        entity:AddSlowing(EntityRef(player), 150, 0.8, Color(1, 1, 1, 1, 113/255, 120/255, 82/255))
+        entity:AddSlowing(EntityRef(player), 150, 0.8, oreganoColor)
     end
 end
 
