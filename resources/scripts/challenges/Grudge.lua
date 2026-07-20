@@ -27,7 +27,7 @@ local function HandleGrudgeDashDamage(player, collider, hopParams)
 
     sfx:Play(SoundEffect.SOUND_MEATY_DEATHS)
     collider.Velocity = collider.Velocity + player.Velocity
-    collider:TakeDamage(damage, DamageFlag.DAMAGE_CRUSH, EntityRef(player), 0)
+    collider:TakeDamage(damage, DamageFlag.DAMAGE_CRUSH | DamageFlag.DAMAGE_IGNORE_ARMOR, EntityRef(player), 0)
 end
 
 ---@param player EntityPlayer
