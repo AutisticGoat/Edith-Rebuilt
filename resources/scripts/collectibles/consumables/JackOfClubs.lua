@@ -5,7 +5,7 @@ local utils = enums.Utils
 local game = utils.Game
 local modules = mod.Modules
 local Helpers = modules.HELPERS
-local ModRNG = modules.RNG 
+local ModRNG = modules.RNG
 local JackOfClubs = {}
 
 ---@param player EntityPlayer
