@@ -7,7 +7,7 @@
         name="Jack of Clubs​​​" 
         description="Partial destruction" 
         mimiccharge="4"
-        achievement="EdithRebuilt_Jack of Clubs"
+        achievement="Jack of Clubs"
     />
     <card 
         type="object" 
@@ -15,7 +15,7 @@
         name="Salt Rocks" 
         description="Get Salted" 
         hud="SaltRocks"
-        achievement="EdithRebuilt_Salt Rocks"
+        achievement="Salt Rocks"
     />
     <card 
         type="rune" 
@@ -24,7 +24,7 @@
         description="The heaviness of your judgment" 
         hud="SoulOfEdith" 
         mimiccharge="4"
-        achievement="EdithRebuilt_Soul of Edith"
+        achievement="Soul of Edith"
     />
 
 </pocketitems>

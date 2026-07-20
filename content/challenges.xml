@@ -4,8 +4,8 @@
         name="[Edith: Rebuilt] Vestige" 
         endstage="8" 
         secretpath="true"
-        unlockachievement="EdithRebuilt_Effigy"
-        achievements="EdithRebuilt_Vestige"
+        unlockachievement="Effigy"
+        achievements="Vestige"
         lockeddesc="Kill 15 salted enemies with stomps"
     />
 	<challenge 
@@ -13,8 +13,8 @@
         name="[Edith: Rebuilt] Grudge" 
         endstage="8" 
         secretpath="true"
-        achievements="EdithRebuilt_Grudge"
-        unlockachievement="EdithRebuilt_Chunk of Basalt"
+        achievements="Grudge"
+        unlockachievement="Chunk of Basalt"
         lockeddesc="Do 5 consecutive perfect parries"
     />
 </challenges>
