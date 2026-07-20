@@ -213,19 +213,6 @@ mod:AddCallback(ModCallbacks.MC_POST_PLAYER_UPDATE, function(_, player)
 	HandleTargetManagers(player, TargetArrow.GetEdithTarget(player), state)
 end)
 
----@param pos Vector
----@return boolean
-local function IsFleshTrapdoorAtPos(pos)
-	local grid = game:GetRoom():GetGridEntityFromPos(pos)
-	if not grid then return false end
-	local trapdoor = grid:ToTrapDoor()
-	if not trapdoor then return false end
-	local path = trapdoor:GetSprite():GetLayer(0):GetSpritesheetPath()
-	return string.find(path, "womb") ~= nil
-		or (string.find(path, "corpse") ~= nil
-			and not string.find(path, "corpse_big"))
-end
-
 ---@param player EntityPlayer
 mod:AddCallback(JumpLib.Callbacks.POST_ENTITY_JUMP, function(_, player)
 	local jumpParams = params(player)
@@ -409,19 +396,6 @@ mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_TAKE_DMG, function(_, player)
 
 	return false
 end)
-
--- ---@param player EntityPlayer
--- mod:AddCallback(ModCallbacks.MC_PRE_PLAYER_RENDER, function(_, player)
--- 	if not Player.IsEdith(player, false) then return end
-
--- 	local sprite = player:GetSprite()
-
--- 	if not sprite:IsPlaying("Trapdoor") then return end
--- 	-- JumpLib:QuitJump(player)
--- 	-- if sprite:GetFrame() ~= 4 then return end
--- 	-- if not IsFleshTrapdoorAtPos(player.Position) then return end
--- 	-- game:StartStageTransition(false, 0, player)
--- end)
 
 ---@param ID CollectibleType
 ---@param player EntityPlayer
