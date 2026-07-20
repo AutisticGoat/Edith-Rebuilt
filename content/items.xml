@@ -9,7 +9,7 @@
 		chargetype="timed"
 		maxcharges="360"
 		tags="offensive"
-		achievement="EdithRebuilt_Salt Shaker"
+		achievement="Salt Shaker"
 	/>
 	<active
 		id="1" 
@@ -19,7 +19,7 @@
 		quality="2" 
 		chargetype="timed"
 		maxcharges="120"
-		achievement="EdithRebuilt_Pepper Grinder"
+		achievement="Pepper Grinder"
 		tags="offensive"
 	/>
 	<active
@@ -30,7 +30,7 @@
 		quality="3"
 		chargetype="timed"
 		maxcharges="360"
-		achievement="EdithRebuilt_Sulfuric Fire"
+		achievement="Sulfuric Fire"
 		tags="offensive"
 	/>	
 	<passive
@@ -41,7 +41,7 @@
 		quality="2"
 		damagemult="1.35"
 		tags="offensive summonable"
-		achievement="EdithRebuilt_Ediths Hood"
+		achievement="Ediths Hood"
 	/>
 	<passive
 		id="4" 
@@ -50,7 +50,7 @@
 		gfx="collectibles_Sal.png"
 		quality="3"
 		tags="offensive summonable"
-		achievement="EdithRebuilt_Sal"
+		achievement="Sal"
 	/>
 	<passive
 		id="5" 
@@ -61,7 +61,7 @@
 		coins="5"
 		luck="1"
 		tags="offensive summonable"
-		achievement="EdithRebuilt_Gilded Stone"
+		achievement="Gilded Stone"
 	/>
 	<passive
 		id="6" 
@@ -71,7 +71,7 @@
 		gfx="collectibles_Molten_Core.png"
 		quality="3"
 		tags="offensive summonable"
-		achievement="EdithRebuilt_Molten Core"
+		achievement="Molten Core"
 	/>
 	<active
 		id="7" 
@@ -82,7 +82,7 @@
 		maxcharges="3"
 		cache="damage"
 		tags="offensive"
-		achievement="EdithRebuilt_Ediths Hood"
+		achievement="Ediths Hood"
 	/>	
 	<passive
 		id="8" 
@@ -92,7 +92,7 @@
 		gfx="collectibles_Salt_Heart.png"
 		quality="2"
 		tags="nolostbr summonable"
-		achievement="EdithRebuilt_Salt Heart"
+		achievement="Salt Heart"
 	/>
 	<active
 		id="9" 
@@ -104,7 +104,7 @@
 		chargetype="timed"
 		maxcharges="420"
 		tags="nolostbr"
-		achievement="EdithRebuilt_Divine Retribution"
+		achievement="Divine Retribution"
 	/>
 	<active
 		id="10" 
@@ -113,7 +113,7 @@
 		gfx="collectibles_Spices_Mix.png"
 		quality="2"
 		tags="offensive"
-		achievement="EdithRebuilt_SpicesMix"
+		achievement="SpicesMix"
 		chargetype="timed"
 		maxcharges="180"
 	/>
@@ -125,19 +125,19 @@
 		gfx="collectibles_Hydrargyrum.png"
 		quality="2"
 		tags="offensive summonable"
-		achievement="EdithRebuilt_Hydrargyrum"
+		achievement="Hydrargyrum"
 	/>
 	<trinket 
 		name="Geode"
 		description="Crack it open" 
 		gfx="Geode.png" 
-		achievement="EdithRebuilt_Geode"
+		achievement="Geode"
 	/>
 	<trinket 
 		name="Rumbling Pebble"
 		description="Rock scattering" 
 		gfx="RumblingPebble.png" 
-		achievement="EdithRebuilt_Rumbling Pebble"
+		achievement="Rumbling Pebble"
 	/>
 	<!-- Edith unlocks end -->
 
@@ -151,7 +151,7 @@
 		quality="2"
 		maxcharges="4"
 		tags="offensive"
-		achievement="EdithRebuilt_Divine Wrath"
+		achievement="Divine Wrath"
 	/>	
 	<active
 		id="13" 
@@ -161,19 +161,19 @@
 		quality="2"
 		chargetype="timed"
 		maxcharges="180"
-		achievement="EdithRebuilt_Burnt Hood"
+		achievement="Burnt Hood"
 	/>	
 	<trinket 
 		name="Paprika"
 		description="Spicy death" 
 		gfx="Paprika.png" 
-		achievement="EdithRebuilt_Paprika"
+		achievement="Paprika"
 	/>
 	<trinket 
 		name="Burnt Salt"
 		description="Burns to death" 
 		gfx="BurntSalt.png" 
-		achievement="EdithRebuilt_Burnt Salt"
+		achievement="Burnt Salt"
 	/>
 
 	<!-- Challenges -->
@@ -184,7 +184,7 @@
 		maxcharges="64"
 		chargetype="special"
 		gfx="collectibles_Effigy.png"
-		achievement="EdithRebuilt_Effigy"
+		achievement="Effigy"
 		tags="nocantrip nolostbr"
 		persistent="true"
 		quality="4"
@@ -196,7 +196,7 @@
 		gfx="collectibles_Chunk_Of_Basalt.png"
 		quality="2"
 		tags="offensive summonable"
-		achievement="EdithRebuilt_Chunk of Basalt"
+		achievement="Chunk of Basalt"
 	/>
 
 	<!-- Null items -->
