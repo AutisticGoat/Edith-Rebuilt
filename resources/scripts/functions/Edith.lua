@@ -469,7 +469,7 @@ local function ComputeRawDamage(player, params)
         mults.TanukiStatue *
         mults.Terra *
 		mults.CritStomp
-    ) + (params.CoalBonus or 0)
+    ) + (params.CoalBonus or 0) + (params.BombStomp and 100 or 0)
 end
 
 ---@param player EntityPlayer
