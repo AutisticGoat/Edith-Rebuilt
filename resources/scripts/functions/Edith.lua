@@ -441,10 +441,10 @@ local function GetStompMultipliers(player, jumpParams)
     local Math = modules.MATHS
     return {
         MultiShot = Math.Round(Math.exp(PlayerMod.GetNumTears(player), 1, 0.5), 2),
-        Birthright = PlayerMod.PlayerHasBirthright(player) and 1.2 or 1,
+        Birthright = PlayerMod.PlayerHasBirthright(player) and 1.25 or 1,
         BloodClot = CollectibleMult(player, CollectibleType.COLLECTIBLE_BLOOD_CLOT, 1.1),
-        Flight = player.CanFly and 1.3 or 1,
-        RocketLaunch = jumpParams.RocketLaunch and 1.2 or 1,
+        Flight = player.CanFly and 1.35 or 1,
+        RocketLaunch = jumpParams.RocketLaunch and 1.25 or 1,
         TanukiStatue = PlayerMod.HasTanukiStatueEffect(player) and 1.5 or 1,
         Terra = GetTerraMult(player),
 		CritStomp = jumpParams.IsCriticalStomp and 1.5 or 1
