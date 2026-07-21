@@ -1,7 +1,7 @@
 DeadSeaScrollsMenu.AddChangelog("Edith: Rebuilt", "v1.8.0", [[
 - General:
 -- Renamed achievements 
-THIS WILL ERASE MOD'S PROGRESS
+(THIS WILL ERASE MOD'S PROGRESS)
 -- Great mod's codebase rewrite 
 -- Now both Ediths won't be affected 
 by slippery creep
@@ -38,6 +38,8 @@ sprite
 unfaithful sprite
 -- Improved Unlock manager
 -- Improved water land vfx's color
+-- Fixed Jack of Clubs UI 
+sprite being offset 
 -- Fixed Death's touch making Salt 
 Tears incredibly giant for one frame
 -- Fixed Geode triggering its 
