@@ -1,10 +1,272 @@
 DeadSeaScrollsMenu.AddChangelog("Edith: Rebuilt", "v1.8.0", [[
-- Still indev please wait
+- General:
+-- Renamed achievements 
+THIS WILL ERASE MOD'S PROGRESS
+-- Great mod's codebase rewrite 
+-- Now both Ediths won't be affected 
+by slippery creep
+-- Now salt types are stored in 
+flags, allowing to combine them
+-- Now Edith can't accidentally 
+take shop/devil deal items
+-- Reworked stomp system
+-- Reworked Land pickup manager
+-- Added Abyss locusts 
+for all mod items
+-- Added Book of Virtues 
+wisps for all mod active items
+-- Added Effigy's costume
+-- Added Edith's Hood's costume
+-- Added Vestige Mode and Grudge Mode:
+--- Unlocked after beating Vestige 
+--- and Grudge challenges respectively
+--- Play with the same gameplay 
+--- rules in a normal run
+-- Updated StatusEffectsLibrary 
+(v1.12 > v1.13)
+-- Updated Save Manager 
+(v2.3.2 > v2.4.1b)
+-- Improved Molten Core sprite
+-- Improved Gilded Stone sprite
+-- Improved Sulfuric Fire sprite
+-- Improved Pepper Grinder sprite
+-- Improved Hydrargyrum sprite
+-- Improved Divine Retribution 
+sprite
+-- Improved Sal sprite
+-- Improved Faith of the 
+unfaithful sprite
+-- Improved Unlock manager
+-- Improved water land vfx's color
+-- Fixed Death's touch making Salt 
+Tears incredibly giant for one frame
+-- Fixed Geode triggering its 
+destroy function more times than intended
+-- Fixed ImGui menu constantly 
+giving errors when Edith is locked
+-- Fixed Parprika's clouds not 
+dealing damage when having only 1 copy
+-- Fixed Burnt Hood not 
+correctly triggering parry effects
+-- Fixed Door manager not 
+opening Reflourished's Gehenna's door
+-- Fixed Bombstomp not being 
+fast enough when having flight
+-- Fixed Edith not having a 
+death sound effect
+-- Fixed Edith not spawning a 
+poof effect when going trough 
+a trapdoor
+-- Fixed Edith's target moving slow 
+when holding down the jump button while 
+not jumping and moving it in Vestige
+-- Fixed T. Edith not getting hopdash 
+charge bonus in Grudge Challenge
+-- Fixed T. Edith being invulnerable 
+when falling to a Little's Horn 
+pit while dashing
+-- Fixed T. Edith's sprite being 
+pretty offset when going 
+to the minecart
+-- Fixed T. Edith going backwards 
+when going to the mirror door
+-- Fixed T. Edith being more dragged 
+by water currents while 
+redirecting her hopdash 
+-- Fixed T. Edith triggering Grudge 
+sliding vfx while redirecting 
+in water currents
+
+- Edith: 
+-- Added a jump animation 
+-- Increased height and speed 
+from jump explosion recoil
+-- Increased Target's speed
+-- Now Target's speed will be 
+affected by Edith's movement speed
+-- Fixed Edith's stomp damage 
+not scaling correctly when 
+playing Greed/Greedier mode
+-- Fixed Edith's explosive stomps 
+not destroying machines and beggars
+-- Fixed Edith droping trinkets 
+when jumping with DROP key
+-- Increased Edith's land's 
+pickup radius (20 > 30)
+-- Fixed familiars not falling at 
+the same speed as Edith when 
+having flight
+-- Now Edith will land on 
+her target more accurately
+-- Now Edith's stomp 
+radius scales with size
+-- Added Cube Baby stomp interaction
+-- General Stomp rebalance:
+--- Increased stomp cooldown 
+(base 15 > 16)
+--- Increased stomp damage 
+base (12 > 12.75)
+--- Reduced chapter's stomp 
+damage increase (6 > 5)
+--- Increased flight stomp 
+damage mult (1.25 > 1.3)
+--- Reduced stomp 
+radius base (35 > 32)
+-- Added Critical stomps:
+--- Luck based trigger (10% chance 
+at 0 luck, 50% chance at 20 luck)
+--- Increased damage (x1.5)
+--- increased knockback (x1.15)
+--- Reduced stomp cooldown by 25%
+--- Increased screenshake
+--- Edith will flash red
+-- Added Edith's birthwrong effect:
+--- Dissolution, flooded rooms:
+---- All rooms will get flooded
+---- Standing on water will slowly 
+decrease edith's movement 
+speed (-0.01 every 20 frames)
+---- If Movement speed goes 
+below 0.7, Edith won't 
+be able to shoot tears
+---- Killing salted enemies with 
+---the stomp will increase speed by 0.5
+-- Reworked Edith's birthcake effect:
+--- Now offensive stomps have 
+a 25% chance of apply salted 
+status effect
+
+- Tainted Edith:
+-- Parry: 
+--- Fixed Perfect parried projectiles 
+not going to the nearest enemy 
+if its spawner is dead
+--- Increased Parry radius (28 > 32)
+--- Reduced Parry jump's 
+speed (5.5 > 4.75)
+--- Reduced Perfect Parry's 
+hopdash charge bonus (30% > 25%)
+--- Added blazing parries:
+---- Luck based trigger 
+(10% at 0 luck, 50% at 20 luck)
+---- Imprecise parried enemies 
+will get burn status effect
+---- Perfect parried enemies will 
+spawn a fire jet on its position
+-- HopDash: 
+--- Increased Hopdash land damage
+--- Increased T. Edith's hopdash 
+land's pickup radius (20 > 30)
+--- Now T. Edith's hopdash 
+land applies tear status effects
+--- Now Grudge's dash crush 
+will ignore boss armor
+--- Fixed Wisps and Willos going 
+pretty far when stopping a hopdash
+-- Added T. Edith's birthwrong effect:
+--- The sky breaks twice: 
+---- Evere 3 frames a rock 
+will fall from the sky
+---- These rocks will spawn 
+fire jets on landing
+---- 15% of spawn a fire jet 
+wave instead of a single fire jet
+These rocks and fire jets 
+damage enemies, but can also 
+hurt Tainted Edith
+
+- Items: 
+-- Pepper Grinder changes:
+--- Now Pepper Grinder is 
+a timed active (4 seconds)
+-- Divine Retribution buff:
+--- Increased base damage (25 > 40)
+--- Increased healing (1 > 2)
+-- Molten Core buff:
+--- Increased radius (80 > 120)
+-- Hydrargyrum's buff: 
+--- Reduced Hydrargyrum tears shot 
+interval (15 frames > 10 frames)
+--- Increased Mercury creep size
+-- Fate of the unfaithful buff:
+--- Reduced charges (4 > 3)
+-- Salt Shaker changes:
+--- Now it properly pushes nearby 
+enemies on use
+--- Added vfx
+--- Now the salt circle pushes 
+enemies away
+-- Gilded Stone rework:
+--- Readjusted reward weights
+--- Added the following rewards:
+---- Double penny
+---- Lucky penny
+--- Adjusted rock tear chance
+---- Now they are more likely 
+to be shot
+---- Luck has more weight 
+in the formula
+---- Chance capped at 75%
+--- Adjusted rock reward chance
+---- Now they are more likely 
+to give rewards
+---- Coins have more weight 
+in the formula
+---- Capped at 50%
+-- Effigy rework:
+--- Now Effigy has 64 charges
+--- On use, Isaac will switch between 
+his normal state and Statue state
+--- On Statue state:
+---- Isaac is unable to shoot
+---- Isaac will be unable to walk, 
+using Edith-like stomps to move:
+----- Stomp damage: 3x Player's damage
+----- Cooldown: 0.5 seconds 
+(30 update frames)
+----- 20 i-frames
+----- Consumes 1 charge on land
+---- When pressing any jump button 
+(the same used by Edith to jump) 
+Isaac will perform a high jump:
+----- Stomp damage: 
+10x player's damage + 10
+----- Cooldown: 4 seconds 
+(120 update frames)
+----- 20 i-frames
+----- Consumes 5 charges on land
+--- When completely discharged, 
+it won't be charged by any 
+means until going to a new floor
+-- Burnt Hood buff:
+--- Increased Parry radius (28 > 32)
+
+- Trinkets:
+-- Geode:
+--- Now Geode can spawn soul stones
+
+- Consumables:
+-- Salt Rocks buff:
+--- Killing an enemy salted with 
+salt rocks will shoot 10-15 
+salt tears in random directions
+--- These salt tears will 
+leave salt creep on land
+--- This salt creep can 
+re-trigger the effects listed above
+
+- Misc:
+-- Salt creep changes:
+--- Only salt shaker creep 
+will push enemies away
+--- Reduced salt shaker 
+creep push strenght
 ]]
 )
 
 DeadSeaScrollsMenu.AddChangelog("Edith: Rebuilt", "v1.7.1a", [[
-- Fixed some abyss locusts being completely invisible for no reason
+- Fixed some abyss locusts being 
+completely invisible for no reason
 ]]
 )
 
