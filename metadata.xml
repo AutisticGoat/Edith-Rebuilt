@@ -30,7 +30,9 @@ You know, i don't think it would be good if i explain how does Tainted Edith wor
 [h3][b]Mod Compatibility:[/b][/h3]
 Mod compatibility isn't as great as I expected to be on release, but this will be worked on, current supported mods are:
 - Birthcake: Rebaked
-
+- EID 
+- Birthwrong
+- The Future
 
 [h3]Possible questions:[/h3]
 
@@ -49,7 +51,6 @@ Yeah, i know there are a lot of Ediths, but i've been working on this since sept
 [b]There will be a Tarnished Edith?[/b]
 Yes! I already have an raw idea of  how Tarnished Edith will behave, but she will be added in the future
 
-
 A GitHub mirror can be found [url=https://github.com/AutisticGoat/Edith-Rebuilt]here[/url]
 
 This is the greatest work of my life, i hope you enjoy it the same way i did working on it.
@@ -57,9 +58,10 @@ This is the greatest work of my life, i hope you enjoy it the same way i did wor
 If you want, please join to the [url=https://discord.gg/2dNcFXVK]mod's discord server[/url], im pretty active and it's easier to contact me there
 
 Team:
-- Kotry: Director and coder
+- Kotry: Director, coder, gameplay designer
 - Pattowolf: Spriter
-- gigamouse: Spriter 
+- gigamouse: Spriter
+- River Moondrop: Spriter, gameplay designer 
 
 Notable Contributors:
 - Jozin: Thumbnail art
@@ -70,7 +72,7 @@ Special Thanks:
 - JJ: For making her own [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2785782570]Edith interpretation[/url], which was the base of this mod
 - D!Edith team: For releasing [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3281491787]D!Edith[/url] and [url=https://github.com/drpandacat/JumpLib]JumpLib[/url], which were a great inspiration to resume this project
     </description>
-    <version>1.7.1</version>
+    <version>1.8.0</version>
     <visibility>Public</visibility>
     <tag id="Lua"/>
     <tag id="Items"/>

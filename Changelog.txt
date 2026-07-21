@@ -324,15 +324,17 @@ v1.7.1
 
 v1.8.0
 - General:
+-- Renamed achievements (THIS WILL ERASE MOD'S PROGRESS)
 -- Great mod's codebase rewrite 
 -- Now both Ediths won't be affected by slippery creep
 -- Now salt types are stored in flags, allowing to combine them
+-- Now Edith can't accidentally take shop/devil deal items
 -- Reworked stomp system
 -- Reworked Land pickup manager
 -- Added Abyss locusts for all mod items
+-- Added Book of Virtues wisps for all mod active items
 -- Added Effigy's costume
 -- Added Edith's Hood's costume
--- Added Book of Virtues wisps for all mod active items
 -- Added Vestige Mode and Grudge Mode:
 --- Unlocked after beating Vestige and Grudge challenges respectively
 --- Play with the same gameplay rules in a normal run
@@ -348,6 +350,7 @@ v1.8.0
 -- Improved Faith of the unfaithful sprite
 -- Improved Unlock manager
 -- Improved water land vfx's color
+-- Fixed Jack of Clubs UI sprite being offset 
 -- Fixed Death's touch making Salt Tears incredibly giant for one frame
 -- Fixed Geode triggering its destroy function more times than intended
 -- Fixed ImGui menu constantly giving errors when Edith is locked
@@ -368,12 +371,15 @@ v1.8.0
 - Edith: 
 -- Added a jump animation 
 -- Increased height and speed from jump explosion recoil
+-- Increased Target's speed
+-- Now Target's speed will be affected by Edith's movement speed
 -- Fixed Edith's stomp damage not scaling correctly when playing Greed/Greedier mode
 -- Fixed Edith's explosive stomps not destroying machines and beggars
 -- Fixed Edith droping trinkets when jumping with DROP key
 -- Increased Edith's land's pickup radius (20 > 30)
 -- Fixed familiars not falling at the same speed as Edith when having flight
 -- Now Edith will land on her target more accurately
+-- Now Edith's stomp radius scales with size
 -- Added Cube Baby stomp interaction
 -- General Stomp rebalance:
 --- Increased stomp cooldown (base 15 > 16)
@@ -399,7 +405,7 @@ v1.8.0
 
 - Tainted Edith:
 -- Parry: 
---- Fixed Perfect parried projectiles not going to the nearest enemy if its spawnes is dead
+--- Fixed Perfect parried projectiles not going to the nearest enemy if its spawner is dead
 --- Increased Parry radius (28 > 32)
 --- Reduced Parry jump's speed (5.5 > 4.75)
 --- Reduced Perfect Parry's hopdash charge bonus (30% > 25%)
@@ -411,6 +417,7 @@ v1.8.0
 --- Increased Hopdash land damage
 --- Increased T. Edith's hopdash land's pickup radius (20 > 30)
 --- Now T. Edith's hopdash land applies tear status effects
+--- Now Grudge's dash crush will ignore boss armor
 --- Fixed Wisps and Willos going pretty far when stopping a hopdash
 -- Added T. Edith's birthwrong effect:
 --- The sky breaks twice: 
@@ -451,7 +458,7 @@ v1.8.0
 ---- Capped at 50%
 -- Effigy rework:
 --- Now Effigy has 64 charges
---- On using, Isaac will switch between his normal state and Statue state
+--- On use, Isaac will switch between his normal state and Statue state
 --- On Statue state:
 ---- Isaac is unable to shoot
 ---- Isaac will be unable to walk, using Edith-like stomps to move:
@@ -474,7 +481,7 @@ v1.8.0
 
 - Consumables:
 -- Salt Rocks buff:
---- Killing an enemy salted will salt rocks will shoot 10-15 salt tears in random directions
+--- Killing an enemy salted with salt rocks will shoot 10-15 salt tears in random directions
 --- These salt tears will leave salt creep on land
 --- This salt creep can re-trigger the effects listed above
 

@@ -67,7 +67,7 @@ mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, function()
 	utils.RNG:SetSeed(utils.Game:GetSeeds():GetStartSeed())
 end)
 
-EdithRebuilt.Version = "v" .. version[1].. "." .. version[2] .. "." .. version[3] .. "beta"
+EdithRebuilt.Version = "v" .. version[1].. "." .. version[2] .. "." .. version[3]
 
 Isaac.DebugString("Edith Rebuilt " .. EdithRebuilt.Version .. " loaded correctly")
 print("Edith Rebuilt " .. EdithRebuilt.Version .. " loaded correctly")

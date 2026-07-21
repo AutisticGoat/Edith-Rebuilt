@@ -70,6 +70,7 @@ pit while dashing
 -- Fixed T. Edith's sprite being 
 pretty offset when going 
 to the minecart
+
 -- Fixed T. Edith going backwards 
 when going to the mirror door
 -- Fixed T. Edith being more dragged 
