@@ -31,7 +31,10 @@ end
 ---@param coreCount number
 local function ApplyCoreHeatColor(enemy, coreCount)
     local t = coreCount / CORE.COLOR_SCALE
-    enemy.Color = Color(1, 1, 1, 1, 0.5 * t, 0.125 * t)
+    local color = enemy.Color
+    color:SetOffset(0.5 * t, 0.125 * t, 0)
+
+    enemy.Color = color
 end
 
 ---@param player EntityPlayer

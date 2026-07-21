@@ -333,6 +333,7 @@ end
 
 local backdropColors = tables.BackdropColors
 local MortisBackdrop = tables.MortisBackdrop
+local ColorRed = Color(1, 0, 0)
 
 ---@param effect EntityEffect
 function Helpers.SetBloodEffectColor(effect)
@@ -340,24 +341,20 @@ function Helpers.SetBloodEffectColor(effect)
     local IsMortis = Helpers.IsLJMortis()
 	local BackDrop = room:GetBackdropType()
 	local hasWater = room:HasWater()
-	local color = Color(1, 1, 1)
+	local color = Color.Default
 	local switch = {
 		[EffectVariant.BIG_SPLASH] = function()
-			color = Helpers.GetWaterEffectColor()
 			if IsMortis then
-				color = Color(0, 0.8, 0.76, 1, 0, 0, 0)
+				color = Colors.MortisColors[MortisBackdrop.MOIST]
+			else
+				color = Helpers.GetWaterEffectColor()
 			end
 		end,
 		[EffectVariant.POOF02] = function()
 			if IsMortis then
-				local Colors = {
-					[MortisBackdrop.MORGUE] = Color(0, 0, 0, 1, 0.45, 0.5, 0.575),
-					[MortisBackdrop.MOIST] = Color(0, 0.8, 0.76, 1, 0, 0, 0),
-					[MortisBackdrop.FLESH] = Color(0, 0, 0, 1, 0.55, 0.5, 0.55),
-				}
-				color = Helpers.When(Helpers.GetMortisDrop(), Colors, Color.Default)
+				color = Helpers.When(Helpers.GetMortisDrop(), tables.MortisBackdropColor, Color.Default)
             else
-                color = backdropColors[BackDrop] or Color(1, 0, 0)
+                color = backdropColors[BackDrop] or ColorRed
 			end
 		end,
 		[EffectVariant.POOF01] = function()
@@ -403,13 +400,14 @@ end
 ---@return boolean
 function Helpers.IsKeyStompPressed(player)
 	local customButtom = Helpers.GetConfigData(ConfigDataTypes.MISC).CustomActionKey
+	local ctrlIdx = player.ControllerIndex
 
 	local k_stomp =
-		Input.IsButtonPressed(customButtom, player.ControllerIndex) or
-        Input.IsButtonPressed(Keyboard.KEY_LEFT_SHIFT, player.ControllerIndex) or
-        Input.IsButtonPressed(Keyboard.KEY_RIGHT_SHIFT, player.ControllerIndex) or
-		Input.IsButtonPressed(Keyboard.KEY_RIGHT_CONTROL, player.ControllerIndex) or
-        Input.IsActionPressed(ButtonAction.ACTION_DROP, player.ControllerIndex)
+		Input.IsButtonPressed(customButtom, ctrlIdx) or
+        Input.IsButtonPressed(Keyboard.KEY_LEFT_SHIFT, ctrlIdx) or
+        Input.IsButtonPressed(Keyboard.KEY_RIGHT_SHIFT, ctrlIdx) or
+		Input.IsButtonPressed(Keyboard.KEY_RIGHT_CONTROL, ctrlIdx) or
+        Input.IsActionPressed(ButtonAction.ACTION_DROP, ctrlIdx)
 		return k_stomp
 end
 
@@ -418,13 +416,14 @@ end
 ---@return boolean
 function Helpers.IsKeyStompTriggered(player)
 	local customButtom = Helpers.GetConfigData(ConfigDataTypes.MISC).CustomActionKey
+	local ctrlIdx = player.ControllerIndex
 
 	local k_stomp =
-		Input.IsButtonTriggered(customButtom, player.ControllerIndex) or
-        Input.IsButtonTriggered(Keyboard.KEY_LEFT_SHIFT, player.ControllerIndex) or
-        Input.IsButtonTriggered(Keyboard.KEY_RIGHT_SHIFT, player.ControllerIndex) or
-		Input.IsButtonTriggered(Keyboard.KEY_RIGHT_CONTROL, player.ControllerIndex) or
-        Input.IsActionTriggered(ButtonAction.ACTION_DROP, player.ControllerIndex)
+		Input.IsButtonTriggered(customButtom, ctrlIdx) or
+        Input.IsButtonTriggered(Keyboard.KEY_LEFT_SHIFT, ctrlIdx) or
+        Input.IsButtonTriggered(Keyboard.KEY_RIGHT_SHIFT, ctrlIdx) or
+		Input.IsButtonTriggered(Keyboard.KEY_RIGHT_CONTROL, ctrlIdx) or
+        Input.IsActionTriggered(ButtonAction.ACTION_DROP, ctrlIdx)
 
 	return k_stomp
 end
@@ -505,16 +504,18 @@ function Helpers.IsLJMortis()
 	return IsMortis
 end
 
+local mortisBackdrop = tables.MortisBackdrop
+
 ---@return integer
 function Helpers.GetMortisDrop()
 	if not Helpers.IsLJMortis() then return 0 end
 
 	if LastJudgement.UsingMorgueisBackdrop then
-		return tables.MortisBackdrop.MORGUE
-	elseif LastJudgement.UsingMoistisBackdrop then 
-		return tables.MortisBackdrop.MOIST
+		return mortisBackdrop.MORGUE
+	elseif LastJudgement.UsingMoistisBackdrop then
+		return mortisBackdrop.MOIST
 	else
-		return tables.MortisBackdrop.FLESH
+		return mortisBackdrop.FLESH
 	end
 end
 
@@ -561,10 +562,11 @@ local function doEdithTear(tear, IsBlood, isTainted)
 
 	if not player then return end
 
-	local tearSizeMult = player:HasCollectible(CollectibleType.COLLECTIBLE_SOY_MILK) and 1 or 0.85
 	local tearData = data(tear)
 
 	if tearData.IsEdithRebuiltSaltTear then return end
+
+	local tearSizeMult = player:HasCollectible(CollectibleType.COLLECTIBLE_SOY_MILK) and 1 or 0.85
 
 	local path = (isTainted and (IsBlood and "burnt_blood_salt_tears" or "burnt_salt_tears") or (IsBlood and "blood_salt_tears" or "salt_tears"))
 	local newSprite = misc.TearPath .. path .. ".png"

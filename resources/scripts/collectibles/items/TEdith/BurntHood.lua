@@ -17,7 +17,7 @@ end, items.COLLECTIBLE_BURNT_HOOD)
 ---@return boolean
 local function TriggerParry(player, jumpData)
 	local PerfectParry = Land.ParryLandManager(player, TEdith.GetHopParryParams(player), false)
-	Land.LandFeedbackManager(player, Land.GetLandSoundTable(true, PerfectParry), Color(1, 1, 1), jumpData, PerfectParry)
+	Land.LandFeedbackManager(player, Land.GetLandSoundTable(true, PerfectParry), Color.Default, jumpData, PerfectParry)
 
 	return PerfectParry
 end

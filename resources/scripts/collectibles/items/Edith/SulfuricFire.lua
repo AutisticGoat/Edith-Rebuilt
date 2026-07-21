@@ -17,6 +17,7 @@ local SULFURIC = {
     CAR_BATTERY_MULT = 1.25,
     SHAKE_INTENSITY = 12,
     IDENTIFIER = "EdithRebuilt_SulfuricFire",
+    TEAR_COLOR = Color(1, 0.2, 0.2, 1, 0, 0, 0, 0, 0, 0, 0.34)
 }
 
 ---@param player EntityPlayer
@@ -71,7 +72,7 @@ mod:AddCallback(ModCallbacks.MC_POST_FIRE_TEAR, function(_, tear)
     local player = Helpers.GetPlayerFromTear(tear)
     if not player then return end
     if not HasSulfuricFireDamageBoost(player) then return end
-    tear.Color = Color(1, 0.2, 0.2, 1, 0, 0, 0, 0, 0, 0, 0.34)
+    tear.Color = SULFURIC.TEAR_COLOR
 end)
 
 ---@param ent Entity

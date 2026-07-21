@@ -622,7 +622,7 @@ local function GetLandEffectColor(Variant, BackDrop, IsMortis)
     end
 
     if IsMortis then
-        color = Helpers.When(Helpers.GetMortisDrop(), MortisColors, defColor)
+        color = Helpers.When(Helpers.GetMortisDrop(), tables.MortisBackdropColor, defColor)
     end
 
     return color or defColor

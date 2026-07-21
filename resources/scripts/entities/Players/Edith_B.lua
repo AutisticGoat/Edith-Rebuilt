@@ -4,6 +4,7 @@ local utils = enums.Utils
 local game = utils.Game
 local sfx = utils.SFX
 local tables = enums.Tables
+local jumpTags = tables.JumpTags
 local parryTypes = enums.ParryTypes
 local misc = enums.Misc
 local modules = mod.Modules
@@ -18,6 +19,12 @@ local effects = modules.STATUS_EFFECTS
 local BitMask = modules.BIT_MASK
 local Jump = modules.JUMP
 local data = mod.DataHolder.GetEntityData
+
+local Colors = {
+	Cooldown = Color(1, 1, 1, 1, 0.3),
+	HopDashStop = Color(1, 1, 1, 1, 0, 0.1, 0.3),
+	Redirection = Color(1, 1, 1, 1, 0.3, 0.3, 0.3),
+}
 
 ---@param ent Entity
 mod:AddCallback(enums.Callbacks.PERFECT_PARRY_KILL, function(_, _, ent)
@@ -100,14 +107,14 @@ local function ManageParryInput(player, playerData, HopParams, IsGrudge, jumpDat
 	HopParams.IsParryJump = HopParams.IsParryJump or false
 
 	if Helpers.IsKeyStompTriggered(player) then
-		local isParryJump = Jump.IsSpecificJump(JumpLib:GetData(player), tables.JumpTags.TEdithJump)
+		local isParryJump = Jump.IsSpecificJump(JumpLib:GetData(player), jumpTags.TEdithJump)
 		local cooldown = HopParams.ParryCooldown
 		local maxCooldown =  playerData.MaxParryCooldown
 
 		if cooldown == 0 and not isParryJump and not HopParams.IsParryJump then
 			TEdithMod.ParryTriggerManager(player, IsGrudge, HopParams, jumpData)
 		elseif maxCooldown and (HopParams.ParryCooldown > 0 and HopParams.ParryCooldown >= maxCooldown - 6) then
-			player:SetColor(Color(1, 1, 1, 1, 0.3), 3, 1, true, false)
+			player:SetColor(Colors.Cooldown, 3, 1, true, false)
 			playerData.StoredInput = true
 		end
 	elseif playerData.StoredInput and HopParams.ParryCooldown <= 0 then
@@ -172,7 +179,7 @@ local function ManageTargetCleanup(player, pData, arrow, isArrowMoving)
 			TargetArrow.RemoveEdithTarget(player, true)
 			TEdithMod.StopTEdithHops(player, 20, false, true, true)
 			player:MultiplyFriction(0.05)
-			player:SetColor(Color(1, 1, 1, 1, 0, 0.1, 0.3), 5, 1000, true, false)
+			player:SetColor(Colors.HopDashStop, 5, 1000, true, false)
 		elseif pData.PressCount >= 9 then
 			TargetArrow.RemoveEdithTarget(player, true)
 		end
@@ -194,7 +201,7 @@ local function ManageRedirectionInput(player, pData, isArrowMoving)
 	if not pData.IsRedirectioningMove then return end
 
 	if pData.PressCount == 5 then
-		player:SetColor(Color(1, 1, 1, 1, 0.3, 0.3, 0.3), 5, 1000, true, false)
+		player:SetColor(Colors.Redirection, 5, 1000, true, false)
 	elseif pData.PressCount <= 2 then
 		player:SetMinDamageCooldown(20)
 		player:MultiplyFriction(0.05)
@@ -290,25 +297,27 @@ mod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, function ()
 end)
 
 local damageBase = 5.25
+local VecOne = Vector.One
 
 ---@param player EntityPlayer
 ---@param jumpData JumpData
 ---@param params TEdithHopParryParams
 local function OnHopLand(player, jumpData, params)
-	if not Jump.IsSpecificJump(jumpData, tables.JumpTags.TEdithHop) then return end
+	if not Jump.IsSpecificJump(jumpData, jumpTags.TEdithHop) then return end
 
 	local tearRange = player.TearRange / 40
 	local Knockbackbase = (player.ShotSpeed * 10) + 8
 	local Charge = TEdithMod.GetHopDashCharge(player, false, false)
+	local chargeDiv = Charge / 100
 	local BRCharge = params.HopMoveBRCharge / 100
 	local BRMult = 1 + BRCharge
-	local damageFormula = (((damageBase + player.Damage) / 2) * (TEdithMod.HopCurve(Charge/100))) * BRMult
+	local damageFormula = (((damageBase + player.Damage) / 2) * (TEdithMod.HopCurve(chargeDiv))) * BRMult
 
 	params.HopDamage = damageFormula
-	params.HopKnockback = Knockbackbase * maths.exp(Charge / 100, 1, 1.5)
+	params.HopKnockback = Knockbackbase * maths.exp(chargeDiv, 1, 1.5)
 	params.HopRadius = math.min((30 + (tearRange - 9)), 35)
 
-	player:SpawnWaterImpactEffects(player.Position, Vector(1, 1), 1)
+	player:SpawnWaterImpactEffects(player.Position, VecOne, 1)
 	land.LandFeedbackManager(player, land.GetLandSoundTable(true), misc.BurntSaltColor, jumpData)
 	land.TaintedEdithHop(player, params)
 end
@@ -317,7 +326,7 @@ end
 ---@param jumpData JumpData
 ---@param params TEdithHopParryParams
 local function OnParryLand(player, jumpData, params)
-	if not Jump.IsSpecificJump(jumpData, tables.JumpTags.TEdithJump) then return end
+	if not Jump.IsSpecificJump(jumpData, jumpTags.TEdithJump) then return end
 
 	if TargetArrow.GetEdithTarget(player, true) then
 		TEdithMod.ResetHopDashCharge(player, true, true)

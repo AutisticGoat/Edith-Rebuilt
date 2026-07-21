@@ -10,6 +10,12 @@ local effigyHop = "edithRebuilt_EffigyHop"
 local effigyJump = "edithRebuilt_EffigyJump"
 local soulOfEdithJump = "edithRebuilt_SoulOfEdith"
 
+local mortisBackdrops = {
+	MORGUE = 1,
+	MOIST = 2,
+	FLESH = 3,
+}
+
 local jumpFlags = JumpLib.Flags
 
 EdithRebuilt.Enums = {
@@ -437,9 +443,14 @@ EdithRebuilt.Enums = {
 			[12] = { Suffix = "_italy", Size = 1 },
 		},
 		MortisBackdrop = {
-			MORGUE = 1,
-			MOIST = 2,
-			FLESH = 3,
+			MORGUE = mortisBackdrops.MORGUE,
+			MOIST = mortisBackdrops.MOIST,
+			FLESH = mortisBackdrops.FLESH,
+		},
+		MortisBackdropColor = {
+			[mortisBackdrops.MORGUE] = Color(0, 0, 0, 1, 0.45, 0.5, 0.575),
+			[mortisBackdrops.MOIST] = Color(0, 0.8, 0.76, 1, 0, 0, 0),
+			[mortisBackdrops.FLESH] = Color(0, 0, 0, 1, 0.55, 0.5, 0.55),
 		},
 		TriggerDamageSlots = {
 			[SlotVariant.BLOOD_DONATION_MACHINE] = true,
